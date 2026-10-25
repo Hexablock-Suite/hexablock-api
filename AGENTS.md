@@ -13,6 +13,7 @@ Rules for every contributor, human or agent, in this repository. Each rule names
 
 ## Rules
 
+- Read `docs/REQUIREMENTS.md` before you change behavior. When a requirement, assumption or professor answer changes, update it here and in the app repo's canonical file. Gate: no gate. <!-- rule: R-requirements -->
 - Write every artifact, comment and commit message in English. Gate: no gate. <!-- rule: R-english -->
 - Write commit messages as Conventional Commits. Gate: `commitlint.config.cjs`, `.vite-hooks/commit-msg`, `test/gates/commit-message.gate.spec.ts`. <!-- rule: R-conventional-commits -->
 - Name each test `should_<expected_result>_when_<condition>`. Gate: `vite.config.ts`, `test/gates/test-name.gate.spec.ts`. <!-- rule: R-test-names -->
