@@ -55,8 +55,14 @@ export default defineConfig({
     '*': 'vp fmt --no-error-on-unmatched-pattern',
   },
   fmt: {
-    // openapi.json is generated. scripts/openapi/export.js owns its format.
-    ignorePatterns: ['dist/**', 'coverage/**', 'pnpm-lock.yaml', 'openapi/openapi.json'],
+    // Generated files keep the format of the tool that writes them.
+    ignorePatterns: [
+      'dist/**',
+      'coverage/**',
+      'pnpm-lock.yaml',
+      'openapi/openapi.json',
+      'drizzle/meta/**',
+    ],
     singleQuote: true,
     trailingComma: 'all',
   },

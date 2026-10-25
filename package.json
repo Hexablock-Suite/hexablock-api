@@ -27,7 +27,9 @@
     "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm arch && pnpm openapi:check",
     "openapi:export": "pnpm build && node scripts/openapi/export.js",
     "openapi:check": "pnpm build && node scripts/openapi/export.js --check",
-    "contract:verify": "node scripts/contract/verify-provider.js"
+    "contract:verify": "node scripts/contract/verify-provider.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
