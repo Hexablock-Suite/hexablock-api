@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Fast part of pnpm verify. Tests run in CI.
+pnpm lint && pnpm typecheck && pnpm arch

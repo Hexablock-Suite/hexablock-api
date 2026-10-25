@@ -48,6 +48,12 @@ export default defineConfig({
       },
     ],
   },
+  // pre-commit runs these on staged files. Fixtures stay out of the lint run.
+  staged: {
+    '*.{ts,js,cjs,mjs}':
+      'vp lint --deny-warnings --ignore-pattern "test/fixtures/**" --no-error-on-unmatched-pattern',
+    '*': 'vp fmt --no-error-on-unmatched-pattern',
+  },
   fmt: {
     ignorePatterns: ['dist/**', 'coverage/**', 'pnpm-lock.yaml'],
     singleQuote: true,
