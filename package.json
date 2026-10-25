@@ -13,14 +13,15 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "vp lint --deny-warnings",
-    "test": "vitest run --config ./vitest.config.e2e.ts",
+    "lint": "vp lint --deny-warnings --ignore-pattern \"test/fixtures/**\"",
+    "test": "vitest run && vitest run --config ./vitest.config.e2e.ts",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "format:check": "vp fmt --check",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
