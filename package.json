@@ -21,7 +21,8 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "format:check": "vp fmt --check",
     "typecheck": "tsc --noEmit",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "arch": "depcruise src --config .dependency-cruiser.cjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
