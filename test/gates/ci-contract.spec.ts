@@ -11,13 +11,22 @@ describe('CI contract', () => {
 
   it('should_run_gates_in_fixed_order_when_verify_is_called', () => {
     expect(scripts.verify).toBe(
-      'pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm arch',
+      'pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm arch && pnpm openapi:check',
     );
   });
 
-  it('should_keep_required_job_name_when_workflow_changes', () => {
+  it('should_keep_required_job_names_when_workflow_changes', () => {
     expect(workflow).toMatch(/^ {2}verify:\n {4}name: verify$/m);
     expect(workflow).toMatch(/^ {6}- run: pnpm verify$/m);
+    expect(workflow).toMatch(/^ {2}contract:\n {4}name: contract$/m);
+    expect(workflow).toMatch(/^ {6}- run: pnpm contract:verify$/m);
+  });
+
+  it('should_verify_client_pact_when_contract_job_runs', () => {
+    expect(scripts['contract:verify']).toBe('node scripts/contract/verify-provider.js');
+    expect(read('scripts/contract/verify-provider.js')).toContain(
+      'https://raw.githubusercontent.com/Hexablock-Suite/hexablock-app/main/pacts/hexablock-app-hexablock-api.json',
+    );
   });
 
   it('should_use_pinned_node_when_ci_sets_up_node', () => {

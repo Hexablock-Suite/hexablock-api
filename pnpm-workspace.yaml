@@ -12,3 +12,5 @@ peerDependencyRules:
 allowBuilds:
   # Telemetry postinstall of swagger-ui-dist. The API does not need it.
   '@scarf/scarf': false
+  # esbuild ships its binary as an optional dependency. Its postinstall only checks it.
+  esbuild: false

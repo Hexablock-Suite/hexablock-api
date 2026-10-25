@@ -55,7 +55,14 @@ export default defineConfig({
     '*': 'vp fmt --no-error-on-unmatched-pattern',
   },
   fmt: {
-    ignorePatterns: ['dist/**', 'coverage/**', 'pnpm-lock.yaml'],
+    // Generated files keep the format of the tool that writes them.
+    ignorePatterns: [
+      'dist/**',
+      'coverage/**',
+      'pnpm-lock.yaml',
+      'openapi/openapi.json',
+      'drizzle/meta/**',
+    ],
     singleQuote: true,
     trailingComma: 'all',
   },

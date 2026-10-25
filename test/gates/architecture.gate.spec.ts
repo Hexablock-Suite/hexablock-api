@@ -27,4 +27,20 @@ describe('architecture gate', () => {
       'src/adapters/http/imports-infrastructure.ts -> src/infrastructure/module.ts',
     ]);
   });
+
+  it('should_report_framework_in_persistence_when_persistence_adapter_imports_nest', () => {
+    expect(violationsOf(report, 'persistence-adapters-never-import-nest')).toEqual([
+      expect.stringMatching(
+        /^src\/adapters\/persistence\/imports-framework\.ts -> .*@nestjs\/common/,
+      ),
+    ]);
+  });
+
+  it('should_allow_drizzle_when_persistence_adapter_imports_it', () => {
+    const fromDrizzleFixture = report.violations.filter(
+      (violation) => violation.from === 'src/adapters/persistence/imports-drizzle.ts',
+    );
+
+    expect(fromDrizzleFixture).toEqual([]);
+  });
 });

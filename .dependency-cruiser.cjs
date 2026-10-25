@@ -30,6 +30,14 @@ module.exports = {
       from: { path: '^src/adapters/' },
       to: { path: '^src/infrastructure/' },
     },
+    {
+      name: 'persistence-adapters-never-import-nest',
+      comment:
+        'Persistence adapters may import drizzle-orm but never @nestjs/*. The infrastructure binds them to Nest.',
+      severity: 'error',
+      from: { path: '^src/adapters/persistence/' },
+      to: { path: '@nestjs/' },
+    },
   ],
   options: {
     doNotFollow: { path: 'node_modules' },

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -34,5 +36,15 @@ describe('HTTP entry points', () => {
     expect(response.status).toBe(200);
     expect(response.body.openapi).toMatch(/^3\./);
     expect(response.body.paths).toHaveProperty('/health');
+  });
+
+  it('should_match_committed_openapi_file_when_docs_json_is_requested', async () => {
+    const committed: unknown = JSON.parse(
+      readFileSync(resolve(import.meta.dirname, '../openapi/openapi.json'), 'utf8'),
+    );
+
+    const response = await request(app.getHttpServer()).get('/docs-json');
+
+    expect(response.body).toEqual(committed);
   });
 });

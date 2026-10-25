@@ -32,3 +32,36 @@ jobs:
         if: github.event_name == 'pull_request'
         run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
       - run: pnpm verify
+
+  # Verifies the pact from the client main branch against this commit (spec S9).
+  contract:
+    name: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PORT: '3000'
+      BACKEND_URL: http://localhost:3000
+      PACT_DO_NOT_TRACK: 'true'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: start the API
+        run: nohup node dist/main.js > api.log 2>&1 &
+      - name: wait for /health
+        run: |
+          for _ in $(seq 1 30); do
+            curl -fsS "$BACKEND_URL/health" && exit 0
+            sleep 1
+          done
+          cat api.log
+          exit 1
+      - run: pnpm contract:verify
+      - name: show the API log
+        if: failure()
+        run: cat api.log
