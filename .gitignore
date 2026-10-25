@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Test output
+coverage/
+
+# Vite+ generates the hook dispatcher on install
+.vite-hooks/_/
+
+# Logs and editor state
+*.log
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local environment files
+.env
+.env.*
+!.env.example

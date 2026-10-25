@@ -1,0 +1,14 @@
+# Vite+ asks every package to share its Vite core and its Vitest version.
+# Keep both pins equal to the installed vite-plus release (`vp toolchain`).
+overrides:
+  vite@*: npm:@voidzero-dev/vite-plus-core@1.4.0
+  vitest@*: 5.0.5
+
+peerDependencyRules:
+  # The vite alias above reports the vite-plus-core version, not Vite 8.
+  allowAny:
+    - vite
+
+allowBuilds:
+  # Telemetry postinstall of swagger-ui-dist. The API does not need it.
+  '@scarf/scarf': false
