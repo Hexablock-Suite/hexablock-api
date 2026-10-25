@@ -26,7 +26,8 @@
     "prepare": "vp config --no-agent",
     "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm arch && pnpm openapi:check",
     "openapi:export": "pnpm build && node scripts/openapi/export.js",
-    "openapi:check": "pnpm build && node scripts/openapi/export.js --check"
+    "openapi:check": "pnpm build && node scripts/openapi/export.js --check",
+    "contract:verify": "node scripts/contract/verify-provider.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

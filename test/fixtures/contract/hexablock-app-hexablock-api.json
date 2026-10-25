@@ -1,0 +1,12 @@
+{
+  "consumer": { "name": "hexablock-app" },
+  "provider": { "name": "hexablock-api" },
+  "interactions": [
+    {
+      "description": "a health check",
+      "request": { "method": "GET", "path": "/health" },
+      "response": { "status": 200, "body": { "status": "ok" } }
+    }
+  ],
+  "metadata": { "pactSpecification": { "version": "3.0.0" } }
+}

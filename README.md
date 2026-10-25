@@ -51,6 +51,17 @@ pnpm openapi:check # fails when openapi/openapi.json differs from the built app
 pnpm openapi:export # rewrites openapi/openapi.json after an HTTP change
 ```
 
+Contract tests verify the client pact against a running API. The CI job `contract` runs them on
+every pull request with the pact from the client `main` branch.
+
+```bash
+pnpm build && PORT=3000 node dist/main.js &   # start the API
+pnpm contract:verify                          # pact from hexablock-app main, API at BACKEND_URL
+PACT_FILE=test/fixtures/contract/hexablock-app-hexablock-api.json pnpm contract:verify
+```
+
+`BACKEND_URL` defaults to `http://localhost:3000`. A missing pact fails the run.
+
 ## AI Usage Documentation
 
 TODO: summarize the AI tools used. The full log lives in [AI_USAGE.md](AI_USAGE.md).

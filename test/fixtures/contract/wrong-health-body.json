@@ -1,0 +1,12 @@
+{
+  "consumer": { "name": "hexablock-app" },
+  "provider": { "name": "hexablock-api" },
+  "interactions": [
+    {
+      "description": "a health check that expects a body the API never sends",
+      "request": { "method": "GET", "path": "/health" },
+      "response": { "status": 200, "body": { "status": "down" } }
+    }
+  ],
+  "metadata": { "pactSpecification": { "version": "3.0.0" } }
+}
