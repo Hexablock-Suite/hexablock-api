@@ -46,7 +46,9 @@ TODO: describe the test layers as they grow. Today:
 pnpm test          # unit and gate tests, then e2e tests
 pnpm test:unit     # unit and gate tests only
 pnpm test:e2e      # HTTP end-to-end tests only
-pnpm verify        # lint, format:check, typecheck, test, arch (the CI gate)
+pnpm verify        # lint, format:check, typecheck, test, arch, openapi:check (the CI gate)
+pnpm openapi:check # fails when openapi/openapi.json differs from the built app
+pnpm openapi:export # rewrites openapi/openapi.json after an HTTP change
 ```
 
 ## AI Usage Documentation

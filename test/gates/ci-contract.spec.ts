@@ -11,7 +11,7 @@ describe('CI contract', () => {
 
   it('should_run_gates_in_fixed_order_when_verify_is_called', () => {
     expect(scripts.verify).toBe(
-      'pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm arch',
+      'pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm arch && pnpm openapi:check',
     );
   });
 
