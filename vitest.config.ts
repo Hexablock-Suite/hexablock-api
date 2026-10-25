@@ -1,12 +1,12 @@
 import { defineConfig } from 'vitest/config';
 
+// Unit and gate tests. Vitest fails when this selection finds no file.
 export default defineConfig({
-  // Resolves the path aliases declared in tsconfig.json, including the ones
-  // added by `nest g library`. Requires Vite 8, which ships this option.
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,
     root: './',
-    include: ['**/*.spec.ts'],
+    include: ['src/**/*.spec.ts', 'test/**/*.spec.ts'],
+    exclude: ['test/fixtures/**', 'node_modules/**', 'dist/**'],
   },
 });
