@@ -24,14 +24,14 @@ Required:
 - **SOLID (§3.2)** applies to all project code; each principle used has a README example from this repo.
 - **AOP (§3.5):** aspects are decorators or proxies over use cases, never inside business code.
 - **README (§6.1), commits (§6.2) and `AI_USAGE.md` (§7)** are required in this repository too.
-- **Clean Architecture, GoF patterns and diagrams (§3.3, §3.4, §4):** see A9 and Q2.
+- **Clean Architecture, GoF patterns and diagrams (§3.3, §3.4, §4):** required here too. See decisions D6 and D7 in the client requirements.
 
 ## 3. Assumptions that shape the API
 
 - **A5 — Fit levels can be won.** Every Fit level carries the designer's solution (piece, rotation in 60° steps, position). The level update endpoint rejects a Fit level when its pieces do not have the same total area as the figure, or when the stored solution does not cover the figure exactly without overlaps. Pieces rotate; they are never mirrored.
 - **A6 — Level origin.** The app always ships its own levels and works offline; levels from this API add to them or replace them. The API is not required for a first launch.
 - **A7 — Public repositories.** This repository is public.
-- **A9 — Backend scope.** Until Q2 is answered, this backend follows Clean Architecture, SOLID, the patterns where they fit naturally, and has its own class and layer diagrams in `docs/`.
+- **A9 — Backend scope.** Replaced on 2026-10-26 by the client's D6: this backend meets the same standards as the client (generics, SOLID, Clean Architecture, the patterns it needs, `EXTENSIBILITY.md` and its own class and layer diagrams in `docs/`).
 
 ## 4. Data shape decisions still open (team)
 
@@ -41,7 +41,7 @@ Required:
 
 ## 5. Questions for the professor that touch the backend
 
-- **Q2:** Must the backend also meet the generics, GoF patterns, `EXTENSIBILITY.md` and the three diagrams, or only the client?
+- **Q2:** Closed by the team on 2026-10-26: the backend meets the same standards (client D6).
 - **Q4:** Who may update level definitions? The statement asks only for sign-up and sign-in, with no roles.
 - **C1:** Do you expect the system to check that a Fit level can be won? (A5)
 - **C6:** Are public repositories acceptable? (A7)
