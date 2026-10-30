@@ -12,6 +12,8 @@ TODO: describe the REST backend for users, progress, leaderboards and level defi
 
 TODO: explain the Clean layers (`src/domain`, `src/application`, `src/adapters`, `src/infrastructure`) and the `pnpm arch` rules that guard them.
 
+Draft layer diagram: [docs/architecture/layers.md](docs/architecture/layers.md).
+
 ## Generic Engine
 
 TODO: explain how the API stores level definitions for the single generic engine and its variants.
