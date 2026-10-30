@@ -14,7 +14,7 @@ flowchart TB
     APPMOD["AppModule"]
     FEATMOD["Nest feature modules: Auth, Progress,<br/>Leaderboard, Levels (planned)"]
     HTTPAPP["http-app.ts<br/>Swagger and OpenAPI document"]
-    DB["database/: DatabaseModule, connection.ts,<br/>schema.ts (Drizzle schema, no tables yet)"]
+    DB["database/: DatabaseModule, connection.ts"]
     SYSCLOCK["clock/SystemClock"]
     SECURITY["JWT token issuer and password hasher<br/>adapters (planned)"]
     ASPECTS["AOP aspects: logging and timing<br/>wrappers over use cases (planned)"]
@@ -25,6 +25,7 @@ flowchart TB
     CONTROLLERS["http/: Auth, Progress, Leaderboard and<br/>Levels controllers with their DTOs (planned)"]
     GUARD["http/: JwtAuthGuard and<br/>HTTP error filter (planned)"]
     REPOS["persistence/: Drizzle repositories<br/>and row mappers (planned)"]
+    SCHEMA["persistence/schema.ts:<br/>Drizzle schema, no tables yet"]
   end
 
   subgraph APP["2. Application (use cases): src/application"]
@@ -49,7 +50,7 @@ flowchart TB
 
   classDef real fill:#ffffff,stroke:#222222,color:#111111
   classDef planned fill:#ffffff,stroke:#777777,stroke-dasharray:5 5,color:#444444
-  class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,HEALTH,CLOCK real
+  class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,HEALTH,SCHEMA,CLOCK real
   class FEATMOD,SECURITY,ASPECTS,CONTROLLERS,GUARD,REPOS,UC,ENT,PORTS planned
 
   style INFRA fill:#eeeeee,stroke:#666666,color:#111111
@@ -82,7 +83,7 @@ How to read it:
 - **Ports:** `src/domain`, next to the entities that use them, as `src/domain/shared/clock.ts` does today. The persistence adapters implement these ports.
 - **Controllers:** `src/adapters/http`. They translate HTTP requests into use case calls.
 - **DTOs and validation:** `src/adapters/http`, next to their controllers. The domain checks its own rules, such as the Fit level check of assumption A5.
-- **Drizzle schema:** `src/infrastructure/database/schema.ts` today. `drizzle-kit` reads it to write the migrations in `drizzle/`. See question 2.
+- **Drizzle schema:** `src/adapters/persistence/schema.ts`, next to the repositories that query its tables. `drizzle-kit` reads it to write the migrations in `drizzle/`, and `src/infrastructure/database/connection.ts` passes it to Drizzle. See question 2.
 - **Drizzle repositories and row mappers:** `src/adapters/persistence`. The mappers turn rows into entities and back.
 - **JWT guard:** `src/adapters/http`. It verifies the token through the `TokenIssuer` port.
 - **JWT and password hashing adapters:** `src/infrastructure`, as `SystemClock` does for the `Clock` port.
@@ -94,5 +95,5 @@ How to read it:
 ## Open questions for the professor
 
 1. **Where do the ports live?** Statement §3.4 says the use cases depend on ports defined in their own layer. This repo defines its ports in `src/domain`, as `Clock` shows. Is a port in the domain acceptable, or must repository ports move to `src/application`?
-2. **Where does the Drizzle schema live?** The table definitions sit in `src/infrastructure/database/schema.ts`. A Drizzle repository in `src/adapters/persistence` needs those tables, but rule `adapters-never-import-infrastructure` forbids that import. Should the schema move to `src/adapters/persistence`, as part of the persistence adapter?
+2. **Resolved by the team on 2026-10-30: the Drizzle schema lives in `src/adapters/persistence/schema.ts`.** It sat in `src/infrastructure/database/schema.ts`, and rule `adapters-never-import-infrastructure` kept the repositories from importing it. The infrastructure may import the adapters, so `connection.ts` now takes the schema from there. The architecture gate test pins the path that `drizzle.config.ts` gives to `drizzle-kit`.
 3. **Where do the AOP aspects live?** An aspect wraps a use case. It can live in `src/application` as a plain decorator over a logger port, or in `src/infrastructure` as a wrapper that the Nest modules apply. Which layer do you expect?

@@ -45,7 +45,7 @@ For database work, start the local Postgres from `compose.yaml` and point `DATAB
 ```bash
 docker compose up -d --wait
 export DATABASE_URL=postgres://hexablock:hexablock@localhost:5432/hexablock
-pnpm db:generate   # writes a SQL migration into drizzle/ from src/infrastructure/database/schema.ts
+pnpm db:generate   # writes a SQL migration into drizzle/ from src/adapters/persistence/schema.ts
 pnpm db:migrate    # applies the drizzle/ migrations to DATABASE_URL
 docker compose down
 ```

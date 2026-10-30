@@ -43,4 +43,12 @@ describe('architecture gate', () => {
 
     expect(fromDrizzleFixture).toEqual([]);
   });
+
+  // Persistence adapters cannot import src/infrastructure, so the tables they
+  // query live next to them. drizzle-kit reads the same file.
+  it('should_read_the_schema_from_the_persistence_adapter_when_drizzle_kit_generates_migrations', async () => {
+    const { default: drizzleConfig } = await import('../../drizzle.config.js');
+
+    expect(drizzleConfig.schema).toBe('./src/adapters/persistence/schema.ts');
+  });
 });
