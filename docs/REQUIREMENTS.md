@@ -3,28 +3,44 @@
 This file holds the backend requirements, written in our own words. The canonical document for the whole project, with the variation register, every assumption and every question for the professor, is [`hexablock-app/docs/REQUIREMENTS.md`](https://github.com/Hexablock-Suite/hexablock-app/blob/main/docs/REQUIREMENTS.md). Keep the IDs (A#, Q#, C#) the same in both files.
 
 - **Source:** the course statement "Proyecto Semestral — HexaBlock Suite", version 1.0, issued 2026-10-23. It is not redistributed in this repository. Each item cites its section as `§n`.
+- **Requirement IDs:** **API-FR-n** is a functional requirement: what the API serves. **API-NFR-n** is a non-functional requirement: how the backend is built, tested and documented. The client uses APP-FR-n and APP-NFR-n; its APP-FR-12 to APP-FR-15 are the client side of API-FR-01 to API-FR-04. An ID never changes; a dropped requirement keeps its ID and says "Dropped".
+- **Checks:** each requirement ends with _Check_, the evidence that shows it is met. Where a gate already exists, the check names it. The other checks are a proposal of 2026-10-30 for the team to review.
 - **Rule:** when a backend requirement, an assumption or an answer from the professor changes, update this file and the canonical one in the same pair of pull requests.
 
-## 1. What the backend serves (§2, §5.2)
+| Kind                                                 | IDs                      | Sections |
+| ---------------------------------------------------- | ------------------------ | -------- |
+| Functional: what the API serves                      | API-FR-01 to API-FR-06   | §1       |
+| Non-functional: how the backend is built and checked | API-NFR-01 to API-NFR-14 | §2       |
+
+## 1. What the backend serves (functional, §2, §5.2)
 
 A REST API that manages users, progress, scores and level definitions for the four variants: Hexa Lines, Hexa Fit, Hexa Sort and Hexa Merge. Every variant is identified by a `gameId`.
 
-Required:
+API-FR-01 to API-FR-06 keep the numbers of statement §5.2.
 
-1. Sign-up and sign-in with JWT (§5.2.1).
-2. Progress sync with `gameId` as a required key: one progress entry per user and per variant (§5.2.2).
-3. A global leaderboard per `gameId` and, for the level-based variants (Fit and Sort), per level (§5.2.3).
-4. Read and update the level definitions of Fit and Sort, so new levels reach players without an app update. One generic level schema, with a section specific to each `gameId` (§5.2.4).
-5. API documentation with Swagger/OpenAPI (§5.2.5).
-6. Consistent HTTP error responses (§5.2.6).
+- **API-FR-01 — Sign-up and sign-in (§5.2.1).** Sign-up and sign-in with JWT. _Check:_ an e2e test signs up, signs in and calls a protected endpoint with the token; the same call without a token gets 401.
+- **API-FR-02 — Progress sync (§5.2.2).** Progress sync with `gameId` as a required key: one progress entry per user and per variant. _Check:_ an endpoint test saves progress for two variants and reads back two entries; a second save for the same user and variant does not add an entry; a request without `gameId` is rejected.
+- **API-FR-03 — Leaderboard (§5.2.3).** A global leaderboard per `gameId` and, for the level-based variants (Fit and Sort), per level. _Check:_ an endpoint test filters by `gameId` and by level. What orders the per-level leaderboard is still open (§4).
+- **API-FR-04 — Level definitions (§5.2.4).** Read and update the level definitions of Fit and Sort, so new levels reach players without an app update. One generic level schema, with a section specific to each `gameId`. _Check:_ an endpoint test reads the levels of each `gameId`, and the update rejects a Fit level that fails A5. Who may update levels is Q4.
+- **API-FR-05 — API documentation (§5.2.5).** API documentation with Swagger/OpenAPI. _Check:_ `pnpm openapi:export` writes `openapi/openapi.json`, and `test/health.e2e-spec.ts` fails when the committed file differs from the code (rule R-openapi-drift).
+- **API-FR-06 — HTTP errors (§5.2.6).** Consistent HTTP error responses. _Check:_ e2e tests for a validation error, a missing token and a missing resource get the same body shape.
 
-## 2. Quality requirements that reach the backend
+## 2. Quality requirements that reach the backend (non-functional)
 
-- **Tests (§3.6):** unit tests with mocks or stubs; integration tests of use cases with real repositories on an in-memory database; endpoint tests with an HTTP test client, including filtering by `gameId`; save and load progress end to end for each variant; Pact contract tests (recommended); CI on every pull request. Names follow `should_[result]_when_[condition]` with Arrange-Act-Assert.
-- **SOLID (§3.2)** applies to all project code; each principle used has a README example from this repo.
-- **AOP (§3.5):** aspects are decorators or proxies over use cases, never inside business code.
-- **README (§6.1), commits (§6.2) and `AI_USAGE.md` (§7)** are required in this repository too.
-- **Clean Architecture, GoF patterns and diagrams (§3.3, §3.4, §4):** required here too. See decisions D6 and D7 in the client requirements.
+- **API-NFR-01 — Unit tests (§3.6).** Unit tests with mocks or stubs. Names follow `should_[result]_when_[condition]` with Arrange-Act-Assert. _Check:_ gate `test/gates/test-name.gate.spec.ts` (rule R-test-names).
+- **API-NFR-02 — Integration tests (§3.6).** Integration tests of use cases with real repositories on an in-memory database. _Check:_ repository tests run on PGlite through `test/support/test-database.ts`, and gate `test/integration/in-memory-database.spec.ts` covers the harness (rule R-database-harness).
+- **API-NFR-03 — Endpoint tests (§3.6).** Endpoint tests with an HTTP test client, including filtering by `gameId`; save and load progress end to end for each variant. _Check:_ the e2e suite has one save-and-load test per variant.
+- **API-NFR-04 — Contract tests (§3.6).** Pact contract tests (recommended). _Check:_ the CI `contract` job runs `scripts/contract/verify-provider.js` against the client's pact (rule R-contract).
+- **API-NFR-05 — CI (§3.6).** CI on every pull request. _Check:_ the CI `verify` job runs on every pull request, and gate `test/gates/ci-contract.spec.ts` keeps it in step with `pnpm verify` (rule R-verify-parity).
+- **API-NFR-06 — SOLID (§3.2).** SOLID applies to all project code; each principle used has a README example from this repo. _Check:_ the README section "SOLID Principles" has one example per principle with a link to its file.
+- **API-NFR-07 — AOP (§3.5).** Aspects are decorators or proxies over use cases, never inside business code. _Check:_ gate `test/gates/architecture.gate.spec.ts` keeps Nest out of `src/application` (rule R-application-pure), and a test shows the aspect runs while the use case it wraps has none of its code.
+- **API-NFR-08 — Clean Architecture (§3.4).** Required here too. See decision D6 in the client requirements. _Check:_ `pnpm arch` and gate `test/gates/architecture.gate.spec.ts` (rules R-domain-pure, R-application-pure, R-persistence-no-nest, R-adapters-no-infrastructure); the layer diagram is in [`architecture/layers.md`](architecture/layers.md).
+- **API-NFR-09 — GoF patterns (§3.3).** Required here too: the patterns the design needs, each one justified. See decision D7 in the client requirements. _Check:_ the README section "Design Patterns" lists each pattern used with its justification and a link to its file.
+- **API-NFR-10 — Diagrams and extensibility (§4).** Required here too: the class and layer diagrams and `EXTENSIBILITY.md` in `docs/` (D6). _Check:_ [`architecture/layers.md`](architecture/layers.md) holds the layer diagram; the class diagram and `docs/EXTENSIBILITY.md` are still to write.
+- **API-NFR-11 — Reproducible core (D6).** `src/domain` and `src/application` read time from the `Clock` port and randomness from an injected seeded source. _Check:_ gate `test/gates/determinism.gate.spec.ts` (rule R-deterministic-core).
+- **API-NFR-12 — README (§6.1).** The README is required in this repository too. _Check:_ gate `test/gates/docs-skeleton.spec.ts` (rule R-docs-skeleton).
+- **API-NFR-13 — Commits (§6.2).** Conventional Commits are required in this repository too. _Check:_ `commitlint.config.cjs`, the commit-msg hook and gate `test/gates/commit-message.gate.spec.ts` (rule R-conventional-commits).
+- **API-NFR-14 — AI usage (§7).** `AI_USAGE.md` is required in this repository too. _Check:_ no gate (rule R-ai-usage-log); each pull request adds its entry.
 
 ## 3. Assumptions that shape the API
 
@@ -43,5 +59,8 @@ Required:
 
 - **Q2:** Closed by the team on 2026-10-26: the backend meets the same standards (client D6).
 - **Q4:** Who may update level definitions? The statement asks only for sign-up and sign-in, with no roles.
+- **Q10:** Where do the ports live: in `src/domain`, as the backend does today, or in `src/application`, as §3.4 says? See Q10 in [`architecture/layers.md`](architecture/layers.md).
+- **Q11:** Closed by the team on 2026-10-30: the Drizzle schema lives in `src/adapters/persistence/schema.ts`, next to the repositories that query it.
+- **Q12:** Where do the AOP aspects live: in `src/application` as a plain decorator over a logger port, or in `src/infrastructure` as a wrapper that the Nest modules apply? See Q12 in [`architecture/layers.md`](architecture/layers.md).
 - **C1:** Do you expect the system to check that a Fit level can be won? (A5)
 - **C6:** Are public repositories acceptable? (A7)
