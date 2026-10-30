@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle, type PgliteDatabase } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
-import * as schema from '../../src/infrastructure/database/schema.js';
+import * as schema from '../../src/adapters/persistence/schema.js';
 
 const MIGRATIONS = resolve(import.meta.dirname, '../../drizzle');
 
