@@ -1,7 +1,13 @@
+import { Test } from '@nestjs/testing';
+import { CLOCK } from '../../src/application/ports/clock.js';
+import { AppModule } from '../../src/infrastructure/app.module.js';
+import { SystemClock } from '../../src/infrastructure/clock/system-clock.js';
 import { codesOf, lintFile } from '../support/lint.js';
 
 // Gate S6: the domain and the application never read the system clock or
-// an unseeded random source. They take a Clock or a seeded source instead.
+// an unseeded random source. The application reads the instant from the
+// Clock port. The domain takes the instant as a parameter, because ports
+// live in the application layer and the domain never imports it.
 describe('determinism gate', () => {
   it('should_report_each_ambient_read_when_domain_calls_clock_or_random', () => {
     const codes = codesOf(lintFile('test/fixtures/arch/src/domain/reads-ambient-state.ts'));
@@ -22,5 +28,11 @@ describe('determinism gate', () => {
     const codes = codesOf(lintFile('test/fixtures/arch/src/domain/pure.ts'));
 
     expect(codes).toEqual([]);
+  });
+
+  it('should_bind_the_application_clock_port_to_system_clock_when_app_module_compiles', async () => {
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+
+    expect(moduleRef.get(CLOCK)).toBeInstanceOf(SystemClock);
   });
 });

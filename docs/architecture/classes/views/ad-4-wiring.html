@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API wiring · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 3 · View 4 of 5</p>
+      <h1>Wiring: the composition root binds each port to one driver</h1>
+      <svg
+        viewBox="0 0 1040 710"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="ad4wiring-title ad4wiring-desc"
+      >
+        <title id="ad4wiring-title">HexaBlock API wiring · UML class diagram</title>
+        <desc id="ad4wiring-desc">
+          Class diagram of layers 4 and 2 showing AppModule, the composition root, binding the
+          Clock, PasswordHasher and TokenIssuer ports to SystemClock, ScryptPasswordHasher and
+          JwtTokenIssuer in its bindings compartment; the Nest container creates each adapter once.
+        </desc>
+        <defs>
+          <marker
+            id="ad4wiring-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="ad4wiring-diamond-filled"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
+          </marker>
+          <marker
+            id="ad4wiring-diamond-hollow"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon
+              points="0 5, 9 0, 18 5, 9 10"
+              fill="#ffffff"
+              stroke="#17212a"
+              stroke-width="1"
+            />
+          </marker>
+          <marker
+            id="ad4wiring-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="356"
+          rx="8"
+          fill="#cfdcf3"
+          stroke="rgba(30,58,138,0.50)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="396"
+          width="992"
+          height="120"
+          rx="8"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
+          stroke-width="1"
+        />
+        <!-- Pattern and group frames -->
+        <rect
+          x="48"
+          y="208"
+          width="960"
+          height="156"
+          rx="8"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="60"
+          y="224"
+          fill="#5b6873"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          ADAPTER · §3.3
+        </text>
+        <!-- Relationships (drawn before boxes) -->
+        <!-- SystemClock implements Clock: realization -->
+        <line
+          x1="164"
+          y1="312"
+          x2="164"
+          y2="444"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad4wiring-triangle)"
+        />
+        <!-- ScryptPasswordHasher implements PasswordHasher: realization -->
+        <line
+          x1="520"
+          y1="340"
+          x2="520"
+          y2="444"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad4wiring-triangle)"
+        />
+        <!-- JwtTokenIssuer implements TokenIssuer: realization -->
+        <line
+          x1="864"
+          y1="348"
+          x2="864"
+          y2="444"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad4wiring-triangle)"
+        />
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="344" height="12" rx="2" fill="#cfdcf3" />
+        <text
+          x="40"
+          y="44"
+          fill="#1e3a8a"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 4 · FRAMEWORKS AND DRIVERS · src/infrastructure/
+        </text>
+        <rect x="36" y="407" width="248" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="40"
+          y="416"
+          fill="#7e22ce"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 2 · USE CASES · src/application/
+        </text>
+        <!-- Class: AppModule (focal, «module» «composition root») -->
+        <rect
+          x="376"
+          y="72"
+          width="288"
+          height="116"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="376" y="72" width="288" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="376" y="124" width="288" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="520"
+          y="90"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «module» «composition root»
+        </text>
+        <text
+          x="520"
+          y="108"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AppModule
+        </text>
+        <text
+          x="520"
+          y="122"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          single scope
+        </text>
+        <line x1="376" y1="132" x2="664" y2="132" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="392" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          CLOCK → SystemClock
+        </text>
+        <text x="392" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          PASSWORD_HASHER → ScryptPasswordHasher
+        </text>
+        <text x="392" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          TOKEN_ISSUER → JwtTokenIssuer
+        </text>
+        <!-- Class: SystemClock («Adapter») -->
+        <rect
+          x="64"
+          y="240"
+          width="200"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="164"
+          y="258"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="164"
+          y="276"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SystemClock
+        </text>
+        <line x1="64" y1="288" x2="264" y2="288" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="304" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + now(): Date
+        </text>
+        <!-- Class: ScryptPasswordHasher («Adapter») -->
+        <rect
+          x="352"
+          y="240"
+          width="336"
+          height="100"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="520"
+          y="258"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="520"
+          y="276"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ScryptPasswordHasher
+        </text>
+        <text
+          x="520"
+          y="290"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          node:crypto
+        </text>
+        <line x1="352" y1="300" x2="688" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="368" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + hash(plain: string): Promise&lt;string&gt;
+        </text>
+        <text x="368" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + verify(plain: string, hash: string): Promise&lt;boolean&gt;
+        </text>
+        <!-- Class: JwtTokenIssuer («Adapter») -->
+        <rect
+          x="736"
+          y="240"
+          width="256"
+          height="108"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="864"
+          y="258"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="864"
+          y="276"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          JwtTokenIssuer
+        </text>
+        <text
+          x="864"
+          y="290"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-01
+        </text>
+        <line x1="736" y1="300" x2="992" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - secret: string
+        </text>
+        <line x1="736" y1="324" x2="992" y2="324" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="340" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + issue(userId: UserId): SessionToken
+        </text>
+        <!-- Class: Clock (PART 2 · VIEW 2) -->
+        <rect
+          x="64"
+          y="444"
+          width="200"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="164"
+          y="462"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 2
+        </text>
+        <text
+          x="164"
+          y="480"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Clock
+        </text>
+        <!-- Class: PasswordHasher (PART 2 · VIEW 4) -->
+        <rect
+          x="408"
+          y="444"
+          width="224"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="520"
+          y="462"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 4
+        </text>
+        <text
+          x="520"
+          y="480"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PasswordHasher
+        </text>
+        <!-- Class: TokenIssuer (PART 2 · VIEW 4) -->
+        <rect
+          x="752"
+          y="444"
+          width="224"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="864"
+          y="462"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 4
+        </text>
+        <text
+          x="864"
+          y="480"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          TokenIssuer
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="540"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          AppModule is the composition root. Its compartment lists each binding, and the Nest
+          container creates each adapter once from it
+        </text>
+        <text
+          x="24"
+          y="556"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          and injects it into the use cases. This single-scope injection is the Singleton of §3.3.
+          AppModule only names the adapter classes
+        </text>
+        <text
+          x="24"
+          y="572"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          and never calls them, so the view draws no use line to them. The feature modules and
+          DatabaseModule bind the repositories the same way.
+        </text>
+        <text
+          x="24"
+          y="588"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          SystemClock and the CLOCK binding exist today. The two security adapters are planned;
+          node:crypto gives scrypt, so no new package is needed.
+        </text>
+        <text
+          x="24"
+          y="604"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          src/main.ts is only the bootstrap: it creates the Nest app from AppModule and starts the
+          HTTP server.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="628" x2="1016" y2="628" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="646"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="664"
+          x2="52"
+          y2="664"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#ad4wiring-triangle)"
+        />
+        <text
+          x="60"
+          y="668"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Inheritance
+        </text>
+        <line
+          x1="160"
+          y1="664"
+          x2="188"
+          y2="664"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad4wiring-triangle)"
+        />
+        <text
+          x="196"
+          y="668"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="296"
+          y1="664"
+          x2="324"
+          y2="664"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad4wiring-diamond-filled)"
+        />
+        <text
+          x="332"
+          y="668"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Composition · attribute it creates
+        </text>
+        <line
+          x1="520"
+          y1="664"
+          x2="548"
+          y2="664"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad4wiring-diamond-hollow)"
+        />
+        <text
+          x="556"
+          y="668"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · attribute it receives
+        </text>
+        <line
+          x1="752"
+          y1="664"
+          x2="780"
+          y2="664"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad4wiring-open)"
+        />
+        <text
+          x="788"
+          y="668"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · parameter, return, local or new
+        </text>
+        <rect
+          x="24"
+          y="684"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#cfdcf3"
+          stroke="rgba(30,58,138,0.50)"
+          stroke-width="1"
+        />
+        <rect
+          x="48"
+          y="684"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
+          stroke-width="1"
+        />
+        <text
+          x="80"
+          y="693"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zones · Clean layers, outer on top
+        </text>
+        <rect
+          x="264"
+          y="684"
+          width="28"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="300"
+          y="693"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed frame · pattern or group
+        </text>
+        <rect
+          x="470"
+          y="684"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="506"
+          y="693"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+        <rect
+          x="616"
+          y="684"
+          width="28"
+          height="12"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="652"
+          y="693"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed class · detailed in another view
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>

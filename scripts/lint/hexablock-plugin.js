@@ -1,11 +1,13 @@
 import { definePlugin, defineRule } from 'vite-plus/lint/plugins';
 
 // Reports `new Date()` and `Date()` without arguments. Both read the system
-// clock. Code in src/domain and src/application reads time from the Clock port.
+// clock. Code in src/application reads time from the Clock port. Code in
+// src/domain takes the instant as a parameter.
 const noCurrentDate = defineRule({
   meta: {
     messages: {
-      noCurrentDate: 'Read the current instant from the Clock port, not from Date.',
+      noCurrentDate:
+        'Do not read the system clock. The application reads the Clock port; the domain takes the instant as a parameter.',
     },
   },
   create(context) {
