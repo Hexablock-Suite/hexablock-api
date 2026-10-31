@@ -61,7 +61,7 @@
   <body>
     <div class="frame">
       <p class="eyebrow">Class diagram · Part 1 · View 1 of 2</p>
-      <h1>Progress: one row per user and gameId, one result per level</h1>
+      <h1>Progress: one aggregate per user and gameId, with its level results</h1>
       <svg
         viewBox="0 0 1040 702"
         xmlns="http://www.w3.org/2000/svg"
@@ -72,10 +72,10 @@
           HexaBlock API progress entities · UML class diagram
         </title>
         <desc id="domain1progress-desc">
-          Class diagram of layer 1 showing PlayerProgress, keyed by userId and gameId, and
-          LevelResult, keyed by userId, gameId and levelId with stars, moves and elapsedMs, both
-          refer to User by userId and hold a GameId, and the LeaderboardEntry read model that holds
-          a LevelResult.
+          Class diagram of layer 1 showing PlayerProgress, the aggregate root keyed by userId and
+          gameId, which refers to User by userId, holds a GameId and keeps its LevelResult values
+          with levelId, stars, moves and elapsedMs, and the LeaderboardEntry read model that holds a
+          LevelResult.
         </desc>
         <defs>
           <marker
@@ -174,10 +174,12 @@
           stroke-width="1"
           marker-start="url(#domain1progress-diamond-hollow)"
         />
-        <!-- LevelResult holds gameId: GameId: aggregation -->
-        <path
-          d="M680 344 L864 344 Q872 344 872 336 L872 216"
-          fill="none"
+        <!-- PlayerProgress holds results: LevelResult[]: aggregation -->
+        <line
+          x1="540"
+          y1="292"
+          x2="540"
+          y2="344"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#domain1progress-diamond-hollow)"
@@ -205,17 +207,29 @@
         >
           gameId 1
         </text>
-        <rect x="878" y="222" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="546" y="312" width="44" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="906"
-          y="231"
+          x="568"
+          y="321"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          gameId 1
+          results
+        </text>
+        <rect x="502" y="312" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="518"
+          y="321"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          0..*
         </text>
         <rect x="714" y="422" width="44" height="12" rx="2" fill="#f9f4dc" />
         <text
@@ -302,7 +316,7 @@
           x="400"
           y="96"
           width="280"
-          height="164"
+          height="196"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -319,7 +333,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «entity»
+          «entity» «aggregate root»
         </text>
         <text
           x="540"
@@ -357,16 +371,22 @@
         <text x="416" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + updatedAt: Date
         </text>
-        <line x1="400" y1="236" x2="680" y2="236" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="416" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="244" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + results: LevelResult[]
+        </text>
+        <line x1="400" y1="252" x2="680" y2="252" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + recordScore(score: number, at: Date): void
+        </text>
+        <text x="416" y="284" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + recordLevel(result: LevelResult): void
         </text>
         <!-- Class: LevelResult («value object») -->
         <rect
           x="400"
-          y="304"
+          y="344"
           width="280"
-          height="172"
+          height="140"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -374,7 +394,7 @@
         />
         <text
           x="540"
-          y="322"
+          y="362"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -385,7 +405,7 @@
         </text>
         <text
           x="540"
-          y="340"
+          y="380"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -396,7 +416,7 @@
         </text>
         <text
           x="540"
-          y="354"
+          y="394"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -405,32 +425,26 @@
         >
           API-FR-03 · DS-5
         </text>
-        <line x1="400" y1="364" x2="680" y2="364" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="416" y="380" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + userId: UserId
-        </text>
-        <text x="416" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + gameId: GameId
-        </text>
-        <text x="416" y="412" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="400" y1="404" x2="680" y2="404" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="420" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + levelId: string
         </text>
-        <line x1="400" y1="420" x2="680" y2="420" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="416" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="400" y1="428" x2="680" y2="428" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="444" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + stars: number
         </text>
-        <text x="416" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="460" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + moves: number
         </text>
-        <text x="416" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="476" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + elapsedMs: number
         </text>
-        <!-- Class: GameId («enumeration») -->
+        <!-- Class: GameId («value object») -->
         <rect
           x="776"
           y="96"
           width="200"
-          height="120"
+          height="72"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -445,7 +459,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «enumeration»
+          «value object»
         </text>
         <text
           x="876"
@@ -460,16 +474,7 @@
         </text>
         <line x1="776" y1="144" x2="976" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="792" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          lines
-        </text>
-        <text x="792" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          fit
-        </text>
-        <text x="792" y="192" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          sort
-        </text>
-        <text x="792" y="208" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          merge
+          + value: string
         </text>
         <!-- Class: LeaderboardEntry («read model») -->
         <rect
@@ -536,8 +541,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The first compartment of PlayerProgress and LevelResult is the key. The progress table
-          keeps one row per userId and gameId (DS-5, API-FR-02).
+          PlayerProgress is the aggregate root, one per userId and gameId (its key). It keeps the
+          level results of its game, and recordLevel() is the only way to add one.
         </text>
         <text
           x="24"
@@ -546,8 +551,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The level results table keeps the Fit and Sort results per level. Whether it keeps every
-          attempt or only the best one waits on DS-4,
+          ProgressRepository saves the whole aggregate; its adapter splits it into the progress and
+          level_results tables (DS-5). Every attempt or only the best one: DS-4.
         </text>
         <text
           x="24"
@@ -556,8 +561,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          because "best" needs the order. recordScore() keeps the highest score; the Clock port
-          gives the instant. Entities carry no table IDs.
+          recordScore() keeps the highest score; the use case passes the instant from the Clock
+          port. GameId is an open value: lines, fit, sort and merge today.
         </text>
         <text
           x="24"
@@ -566,8 +571,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          PlayerProgress and LevelResult refer to User by id: the userId field is not a line to
-          User. This is an assumption for team review.
+          PlayerProgress refers to User by id: the userId field is not a line to User. This is an
+          assumption for team review. Entities carry no table IDs.
         </text>
         <!-- Legend -->
         <line x1="24" y1="620" x2="1016" y2="620" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

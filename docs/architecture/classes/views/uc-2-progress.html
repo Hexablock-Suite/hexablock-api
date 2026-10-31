@@ -70,9 +70,9 @@
       >
         <title id="uc2progress-title">HexaBlock API progress use cases · UML class diagram</title>
         <desc id="uc2progress-desc">
-          Class diagram of layer 2 showing SyncProgressUseCase, which holds the ProgressRepository,
-          LevelResultRepository and Clock ports, and GetLeaderboardUseCase, which holds the
-          LeaderboardReader port whose order is still open in DS-4.
+          Class diagram of layer 2 showing SyncProgressUseCase, which holds the ProgressRepository
+          port for the whole progress aggregate and the Clock port, and GetLeaderboardUseCase, which
+          holds the LeaderboardReader port whose order is still open in DS-4.
         </desc>
         <defs>
           <marker
@@ -171,19 +171,9 @@
           stroke-width="1"
           marker-start="url(#uc2progress-diamond-hollow)"
         />
-        <!-- SyncProgressUseCase holds LevelResultRepository: aggregation -->
-        <line
-          x1="448"
-          y1="232"
-          x2="568"
-          y2="232"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#uc2progress-diamond-hollow)"
-        />
         <!-- SyncProgressUseCase holds Clock: aggregation -->
         <path
-          d="M448 248 L472 248 Q480 248 480 256 L480 320 Q480 328 488 328 L568 328"
+          d="M448 232 L568 232"
           fill="none"
           stroke="#17212a"
           stroke-width="1"
@@ -224,10 +214,10 @@
         >
           results 1
         </text>
-        <rect x="494" y="310" width="48" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="484" y="214" width="48" height="12" rx="2" fill="#e3f5e6" />
         <text
-          x="518"
-          y="319"
+          x="508"
+          y="223"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -266,7 +256,7 @@
           x="64"
           y="120"
           width="384"
-          height="140"
+          height="124"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -312,13 +302,10 @@
           - progress: ProgressRepository
         </text>
         <text x="80" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - results: LevelResultRepository
-        </text>
-        <text x="80" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - clock: Clock
         </text>
-        <line x1="64" y1="236" x2="448" y2="236" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="80" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="220" x2="448" y2="220" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="80" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + execute(request: SyncProgressRequest): Promise&lt;PlayerProgress&gt;
         </text>
         <!-- Class: GetLeaderboardUseCase («use case») -->
@@ -413,7 +400,7 @@
         <text x="584" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + save(progress: PlayerProgress): Promise&lt;void&gt;
         </text>
-        <!-- Class: LevelResultRepository («interface» «port») -->
+        <!-- Class: Clock («interface» «port») -->
         <rect
           x="568"
           y="208"
@@ -444,47 +431,10 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          LevelResultRepository
+          Clock
         </text>
         <line x1="568" y1="256" x2="984" y2="256" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="584" y="272" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + record(result: LevelResult): Promise&lt;void&gt;
-        </text>
-        <!-- Class: Clock («interface» «port») -->
-        <rect
-          x="568"
-          y="304"
-          width="416"
-          height="72"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="776"
-          y="322"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «interface» «port»
-        </text>
-        <text
-          x="776"
-          y="340"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          Clock
-        </text>
-        <line x1="568" y1="352" x2="984" y2="352" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="584" y="368" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + now(): Date
         </text>
         <!-- Class: LeaderboardReader («interface» «port») -->
@@ -555,7 +505,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           The ports live in src/application (Q10, class of 2026-10-30). Part 3, views 1 and 4,
-          implements them. One sync saves the progress row and
+          implements them. One sync loads the PlayerProgress aggregate,
         </text>
         <text
           x="24"
@@ -564,8 +514,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          records each level result (DS-5). The order of LeaderboardReader.top() is DS-4, still
-          open. Clock is in src/domain/shared/clock.ts in the code
+          records the score and each level result, and saves the whole aggregate (DS-5). The order
+          of LeaderboardReader.top() is DS-4, still open.
         </text>
         <text
           x="24"
@@ -574,7 +524,7 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          today; moving it to src/application is a follow-up outside E1-E3.
+          The use case reads the instant from the Clock port and passes it to the domain.
         </text>
         <!-- Legend -->
         <line x1="24" y1="596" x2="1016" y2="596" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
