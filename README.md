@@ -1,8 +1,16 @@
+<!-- The banner comes from brand/tools/profile-assets/gen.py --repo hexablock-api in Hexablock-Suite/.github. Regenerate it there; do not edit the SVG files by hand. -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
+  <img src="docs/assets/banner-light.svg" alt="HexaBlock API. REST backend: users, progress, leaderboards and level definitions, with Drizzle and OpenAPI docs." width="100%">
+</picture>
+
 # HexaBlock API
 
 ## Project Title & Badges
 
-TODO: add the CI badge once the GitHub organization exists.
+[![hexablock-api CI](https://img.shields.io/github/actions/workflow/status/Hexablock-Suite/hexablock-api/ci.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white&labelColor=262830)](https://github.com/Hexablock-Suite/hexablock-api/actions/workflows/ci.yml)
+
+REST backend: users, progress, leaderboards and level definitions, with Drizzle and OpenAPI docs.
 
 ## Description
 
