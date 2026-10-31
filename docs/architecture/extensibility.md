@@ -12,7 +12,7 @@ Statement §4 asks for an extensibility diagram with the engine in the center an
 - A box with a plural name, such as `Output ports`, stands for a group. Its compartment lists the exact class names.
 - A grey dashed box is a declared extension with no class yet. Its name is a placeholder. A grey italic member is a placeholder too.
 - A white dashed box is a class that another view details, as in the class diagram.
-- A realization arrow points from an extension to the contract it implements. A diamond says that a class keeps another class in an attribute: hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. The other end names the attribute and its multiplicity. A solid line with an open arrowhead and a verb is a use. The notation is the one of the [class diagram](classes.md).
+- A realization arrow points from an extension to the contract it implements. A `«bind»` label on it names the type that the extension gives to the type parameter. A diamond says that a class keeps another class in an attribute: hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. The other end names the attribute and its multiplicity. A solid line with an open arrowhead and a verb is a use. The notation is the one of the [class diagram](classes.md).
 - When a diamond starts or ends at a box with a plural name, its other end names the role of the group and the multiplicity for one member class, for example `input ports` and `1..2`.
 
 ## View 1: the core and its extension axes

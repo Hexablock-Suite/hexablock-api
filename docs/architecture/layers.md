@@ -4,7 +4,15 @@ Status: draft for review with the professor, 2026-10-30. Q10 answered in the cla
 
 This page shows the four Clean layers of the API (statement §3.4 and §4.2). It places each main component in its layer. The rules in [`.dependency-cruiser.cjs`](../../.dependency-cruiser.cjs) forbid every outward import in `src/` on each `pnpm arch` run. They do not prove that each drawn arrow exists. Question IDs such as Q12 use the numbers of the shared question list in `hexablock-app`, `docs/REQUIREMENTS.md` §11. The classes of each layer are in [classes.md](classes.md). The extension points are in [extensibility.md](extensibility.md).
 
-## Diagram
+## Concentric view
+
+![The four Clean layers as concentric rings: layer 1, the entities, in the yellow centre; layer 2, the use cases and their ports, in purple; layer 3, the interface adapters, in light blue; layer 4, the frameworks and drivers, in dark blue on the outside; arrows point toward the centre](layers/views/layers-1-rings.png)
+
+Statement §4.2 asks for a visual representation of the four concentric layers. This view draws them as rings, with the legend inside the drawing. Every source dependency points toward the centre. The component diagram below gives the detail of each layer.
+
+The view comes from [`layers/views/layers-1-rings.html`](layers/views/layers-1-rings.html), one inline SVG drawn with the diagram-design skill and the HexaBlock profile, as the class views are. The `.png` image next to it is that SVG rendered at scale 2 by a headless browser. Commit the `.html` file together with its `.png` image.
+
+## Component diagram
 
 ```mermaid
 flowchart TB
@@ -61,29 +69,47 @@ flowchart TB
   APPMOD -->|registers| HEALTH
   FEATMOD -->|register| CONTROLLERS
 
-  %% Invisible links keep the layers stacked from outer to inner.
+  subgraph LEGEND["Legend"]
+    direction LR
+    KEY4["Layer 4: dark blue"]
+    KEY3["Layer 3: light blue"]
+    KEY2["Layer 2: purple"]
+    KEY1["Layer 1: yellow"]
+    KEYPORT(["Rounded node: a port"])
+    KEYPLANNED["Dashed box: planned"]
+  end
+
+  %% Invisible links keep the layers stacked from outer to inner, with the legend last.
   HEALTH & CONTROLLERS & GUARD ~~~ UC
   UC ~~~ ENT
+  ENT ~~~ KEY4
 
   classDef real fill:#ffffff,stroke:#222222,color:#111111
   classDef planned fill:#ffffff,stroke:#777777,stroke-dasharray:5 5,color:#444444
   class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,HEALTH,SCHEMA,CLOCK real
   class FEATMOD,SECURITY,ASPECTS,CONTROLLERS,GUARD,REPOS,UC,INPORTS,ENT,REPOPORTS,SECPORTS planned
+  class KEYPORT real
+  class KEYPLANNED planned
 
-  style INFRA fill:#eeeeee,stroke:#666666,color:#111111
-  style ADAPTERS fill:#dce9fb,stroke:#3d6db5,color:#111111
-  style APP fill:#dff3df,stroke:#3c8a3c,color:#111111
-  style DOMAIN fill:#fff1c2,stroke:#b38f00,color:#111111
+  style INFRA fill:#cfdcf3,stroke:#1e3a8a,color:#111111
+  style ADAPTERS fill:#e2ebf8,stroke:#1d4ed8,color:#111111
+  style APP fill:#efe7f8,stroke:#7e22ce,color:#111111
+  style DOMAIN fill:#f9f4dc,stroke:#b45309,color:#111111
+  style LEGEND fill:#ffffff,stroke:#777777,color:#111111
+  style KEY4 fill:#cfdcf3,stroke:#1e3a8a,color:#111111
+  style KEY3 fill:#e2ebf8,stroke:#1d4ed8,color:#111111
+  style KEY2 fill:#efe7f8,stroke:#7e22ce,color:#111111
+  style KEY1 fill:#f9f4dc,stroke:#b45309,color:#111111
 ```
 
 How to read it:
 
-- Statement §4.2 asks for four concentric layers. Mermaid draws them as a stack: the outer layer is at the top and the domain, the center, is at the bottom.
+- The concentric view above answers statement §4.2. Mermaid cannot draw rings, so this diagram stacks the same layers: the outer layer is at the top and the domain, the center, is at the bottom.
 - Each arrow is a source-code dependency that the rules allow. No arrow points outward, away from the domain. Some arrows stay inside one layer, such as `AppModule` binding `CLOCK` to `SystemClock`.
 - A rounded node is a port: an interface that an inner layer owns and an outer layer implements.
 - A dashed box with the suffix "(planned)" is a component that does not exist yet. A solid box exists in `src/` today.
 - A label that names a question (Q12) marks a placement the team has not settled. The box sits where this draft puts it, and the professor's answer can move it.
-- Layer colors: yellow is the domain, green is the application, blue is the interface adapters, grey is frameworks and drivers.
+- Layer colors: yellow is the domain, purple is the application, and blue is the infrastructure. With four layers, the infrastructure has two shades: light blue for the interface adapters (layer 3) and dark blue for frameworks and drivers (layer 4). These are the colors the course uses for its three layers. The legend inside each drawing repeats them, and the class and extensibility views use the same zone colors.
 - The clock is the real example of a port and its adapter. `Clock` lives in `src/application/ports/clock.ts`. `SystemClock` in the infrastructure implements it. `AppModule` binds the `CLOCK` token to `SystemClock`.
 - Every port lives in the application layer (Q10). Domain code never imports a port: a use case reads the instant from `Clock` and passes it to the domain as a parameter.
 - `AppModule` is the composition root: it binds each port to its adapter. `src/main.ts` is the bootstrap: it creates the Nest app from `AppModule` and starts the HTTP server.
@@ -124,5 +150,5 @@ How to read it:
 
 ## Resolved questions
 
-- **Q10. Answered in the class of 2026-10-30: the ports live in `src/application`.** The professor said: «Los puertos están en la capa de aplicación.» [26:41] (tip 21). Statement §3.4 says the same: the use cases depend on ports defined in their own layer. The diagram and the class diagram put every port there. The `Clock` port moved to `src/application/ports/clock.ts` on 2026-10-31.
+- **Q10. Answered in the class of 2026-10-30: the ports live in `src/application`.** The professor said that the ports belong to the application layer. Statement §3.4 says the same: the use cases depend on ports defined in their own layer. The diagram and the class diagram put every port there. The `Clock` port moved to `src/application/ports/clock.ts` on 2026-10-31.
 - **Q11. Resolved by the team on 2026-10-30: the Drizzle schema lives in `src/adapters/persistence/schema.ts`.** It sat in `src/infrastructure/database/schema.ts`, and rule `adapters-never-import-infrastructure` kept the repositories from importing it. The infrastructure may import the adapters, so `connection.ts` now takes the schema from there. The architecture gate test pins the path that `drizzle.config.ts` gives to `drizzle-kit`.

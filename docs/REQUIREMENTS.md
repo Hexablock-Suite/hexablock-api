@@ -59,7 +59,7 @@ API-FR-01 to API-FR-06 keep the numbers of statement §5.2.
 
 - **Q2:** Closed by the team on 2026-10-26: the backend meets the same standards (client D6).
 - **Q4:** Who may update level definitions? The statement asks only for sign-up and sign-in, with no roles.
-- **Q10:** Closed in the class of 2026-10-30: «Los puertos están en la capa de aplicación.» [26:41]. The ports live in `src/application`, as §3.4 says. The `Clock` port moved to `src/application/ports/clock.ts` on 2026-10-31. See Q10 in [`architecture/layers.md`](architecture/layers.md).
+- **Q10:** Closed in the class of 2026-10-30: the ports live in the application layer, in `src/application`, as §3.4 says. The `Clock` port moved to `src/application/ports/clock.ts` on 2026-10-31. See Q10 in [`architecture/layers.md`](architecture/layers.md).
 - **Q11:** Closed by the team on 2026-10-30: the Drizzle schema lives in `src/adapters/persistence/schema.ts`, next to the repositories that query it.
 - **Q12:** Where do the AOP aspects live: in `src/application` as a plain decorator over a logger port, or in `src/infrastructure` as a wrapper that the Nest modules apply? See Q12 in [`architecture/layers.md`](architecture/layers.md).
 - **C1:** Do you expect the system to check that a Fit level can be won? (A5)
