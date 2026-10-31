@@ -189,7 +189,7 @@
           stroke-width="1"
           marker-start="url(#uc3levels-diamond-hollow)"
         />
-        <!-- UpdateLevelsUseCase throws LevelRejected: dependency -->
+        <!-- UpdateLevelsUseCase throws LevelRejected: use -->
         <line
           x1="400"
           y1="400"
@@ -197,7 +197,6 @@
           y2="400"
           stroke="#5b6873"
           stroke-width="1"
-          stroke-dasharray="4,3"
           marker-end="url(#uc3levels-open)"
         />
         <!-- UpdateLevelsUseCase holds LevelValidators: aggregation -->
@@ -210,13 +209,12 @@
           stroke-width="1"
           marker-start="url(#uc3levels-diamond-hollow)"
         />
-        <!-- LevelRepository returns LevelDefinition values: dependency -->
+        <!-- LevelRepository returns LevelDefinition values: use -->
         <path
-          d="M832 212 L864 212 Q872 212 872 220 L872 528"
+          d="M832 212 L896 212 Q904 212 904 220 L904 528"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
-          stroke-dasharray="4,3"
           marker-end="url(#uc3levels-open)"
         />
         <!-- Arrow labels and multiplicities -->
@@ -232,9 +230,9 @@
         >
           THROWS
         </text>
-        <rect x="878" y="294" width="48" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="910" y="294" width="48" height="12" rx="2" fill="#e3f5e6" />
         <text
-          x="902"
+          x="934"
           y="303"
           fill="#7d8a94"
           font-size="8"
@@ -243,6 +241,42 @@
           letter-spacing="0.06em"
         >
           RETURNS
+        </text>
+        <rect x="458" y="182" width="56" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="486"
+          y="191"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          levels 1
+        </text>
+        <rect x="686" y="278" width="56" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="714"
+          y="287"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          levels 1
+        </text>
+        <rect x="238" y="510" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="262"
+          y="519"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          rules 1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="248" height="12" rx="2" fill="#e3f5e6" />
@@ -619,9 +653,9 @@
           Inheritance
         </text>
         <line
-          x1="192"
+          x1="160"
           y1="700"
-          x2="220"
+          x2="188"
           y2="700"
           stroke="#17212a"
           stroke-width="1"
@@ -629,7 +663,7 @@
           marker-end="url(#uc3levels-triangle)"
         />
         <text
-          x="228"
+          x="196"
           y="704"
           fill="#5b6873"
           font-size="8.5"
@@ -638,77 +672,58 @@
           Realization
         </text>
         <line
-          x1="360"
+          x1="296"
           y1="700"
-          x2="388"
+          x2="324"
           y2="700"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#uc3levels-diamond-filled)"
         />
         <text
-          x="396"
+          x="332"
           y="704"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Composition · owns
+          Composition · attribute it creates
         </text>
         <line
-          x1="528"
+          x1="520"
           y1="700"
-          x2="556"
+          x2="548"
           y2="700"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#uc3levels-diamond-hollow)"
         />
         <text
-          x="564"
+          x="556"
           y="704"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Aggregation · holds as attribute
+          Aggregation · attribute it receives
         </text>
         <line
-          x1="728"
+          x1="752"
           y1="700"
-          x2="756"
+          x2="780"
           y2="700"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
         <text
-          x="764"
+          x="788"
           y="704"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Association
-        </text>
-        <line
-          x1="896"
-          y1="700"
-          x2="924"
-          y2="700"
-          stroke="#5b6873"
-          stroke-width="1"
-          stroke-dasharray="4,3"
-          marker-end="url(#uc3levels-open)"
-        />
-        <text
-          x="932"
-          y="704"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Dependency · uses
+          Use · parameter, return, local or new
         </text>
         <rect
           x="24"
