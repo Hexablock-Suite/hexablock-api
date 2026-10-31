@@ -145,8 +145,8 @@
           width="992"
           height="116"
           rx="8"
-          fill="#e3f5e6"
-          stroke="rgba(21,128,61,0.45)"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
           stroke-width="1"
         />
         <!-- Pattern and group frames -->
@@ -253,11 +253,11 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/persistence/
         </text>
-        <rect x="36" y="423" width="248" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="36" y="423" width="248" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
           y="432"
-          fill="#15803d"
+          fill="#7e22ce"
           font-size="8"
           font-weight="500"
           font-family="'IBM Plex Mono', monospace"
@@ -317,10 +317,10 @@
         </text>
         <line x1="64" y1="172" x2="368" y2="172" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="80" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(gameId): Promise&lt;AnyLevel[]&gt;
+          + list(gameId: GameId): Promise&lt;AnyLevel[]&gt;
         </text>
         <text x="80" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + save(levels): Promise&lt;void&gt;
+          + save(levels: AnyLevel[]): Promise&lt;void&gt;
         </text>
         <!-- Class: DrizzleUserRepository («Adapter») -->
         <rect
@@ -372,10 +372,10 @@
         </text>
         <line x1="560" y1="172" x2="888" y2="172" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="576" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + findByUsername(username): Promise&lt;User | null&gt;
+          + findByUsername(username: string): Promise&lt;User | null&gt;
         </text>
         <text x="576" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + add(user): Promise&lt;void&gt;
+          + add(user: User): Promise&lt;void&gt;
         </text>
         <!-- Class: LevelRowMapper («mapper») -->
         <rect
@@ -676,8 +676,8 @@
           width="20"
           height="12"
           rx="2"
-          fill="#e3f5e6"
-          stroke="rgba(21,128,61,0.45)"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
           stroke-width="1"
         />
         <text

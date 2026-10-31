@@ -71,9 +71,10 @@
         <title id="domain2levels-title">HexaBlock API level schema · UML class diagram</title>
         <desc id="domain2levels-desc">
           Class diagram of layer 1 showing the generic LevelDefinition with its common part and a
-          section of type TSection, bound to FitSection or SortSection, and the LevelValidator
-          strategy with FitLevelValidator, which checks assumption A5 with the rotation steps of the
-          level topology, and SortLevelValidator, registered by gameId in LevelValidators.
+          section of type TSection that it receives, bound to FitSection or SortSection, and the
+          LevelValidator strategy with FitLevelValidator, which checks assumption A5 with the
+          rotation steps of the level topology, and SortLevelValidator, registered by gameId in
+          LevelValidators.
         </desc>
         <defs>
           <marker
@@ -162,7 +163,7 @@
           STRATEGY · §3.3 · DS-6
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- LevelDefinition&lt;FitSection&gt; creates section: FitSection: composition -->
+        <!-- LevelDefinition&lt;FitSection&gt; receives section: FitSection: aggregation -->
         <line
           x1="176"
           y1="260"
@@ -170,15 +171,15 @@
           y2="316"
           stroke="#17212a"
           stroke-width="1"
-          marker-start="url(#domain2levels-diamond-filled)"
+          marker-start="url(#domain2levels-diamond-hollow)"
         />
-        <!-- LevelDefinition&lt;SortSection&gt; creates section: SortSection: composition -->
+        <!-- LevelDefinition&lt;SortSection&gt; receives section: SortSection: aggregation -->
         <path
           d="M312 260 L312 520 Q312 528 304 528 L288 528"
           fill="none"
           stroke="#17212a"
           stroke-width="1"
-          marker-start="url(#domain2levels-diamond-filled)"
+          marker-start="url(#domain2levels-diamond-hollow)"
         />
         <!-- LevelValidators holds validators: one LevelValidator per gameId with levels: aggregation -->
         <line
@@ -282,6 +283,30 @@
           letter-spacing="0.06em"
         >
           0..*
+        </text>
+        <rect x="514" y="338" width="152" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="662"
+          y="347"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="end"
+          letter-spacing="0.06em"
+        >
+          «bind» TSection → FitSection
+        </text>
+        <rect x="702" y="338" width="156" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="854"
+          y="347"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="end"
+          letter-spacing="0.06em"
+        >
+          «bind» TSection → SortSection
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />

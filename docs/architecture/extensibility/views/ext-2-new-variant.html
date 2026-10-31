@@ -184,13 +184,13 @@
           STRATEGY · §3.3 · DS-6
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- LevelDefinition creates section: TSection: composition -->
+        <!-- LevelDefinition receives section: TSection: aggregation -->
         <path
           d="M200 244 L200 296"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
-          marker-start="url(#ext2variant-diamond-filled)"
+          marker-start="url(#ext2variant-diamond-hollow)"
         />
         <!-- LevelValidator takes a LevelDefinition as a parameter: use -->
         <path
@@ -266,17 +266,16 @@
         >
           0..*
         </text>
-        <rect x="612" y="396" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="610" y="394" width="176" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="640"
-          y="405"
+          x="614"
+          y="403"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
           letter-spacing="0.06em"
         >
-          IMPLEMENT
+          «bind» TSection → its section type
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />

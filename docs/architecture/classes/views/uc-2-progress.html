@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 2 of 4</p>
       <h1>Progress and leaderboard: use cases over output ports</h1>
       <svg
-        viewBox="0 0 1040 678"
+        viewBox="0 0 1040 614"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc2progress-title uc2progress-desc"
@@ -131,10 +131,10 @@
           x="24"
           y="24"
           width="992"
-          height="492"
+          height="428"
           rx="8"
-          fill="#e3f5e6"
-          stroke="rgba(21,128,61,0.45)"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
           stroke-width="1"
         />
         <!-- Pattern and group frames -->
@@ -142,7 +142,7 @@
           x="552"
           y="64"
           width="448"
-          height="436"
+          height="372"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -182,15 +182,15 @@
         <!-- GetLeaderboardUseCase holds LeaderboardReader: aggregation -->
         <line
           x1="448"
-          y1="424"
+          y1="360"
           x2="568"
-          y2="424"
+          y2="360"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#uc2progress-diamond-hollow)"
         />
         <!-- Arrow labels and multiplicities -->
-        <rect x="476" y="126" width="64" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="476" y="126" width="64" height="12" rx="2" fill="#efe7f8" />
         <text
           x="508"
           y="135"
@@ -202,7 +202,7 @@
         >
           progress 1
         </text>
-        <rect x="478" y="214" width="60" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="478" y="214" width="60" height="12" rx="2" fill="#efe7f8" />
         <text
           x="508"
           y="223"
@@ -214,7 +214,7 @@
         >
           results 1
         </text>
-        <rect x="484" y="214" width="48" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="484" y="214" width="48" height="12" rx="2" fill="#efe7f8" />
         <text
           x="508"
           y="223"
@@ -226,10 +226,10 @@
         >
           clock 1
         </text>
-        <rect x="468" y="406" width="80" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="468" y="342" width="80" height="12" rx="2" fill="#efe7f8" />
         <text
           x="508"
-          y="415"
+          y="351"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -239,11 +239,11 @@
           leaderboard 1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
-        <rect x="36" y="35" width="248" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="36" y="35" width="248" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
           y="44"
-          fill="#15803d"
+          fill="#7e22ce"
           font-size="8"
           font-weight="500"
           font-family="'IBM Plex Mono', monospace"
@@ -311,7 +311,7 @@
         <!-- Class: GetLeaderboardUseCase («use case») -->
         <rect
           x="64"
-          y="344"
+          y="280"
           width="384"
           height="108"
           rx="6"
@@ -321,7 +321,7 @@
         />
         <text
           x="256"
-          y="362"
+          y="298"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -332,7 +332,7 @@
         </text>
         <text
           x="256"
-          y="380"
+          y="316"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -343,7 +343,7 @@
         </text>
         <text
           x="256"
-          y="394"
+          y="330"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -352,12 +352,12 @@
         >
           API-FR-03
         </text>
-        <line x1="64" y1="404" x2="448" y2="404" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="420" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="340" x2="448" y2="340" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="356" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - leaderboard: LeaderboardReader
         </text>
-        <line x1="64" y1="428" x2="448" y2="428" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="444" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="364" x2="448" y2="364" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="380" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + execute(query: LeaderboardQuery): Promise&lt;LeaderboardEntry[]&gt;
         </text>
         <!-- Class: ProgressRepository («interface» «port») -->
@@ -440,7 +440,7 @@
         <!-- Class: LeaderboardReader («interface» «port») -->
         <rect
           x="568"
-          y="400"
+          y="336"
           width="416"
           height="84"
           rx="6"
@@ -450,7 +450,7 @@
         />
         <text
           x="776"
-          y="418"
+          y="354"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -461,7 +461,7 @@
         </text>
         <text
           x="776"
-          y="436"
+          y="372"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -472,7 +472,7 @@
         </text>
         <text
           x="776"
-          y="450"
+          y="386"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -481,8 +481,8 @@
         >
           order: DS-4
         </text>
-        <line x1="568" y1="460" x2="984" y2="460" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="584" y="476" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="568" y1="396" x2="984" y2="396" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="584" y="412" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + top(query: LeaderboardQuery): Promise&lt;LeaderboardEntry[]&gt;
         </text>
         <!-- Lollipops: the input port each use case implements -->
@@ -491,15 +491,15 @@
         <text x="91" y="102" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           SyncProgress
         </text>
-        <line x1="80" y1="344" x2="80" y2="328" stroke="#17212a" stroke-width="1" />
-        <circle cx="80" cy="323" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
-        <text x="91" y="326" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="80" y1="280" x2="80" y2="264" stroke="#17212a" stroke-width="1" />
+        <circle cx="80" cy="259" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <text x="91" y="262" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           GetLeaderboard
         </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="540"
+          y="476"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -509,7 +509,7 @@
         </text>
         <text
           x="24"
-          y="556"
+          y="492"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -519,7 +519,7 @@
         </text>
         <text
           x="24"
-          y="572"
+          y="508"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -527,10 +527,10 @@
           The use case reads the instant from the Clock port and passes it to the domain.
         </text>
         <!-- Legend -->
-        <line x1="24" y1="596" x2="1016" y2="596" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="532" x2="1016" y2="532" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="614"
+          y="550"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -540,16 +540,16 @@
         </text>
         <line
           x1="24"
-          y1="632"
+          y1="568"
           x2="52"
-          y2="632"
+          y2="568"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#uc2progress-triangle)"
         />
         <text
           x="60"
-          y="636"
+          y="572"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -558,9 +558,9 @@
         </text>
         <line
           x1="160"
-          y1="632"
+          y1="568"
           x2="188"
-          y2="632"
+          y2="568"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -568,7 +568,7 @@
         />
         <text
           x="196"
-          y="636"
+          y="572"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -577,16 +577,16 @@
         </text>
         <line
           x1="296"
-          y1="632"
+          y1="568"
           x2="324"
-          y2="632"
+          y2="568"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#uc2progress-diamond-filled)"
         />
         <text
           x="332"
-          y="636"
+          y="572"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -595,16 +595,16 @@
         </text>
         <line
           x1="520"
-          y1="632"
+          y1="568"
           x2="548"
-          y2="632"
+          y2="568"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#uc2progress-diamond-hollow)"
         />
         <text
           x="556"
-          y="636"
+          y="572"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -613,16 +613,16 @@
         </text>
         <line
           x1="752"
-          y1="632"
+          y1="568"
           x2="780"
-          y2="632"
+          y2="568"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
         <text
           x="788"
-          y="636"
+          y="572"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -631,17 +631,17 @@
         </text>
         <rect
           x="24"
-          y="652"
+          y="588"
           width="20"
           height="12"
           rx="2"
-          fill="#e3f5e6"
-          stroke="rgba(21,128,61,0.45)"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
           stroke-width="1"
         />
         <text
           x="56"
-          y="661"
+          y="597"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -650,7 +650,7 @@
         </text>
         <rect
           x="166"
-          y="652"
+          y="588"
           width="28"
           height="12"
           rx="2"
@@ -661,7 +661,7 @@
         />
         <text
           x="202"
-          y="661"
+          y="597"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -670,7 +670,7 @@
         </text>
         <rect
           x="372"
-          y="652"
+          y="588"
           width="28"
           height="12"
           rx="2"
@@ -680,18 +680,18 @@
         />
         <text
           x="408"
-          y="661"
+          y="597"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
         </text>
-        <line x1="518" y1="658" x2="534" y2="658" stroke="#17212a" stroke-width="1" />
-        <circle cx="539" cy="658" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="518" y1="594" x2="534" y2="594" stroke="#17212a" stroke-width="1" />
+        <circle cx="539" cy="594" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="554"
-          y="661"
+          y="597"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
