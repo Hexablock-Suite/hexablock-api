@@ -36,7 +36,7 @@ API-FR-01 to API-FR-06 keep the numbers of statement §5.2.
 - **API-NFR-07 — AOP (§3.5).** Aspects are decorators or proxies over use cases, never inside business code. _Check:_ gate `test/gates/architecture.gate.spec.ts` keeps Nest out of `src/application` (rule R-application-pure), and a test shows the aspect runs while the use case it wraps has none of its code.
 - **API-NFR-08 — Clean Architecture (§3.4).** Required here too. See decision D6 in the client requirements. _Check:_ `pnpm arch` and gate `test/gates/architecture.gate.spec.ts` (rules R-domain-pure, R-application-pure, R-persistence-no-nest, R-adapters-no-infrastructure); the layer diagram is in [`architecture/layers.md`](architecture/layers.md).
 - **API-NFR-09 — GoF patterns (§3.3).** Required here too: the patterns the design needs, each one justified. See decision D7 in the client requirements. _Check:_ the README section "Design Patterns" lists each pattern used with its justification and a link to its file.
-- **API-NFR-10 — Diagrams and extensibility (§4).** Required here too: the class and layer diagrams and `EXTENSIBILITY.md` in `docs/` (D6). _Check:_ [`architecture/layers.md`](architecture/layers.md) holds the layer diagram; the class diagram and `docs/EXTENSIBILITY.md` are still to write.
+- **API-NFR-10 — Diagrams and extensibility (§4).** Required here too: the class and layer diagrams and `EXTENSIBILITY.md` in `docs/` (D6). _Check:_ [`architecture/layers.md`](architecture/layers.md) holds the layer diagram and [`architecture/classes.md`](architecture/classes.md) holds the class diagram; `docs/EXTENSIBILITY.md` is still to write.
 - **API-NFR-11 — Reproducible core (D6).** `src/domain` and `src/application` read time from the `Clock` port and randomness from an injected seeded source. _Check:_ gate `test/gates/determinism.gate.spec.ts` (rule R-deterministic-core).
 - **API-NFR-12 — README (§6.1).** The README is required in this repository too. _Check:_ gate `test/gates/docs-skeleton.spec.ts` (rule R-docs-skeleton).
 - **API-NFR-13 — Commits (§6.2).** Conventional Commits are required in this repository too. _Check:_ `commitlint.config.cjs`, the commit-msg hook and gate `test/gates/commit-message.gate.spec.ts` (rule R-conventional-commits).
@@ -47,19 +47,19 @@ API-FR-01 to API-FR-06 keep the numbers of statement §5.2.
 - **A5 — Fit levels can be won.** Every Fit level carries the designer's solution (piece, rotation in 60° steps, position). The level update endpoint rejects a Fit level when its pieces do not have the same total area as the figure, or when the stored solution does not cover the figure exactly without overlaps. Pieces rotate; they are never mirrored.
 - **A6 — Level origin.** The app always ships its own levels and works offline; levels from this API add to them or replace them. The API is not required for a first launch.
 - **A7 — Public repositories.** This repository is public.
-- **A9 — Backend scope.** Replaced on 2026-10-26 by the client's D6: this backend meets the same standards as the client (generics, SOLID, Clean Architecture, the patterns it needs, `EXTENSIBILITY.md` and its own class and layer diagrams in `docs/`).
+- **A9 — Backend scope.** Replaced on 2026-10-26 by the client's D6: this backend meets the same standards as the client (generics, SOLID, Clean Architecture, the patterns it needs, `EXTENSIBILITY.md` and its own class and layer diagrams in `docs/`). The class diagram exists since 2026-10-31: [`architecture/classes.md`](architecture/classes.md).
 
-## 4. Data shape decisions still open (team)
+## 4. Data shape decisions (team)
 
-- How one progress entry per user and variant (§5.2.2) also holds per-level results, and how the per-level leaderboard (§5.2.3) reads them.
-- What orders the per-level leaderboard for Fit (stars, moves, time) and for Sort; scoring is defined by the team (§5.1.6).
-- The generic level schema: the common part, and the `gameId` section for Fit (figure, pieces, solution) and for Sort (board, goals, piece source).
+- **DS-5 — Progress shape (§5.2.2, §5.2.3).** Closed by the team on 2026-10-30 with option «B · Dos tablas»: one progress row per `userId` and `gameId`, and a level results table with `userId`, `gameId`, `levelId`, `stars`, `moves` and `elapsedMs`. The per-level leaderboard reads the level results table. See [`architecture/classes.md`](architecture/classes.md), views 1.1 and 3.1.
+- **DS-4 — Leaderboard order (§5.2.3).** Open. What orders the per-level leaderboard for Fit (stars, moves, time) and for Sort; scoring is defined by the team (§5.1.6). It also decides whether the level results table keeps every attempt or only the best one.
+- **DS-6 — Level schema (§5.2.4).** Closed by the team on 2026-10-30 with option «A · Común + sección tipada»: a common part (`gameId`, `levelId`, `order`, `version`, `topology`) and a typed section per `gameId`, validated per variant. The Fit section has `figure`, `pieces` and `witness` (the solution of A5). The Sort section has `radius`, `goals` and `source`. The API rejects a Fit level that fails A5 (API-FR-04). See [`architecture/classes.md`](architecture/classes.md), views 1.2 and 2.3.
 
 ## 5. Questions for the professor that touch the backend
 
 - **Q2:** Closed by the team on 2026-10-26: the backend meets the same standards (client D6).
 - **Q4:** Who may update level definitions? The statement asks only for sign-up and sign-in, with no roles.
-- **Q10:** Where do the ports live: in `src/domain`, as the backend does today, or in `src/application`, as §3.4 says? See Q10 in [`architecture/layers.md`](architecture/layers.md).
+- **Q10:** Closed in the class of 2026-10-30: «Los puertos están en la capa de aplicación.» [26:41]. The ports live in `src/application`, as §3.4 says. Moving `src/domain/shared/clock.ts` in code is a follow-up outside E1-E3. See Q10 in [`architecture/layers.md`](architecture/layers.md).
 - **Q11:** Closed by the team on 2026-10-30: the Drizzle schema lives in `src/adapters/persistence/schema.ts`, next to the repositories that query it.
 - **Q12:** Where do the AOP aspects live: in `src/application` as a plain decorator over a logger port, or in `src/infrastructure` as a wrapper that the Nest modules apply? See Q12 in [`architecture/layers.md`](architecture/layers.md).
 - **C1:** Do you expect the system to check that a Fit level can be won? (A5)
