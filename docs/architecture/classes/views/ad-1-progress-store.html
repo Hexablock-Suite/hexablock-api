@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API progress persistence · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 3 · View 1 of 4</p>
+      <h1>Progress store: three Drizzle adapters over two tables</h1>
+      <svg
+        viewBox="0 0 1040 682"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="ad1progressstore-title ad1progressstore-desc"
+      >
+        <title id="ad1progressstore-title">
+          HexaBlock API progress persistence · UML class diagram
+        </title>
+        <desc id="ad1progressstore-desc">
+          Class diagram of layers 3 and 2 showing DrizzleProgressRepository,
+          DrizzleLevelResultRepository and DrizzleLeaderboardReader, which implement the three
+          progress ports of layer 2, and ProgressRowMapper, which turns progress rows into entities.
+        </desc>
+        <defs>
+          <marker
+            id="ad1progressstore-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="ad1progressstore-diamond-filled"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
+          </marker>
+          <marker
+            id="ad1progressstore-diamond-hollow"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon
+              points="0 5, 9 0, 18 5, 9 10"
+              fill="#ffffff"
+              stroke="#17212a"
+              stroke-width="1"
+            />
+          </marker>
+          <marker
+            id="ad1progressstore-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="360"
+          rx="8"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="400"
+          width="992"
+          height="120"
+          rx="8"
+          fill="#e3f5e6"
+          stroke="rgba(21,128,61,0.45)"
+          stroke-width="1"
+        />
+        <!-- Pattern and group frames -->
+        <rect
+          x="48"
+          y="56"
+          width="936"
+          height="172"
+          rx="8"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="60"
+          y="72"
+          fill="#5b6873"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          ADAPTER · §3.3 · §8 DATABASE ENGINE
+        </text>
+        <!-- Relationships (drawn before boxes) -->
+        <!-- DrizzleProgressRepository uses ProgressRowMapper: dependency -->
+        <line
+          x1="208"
+          y1="212"
+          x2="208"
+          y2="272"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+          marker-end="url(#ad1progressstore-open)"
+        />
+        <!-- DrizzleProgressRepository implements ProgressRepository: realization -->
+        <line
+          x1="376"
+          y1="212"
+          x2="376"
+          y2="448"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad1progressstore-triangle)"
+        />
+        <!-- DrizzleLevelResultRepository implements LevelResultRepository: realization -->
+        <line
+          x1="548"
+          y1="196"
+          x2="548"
+          y2="448"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad1progressstore-triangle)"
+        />
+        <!-- DrizzleLeaderboardReader implements LeaderboardReader: realization -->
+        <line
+          x1="836"
+          y1="196"
+          x2="836"
+          y2="448"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad1progressstore-triangle)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="214" y="236" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="230"
+          y="245"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          USES
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="360" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="40"
+          y="44"
+          fill="#1d4ed8"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 3 · INTERFACE ADAPTERS · src/adapters/persistence/
+        </text>
+        <rect x="36" y="411" width="248" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="40"
+          y="420"
+          fill="#15803d"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 2 · USE CASES · src/application/
+        </text>
+        <!-- Class: DrizzleProgressRepository (focal, «Adapter») -->
+        <rect
+          x="64"
+          y="88"
+          width="328"
+          height="124"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="64" y="88" width="328" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="64" y="140" width="328" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="228"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="228"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          DrizzleProgressRepository
+        </text>
+        <text
+          x="228"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          DS-5
+        </text>
+        <line x1="64" y1="148" x2="392" y2="148" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="80" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - db: PgDatabase
+        </text>
+        <line x1="64" y1="172" x2="392" y2="172" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="80" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + find(userId, gameId): Promise&lt;PlayerProgress | null&gt;
+        </text>
+        <text x="80" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + save(progress): Promise&lt;void&gt;
+        </text>
+        <!-- Class: DrizzleLevelResultRepository («Adapter») -->
+        <rect
+          x="424"
+          y="88"
+          width="248"
+          height="108"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="548"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="548"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          DrizzleLevelResultRepository
+        </text>
+        <text
+          x="548"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          DS-5
+        </text>
+        <line x1="424" y1="148" x2="672" y2="148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="440" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - db: PgDatabase
+        </text>
+        <line x1="424" y1="172" x2="672" y2="172" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="440" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + record(result): Promise&lt;void&gt;
+        </text>
+        <!-- Class: DrizzleLeaderboardReader («Adapter») -->
+        <rect
+          x="704"
+          y="88"
+          width="264"
+          height="108"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="836"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="836"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          DrizzleLeaderboardReader
+        </text>
+        <text
+          x="836"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          order: DS-4
+        </text>
+        <line x1="704" y1="148" x2="968" y2="148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="720" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - db: PgDatabase
+        </text>
+        <line x1="704" y1="172" x2="968" y2="172" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="720" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + top(query): Promise&lt;LeaderboardEntry[]&gt;
+        </text>
+        <!-- Class: ProgressRowMapper («mapper») -->
+        <rect
+          x="64"
+          y="272"
+          width="288"
+          height="88"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="208"
+          y="290"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «mapper»
+        </text>
+        <text
+          x="208"
+          y="308"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressRowMapper
+        </text>
+        <line x1="64" y1="320" x2="352" y2="320" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="336" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toEntity(row: ProgressRow): PlayerProgress
+        </text>
+        <text x="80" y="352" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toRow(progress: PlayerProgress): ProgressRow
+        </text>
+        <!-- Class: ProgressRepository (PART 2 · VIEW 2) -->
+        <rect
+          x="272"
+          y="448"
+          width="224"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="384"
+          y="466"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 2
+        </text>
+        <text
+          x="384"
+          y="484"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressRepository
+        </text>
+        <!-- Class: LevelResultRepository (PART 2 · VIEW 2) -->
+        <rect
+          x="520"
+          y="448"
+          width="240"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="640"
+          y="466"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 2
+        </text>
+        <text
+          x="640"
+          y="484"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelResultRepository
+        </text>
+        <!-- Class: LeaderboardReader (PART 2 · VIEW 2) -->
+        <rect
+          x="784"
+          y="448"
+          width="208"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="888"
+          y="466"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 2
+        </text>
+        <text
+          x="888"
+          y="484"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LeaderboardReader
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="544"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Two tables hold the progress (DS-5): progress, one row per userId and gameId, and
+          level_results, with userId, gameId, levelId, stars,
+        </text>
+        <text
+          x="24"
+          y="560"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          moves and elapsedMs. DrizzleLeaderboardReader reads both, and its ORDER BY waits on DS-4.
+          DrizzleLevelResultRepository maps its rows the
+        </text>
+        <text
+          x="24"
+          y="576"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          same way. A MongoDB engine (§8) means new adapters here and no change in layer 2. Rule
+          persistence-adapters-never-import-nest applies.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="600" x2="1016" y2="600" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="618"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="636"
+          x2="52"
+          y2="636"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#ad1progressstore-triangle)"
+        />
+        <text
+          x="60"
+          y="640"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Inheritance
+        </text>
+        <line
+          x1="192"
+          y1="636"
+          x2="220"
+          y2="636"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad1progressstore-triangle)"
+        />
+        <text
+          x="228"
+          y="640"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="360"
+          y1="636"
+          x2="388"
+          y2="636"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad1progressstore-diamond-filled)"
+        />
+        <text
+          x="396"
+          y="640"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Composition · owns
+        </text>
+        <line
+          x1="528"
+          y1="636"
+          x2="556"
+          y2="636"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad1progressstore-diamond-hollow)"
+        />
+        <text
+          x="564"
+          y="640"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · holds as attribute
+        </text>
+        <line
+          x1="728"
+          y1="636"
+          x2="756"
+          y2="636"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad1progressstore-open)"
+        />
+        <text
+          x="764"
+          y="640"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Association
+        </text>
+        <line
+          x1="896"
+          y1="636"
+          x2="924"
+          y2="636"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+          marker-end="url(#ad1progressstore-open)"
+        />
+        <text
+          x="932"
+          y="640"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dependency · uses
+        </text>
+        <rect
+          x="24"
+          y="656"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="48"
+          y="656"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#e3f5e6"
+          stroke="rgba(21,128,61,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="80"
+          y="665"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zones · Clean layers, outer on top
+        </text>
+        <rect
+          x="264"
+          y="656"
+          width="28"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="300"
+          y="665"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed frame · pattern or group
+        </text>
+        <rect
+          x="470"
+          y="656"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="506"
+          y="665"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+        <rect
+          x="616"
+          y="656"
+          width="28"
+          height="12"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="652"
+          y="665"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed class · detailed in another view
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
