@@ -7,7 +7,8 @@ const TEST_TITLE = '^should_[a-z0-9_]+_when_[a-z0-9_]+$';
 // The domain and the application stay deterministic (spec S6). The globs
 // start with ** so the wrong examples in test/fixtures/arch match too.
 const CORE_FILES = ['**/src/domain/**', '**/src/application/**'];
-const USE_THE_PORT = 'Inject the Clock port or a seeded random source.';
+const USE_THE_PORT =
+  'Take the instant as a parameter in src/domain or from the Clock port in src/application, and inject a seeded random source.';
 
 export default defineConfig({
   lint: {
