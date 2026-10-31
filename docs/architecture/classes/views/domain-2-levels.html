@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API level schema · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 1 · View 2 of 2</p>
+      <h1>Level schema: a common part and a typed section per gameId</h1>
+      <svg
+        viewBox="0 0 1040 786"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="domain2levels-title domain2levels-desc"
+      >
+        <title id="domain2levels-title">HexaBlock API level schema · UML class diagram</title>
+        <desc id="domain2levels-desc">
+          Class diagram of layer 1 showing the generic LevelDefinition with its common part and a
+          section of type TSection, bound to FitSection or SortSection, and the LevelValidator
+          strategy with FitLevelValidator, which checks assumption A5, and SortLevelValidator,
+          chosen by gameId in LevelValidators.
+        </desc>
+        <defs>
+          <marker
+            id="domain2levels-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="domain2levels-diamond-filled"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
+          </marker>
+          <marker
+            id="domain2levels-diamond-hollow"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon
+              points="0 5, 9 0, 18 5, 9 10"
+              fill="#ffffff"
+              stroke="#17212a"
+              stroke-width="1"
+            />
+          </marker>
+          <marker
+            id="domain2levels-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="600"
+          rx="8"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <!-- Pattern and group frames -->
+        <rect
+          x="440"
+          y="208"
+          width="568"
+          height="292"
+          rx="8"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="452"
+          y="224"
+          fill="#5b6873"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          STRATEGY · §3.3 · DS-6
+        </text>
+        <!-- Relationships (drawn before boxes) -->
+        <!-- LevelDefinition&lt;FitSection&gt; owns its FitSection: composition -->
+        <line
+          x1="176"
+          y1="260"
+          x2="176"
+          y2="316"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain2levels-diamond-filled)"
+        />
+        <!-- LevelDefinition&lt;SortSection&gt; owns its SortSection: composition -->
+        <path
+          d="M312 260 L312 520 Q312 528 304 528 L288 528"
+          fill="none"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain2levels-diamond-filled)"
+        />
+        <!-- LevelValidators holds two LevelValidator strategies: aggregation -->
+        <line
+          x1="824"
+          y1="196"
+          x2="824"
+          y2="232"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain2levels-diamond-hollow)"
+        />
+        <!-- LevelValidator takes a LevelDefinition as a parameter: dependency -->
+        <line
+          x1="640"
+          y1="244"
+          x2="336"
+          y2="244"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+          marker-end="url(#domain2levels-open)"
+        />
+        <!-- FitLevelValidator implements LevelValidator&lt;FitSection&gt;: realization -->
+        <line
+          x1="672"
+          y1="368"
+          x2="672"
+          y2="304"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
+        />
+        <!-- SortLevelValidator implements LevelValidator&lt;SortSection&gt;: realization -->
+        <line
+          x1="864"
+          y1="368"
+          x2="864"
+          y2="304"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="182" y="282" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="206"
+          y="291"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          SECTION
+        </text>
+        <rect x="318" y="394" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="342"
+          y="403"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          SECTION
+        </text>
+        <rect x="378" y="226" width="44" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="400"
+          y="235"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          CHECKS
+        </text>
+        <rect x="830" y="208" width="16" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="838"
+          y="217"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          2
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="44"
+          fill="#b45309"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 1 · ENTITIES · src/domain/
+        </text>
+        <!-- Class: LevelDefinition (focal, «entity») -->
+        <rect
+          x="64"
+          y="88"
+          width="272"
+          height="172"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="64" y="88" width="272" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="64" y="140" width="272" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="200"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «entity»
+        </text>
+        <text
+          x="200"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelDefinition
+        </text>
+        <text
+          x="200"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-04 · DS-6
+        </text>
+        <line x1="64" y1="148" x2="336" y2="148" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="80" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + gameId: GameId
+        </text>
+        <text x="80" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + levelId: string
+        </text>
+        <text x="80" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + order: number
+        </text>
+        <text x="80" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + version: number
+        </text>
+        <text x="80" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + topology: TopologyId
+        </text>
+        <line x1="64" y1="236" x2="336" y2="236" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="80" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + section: TSection
+        </text>
+        <!-- Class: FitSection («value object») -->
+        <rect
+          x="64"
+          y="316"
+          width="224"
+          height="116"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="176"
+          y="334"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="176"
+          y="352"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          FitSection
+        </text>
+        <text
+          x="176"
+          y="366"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          §1.2 · A5
+        </text>
+        <line x1="64" y1="376" x2="288" y2="376" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="392" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + figure: Coord[]
+        </text>
+        <text x="80" y="408" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + pieces: PieceShape[]
+        </text>
+        <text x="80" y="424" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + witness: Placement[]
+        </text>
+        <!-- Class: SortSection («value object») -->
+        <rect
+          x="64"
+          y="480"
+          width="224"
+          height="116"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="176"
+          y="498"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="176"
+          y="516"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SortSection
+        </text>
+        <text
+          x="176"
+          y="530"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          §1.3 · A4
+        </text>
+        <line x1="64" y1="540" x2="288" y2="540" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="556" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + radius: number
+        </text>
+        <text x="80" y="572" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + goals: SortGoal[]
+        </text>
+        <text x="80" y="588" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + source: PieceSourceSpec
+        </text>
+        <!-- Class: LevelValidators («domain service») -->
+        <rect
+          x="680"
+          y="72"
+          width="288"
+          height="124"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="824"
+          y="90"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «domain service»
+        </text>
+        <text
+          x="824"
+          y="108"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelValidators
+        </text>
+        <text
+          x="824"
+          y="122"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-04
+        </text>
+        <line x1="680" y1="132" x2="968" y2="132" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="696" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - fit: LevelValidator&lt;FitSection&gt;
+        </text>
+        <text x="696" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - sort: LevelValidator&lt;SortSection&gt;
+        </text>
+        <line x1="680" y1="172" x2="968" y2="172" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="696" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + check(level: AnyLevel): LevelProblem[]
+        </text>
+        <!-- Class: LevelValidator («interface» «Strategy») -->
+        <rect
+          x="640"
+          y="232"
+          width="344"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="812"
+          y="250"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «Strategy»
+        </text>
+        <text
+          x="812"
+          y="268"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelValidator
+        </text>
+        <line x1="640" y1="280" x2="984" y2="280" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="656" y="296" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + check(level: LevelDefinition&lt;TSection&gt;): LevelProblem[]
+        </text>
+        <!-- Class: FitLevelValidator («Strategy») -->
+        <rect
+          x="456"
+          y="368"
+          width="256"
+          height="116"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="584"
+          y="386"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Strategy»
+        </text>
+        <text
+          x="584"
+          y="404"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          FitLevelValidator
+        </text>
+        <text
+          x="584"
+          y="418"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          A5 · API-FR-04
+        </text>
+        <line x1="456" y1="428" x2="712" y2="428" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="472" y="444" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + check(level: FitLevel): LevelProblem[]
+        </text>
+        <text x="472" y="460" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - areasMatch(level: FitLevel): boolean
+        </text>
+        <text x="472" y="476" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - witnessCovers(level: FitLevel): boolean
+        </text>
+        <!-- Class: SortLevelValidator («Strategy») -->
+        <rect
+          x="736"
+          y="368"
+          width="256"
+          height="84"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="864"
+          y="386"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Strategy»
+        </text>
+        <text
+          x="864"
+          y="404"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SortLevelValidator
+        </text>
+        <text
+          x="864"
+          y="418"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          A4 · API-FR-04
+        </text>
+        <line x1="736" y1="428" x2="992" y2="428" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="444" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + check(level: SortLevel): LevelProblem[]
+        </text>
+        <!-- UML template boxes: type parameters on the top-right corner -->
+        <rect
+          x="288"
+          y="78"
+          width="56"
+          height="18"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="316"
+          y="90"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+        >
+          TSection
+        </text>
+        <rect
+          x="936"
+          y="222"
+          width="56"
+          height="18"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="964"
+          y="234"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+        >
+          TSection
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="648"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          FitLevel is LevelDefinition&lt;FitSection&gt;, SortLevel is
+          LevelDefinition&lt;SortSection&gt;, and AnyLevel is their union. Lines and Merge have no
+        </text>
+        <text
+          x="24"
+          y="664"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          level files (API-FR-04). A coordinate is a tuple of numbers; topology says how to read it
+          (D4). LevelValidators picks the strategy by gameId.
+        </text>
+        <text
+          x="24"
+          y="680"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          An empty LevelProblem[] means the level is valid. The HTTP DTO checks the shape; this
+          check holds the rules, such as A5 for Fit.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="704" x2="1016" y2="704" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="722"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="740"
+          x2="52"
+          y2="740"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#domain2levels-triangle)"
+        />
+        <text
+          x="60"
+          y="744"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Inheritance
+        </text>
+        <line
+          x1="192"
+          y1="740"
+          x2="220"
+          y2="740"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
+        />
+        <text
+          x="228"
+          y="744"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="360"
+          y1="740"
+          x2="388"
+          y2="740"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain2levels-diamond-filled)"
+        />
+        <text
+          x="396"
+          y="744"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Composition · owns
+        </text>
+        <line
+          x1="528"
+          y1="740"
+          x2="556"
+          y2="740"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain2levels-diamond-hollow)"
+        />
+        <text
+          x="564"
+          y="744"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · holds as attribute
+        </text>
+        <line
+          x1="728"
+          y1="740"
+          x2="756"
+          y2="740"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain2levels-open)"
+        />
+        <text
+          x="764"
+          y="744"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Association
+        </text>
+        <line
+          x1="896"
+          y1="740"
+          x2="924"
+          y2="740"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+          marker-end="url(#domain2levels-open)"
+        />
+        <text
+          x="932"
+          y="744"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dependency · uses
+        </text>
+        <rect
+          x="24"
+          y="760"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="56"
+          y="769"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zone · Clean layer
+        </text>
+        <rect
+          x="166"
+          y="760"
+          width="28"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="202"
+          y="769"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed frame · pattern or group
+        </text>
+        <rect
+          x="372"
+          y="760"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="408"
+          y="769"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+        <rect
+          x="518"
+          y="760"
+          width="28"
+          height="12"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="554"
+          y="769"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Corner box · type parameters
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
