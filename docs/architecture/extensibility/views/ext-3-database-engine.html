@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API new database engine · extensibility diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Extensibility diagram · View 3 of 3</p>
+      <h1>A new database engine: new adapters, same ports</h1>
+      <svg
+        viewBox="0 0 1040 728"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="ext3database-title ext3database-desc"
+      >
+        <title id="ext3database-title">
+          HexaBlock API new database engine · extensibility diagram
+        </title>
+        <desc id="ext3database-desc">
+          Extensibility diagram showing the five output ports of layer 2, held by the use cases and
+          implemented today by five Drizzle repositories over Postgres, and the declared MongoDB
+          repositories that would implement the same ports with no change to the use cases.
+        </desc>
+        <defs>
+          <marker
+            id="ext3database-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="ext3database-diamond-filled"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
+          </marker>
+          <marker
+            id="ext3database-diamond-hollow"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon
+              points="0 5, 9 0, 18 5, 9 10"
+              fill="#ffffff"
+              stroke="#17212a"
+              stroke-width="1"
+            />
+          </marker>
+          <marker
+            id="ext3database-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="292"
+          rx="8"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="332"
+          width="992"
+          height="232"
+          rx="8"
+          fill="#e3f5e6"
+          stroke="rgba(21,128,61,0.45)"
+          stroke-width="1"
+        />
+        <!-- Extension axes and groups -->
+        <rect
+          x="48"
+          y="60"
+          width="456"
+          height="240"
+          rx="8"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="60"
+          y="76"
+          fill="#5b6873"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          ADAPTER · §3.3 · POSTGRES TODAY
+        </text>
+        <rect
+          x="536"
+          y="60"
+          width="456"
+          height="240"
+          rx="8"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="548"
+          y="76"
+          fill="#5b6873"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          ADAPTER · §8 · D5 · DECLARED
+        </text>
+        <!-- Relationships (drawn before boxes) -->
+        <!-- Drizzle adapters implement the ports -->
+        <path
+          d="M416 284 L416 392"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext3database-triangle)"
+        />
+        <!-- MongoDB adapters would implement the same ports -->
+        <path
+          d="M624 228 L624 392"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext3database-triangle)"
+        />
+        <!-- Use cases hold the output ports: aggregation -->
+        <path
+          d="M264 464 L312 464"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          marker-start="url(#ext3database-diamond-hollow)"
+        />
+        <!-- Arrow labels -->
+        <rect x="424" y="352" width="56" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="452"
+          y="361"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          IMPLEMENT
+        </text>
+        <rect x="632" y="352" width="87" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="675.5"
+          y="361"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          WOULD IMPLEMENT
+        </text>
+        <rect x="272" y="446" width="29" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="286.5"
+          y="455"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          HOLD
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="357" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="40"
+          y="44"
+          fill="#1d4ed8"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 3 · INTERFACE ADAPTERS · src/adapters/persistence/
+        </text>
+        <rect x="36" y="343" width="245" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="40"
+          y="352"
+          fill="#15803d"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 2 · USE CASES · src/application/
+        </text>
+        <!-- Drizzle repositories -->
+        <rect
+          x="64"
+          y="92"
+          width="424"
+          height="192"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="276"
+          y="110"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter» × 5 · VIEWS 3.1, 3.2
+        </text>
+        <text
+          x="276"
+          y="128"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Drizzle repositories
+        </text>
+        <line x1="64" y1="140" x2="488" y2="140" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="156" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          DrizzleProgressRepository
+        </text>
+        <text x="80" y="172" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          DrizzleLevelResultRepository
+        </text>
+        <text x="80" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          DrizzleLeaderboardReader
+        </text>
+        <text x="80" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          DrizzleLevelRepository
+        </text>
+        <text x="80" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          DrizzleUserRepository
+        </text>
+        <line x1="64" y1="228" x2="488" y2="228" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="244" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - db: PgDatabase
+        </text>
+        <text x="80" y="260" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ProgressRowMapper, LevelRowMapper, UserRowMapper
+        </text>
+        <text x="80" y="276" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          src/adapters/persistence/schema.ts
+        </text>
+        <!-- MongoDB repositories -->
+        <rect
+          x="552"
+          y="92"
+          width="424"
+          height="136"
+          rx="6"
+          fill="rgba(23,33,42,0.02)"
+          stroke="rgba(23,33,42,0.35)"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="764"
+          y="110"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          DECLARED · §8 · PLACEHOLDER NAMES
+        </text>
+        <text
+          x="764"
+          y="128"
+          fill="#5b6873"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          MongoDB repositories
+        </text>
+        <line x1="552" y1="140" x2="976" y2="140" stroke="rgba(23,33,42,0.14)" stroke-width="1" />
+        <text x="568" y="156" fill="#7d8a94" font-size="9" font-family="'IBM Plex Mono', monospace">
+          MongoProgressRepository
+        </text>
+        <text x="568" y="172" fill="#7d8a94" font-size="9" font-family="'IBM Plex Mono', monospace">
+          MongoLevelResultRepository
+        </text>
+        <text x="568" y="188" fill="#7d8a94" font-size="9" font-family="'IBM Plex Mono', monospace">
+          MongoLeaderboardReader
+        </text>
+        <text x="568" y="204" fill="#7d8a94" font-size="9" font-family="'IBM Plex Mono', monospace">
+          MongoLevelRepository
+        </text>
+        <text x="568" y="220" fill="#7d8a94" font-size="9" font-family="'IBM Plex Mono', monospace">
+          MongoUserRepository
+        </text>
+        <!-- Class group: the output ports (focal, the seam) -->
+        <rect
+          x="312"
+          y="392"
+          width="416"
+          height="148"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="312" y="392" width="416" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="312" y="444" width="416" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="520"
+          y="410"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port» × 5
+        </text>
+        <text
+          x="520"
+          y="428"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Output ports
+        </text>
+        <text
+          x="520"
+          y="442"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          §3.4 · Q10 · §8
+        </text>
+        <line x1="312" y1="452" x2="728" y2="452" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="328" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ProgressRepository: find(), save()
+        </text>
+        <text x="328" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LevelResultRepository: record()
+        </text>
+        <text x="328" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LeaderboardReader: top()
+        </text>
+        <text x="328" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LevelRepository: list(), save()
+        </text>
+        <text x="328" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          UserRepository: findByUsername(), add()
+        </text>
+        <!-- Use cases -->
+        <rect
+          x="64"
+          y="440"
+          width="200"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="164"
+          y="458"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEWS 2 TO 4
+        </text>
+        <text
+          x="164"
+          y="476"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Use cases
+        </text>
+        <!-- UML template boxes: type parameters on the top-right corner -->
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="592"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          A new database engine adds one adapter per output port and its own row mapping. The output
+          ports, the use cases and the domain do not change (§8, D5).
+        </text>
+        <text
+          x="24"
+          y="608"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The Mongo names are placeholders: no class exists yet. The Nest feature modules and
+          DatabaseModule bind each port to one adapter, so a switch changes
+        </text>
+        <text
+          x="24"
+          y="624"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          those bindings in layer 4, the way AppModule binds the drivers (view 3.4). The Drizzle
+          schema and the drizzle/ migrations stay with the Drizzle adapters.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="648" x2="1016" y2="648" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="666"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="684"
+          x2="52"
+          y2="684"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext3database-triangle)"
+        />
+        <text
+          x="60"
+          y="688"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="272"
+          y1="684"
+          x2="300"
+          y2="684"
+          stroke-width="1"
+          stroke="#17212a"
+          marker-start="url(#ext3database-diamond-hollow)"
+        />
+        <text
+          x="308"
+          y="688"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · holds as attribute
+        </text>
+        <rect
+          x="520"
+          y="678"
+          width="12"
+          height="12"
+          rx="2"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="536"
+          y="678"
+          width="12"
+          height="12"
+          rx="2"
+          fill="#e3f5e6"
+          stroke="rgba(21,128,61,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="556"
+          y="688"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zones · Clean layers, outer on top
+        </text>
+        <rect
+          x="768"
+          y="678"
+          width="28"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-dasharray="4,4"
+          stroke-width="1"
+        />
+        <text
+          x="804"
+          y="688"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed frame · pattern or group
+        </text>
+        <rect
+          x="24"
+          y="700"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="60"
+          y="710"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · extension point
+        </text>
+        <rect
+          x="272"
+          y="700"
+          width="28"
+          height="12"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-dasharray="4,3"
+          stroke-width="1"
+        />
+        <text
+          x="308"
+          y="710"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed box · detailed in another view
+        </text>
+        <rect
+          x="520"
+          y="700"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(23,33,42,0.02)"
+          stroke="rgba(23,33,42,0.35)"
+          stroke-dasharray="4,3"
+          stroke-width="1"
+        />
+        <text
+          x="556"
+          y="710"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Grey dashed box · declared, placeholder names
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
