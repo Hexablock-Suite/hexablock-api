@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 1 of 3</p>
       <h1>The application core and its extension axes</h1>
       <svg
-        viewBox="0 0 1040 1188"
+        viewBox="0 0 1040 1210"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext1overview-title ext1overview-desc"
@@ -349,9 +349,9 @@
           marker-start="url(#ext1overview-diamond-hollow)"
         />
         <!-- Arrow labels -->
-        <rect x="434" y="436" width="92" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="498" y="436" width="32" height="12" rx="2" fill="#e3f5e6" />
         <text
-          x="480"
+          x="514"
           y="445"
           fill="#7d8a94"
           font-size="8"
@@ -359,7 +359,7 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          HOLD INPUT PORTS
+          1..2
         </text>
         <rect x="736" y="436" width="103" height="12" rx="2" fill="#e3f5e6" />
         <text
@@ -409,9 +409,9 @@
         >
           IMPLEMENT INPUT PORTS
         </text>
-        <rect x="296" y="682" width="29" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="290" y="682" width="72" height="12" rx="2" fill="#e3f5e6" />
         <text
-          x="310.5"
+          x="326"
           y="691"
           fill="#7d8a94"
           font-size="8"
@@ -419,11 +419,11 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          HOLD
+          driver ports
         </text>
-        <rect x="684" y="682" width="29" height="12" rx="2" fill="#e3f5e6" />
+        <rect x="684" y="682" width="72" height="12" rx="2" fill="#e3f5e6" />
         <text
-          x="698.5"
+          x="720"
           y="691"
           fill="#7d8a94"
           font-size="8"
@@ -431,11 +431,11 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          HOLD
+          output ports
         </text>
-        <rect x="520" y="846" width="140" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="520" y="846" width="112" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="590"
+          x="576"
           y="855"
           fill="#7d8a94"
           font-size="8"
@@ -443,7 +443,55 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          UpdateLevelsUseCase HOLDS
+          UpdateLevelsUseCase
+        </text>
+        <rect x="537" y="436" width="64" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="569"
+          y="445"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          input ports
+        </text>
+        <rect x="286" y="706" width="32" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="302"
+          y="715"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          0..2
+        </text>
+        <rect x="724" y="706" width="32" height="12" rx="2" fill="#e3f5e6" />
+        <text
+          x="740"
+          y="715"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          1..2
+        </text>
+        <rect x="516" y="888" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="540"
+          y="897"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          rules 1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="345" height="12" rx="2" fill="#eceef0" />
@@ -1355,9 +1403,8 @@
           y1="1128"
           x2="52"
           y2="1128"
-          stroke-width="1"
           stroke="#17212a"
-          stroke-dasharray="5,4"
+          stroke-width="1"
           marker-end="url(#ext1overview-triangle)"
         />
         <text
@@ -1367,29 +1414,84 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Realization
+          Inheritance
         </text>
         <line
-          x1="272"
+          x1="160"
           y1="1128"
-          x2="300"
+          x2="188"
           y2="1128"
-          stroke-width="1"
           stroke="#17212a"
-          marker-start="url(#ext1overview-diamond-hollow)"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
         />
         <text
-          x="308"
+          x="196"
           y="1132"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Aggregation · holds as attribute
+          Realization
+        </text>
+        <line
+          x1="296"
+          y1="1128"
+          x2="324"
+          y2="1128"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ext1overview-diamond-filled)"
+        />
+        <text
+          x="332"
+          y="1132"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Composition · attribute it creates
+        </text>
+        <line
+          x1="520"
+          y1="1128"
+          x2="548"
+          y2="1128"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ext1overview-diamond-hollow)"
+        />
+        <text
+          x="556"
+          y="1132"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · attribute it receives
+        </text>
+        <line
+          x1="752"
+          y1="1128"
+          x2="780"
+          y2="1128"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ext1overview-open)"
+        />
+        <text
+          x="788"
+          y="1132"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · parameter, return, local or new
         </text>
         <rect
-          x="520"
-          y="1122"
+          x="24"
+          y="1144"
           width="12"
           height="12"
           rx="2"
@@ -1398,8 +1500,8 @@
           stroke-width="1"
         />
         <rect
-          x="536"
-          y="1122"
+          x="40"
+          y="1144"
           width="12"
           height="12"
           rx="2"
@@ -1408,8 +1510,8 @@
           stroke-width="1"
         />
         <rect
-          x="552"
-          y="1122"
+          x="56"
+          y="1144"
           width="12"
           height="12"
           rx="2"
@@ -1418,8 +1520,8 @@
           stroke-width="1"
         />
         <rect
-          x="568"
-          y="1122"
+          x="72"
+          y="1144"
           width="12"
           height="12"
           rx="2"
@@ -1428,8 +1530,8 @@
           stroke-width="1"
         />
         <text
-          x="588"
-          y="1132"
+          x="92"
+          y="1154"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1437,8 +1539,8 @@
           Zones · Clean layers, outer on top
         </text>
         <rect
-          x="768"
-          y="1122"
+          x="272"
+          y="1144"
           width="28"
           height="12"
           rx="2"
@@ -1448,8 +1550,8 @@
           stroke-width="1"
         />
         <text
-          x="804"
-          y="1132"
+          x="308"
+          y="1154"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1457,7 +1559,7 @@
           Dashed frame · extension axis
         </text>
         <rect
-          x="24"
+          x="520"
           y="1144"
           width="28"
           height="12"
@@ -1467,7 +1569,7 @@
           stroke-width="1"
         />
         <text
-          x="60"
+          x="556"
           y="1154"
           fill="#5b6873"
           font-size="8.5"
@@ -1476,7 +1578,7 @@
           Teal · focal class
         </text>
         <rect
-          x="272"
+          x="768"
           y="1144"
           width="28"
           height="12"
@@ -1487,7 +1589,7 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="308"
+          x="804"
           y="1154"
           fill="#5b6873"
           font-size="8.5"
@@ -1496,8 +1598,8 @@
           Corner box · type parameters
         </text>
         <rect
-          x="520"
-          y="1144"
+          x="24"
+          y="1166"
           width="28"
           height="12"
           rx="2"
@@ -1507,8 +1609,8 @@
           stroke-width="1"
         />
         <text
-          x="556"
-          y="1154"
+          x="60"
+          y="1176"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
