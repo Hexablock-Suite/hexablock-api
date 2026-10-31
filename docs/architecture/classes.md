@@ -15,7 +15,7 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 - A lollipop (a circle on a short line) is the input port that a use case implements.
 - A dashed class with no members is a class that another view details. Its eyebrow names that view, for example `PART 2 · VIEW 2`.
 - Under the name of a class, an ID such as `API-FR-04` names the requirement it serves.
-- A class that holds another class as an attribute draws an aggregation (hollow diamond). A class that only takes another class as a parameter draws a dependency (dashed arrow). This is the rule of the class of 2026-10-30 (tip 23).
+- A class that keeps another class in an attribute draws a diamond at its own end: hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. The other end names the attribute and its multiplicity, even when it is 1. A solid line with an open arrowhead and a verb is a use: the other class is only a parameter, a return value, a local variable or a `new`. This follows the course (board of the class of 2026-10-02; tip 23 of 2026-10-30).
 - Every class is planned, except `Clock`, `SystemClock` and `AppModule`. Today `src/` holds the health endpoint, the `Clock` port and its adapter, and the database connection.
 
 ## Part 1: the domain
