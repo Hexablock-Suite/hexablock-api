@@ -138,7 +138,7 @@
           stroke-width="1"
         />
         <!-- Relationships (drawn before boxes) -->
-        <!-- ProgressController uses JwtAuthGuard: dependency -->
+        <!-- ProgressController uses JwtAuthGuard: use -->
         <line
           x1="712"
           y1="128"
@@ -146,19 +146,17 @@
           y2="128"
           stroke="#5b6873"
           stroke-width="1"
-          stroke-dasharray="4,3"
           marker-end="url(#ad3http-open)"
         />
-        <!-- LevelsController uses JwtAuthGuard: dependency -->
+        <!-- LevelsController uses JwtAuthGuard: use -->
         <path
           d="M736 304 L872 304 Q880 304 880 296 L880 172"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
-          stroke-dasharray="4,3"
           marker-end="url(#ad3http-open)"
         />
-        <!-- LevelsController takes LevelDto as a parameter: dependency -->
+        <!-- LevelsController takes LevelDto as a parameter: use -->
         <line
           x1="592"
           y1="420"
@@ -166,7 +164,6 @@
           y2="480"
           stroke="#5b6873"
           stroke-width="1"
-          stroke-dasharray="4,3"
           marker-end="url(#ad3http-open)"
         />
         <!-- Arrow labels and multiplicities -->
@@ -194,9 +191,9 @@
         >
           USES
         </text>
-        <rect x="598" y="444" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="598" y="444" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
-          x="614"
+          x="618"
           y="453"
           fill="#7d8a94"
           font-size="8"
@@ -204,7 +201,7 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          BODY
+          TAKES
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="316" height="12" rx="2" fill="#e2ebf8" />
@@ -663,9 +660,9 @@
           Inheritance
         </text>
         <line
-          x1="192"
+          x1="160"
           y1="792"
-          x2="220"
+          x2="188"
           y2="792"
           stroke="#17212a"
           stroke-width="1"
@@ -673,7 +670,7 @@
           marker-end="url(#ad3http-triangle)"
         />
         <text
-          x="228"
+          x="196"
           y="796"
           fill="#5b6873"
           font-size="8.5"
@@ -682,77 +679,58 @@
           Realization
         </text>
         <line
-          x1="360"
+          x1="296"
           y1="792"
-          x2="388"
+          x2="324"
           y2="792"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#ad3http-diamond-filled)"
         />
         <text
-          x="396"
+          x="332"
           y="796"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Composition · owns
+          Composition · attribute it creates
         </text>
         <line
-          x1="528"
+          x1="520"
           y1="792"
-          x2="556"
+          x2="548"
           y2="792"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#ad3http-diamond-hollow)"
         />
         <text
-          x="564"
+          x="556"
           y="796"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Aggregation · holds as attribute
+          Aggregation · attribute it receives
         </text>
         <line
-          x1="728"
+          x1="752"
           y1="792"
-          x2="756"
+          x2="780"
           y2="792"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad3http-open)"
         />
         <text
-          x="764"
+          x="788"
           y="796"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Association
-        </text>
-        <line
-          x1="896"
-          y1="792"
-          x2="924"
-          y2="792"
-          stroke="#5b6873"
-          stroke-width="1"
-          stroke-dasharray="4,3"
-          marker-end="url(#ad3http-open)"
-        />
-        <text
-          x="932"
-          y="796"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Dependency · uses
+          Use · parameter, return, local or new
         </text>
         <rect
           x="24"
