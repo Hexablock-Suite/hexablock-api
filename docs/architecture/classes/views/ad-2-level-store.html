@@ -60,7 +60,7 @@
   </head>
   <body>
     <div class="frame">
-      <p class="eyebrow">Class diagram · Part 3 · View 2 of 4</p>
+      <p class="eyebrow">Class diagram · Part 3 · View 2 of 5</p>
       <h1>Level and user store: Drizzle adapters and their row mappers</h1>
       <svg
         viewBox="0 0 1040 674"
@@ -73,8 +73,8 @@
         </title>
         <desc id="ad2levelstore-desc">
           Class diagram of layers 3 and 2 showing DrizzleLevelRepository with LevelRowMapper, which
-          reads the typed section by gameId, and DrizzleUserRepository with UserRowMapper,
-          implementing the LevelRepository and UserRepository ports.
+          keeps the section as stored, and DrizzleUserRepository with UserRowMapper, implementing
+          the LevelRepository and UserRepository ports.
         </desc>
         <defs>
           <marker
@@ -554,8 +554,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelRowMapper reads the section type from gameId. The domain check of Part 1, view 2,
-          runs in the use case before save().
+          LevelRowMapper keeps the section as stored and never reads gameId. The validator of its
+          gameId (Part 1, view 2) checks it in the use case before save().
         </text>
         <!-- Legend -->
         <line x1="24" y1="592" x2="1016" y2="592" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

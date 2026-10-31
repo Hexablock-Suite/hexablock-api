@@ -60,10 +60,10 @@
   </head>
   <body>
     <div class="frame">
-      <p class="eyebrow">Class diagram · Part 3 · View 3 of 4</p>
+      <p class="eyebrow">Class diagram · Part 3 · View 3 of 5</p>
       <h1>HTTP: controllers call input ports, never use case classes</h1>
       <svg
-        viewBox="0 0 1040 838"
+        viewBox="0 0 1040 854"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad3http-title ad3http-desc"
@@ -72,7 +72,8 @@
         <desc id="ad3http-desc">
           Class diagram of layer 3 showing the Auth, Progress, Leaderboard and Levels controllers,
           each holding the input ports it calls, the JwtAuthGuard that guards progress and level
-          updates, the LevelDto with its typed section, and the HttpErrorFilter.
+          updates, the LevelDto that carries the section for the validator of its gameId, and the
+          HttpErrorFilter for unexpected errors.
         </desc>
         <defs>
           <marker
@@ -548,7 +549,7 @@
         </text>
         <line x1="448" y1="628" x2="736" y2="628" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="464" y="644" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + section: FitSectionDto | SortSectionDto
+          + section: Record&lt;string, unknown&gt;
         </text>
         <!-- Class: HttpErrorFilter («filter») -->
         <rect
@@ -616,8 +617,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelDto checks the shape of the section for its gameId; the A5 rule stays in the domain
-          (Part 1, view 2). HttpErrorFilter gives every error
+          LevelDto checks the common part; the validator of its gameId checks the section (Part 1,
+          view 2). The mappers of view 5 translate between DTOs and entities.
         </text>
         <text
           x="24"
@@ -626,14 +627,24 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          the same body (API-FR-06). How JwtAuthGuard verifies a token is open: a TokenVerifier port
-          or an AuthenticateToken input port (layers.md).
+          A controller turns a failed Result into the error body of API-FR-06. HttpErrorFilter
+          handles only unexpected errors, with the same body shape.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="756" x2="1016" y2="756" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="774"
+          y="748"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          How JwtAuthGuard verifies a token is open: a TokenVerifier port or an AuthenticateToken
+          input port (layers.md).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="772" x2="1016" y2="772" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="790"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -643,16 +654,16 @@
         </text>
         <line
           x1="24"
-          y1="792"
+          y1="808"
           x2="52"
-          y2="792"
+          y2="808"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#ad3http-triangle)"
         />
         <text
           x="60"
-          y="796"
+          y="812"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -661,9 +672,9 @@
         </text>
         <line
           x1="160"
-          y1="792"
+          y1="808"
           x2="188"
-          y2="792"
+          y2="808"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -671,7 +682,7 @@
         />
         <text
           x="196"
-          y="796"
+          y="812"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -680,16 +691,16 @@
         </text>
         <line
           x1="296"
-          y1="792"
+          y1="808"
           x2="324"
-          y2="792"
+          y2="808"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#ad3http-diamond-filled)"
         />
         <text
           x="332"
-          y="796"
+          y="812"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -698,16 +709,16 @@
         </text>
         <line
           x1="520"
-          y1="792"
+          y1="808"
           x2="548"
-          y2="792"
+          y2="808"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#ad3http-diamond-hollow)"
         />
         <text
           x="556"
-          y="796"
+          y="812"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -716,16 +727,16 @@
         </text>
         <line
           x1="752"
-          y1="792"
+          y1="808"
           x2="780"
-          y2="792"
+          y2="808"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad3http-open)"
         />
         <text
           x="788"
-          y="796"
+          y="812"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -734,7 +745,7 @@
         </text>
         <rect
           x="24"
-          y="812"
+          y="828"
           width="20"
           height="12"
           rx="2"
@@ -744,7 +755,7 @@
         />
         <text
           x="56"
-          y="821"
+          y="837"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -753,7 +764,7 @@
         </text>
         <rect
           x="166"
-          y="812"
+          y="828"
           width="28"
           height="12"
           rx="2"
@@ -763,7 +774,7 @@
         />
         <text
           x="202"
-          y="821"
+          y="837"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

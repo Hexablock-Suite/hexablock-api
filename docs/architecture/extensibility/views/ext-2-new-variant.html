@@ -71,9 +71,9 @@
         <title id="ext2variant-title">HexaBlock API new variant · extensibility diagram</title>
         <desc id="ext2variant-desc">
           Extensibility diagram of layer 1 showing what a new variant with level files adds: a
-          section type bound to TSection of LevelDefinition, a LevelValidator strategy and one field
-          in LevelValidators, with FitSection and SortSection as the existing cases and the declared
-          Fill section and validator as placeholders.
+          section type bound to TSection of LevelDefinition and a LevelValidator strategy that the
+          composition root registers by gameId in LevelValidators, with FitSection and SortSection
+          as the existing cases and the declared Fill section and validator as placeholders.
         </desc>
         <defs>
           <marker
@@ -200,9 +200,9 @@
           stroke="#5b6873"
           marker-end="url(#ext2variant-open)"
         />
-        <!-- LevelValidators holds fit, sort and fill, one LevelValidator per gameId with levels: aggregation -->
+        <!-- LevelValidators holds validators, one LevelValidator per gameId with levels: aggregation -->
         <path
-          d="M704 212 L704 296"
+          d="M704 180 L704 296"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -210,7 +210,7 @@
         />
         <!-- Each validator implements LevelValidator for its section: realization -->
         <path
-          d="M604 416 L604 368"
+          d="M604 416 L604 384"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -242,9 +242,9 @@
         >
           CHECKS
         </text>
-        <rect x="710" y="232" width="40" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="710" y="232" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="730"
+          x="738"
           y="241"
           fill="#7d8a94"
           font-size="8"
@@ -252,12 +252,24 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          fit 1
+          validators
         </text>
-        <rect x="612" y="386" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="668" y="232" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="684"
+          y="241"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          0..*
+        </text>
+        <rect x="612" y="396" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="640"
-          y="395"
+          y="405"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -265,31 +277,6 @@
           letter-spacing="0.06em"
         >
           IMPLEMENT
-        </text>
-        <rect x="710" y="248" width="44" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="732"
-          y="257"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          sort 1
-        </text>
-        <rect x="710" y="264" width="44" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="732"
-          y="273"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-          font-style="italic"
-        >
-          fill 1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
@@ -370,19 +357,19 @@
         <text x="80" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + section: TSection
         </text>
-        <!-- Class: LevelValidators (the fill field is a declared placeholder) -->
+        <!-- Class: LevelValidators (a registry by gameId) -->
         <rect
           x="656"
           y="72"
-          width="288"
-          height="140"
+          width="312"
+          height="108"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="800"
+          x="812"
           y="90"
           fill="#5b6873"
           font-size="8"
@@ -393,7 +380,7 @@
           «domain service»
         </text>
         <text
-          x="800"
+          x="812"
           y="108"
           fill="#17212a"
           font-size="12"
@@ -404,7 +391,7 @@
           LevelValidators
         </text>
         <text
-          x="800"
+          x="812"
           y="122"
           fill="#5b6873"
           font-size="8"
@@ -414,25 +401,12 @@
         >
           API-FR-04 · DECISION 5
         </text>
-        <line x1="656" y1="132" x2="944" y2="132" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="656" y1="132" x2="968" y2="132" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="672" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - fit: LevelValidator&lt;FitSection&gt;
+          - validators: Map&lt;GameId, LevelValidator&lt;unknown&gt;&gt;
         </text>
-        <text x="672" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - sort: LevelValidator&lt;SortSection&gt;
-        </text>
-        <text
-          x="672"
-          y="180"
-          fill="#7d8a94"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          font-style="italic"
-        >
-          - fill: LevelValidator&lt;FillSection&gt;
-        </text>
-        <line x1="656" y1="188" x2="944" y2="188" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="672" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="656" y1="156" x2="968" y2="156" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="672" y="172" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + check(level: AnyLevel): LevelProblem[]
         </text>
         <!-- Class: LevelValidator (focal, the strategy a variant implements) -->
@@ -440,7 +414,7 @@
           x="432"
           y="296"
           width="344"
-          height="72"
+          height="88"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -472,6 +446,9 @@
         </text>
         <line x1="432" y1="344" x2="776" y2="344" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="448" y="360" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isSection(raw: unknown): raw is TSection
+        </text>
+        <text x="448" y="376" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + check(level: LevelDefinition&lt;TSection&gt;): LevelProblem[]
         </text>
         <!-- FitSection -->
@@ -725,8 +702,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          A new variant with level files adds one section type, one validator, one field in
-          LevelValidators and one GameId value (decision 5). LevelDefinition,
+          A new variant with level files adds one section type, one validator and one entry for its
+          gameId in the composition root (decision 5). LevelDefinition, LevelValidators, GameId,
         </text>
         <text
           x="24"
@@ -735,8 +712,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          the use cases and the level table do not change: the table keeps the section in one JSON
-          column. AnyLevel and the section of LevelDto gain one member.
+          the mappers, LevelDto, the use cases and the level table do not change: the table keeps
+          the section in one JSON column, and the validator checks its shape with isSection().
         </text>
         <text
           x="24"
@@ -745,8 +722,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          FillSection, FillLevelValidator and the fill field are placeholders for «Hexa Fill: pintar
-          celdas con restricciones» (§3.1). Lines and Merge have no level
+          FillSection and FillLevelValidator are placeholders for «Hexa Fill: pintar celdas con
+          restricciones» (§3.1). Lines and Merge have no level
         </text>
         <text
           x="24"
@@ -755,8 +732,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          files (API-FR-04), so they appear only as GameId values. A coordinate is a tuple and
-          topology says how to read it: a square, triangular or 3D level needs
+          files (API-FR-04), so they register no validator. A coordinate is a tuple and topology
+          says how to read it: a square, triangular or 3D level needs
         </text>
         <text
           x="24"
@@ -765,8 +742,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          no new schema (decision 6). When a second topology reaches the level files, the Fit check
-          needs a topology strategy (D5).
+          no new schema (decision 6). The Fit check takes its rotation steps from the Topology that
+          the topology field names, never 60° by default.
         </text>
         <!-- Legend -->
         <line x1="24" y1="652" x2="1016" y2="652" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
