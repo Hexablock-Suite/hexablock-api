@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API HTTP mappers · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 3 · View 5 of 5</p>
+      <h1>HTTP mappers: the controllers translate between DTOs and entities</h1>
+      <svg
+        viewBox="0 0 1040 690"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="ad5httpmappers-title ad5httpmappers-desc"
+      >
+        <title id="ad5httpmappers-title">HexaBlock API HTTP mappers · UML class diagram</title>
+        <desc id="ad5httpmappers-desc">
+          Class diagram of layers 3 and 1 showing ProgressDtoMapper and LevelDtoMapper in
+          src/adapters/http: ProgressController uses ProgressDtoMapper to turn PlayerProgress into
+          the response DTO, and LevelsController uses LevelDtoMapper to turn each LevelDto into a
+          level and a failed Result into the error body.
+        </desc>
+        <defs>
+          <marker
+            id="ad5httpmappers-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="ad5httpmappers-diamond-filled"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
+          </marker>
+          <marker
+            id="ad5httpmappers-diamond-hollow"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon
+              points="0 5, 9 0, 18 5, 9 10"
+              fill="#ffffff"
+              stroke="#17212a"
+              stroke-width="1"
+            />
+          </marker>
+          <marker
+            id="ad5httpmappers-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="372"
+          rx="8"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="412"
+          width="992"
+          height="116"
+          rx="8"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <!-- Relationships (drawn before boxes) -->
+        <!-- ProgressController uses ProgressDtoMapper: use -->
+        <line
+          x1="144"
+          y1="120"
+          x2="144"
+          y2="176"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
+        <!-- LevelsController uses LevelDtoMapper: use -->
+        <line
+          x1="640"
+          y1="120"
+          x2="640"
+          y2="176"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
+        <!-- ProgressDtoMapper takes PlayerProgress as a parameter: use -->
+        <line
+          x1="144"
+          y1="264"
+          x2="144"
+          y2="456"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
+        <!-- LevelDtoMapper returns a LevelDefinition: use -->
+        <line
+          x1="640"
+          y1="296"
+          x2="640"
+          y2="456"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="150" y="140" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="166"
+          y="149"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          USES
+        </text>
+        <rect x="646" y="140" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="662"
+          y="149"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          USES
+        </text>
+        <rect x="150" y="344" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="170"
+          y="353"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          TAKES
+        </text>
+        <rect x="646" y="360" width="48" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="670"
+          y="369"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          RETURNS
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="316" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="40"
+          y="44"
+          fill="#1d4ed8"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 3 · INTERFACE ADAPTERS · src/adapters/http/
+        </text>
+        <rect x="36" y="423" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="432"
+          fill="#b45309"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 1 · ENTITIES · src/domain/
+        </text>
+        <!-- Class: ProgressController (PART 3 · VIEW 3) -->
+        <rect
+          x="64"
+          y="72"
+          width="304"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="216"
+          y="90"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 3 · VIEW 3
+        </text>
+        <text
+          x="216"
+          y="108"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressController
+        </text>
+        <!-- Class: LevelsController (PART 3 · VIEW 3) -->
+        <rect
+          x="560"
+          y="72"
+          width="304"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="712"
+          y="90"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 3 · VIEW 3
+        </text>
+        <text
+          x="712"
+          y="108"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelsController
+        </text>
+        <!-- Class: ProgressDtoMapper (focal, «mapper») -->
+        <rect
+          x="64"
+          y="176"
+          width="376"
+          height="88"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="64" y="176" width="376" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="64" y="228" width="376" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="252"
+          y="194"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «mapper»
+        </text>
+        <text
+          x="252"
+          y="212"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressDtoMapper
+        </text>
+        <text
+          x="252"
+          y="226"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02
+        </text>
+        <line x1="64" y1="236" x2="440" y2="236" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="80" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toDto(progress: PlayerProgress): ProgressDto
+        </text>
+        <!-- Class: LevelDtoMapper («mapper») -->
+        <rect
+          x="560"
+          y="176"
+          width="424"
+          height="120"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="772"
+          y="194"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «mapper»
+        </text>
+        <text
+          x="772"
+          y="212"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelDtoMapper
+        </text>
+        <text
+          x="772"
+          y="226"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-04 · API-FR-06
+        </text>
+        <line x1="560" y1="236" x2="984" y2="236" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="576" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toLevel(dto: LevelDto): AnyLevel
+        </text>
+        <text x="576" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toDto(level: AnyLevel): LevelDto
+        </text>
+        <text x="576" y="284" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toErrorBody(problems: LevelProblem[]): ErrorDto
+        </text>
+        <!-- Class: PlayerProgress (PART 1 · VIEW 1) -->
+        <rect
+          x="64"
+          y="456"
+          width="304"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="216"
+          y="474"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 1 · VIEW 1
+        </text>
+        <text
+          x="216"
+          y="492"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PlayerProgress
+        </text>
+        <!-- Class: LevelDefinition (PART 1 · VIEW 2) -->
+        <rect
+          x="560"
+          y="456"
+          width="304"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="712"
+          y="474"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 1 · VIEW 2
+        </text>
+        <text
+          x="712"
+          y="492"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelDefinition
+        </text>
+        <!-- UML template boxes: type parameters on the top-right corner -->
+        <rect
+          x="816"
+          y="446"
+          width="56"
+          height="18"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="844"
+          y="458"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+        >
+          TSection
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="552"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The controllers hold no translation code. These mappers translate between DTOs and
+          entities, as the row mappers do for persistence (views 3.1, 3.2).
+        </text>
+        <text
+          x="24"
+          y="568"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          SyncProgress returns PlayerProgress, and ProgressDtoMapper turns it into ProgressDto.
+          LevelDtoMapper keeps the section as it arrives; the validator of the gameId
+        </text>
+        <text
+          x="24"
+          y="584"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          checks it in the use case. A failed Result of UpdateLevels becomes the error body of
+          API-FR-06 through toErrorBody(). The mappers hold no state.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="608" x2="1016" y2="608" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="626"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="644"
+          x2="52"
+          y2="644"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-triangle)"
+        />
+        <text
+          x="60"
+          y="648"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Inheritance
+        </text>
+        <line
+          x1="160"
+          y1="644"
+          x2="188"
+          y2="644"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad5httpmappers-triangle)"
+        />
+        <text
+          x="196"
+          y="648"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="296"
+          y1="644"
+          x2="324"
+          y2="644"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad5httpmappers-diamond-filled)"
+        />
+        <text
+          x="332"
+          y="648"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Composition · attribute it creates
+        </text>
+        <line
+          x1="520"
+          y1="644"
+          x2="548"
+          y2="644"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad5httpmappers-diamond-hollow)"
+        />
+        <text
+          x="556"
+          y="648"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · attribute it receives
+        </text>
+        <line
+          x1="752"
+          y1="644"
+          x2="780"
+          y2="644"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
+        <text
+          x="788"
+          y="648"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · parameter, return, local or new
+        </text>
+        <rect
+          x="24"
+          y="664"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="48"
+          y="664"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="80"
+          y="673"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zones · Clean layers, outer on top
+        </text>
+        <rect
+          x="470"
+          y="664"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="506"
+          y="673"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+        <rect
+          x="616"
+          y="664"
+          width="28"
+          height="12"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="652"
+          y="673"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed class · detailed in another view
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
