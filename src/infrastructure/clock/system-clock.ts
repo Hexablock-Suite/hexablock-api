@@ -1,4 +1,4 @@
-import type { Clock } from '../../domain/shared/clock.js';
+import type { Clock } from '../../application/ports/clock.js';
 
 // Production adapter for the Clock port. It is the only reader of the system clock.
 export class SystemClock implements Clock {

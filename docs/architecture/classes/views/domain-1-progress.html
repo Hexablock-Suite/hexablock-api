@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API progress entities · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 1 · View 1 of 2</p>
+      <h1>Progress: one aggregate per user and gameId, with its level results</h1>
+      <svg
+        viewBox="0 0 1040 702"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="domain1progress-title domain1progress-desc"
+      >
+        <title id="domain1progress-title">
+          HexaBlock API progress entities · UML class diagram
+        </title>
+        <desc id="domain1progress-desc">
+          Class diagram of layer 1 showing PlayerProgress, the aggregate root keyed by userId and
+          gameId, which refers to User by userId, holds a GameId and keeps its LevelResult values
+          with levelId, stars, moves and elapsedMs, and the LeaderboardEntry read model that holds a
+          LevelResult.
+        </desc>
+        <defs>
+          <marker
+            id="domain1progress-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="domain1progress-diamond-filled"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
+          </marker>
+          <marker
+            id="domain1progress-diamond-hollow"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon
+              points="0 5, 9 0, 18 5, 9 10"
+              fill="#ffffff"
+              stroke="#17212a"
+              stroke-width="1"
+            />
+          </marker>
+          <marker
+            id="domain1progress-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="500"
+          rx="8"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <!-- Pattern and group frames -->
+        <rect
+          x="376"
+          y="64"
+          width="328"
+          height="436"
+          rx="8"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="388"
+          y="80"
+          fill="#5b6873"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          PROGRESS · DS-5 · §5.2.2
+        </text>
+        <!-- Relationships (drawn before boxes) -->
+        <!-- PlayerProgress holds gameId: GameId: aggregation -->
+        <line
+          x1="680"
+          y1="128"
+          x2="776"
+          y2="128"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain1progress-diamond-hollow)"
+        />
+        <!-- PlayerProgress holds results: LevelResult[]: aggregation -->
+        <line
+          x1="540"
+          y1="292"
+          x2="540"
+          y2="344"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain1progress-diamond-hollow)"
+        />
+        <!-- LeaderboardEntry holds result: LevelResult | null on a per-level board: aggregation -->
+        <line
+          x1="776"
+          y1="440"
+          x2="680"
+          y2="440"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain1progress-diamond-hollow)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="714" y="110" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="742"
+          y="119"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          gameId 1
+        </text>
+        <rect x="546" y="312" width="44" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="568"
+          y="321"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          results
+        </text>
+        <rect x="502" y="312" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="518"
+          y="321"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          0..*
+        </text>
+        <rect x="714" y="422" width="44" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="736"
+          y="431"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          result
+        </text>
+        <rect x="714" y="446" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="730"
+          y="455"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          0..1
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="44"
+          fill="#b45309"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 1 · ENTITIES · src/domain/
+        </text>
+        <!-- Class: User («entity») -->
+        <rect
+          x="64"
+          y="88"
+          width="224"
+          height="104"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="176"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «entity»
+        </text>
+        <text
+          x="176"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          User
+        </text>
+        <line x1="64" y1="136" x2="288" y2="136" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="152" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + id: UserId
+        </text>
+        <text x="80" y="168" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + username: string
+        </text>
+        <text x="80" y="184" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + passwordHash: string
+        </text>
+        <!-- Class: PlayerProgress (focal, «entity») -->
+        <rect
+          x="400"
+          y="96"
+          width="280"
+          height="196"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="400" y="96" width="280" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="400" y="148" width="280" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="540"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «entity» «aggregate root»
+        </text>
+        <text
+          x="540"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PlayerProgress
+        </text>
+        <text
+          x="540"
+          y="146"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02 · DS-5
+        </text>
+        <line x1="400" y1="156" x2="680" y2="156" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="172" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + userId: UserId
+        </text>
+        <text x="416" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + gameId: GameId
+        </text>
+        <line x1="400" y1="196" x2="680" y2="196" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + highScore: number | null
+        </text>
+        <text x="416" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + updatedAt: Date
+        </text>
+        <text x="416" y="244" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + results: LevelResult[]
+        </text>
+        <line x1="400" y1="252" x2="680" y2="252" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + recordScore(score: number, at: Date): void
+        </text>
+        <text x="416" y="284" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + recordLevel(result: LevelResult): void
+        </text>
+        <!-- Class: LevelResult («value object») -->
+        <rect
+          x="400"
+          y="344"
+          width="280"
+          height="140"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="540"
+          y="362"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="540"
+          y="380"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelResult
+        </text>
+        <text
+          x="540"
+          y="394"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · DS-5
+        </text>
+        <line x1="400" y1="404" x2="680" y2="404" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="420" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + levelId: string
+        </text>
+        <line x1="400" y1="428" x2="680" y2="428" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="444" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + stars: number
+        </text>
+        <text x="416" y="460" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + moves: number
+        </text>
+        <text x="416" y="476" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + elapsedMs: number
+        </text>
+        <!-- Class: GameId («value object») -->
+        <rect
+          x="776"
+          y="96"
+          width="200"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="876"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="876"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          GameId
+        </text>
+        <line x1="776" y1="144" x2="976" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="792" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: string
+        </text>
+        <!-- Class: LeaderboardEntry («read model») -->
+        <rect
+          x="776"
+          y="368"
+          width="216"
+          height="132"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="884"
+          y="386"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «read model»
+        </text>
+        <text
+          x="884"
+          y="404"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LeaderboardEntry
+        </text>
+        <text
+          x="884"
+          y="418"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · order: DS-4
+        </text>
+        <line x1="776" y1="428" x2="992" y2="428" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="792" y="444" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + position: number
+        </text>
+        <text x="792" y="460" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + username: string
+        </text>
+        <text x="792" y="476" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + highScore: number | null
+        </text>
+        <text x="792" y="492" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + result: LevelResult | null
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="548"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          PlayerProgress is the aggregate root, one per userId and gameId (its key). It keeps the
+          level results of its game, and recordLevel() is the only way to add one.
+        </text>
+        <text
+          x="24"
+          y="564"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          ProgressRepository saves the whole aggregate; its adapter splits it into the progress and
+          level_results tables (DS-5). Every attempt or only the best one: DS-4.
+        </text>
+        <text
+          x="24"
+          y="580"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          recordScore() keeps the highest score; the use case passes the instant from the Clock
+          port. GameId is an open value: lines, fit, sort and merge today.
+        </text>
+        <text
+          x="24"
+          y="596"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          PlayerProgress refers to User by id: the userId field is not a line to User. This is an
+          assumption for team review. Entities carry no table IDs.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="620" x2="1016" y2="620" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="638"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="656"
+          x2="52"
+          y2="656"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#domain1progress-triangle)"
+        />
+        <text
+          x="60"
+          y="660"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Inheritance
+        </text>
+        <line
+          x1="160"
+          y1="656"
+          x2="188"
+          y2="656"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain1progress-triangle)"
+        />
+        <text
+          x="196"
+          y="660"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="296"
+          y1="656"
+          x2="324"
+          y2="656"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain1progress-diamond-filled)"
+        />
+        <text
+          x="332"
+          y="660"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Composition · attribute it creates
+        </text>
+        <line
+          x1="520"
+          y1="656"
+          x2="548"
+          y2="656"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#domain1progress-diamond-hollow)"
+        />
+        <text
+          x="556"
+          y="660"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · attribute it receives
+        </text>
+        <line
+          x1="752"
+          y1="656"
+          x2="780"
+          y2="656"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain1progress-open)"
+        />
+        <text
+          x="788"
+          y="660"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · parameter, return, local or new
+        </text>
+        <rect
+          x="24"
+          y="676"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="56"
+          y="685"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zone · Clean layer
+        </text>
+        <rect
+          x="166"
+          y="676"
+          width="28"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="202"
+          y="685"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Dashed frame · pattern or group
+        </text>
+        <rect
+          x="372"
+          y="676"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="408"
+          y="685"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
