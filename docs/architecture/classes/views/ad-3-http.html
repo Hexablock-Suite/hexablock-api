@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API HTTP adapters · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 3 · View 3 of 5</p>
+      <h1>HTTP: controllers call input ports, never use case classes</h1>
+      <svg
+        viewBox="0 0 1040 694"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="ad3http-title ad3http-desc"
+      >
+        <title id="ad3http-title">HexaBlock API HTTP adapters · UML class diagram</title>
+        <desc id="ad3http-desc">
+          Class diagram of layer 3 showing the Auth, Progress, Leaderboard and Levels controllers,
+          each holding the input ports it calls, the JwtAuthGuard that the controller decorators
+          apply to progress and level updates, the LevelDto that carries the section for the
+          validator of its gameId, and the HttpErrorFilter for unexpected errors.
+        </desc>
+        <defs>
+          <marker
+            id="ad3http-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="ad3http-diamond-filled"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
+          </marker>
+          <marker
+            id="ad3http-diamond-hollow"
+            markerWidth="18"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon
+              points="0 5, 9 0, 18 5, 9 10"
+              fill="#ffffff"
+              stroke="#17212a"
+              stroke-width="1"
+            />
+          </marker>
+          <marker
+            id="ad3http-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="460"
+          rx="8"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <!-- Relationships (drawn before boxes) -->
+        <!-- LevelsController takes LevelDto as a parameter: use -->
+        <line
+          x1="868"
+          y1="228"
+          x2="868"
+          y2="288"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad3http-open)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="874" y="252" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="894"
+          y="261"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          TAKES
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="316" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="40"
+          y="44"
+          fill="#1d4ed8"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 3 · INTERFACE ADAPTERS · src/adapters/http/
+        </text>
+        <!-- Class: AuthController («controller») -->
+        <rect
+          x="40"
+          y="88"
+          width="340"
+          height="140"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="210"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «controller»
+        </text>
+        <text
+          x="210"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AuthController
+        </text>
+        <text
+          x="210"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-01
+        </text>
+        <line x1="40" y1="148" x2="380" y2="148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="56" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - register: RegisterUser
+        </text>
+        <text x="56" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - login: Login
+        </text>
+        <line x1="40" y1="188" x2="380" y2="188" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="56" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + signUp(body: CredentialsDto): Promise&lt;void&gt;
+        </text>
+        <text x="56" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + signIn(body: CredentialsDto): Promise&lt;TokenDto&gt;
+        </text>
+        <!-- Class: ProgressController (focal, «controller») -->
+        <rect
+          x="400"
+          y="88"
+          width="316"
+          height="108"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="400" y="88" width="316" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="400" y="140" width="316" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="558"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «controller»
+        </text>
+        <text
+          x="558"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressController
+        </text>
+        <text
+          x="558"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02 · guarded by JwtAuthGuard
+        </text>
+        <line x1="400" y1="148" x2="716" y2="148" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - syncProgress: SyncProgress
+        </text>
+        <line x1="400" y1="172" x2="716" y2="172" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + sync(body: SyncProgressDto): Promise&lt;ProgressDto&gt;
+        </text>
+        <!-- Class: LevelsController («controller») -->
+        <rect
+          x="736"
+          y="88"
+          width="264"
+          height="140"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="868"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «controller»
+        </text>
+        <text
+          x="868"
+          y="124"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelsController
+        </text>
+        <text
+          x="868"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-04 · update guarded by JwtAuthGuard
+        </text>
+        <line x1="736" y1="148" x2="1000" y2="148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - getLevels: GetLevels
+        </text>
+        <text x="752" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - updateLevels: UpdateLevels
+        </text>
+        <line x1="736" y1="188" x2="1000" y2="188" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + list(gameId: string): Promise&lt;LevelDto[]&gt;
+        </text>
+        <text x="752" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + update(body: LevelDto[]): Promise&lt;void&gt;
+        </text>
+        <!-- Class: LeaderboardController («controller») -->
+        <rect
+          x="40"
+          y="260"
+          width="340"
+          height="108"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="210"
+          y="278"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «controller»
+        </text>
+        <text
+          x="210"
+          y="296"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LeaderboardController
+        </text>
+        <text
+          x="210"
+          y="310"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03
+        </text>
+        <line x1="40" y1="320" x2="380" y2="320" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="56" y="336" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - getLeaderboard: GetLeaderboard
+        </text>
+        <line x1="40" y1="344" x2="380" y2="344" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="56" y="360" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + top(query: LeaderboardQueryDto): Promise&lt;LeaderboardDto&gt;
+        </text>
+        <!-- Class: JwtAuthGuard («guard») -->
+        <rect
+          x="400"
+          y="260"
+          width="316"
+          height="84"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="558"
+          y="278"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «guard»
+        </text>
+        <text
+          x="558"
+          y="296"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          JwtAuthGuard
+        </text>
+        <text
+          x="558"
+          y="310"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-01 · open
+        </text>
+        <line x1="400" y1="320" x2="716" y2="320" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="336" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + canActivate(ctx: ExecutionContext): Promise&lt;boolean&gt;
+        </text>
+        <!-- Class: HttpErrorFilter («filter») -->
+        <rect
+          x="400"
+          y="376"
+          width="316"
+          height="84"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="558"
+          y="394"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «filter»
+        </text>
+        <text
+          x="558"
+          y="412"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          HttpErrorFilter
+        </text>
+        <text
+          x="558"
+          y="426"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-06
+        </text>
+        <line x1="400" y1="436" x2="716" y2="436" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + catch(error: unknown, host: ArgumentsHost): void
+        </text>
+        <!-- Class: LevelDto («DTO») -->
+        <rect
+          x="736"
+          y="288"
+          width="264"
+          height="172"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="868"
+          y="306"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «DTO»
+        </text>
+        <text
+          x="868"
+          y="324"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelDto
+        </text>
+        <text
+          x="868"
+          y="338"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          DS-6
+        </text>
+        <line x1="736" y1="348" x2="1000" y2="348" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + gameId: string
+        </text>
+        <text x="752" y="380" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + levelId: string
+        </text>
+        <text x="752" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + order: number
+        </text>
+        <text x="752" y="412" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + version: number
+        </text>
+        <text x="752" y="428" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + topology: string
+        </text>
+        <line x1="736" y1="436" x2="1000" y2="436" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + section: Record&lt;string, unknown&gt;
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="508"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Each controller holds the input ports of Part 2 as attributes. The Nest and Swagger
+          decorators sit on these classes (API-FR-05).
+        </text>
+        <text
+          x="24"
+          y="524"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          JwtAuthGuard reaches a controller through the @UseGuards decorator, not through a method,
+          so the view draws no use line to it;
+        </text>
+        <text
+          x="24"
+          y="540"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          the sublabel of each guarded controller names it. How the guard verifies a token is open:
+          a TokenVerifier port or an AuthenticateToken
+        </text>
+        <text
+          x="24"
+          y="556"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          input port (layers.md). LevelDto checks the common part; the validator of its gameId
+          checks the section (Part 1, view 2).
+        </text>
+        <text
+          x="24"
+          y="572"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The mappers of view 5 translate between DTOs and entities. A controller turns a failed
+          Result into the error body of API-FR-06.
+        </text>
+        <text
+          x="24"
+          y="588"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          HttpErrorFilter handles only unexpected errors, with the same body shape.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="612" x2="1016" y2="612" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="630"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="648"
+          x2="52"
+          y2="648"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#ad3http-triangle)"
+        />
+        <text
+          x="60"
+          y="652"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Inheritance
+        </text>
+        <line
+          x1="160"
+          y1="648"
+          x2="188"
+          y2="648"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad3http-triangle)"
+        />
+        <text
+          x="196"
+          y="652"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="296"
+          y1="648"
+          x2="324"
+          y2="648"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad3http-diamond-filled)"
+        />
+        <text
+          x="332"
+          y="652"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Composition · attribute it creates
+        </text>
+        <line
+          x1="520"
+          y1="648"
+          x2="548"
+          y2="648"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-start="url(#ad3http-diamond-hollow)"
+        />
+        <text
+          x="556"
+          y="652"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregation · attribute it receives
+        </text>
+        <line
+          x1="752"
+          y1="648"
+          x2="780"
+          y2="648"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad3http-open)"
+        />
+        <text
+          x="788"
+          y="652"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · parameter, return, local or new
+        </text>
+        <rect
+          x="24"
+          y="668"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <text
+          x="56"
+          y="677"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zone · Clean layer
+        </text>
+        <rect
+          x="166"
+          y="668"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="202"
+          y="677"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>

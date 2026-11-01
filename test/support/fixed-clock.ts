@@ -1,4 +1,4 @@
-import type { Clock } from '../../src/domain/shared/clock.js';
+import type { Clock } from '../../src/application/ports/clock.js';
 
 // Test double for the Clock port. It returns a set instant and moves only
 // when the test advances it.

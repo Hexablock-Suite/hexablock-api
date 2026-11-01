@@ -1,4 +1,4 @@
-import type { Clock } from '../../src/domain/shared/clock.js';
+import type { Clock } from '../../src/application/ports/clock.js';
 import { FixedClock } from './fixed-clock.js';
 
 describe('FixedClock', () => {
