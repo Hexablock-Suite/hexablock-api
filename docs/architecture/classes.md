@@ -16,7 +16,8 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 - A lollipop (a circle on a short line) is the input port that a use case implements.
 - A dashed class with no members is a class that another view details. Its eyebrow names that view, for example `PART 2 · VIEW 2`.
 - Under the name of a class, an ID such as `API-FR-04` names the requirement it serves.
-- A class that keeps another class in an attribute draws a diamond at its own end: hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. The other end names the attribute and its multiplicity, even when it is 1. A solid line with an open arrowhead and a verb is a use: the other class is only a parameter, a return value, a local variable or a `new`. A link that is none of these, such as a guard that a decorator applies or a class that a module only names in its metadata, gets no line; the box or the note names it. This follows the course (board of the class of 2026-10-02).
+- A diamond marks an attribute between two classes of one layer, where it shows a pattern or a domain relation: hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. Examples: `LevelValidators` holds its `LevelValidator` strategies (Strategy), and `PlayerProgress` keeps its `LevelResult` values (an aggregate and its parts). The other end names the attribute and its multiplicity, even when it is 1.
+- A solid line with an open arrowhead is a use: the class depends on the other class. It points from the class that holds or calls to the class it needs. When the other class is an attribute across layers, the label names the attribute and its multiplicity. A port counts as across layers: it lives in layer 2, and its adapter lives in layer 3 or 4. When the other class is only a parameter, a return value, a local variable or a `new`, the label is a verb. A link that is none of these, such as a guard that a decorator applies or a class that a module only names in its metadata, gets no line; the box or the note names it. This follows the class of 2026-11-02 (decision 13), which replaces the diamond rule of the board of the class of 2026-10-02.
 - Every class is planned, except `Clock`, `SystemClock` and `AppModule`. Today `src/` holds the health endpoint, the `Clock` port and its adapter, and the database connection.
 
 ## Part 1: the domain
@@ -49,7 +50,7 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 
 ### View 2.4: account
 
-![Account: RegisterUseCase and LoginUseCase over the UserRepository, PasswordHasher and TokenIssuer ports](classes/views/uc-4-account.png)
+![Account: RegisterUseCase and LoginUseCase over the UserRepository, PasswordHasher and TokenIssuer ports, and AuthenticateTokenUseCase, which verifies a token through TokenIssuer for the JWT guard](classes/views/uc-4-account.png)
 
 ## Part 3: adapters and drivers
 
@@ -65,7 +66,7 @@ Layer 3, `src/adapters/`, and layer 4, `src/infrastructure/`. Adapters never imp
 
 ### View 3.3: HTTP
 
-![HTTP: the four controllers hold input ports, JwtAuthGuard guards progress and level updates, LevelDto carries the section](classes/views/ad-3-http.png)
+![HTTP: the four controllers hold input ports, JwtAuthGuard guards progress and level updates through the AuthenticateToken input port, LevelDto carries the section](classes/views/ad-3-http.png)
 
 ### View 3.4: wiring
 
@@ -137,9 +138,11 @@ Plain classes: `LevelValidators`, the row mappers, the HTTP mappers, `Leaderboar
 7. **One generic input port.** Every input port of [layers.md](layers.md) binds `UseCase<TRequest, TResponse>`, for example `SyncProgress`. One aspect class then wraps any use case (§3.5). The app makes the same choice (its decision 9). The cost: an input port cannot add a second method.
 8. **No Abstract Factory in the API.** In the API, a variant has one product: its level validator. A factory per variant would wrap one constructor. To check with the team: whether the professor expects the pattern in the backend too.
 9. **Port names in the language of the game.** A port says what the use case asks for, not how the data travels. For example, `LeaderboardReader`, not a name that says SQL or HTTP. A name that says how the data travels couples the use case to that technology, as the class of 2026-10-30 explained.
-10. **Aspects in layer 4 for now, with no `Logger` port.** The aspects sit in `src/infrastructure/`, as the [layers.md](layers.md) draft says, and call a logging package directly. A `Logger` port would protect no inner layer, so the diagram draws none. If Q12 moves the aspects to `src/application/`, they need a `Logger` port there.
+10. **Aspects in layer 4 for now, with no `Logger` port.** The aspects sit in `src/infrastructure/`, as the [layers.md](layers.md) draft says, and call a logging package directly. A `Logger` port would protect no inner layer, so the diagram draws none. If Q12 moves the aspects to `src/application/`, they need a `Logger` port there. That port takes a typed entry, such as the use case name, the outcome and the error, and never a prebuilt `message: string`; the adapter in layer 4 writes the text. The class of 2026-11-02 said that the message «no debería estar allí … En la implementación de este señor, en un adaptador secundario».
 11. **Expected failures as values.** A use case never throws a domain error to the HTTP layer. `UpdateLevels` returns `Result<void, LevelProblem[]>`. `LevelsController` turns a failed result into the error body of API-FR-06. `HttpErrorFilter` handles only unexpected errors, with the same body shape.
 12. **HTTP mappers.** `ProgressDtoMapper` and `LevelDtoMapper` in `src/adapters/http` translate between DTOs and entities, as the row mappers do for persistence. A controller holds no translation code. `SyncProgress` returns `PlayerProgress`, and `ProgressDtoMapper` turns it into `ProgressDto`.
+13. **Use arrows between layers, diamonds inside one layer.** In the class of 2026-11-02 the professor asked for explicit dependencies (use, extend, implement) between layers, and for a composition or aggregation diamond only where it is needed, for example an entity that holds a Strategy. He added that the rule is for the relations between layers. So an attribute that crosses layers draws a use arrow with the attribute name and its multiplicity: a controller and its input ports, a use case and its ports (each port has its adapter in layer 3 or 4), `UpdateLevelsUseCase` and `LevelValidators` (layers 2 and 1), and the `UseCaseAspect` decorator and its inner `UseCase` (layers 4 and 2). If Q12 moves the aspects to layer 2, that holding can draw a diamond again. Inside one layer, a diamond stays where it shows a pattern or a domain relation: `LevelValidators` and its `LevelValidator` strategies (Strategy), `PlayerProgress` and its `GameId` and `LevelResult` values (an aggregate and its parts), `LeaderboardEntry` and its `LevelResult`, and `LevelDefinition` and its section (an entity and its value object).
+14. **`AuthenticateToken` input port for the JWT guard (assumption for team review).** `JwtAuthGuard` sits in `src/adapters/http` and holds the `AuthenticateToken` input port, as a controller does. It never calls `TokenIssuer`. `AuthenticateTokenUseCase` verifies the token through `TokenIssuer.verify()`, which returns the `UserId` or `null`, and returns `Result<UserId, TokenProblem>`. The guard turns a failed `Result` into a 401 (API-FR-01). The docs named two options: a separate `TokenVerifier` port or an `AuthenticateToken` input port. This draft takes the input port, because a class on the controller side talks to the application only through input ports. The cost: `TokenIssuer` now issues and verifies tokens, so its name is narrower than its job. The team can rename it or split out a `TokenVerifier` port behind the same use case.
 
 ## Render the images
 

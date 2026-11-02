@@ -280,13 +280,13 @@
           NEW VARIANT · STRATEGY · DS-6 · API-FR-04
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- Each controller holds input ports: aggregation -->
+        <!-- Each controller holds input ports: use -->
         <path
           d="M534 376 L534 460"
           fill="none"
           stroke-width="1"
-          stroke="#17212a"
-          marker-start="url(#ext1overview-diamond-hollow)"
+          stroke="#5b6873"
+          marker-end="url(#ext1overview-open)"
         />
         <!-- UseCaseAspect implements UseCase and wraps an inner one: realization -->
         <path
@@ -324,29 +324,29 @@
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- Use cases hold the driver ports: aggregation -->
+        <!-- Use cases hold the driver ports: use -->
         <path
           d="M368 700 L280 700"
           fill="none"
           stroke-width="1"
-          stroke="#17212a"
-          marker-start="url(#ext1overview-diamond-hollow)"
+          stroke="#5b6873"
+          marker-end="url(#ext1overview-open)"
         />
-        <!-- Use cases hold the output ports: aggregation -->
+        <!-- Use cases hold the output ports: use -->
         <path
           d="M656 700 L760 700"
           fill="none"
           stroke-width="1"
-          stroke="#17212a"
-          marker-start="url(#ext1overview-diamond-hollow)"
+          stroke="#5b6873"
+          marker-end="url(#ext1overview-open)"
         />
-        <!-- UpdateLevelsUseCase holds LevelValidators: aggregation -->
+        <!-- UpdateLevelsUseCase holds LevelValidators: use -->
         <path
-          d="M512 784 L512 908"
+          d="M512 800 L512 908"
           fill="none"
           stroke-width="1"
-          stroke="#17212a"
-          marker-start="url(#ext1overview-diamond-hollow)"
+          stroke="#5b6873"
+          marker-end="url(#ext1overview-open)"
         />
         <!-- Arrow labels -->
         <rect x="498" y="436" width="32" height="12" rx="2" fill="#efe7f8" />
@@ -992,10 +992,10 @@
         </text>
         <line x1="368" y1="544" x2="656" y2="544" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="384" y="560" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          bound by RegisterUser, Login, SyncProgress,
+          bound by one input port per use case,
         </text>
         <text x="384" y="576" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GetLeaderboard, GetLevels, UpdateLevels
+          such as Login or AuthenticateToken
         </text>
         <!-- Driver ports -->
         <rect
@@ -1045,7 +1045,7 @@
           x="368"
           y="632"
           width="288"
-          height="152"
+          height="168"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1060,7 +1060,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «use case» × 6
+          «use case» × 7
         </text>
         <text
           x="512"
@@ -1081,15 +1081,18 @@
           LoginUseCase
         </text>
         <text x="384" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          SyncProgressUseCase
+          AuthenticateTokenUseCase
         </text>
         <text x="384" y="744" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GetLeaderboardUseCase
+          SyncProgressUseCase
         </text>
         <text x="384" y="760" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GetLevelsUseCase
+          GetLeaderboardUseCase
         </text>
         <text x="384" y="776" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          GetLevelsUseCase
+        </text>
+        <text x="384" y="792" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           UpdateLevelsUseCase
         </text>
         <!-- Output ports -->
@@ -1343,8 +1346,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The application core sits in the center: UseCase, the six use cases and the ports they own
-          (Q10). Each dashed frame is one extension axis, and a new
+          The application core sits in the center: UseCase, the seven use cases and the ports they
+          own (Q10). Each dashed frame is one extension axis, and a new
         </text>
         <text
           x="24"
@@ -1424,9 +1427,9 @@
           Inheritance
         </text>
         <line
-          x1="160"
+          x1="128"
           y1="1144"
-          x2="188"
+          x2="156"
           y2="1144"
           stroke="#17212a"
           stroke-width="1"
@@ -1434,7 +1437,7 @@
           marker-end="url(#ext1overview-triangle)"
         />
         <text
-          x="196"
+          x="164"
           y="1148"
           fill="#5b6873"
           font-size="8.5"
@@ -1443,58 +1446,49 @@
           Realization
         </text>
         <line
-          x1="296"
+          x1="232"
           y1="1144"
-          x2="324"
+          x2="260"
           y2="1144"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#ext1overview-diamond-filled)"
         />
-        <text
-          x="332"
-          y="1148"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Composition · attribute it creates
-        </text>
         <line
-          x1="520"
+          x1="272"
           y1="1144"
-          x2="548"
+          x2="300"
           y2="1144"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#ext1overview-diamond-hollow)"
         />
         <text
-          x="556"
+          x="308"
           y="1148"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Aggregation · attribute it receives
+          Composition, aggregation · inside one layer: a pattern or a domain relation
         </text>
         <line
-          x1="752"
+          x1="616"
           y1="1144"
-          x2="780"
+          x2="644"
           y2="1144"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext1overview-open)"
         />
         <text
-          x="788"
+          x="652"
           y="1148"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Use · parameter, return, local or new
+          Use · attribute across layers, parameter, return, local or new
         </text>
         <rect
           x="24"
