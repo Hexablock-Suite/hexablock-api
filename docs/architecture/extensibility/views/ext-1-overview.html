@@ -290,25 +290,56 @@
         />
         <!-- UseCaseAspect implements UseCase and wraps an inner one: realization -->
         <path
-          d="M728 156 L728 508 Q728 516 720 516 L656 516"
+          d="M592 136 L592 146 L728 146 L728 508 Q728 516 720 516 L656 516"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- Drivers implement the driver ports: realization -->
+        <!-- Drivers implement the driver ports: realization, one line per driver box. The dash offset aligns the dashes where the lines join. -->
+        <!-- SystemClock implements Clock -->
         <path
-          d="M336 156 L336 552 Q336 560 328 560 L180 560 Q172 560 172 568 L172 632"
+          d="M120 136 L120 146 L336 146 L336 552 Q336 560 328 560 L180 560 Q172 560 172 568 L172 632"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- Database adapters implement the output ports: realization -->
+        <!-- ScryptPasswordHasher implements PasswordHasher -->
         <path
-          d="M868 376 L868 632"
+          d="M336 136 L336 146 L336 552 Q336 560 328 560 L180 560 Q172 560 172 568 L172 632"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- JwtTokenIssuer implements TokenIssuer -->
+        <path
+          d="M416 136 L416 146 L336 146 L336 552 Q336 560 328 560 L180 560 Q172 560 172 568 L172 632"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          stroke-dashoffset="1"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- Database adapters implement the output ports: realization, one line per adapter box. The dash offset aligns the dashes where the lines join. -->
+        <!-- Drizzle repositories implement the output ports -->
+        <path
+          d="M976 276 L984 276 L984 368 L868 368 L868 632"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          stroke-dashoffset="8"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- MongoDB repositories would implement the same ports -->
+        <path
+          d="M868 360 L868 632"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -1415,6 +1446,7 @@
           y2="1144"
           stroke="#17212a"
           stroke-width="1"
+          stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
         <text
@@ -1424,65 +1456,19 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Inheritance
+          Realization
         </text>
         <line
           x1="128"
           y1="1144"
           x2="156"
           y2="1144"
-          stroke="#17212a"
-          stroke-width="1"
-          stroke-dasharray="5,4"
-          marker-end="url(#ext1overview-triangle)"
-        />
-        <text
-          x="164"
-          y="1148"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Realization
-        </text>
-        <line
-          x1="232"
-          y1="1144"
-          x2="260"
-          y2="1144"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#ext1overview-diamond-filled)"
-        />
-        <line
-          x1="272"
-          y1="1144"
-          x2="300"
-          y2="1144"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#ext1overview-diamond-hollow)"
-        />
-        <text
-          x="308"
-          y="1148"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Composition, aggregation · inside one layer: a pattern or a domain relation
-        </text>
-        <line
-          x1="616"
-          y1="1144"
-          x2="644"
-          y2="1144"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext1overview-open)"
         />
         <text
-          x="652"
+          x="164"
           y="1148"
           fill="#5b6873"
           font-size="8.5"

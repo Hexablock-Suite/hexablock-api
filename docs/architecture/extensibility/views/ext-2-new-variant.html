@@ -184,9 +184,26 @@
           STRATEGY · §3.3 · DS-6
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- LevelDefinition receives section: TSection: aggregation -->
+        <!-- LevelDefinition receives section: TSection: aggregation, one line per section type box -->
+        <!-- LevelDefinition holds section: FitSection -->
         <path
-          d="M200 244 L200 296"
+          d="M320 244 L320 268 L344 268 L344 352 L336 352"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          marker-start="url(#ext2variant-diamond-hollow)"
+        />
+        <!-- LevelDefinition holds section: SortSection -->
+        <path
+          d="M320 244 L320 268 L344 268 L344 412 L336 412"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          marker-start="url(#ext2variant-diamond-hollow)"
+        />
+        <!-- LevelDefinition holds section: FillSection -->
+        <path
+          d="M320 244 L320 268 L344 268 L344 472 L336 472"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -208,9 +225,29 @@
           stroke="#17212a"
           marker-start="url(#ext2variant-diamond-hollow)"
         />
-        <!-- Each validator implements LevelValidator for its section: realization -->
+        <!-- Each validator implements LevelValidator for its section: realization, one line per validator box. The dash offset aligns the dashes where the lines join. -->
+        <!-- FitLevelValidator implements LevelValidator -->
         <path
-          d="M604 416 L604 384"
+          d="M604 448 L604 384"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          stroke-dashoffset="4"
+          marker-end="url(#ext2variant-triangle)"
+        />
+        <!-- SortLevelValidator implements LevelValidator -->
+        <path
+          d="M716 448 L716 400 L604 400 L604 384"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext2variant-triangle)"
+        />
+        <!-- FillLevelValidator implements LevelValidator -->
+        <path
+          d="M896 448 L896 400 L604 400 L604 384"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -218,10 +255,10 @@
           marker-end="url(#ext2variant-triangle)"
         />
         <!-- Arrow labels -->
-        <rect x="204" y="276" width="60" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="350" y="262" width="60" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="234"
-          y="285"
+          x="380"
+          y="271"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -266,9 +303,9 @@
         >
           0..*
         </text>
-        <rect x="610" y="394" width="176" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="400" y="394" width="184" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="614"
+          x="404"
           y="403"
           fill="#7d8a94"
           font-size="8"
@@ -763,6 +800,7 @@
           y2="688"
           stroke="#17212a"
           stroke-width="1"
+          stroke-dasharray="5,4"
           marker-end="url(#ext2variant-triangle)"
         />
         <text
@@ -772,7 +810,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Inheritance
+          Realization
         </text>
         <line
           x1="128"
@@ -781,8 +819,7 @@
           y2="688"
           stroke="#17212a"
           stroke-width="1"
-          stroke-dasharray="5,4"
-          marker-end="url(#ext2variant-triangle)"
+          marker-start="url(#ext2variant-diamond-hollow)"
         />
         <text
           x="164"
@@ -791,46 +828,19 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Realization
+          Aggregation · inside one layer: a pattern or a domain relation
         </text>
         <line
-          x1="232"
+          x1="424"
           y1="688"
-          x2="260"
-          y2="688"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#ext2variant-diamond-filled)"
-        />
-        <line
-          x1="272"
-          y1="688"
-          x2="300"
-          y2="688"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#ext2variant-diamond-hollow)"
-        />
-        <text
-          x="308"
-          y="692"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Composition, aggregation · inside one layer: a pattern or a domain relation
-        </text>
-        <line
-          x1="616"
-          y1="688"
-          x2="644"
+          x2="452"
           y2="688"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext2variant-open)"
         />
         <text
-          x="652"
+          x="460"
           y="692"
           fill="#5b6873"
           font-size="8.5"
