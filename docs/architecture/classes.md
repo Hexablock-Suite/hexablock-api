@@ -8,7 +8,7 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 
 - The colored zone is the Clean layer, with the colors of [layers.md](layers.md): yellow for layer 1, purple for layer 2, light blue for layer 3 and dark blue for layer 4.
 - One view can show several layers. The zones are bands, with the outer layer at the top and the inner layer at the bottom, so every dependency between layers points down.
-- A dashed frame groups the classes of one GoF pattern or one group. Its label names the source, for example `STRATEGY · §3.3 · DS-6`.
+- A dashed frame groups the classes of one GoF pattern or one group. Its label names the source, for example `STRATEGY · §3.3 · DS-6`. A frame is not a class. A diamond, a realization or an inheritance line starts and ends on a class or interface box, never on a frame. Only a use arrow can start or end on a frame: then it stands for every class in the frame.
 - A stereotype such as `«Strategy»` marks the role of one class in that pattern. `«port»` marks an interface that an outer layer implements.
 - The dashed box at the top right of a class holds its type parameters. This is the UML template notation that §4.1 asks for.
 - A `«bind»` label on a realization or an inheritance line names the type that each parameter takes, for example `«bind» TSection → FitSection`.
@@ -18,6 +18,7 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 - Under the name of a class, an ID such as `API-FR-04` names the requirement it serves.
 - A diamond marks an attribute between two classes of one layer, where it shows a pattern or a domain relation: hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. Examples: `LevelValidators` holds its `LevelValidator` strategies (Strategy), and `PlayerProgress` keeps its `LevelResult` values (an aggregate and its parts). The other end names the attribute and its multiplicity, even when it is 1.
 - A solid line with an open arrowhead is a use: the class depends on the other class. It points from the class that holds or calls to the class it needs. When the other class is an attribute across layers, the label names the attribute and its multiplicity. A port counts as across layers: it lives in layer 2, and its adapter lives in layer 3 or 4. When the other class is only a parameter, a return value, a local variable or a `new`, the label is a verb. A link that is none of these, such as a guard that a decorator applies or a class that a module only names in its metadata, gets no line; the box or the note names it. This follows the class of 2026-11-02 (decision 13), which replaces the diamond rule of the board of the class of 2026-10-02.
+- The legend of each view lists only the line kinds that the view draws.
 - Every class is planned, except `Clock`, `SystemClock` and `AppModule`. Today `src/` holds the health endpoint, the `Clock` port and its adapter, and the database connection.
 
 ## Part 1: the domain
