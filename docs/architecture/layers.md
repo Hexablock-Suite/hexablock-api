@@ -55,16 +55,16 @@ flowchart TB
   ADAPTERS --> APP
   ADAPTERS --> DOMAIN
   APP --> DOMAIN
-  SYSCLOCK -->|implements| CLOCK
+  SYSCLOCK -.->|implements| CLOCK
   APPMOD -->|binds CLOCK to| SYSCLOCK
   CONTROLLERS -->|calls| INPORTS
   GUARD -->|calls| INPORTS
-  UC -->|implements| INPORTS
-  ASPECTS -->|implements| INPORTS
+  UC -.->|implements| INPORTS
+  ASPECTS -.->|implements| INPORTS
   UC -->|uses| REPOPORTS
   UC -->|uses| SECPORTS
-  REPOS -->|implements| REPOPORTS
-  SECURITY -->|implements| SECPORTS
+  REPOS -.->|implements| REPOPORTS
+  SECURITY -.->|implements| SECPORTS
   REPOS -->|queries tables of| SCHEMA
   DB -->|passes to Drizzle| SCHEMA
   APPMOD -->|registers| HEALTH
@@ -78,6 +78,7 @@ flowchart TB
     KEY1["Layer 1: yellow"]
     KEYPORT(["Rounded node: a port"])
     KEYPLANNED["Dashed box: planned"]
+    KEYIMPL["Dotted arrow labelled implements:<br/>realization"]
   end
 
   %% Invisible links keep the layers stacked from outer to inner, with the legend last.
@@ -89,7 +90,7 @@ flowchart TB
   classDef planned fill:#ffffff,stroke:#777777,stroke-dasharray:5 5,color:#444444
   class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,HEALTH,SCHEMA,CLOCK real
   class FEATMOD,SECURITY,ASPECTS,CONTROLLERS,GUARD,REPOS,UC,INPORTS,ENT,REPOPORTS,SECPORTS planned
-  class KEYPORT real
+  class KEYPORT,KEYIMPL real
   class KEYPLANNED planned
 
   style INFRA fill:#cfdcf3,stroke:#1e3a8a,color:#111111
@@ -108,6 +109,7 @@ How to read it:
 - The concentric view above answers statement §4.2. Mermaid cannot draw rings, so this diagram stacks the same layers: the outer layer is at the top and the domain, the center, is at the bottom.
 - Each arrow is a source-code dependency that the rules allow. No arrow points outward, away from the domain. Some arrows stay inside one layer, such as `AppModule` binding `CLOCK` to `SystemClock`.
 - A rounded node is a port: an interface that an inner layer owns and an outer layer implements.
+- A dotted arrow labelled `implements` is a realization: the class implements the port. Mermaid cannot draw the hollow triangle of UML, so the dotted line stands for it, as in the layers page of `hexablock-app`. A solid arrow is any other dependency.
 - A dashed box with the suffix "(planned)" is a component that does not exist yet. A solid box exists in `src/` today.
 - A label that names a question (Q12) marks a placement the team has not settled. The box sits where this draft puts it, and the professor's answer can move it.
 - Layer colors: yellow is the domain, purple is the application, and blue is the infrastructure. With four layers, the infrastructure has two shades: light blue for the interface adapters (layer 3) and dark blue for frameworks and drivers (layer 4). These are the colors the course uses for its three layers. The legend inside each drawing repeats them, and the class and extensibility views use the same zone colors.

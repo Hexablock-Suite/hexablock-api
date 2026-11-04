@@ -16,6 +16,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- The class and extensibility views draw realization and diamond lines only between class boxes, join a dashed frame only with a use arrow, and list in each legend only the line kinds they draw; the layer diagram draws `implements` as a dotted realization edge ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - The class diagrams draw use arrows between layers and keep diamonds inside one layer, and `JwtAuthGuard` calls a new `AuthenticateToken` input port ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - The layer diagram is fixed after the draft audit ([#7](https://github.com/Hexablock-Suite/hexablock-api/pull/7)).
 - The Drizzle schema moves into the persistence adapter ([#5](https://github.com/Hexablock-Suite/hexablock-api/pull/5)).
