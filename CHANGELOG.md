@@ -8,6 +8,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Added
 
+- A use case flow page, `docs/architecture/flows.md`, with a class view and a UML sequence diagram of the sync progress endpoint across the four layers ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - This changelog, rule R-sprint-release and its gate `test/gates/changelog.gate.spec.ts`.
 - Numbered functional and non-functional requirements, API-FR-n and API-NFR-n, each with a check ([#8](https://github.com/Hexablock-Suite/hexablock-api/pull/8)).
 - Draft layer diagram in `docs/architecture/layers.md` for review with the professor ([#4](https://github.com/Hexablock-Suite/hexablock-api/pull/4)), with the interfaces the brief names ([#6](https://github.com/Hexablock-Suite/hexablock-api/pull/6)).
