@@ -59,6 +59,8 @@ points toward the domain.
 Full layer diagram and the place of each piece: [docs/architecture/layers.md](docs/architecture/layers.md).
 Classes per layer: [docs/architecture/classes.md](docs/architecture/classes.md). Extension points:
 [docs/architecture/extensibility.md](docs/architecture/extensibility.md).
+How one request crosses the layers, as a class view and a sequence diagram:
+[docs/architecture/flows.md](docs/architecture/flows.md).
 
 ## Generic Engine
 

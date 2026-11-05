@@ -72,8 +72,9 @@
         <desc id="ad3http-desc">
           Class diagram of layer 3 showing the Auth, Progress, Leaderboard and Levels controllers,
           each holding the input ports it calls, the JwtAuthGuard that the controller decorators
-          apply to progress and level updates, the LevelDto that carries the section for the
-          validator of its gameId, and the HttpErrorFilter for unexpected errors.
+          apply to progress and level updates and that holds the AuthenticateToken input port, the
+          LevelDto that carries the section for the validator of its gameId, and the HttpErrorFilter
+          for unexpected errors.
         </desc>
         <defs>
           <marker
@@ -400,9 +401,9 @@
         <!-- Class: JwtAuthGuard («guard») -->
         <rect
           x="400"
-          y="260"
+          y="232"
           width="316"
-          height="84"
+          height="108"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -410,7 +411,7 @@
         />
         <text
           x="558"
-          y="278"
+          y="250"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -421,7 +422,7 @@
         </text>
         <text
           x="558"
-          y="296"
+          y="268"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -432,17 +433,21 @@
         </text>
         <text
           x="558"
-          y="310"
+          y="282"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-01 · open
+          API-FR-01 · decision 14
         </text>
-        <line x1="400" y1="320" x2="716" y2="320" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="416" y="336" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="400" y1="292" x2="716" y2="292" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="308" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - authenticate: AuthenticateToken
+        </text>
+        <line x1="400" y1="316" x2="716" y2="316" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + canActivate(ctx: ExecutionContext): Promise&lt;boolean&gt;
         </text>
         <!-- Class: HttpErrorFilter («filter») -->
@@ -585,8 +590,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          the sublabel of each guarded controller names it. How the guard verifies a token is open:
-          a TokenVerifier port or an AuthenticateToken
+          the sublabel of each guarded controller names it. The guard holds the AuthenticateToken
+          input port and never calls TokenIssuer (decision 14,
         </text>
         <text
           x="24"
@@ -595,8 +600,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          input port (layers.md). LevelDto checks the common part; the validator of its gameId
-          checks the section (Part 1, view 2).
+          an assumption for team review). LevelDto checks the common part; the validator of its
+          gameId checks the section (Part 1, view 2).
         </text>
         <text
           x="24"
@@ -634,9 +639,9 @@
           y1="648"
           x2="52"
           y2="648"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-end="url(#ad3http-triangle)"
+          marker-end="url(#ad3http-open)"
         />
         <text
           x="60"
@@ -645,80 +650,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Inheritance
-        </text>
-        <line
-          x1="160"
-          y1="648"
-          x2="188"
-          y2="648"
-          stroke="#17212a"
-          stroke-width="1"
-          stroke-dasharray="5,4"
-          marker-end="url(#ad3http-triangle)"
-        />
-        <text
-          x="196"
-          y="652"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Realization
-        </text>
-        <line
-          x1="296"
-          y1="648"
-          x2="324"
-          y2="648"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#ad3http-diamond-filled)"
-        />
-        <text
-          x="332"
-          y="652"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Composition · attribute it creates
-        </text>
-        <line
-          x1="520"
-          y1="648"
-          x2="548"
-          y2="648"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#ad3http-diamond-hollow)"
-        />
-        <text
-          x="556"
-          y="652"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Aggregation · attribute it receives
-        </text>
-        <line
-          x1="752"
-          y1="648"
-          x2="780"
-          y2="648"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#ad3http-open)"
-        />
-        <text
-          x="788"
-          y="652"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Use · parameter, return, local or new
+          Use · attribute across layers, parameter, return, local or new
         </text>
         <rect
           x="24"

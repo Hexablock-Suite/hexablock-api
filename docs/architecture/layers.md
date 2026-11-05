@@ -37,8 +37,8 @@ flowchart TB
   end
 
   subgraph APP["2. Application (use cases): src/application"]
-    INPORTS(["Input ports, one interface per use case:<br/>RegisterUser, Login, SyncProgress, GetLeaderboard,<br/>GetLevels, UpdateLevels (planned)"])
-    UC["RegisterUseCase, LoginUseCase,<br/>SyncProgressUseCase, GetLeaderboardUseCase,<br/>GetLevelsUseCase, UpdateLevelsUseCase (planned)"]
+    INPORTS(["Input ports, one interface per use case:<br/>RegisterUser, Login, AuthenticateToken, SyncProgress,<br/>GetLeaderboard, GetLevels, UpdateLevels (planned)"])
+    UC["RegisterUseCase, LoginUseCase, AuthenticateTokenUseCase,<br/>SyncProgressUseCase, GetLeaderboardUseCase,<br/>GetLevelsUseCase, UpdateLevelsUseCase (planned)"]
     REPOPORTS(["Repository ports: User, Progress,<br/>Leaderboard, Level (planned)"])
     SECPORTS(["PasswordHasher and TokenIssuer<br/>ports (planned)"])
     CLOCK(["Clock port and CLOCK token<br/>ports/clock.ts"])
@@ -55,15 +55,16 @@ flowchart TB
   ADAPTERS --> APP
   ADAPTERS --> DOMAIN
   APP --> DOMAIN
-  SYSCLOCK -->|implements| CLOCK
+  SYSCLOCK -.->|implements| CLOCK
   APPMOD -->|binds CLOCK to| SYSCLOCK
   CONTROLLERS -->|calls| INPORTS
-  UC -->|implements| INPORTS
-  ASPECTS -->|implements| INPORTS
+  GUARD -->|calls| INPORTS
+  UC -.->|implements| INPORTS
+  ASPECTS -.->|implements| INPORTS
   UC -->|uses| REPOPORTS
   UC -->|uses| SECPORTS
-  REPOS -->|implements| REPOPORTS
-  SECURITY -->|implements| SECPORTS
+  REPOS -.->|implements| REPOPORTS
+  SECURITY -.->|implements| SECPORTS
   REPOS -->|queries tables of| SCHEMA
   DB -->|passes to Drizzle| SCHEMA
   APPMOD -->|registers| HEALTH
@@ -77,6 +78,7 @@ flowchart TB
     KEY1["Layer 1: yellow"]
     KEYPORT(["Rounded node: a port"])
     KEYPLANNED["Dashed box: planned"]
+    KEYIMPL["Dotted arrow labelled implements:<br/>realization"]
   end
 
   %% Invisible links keep the layers stacked from outer to inner, with the legend last.
@@ -88,7 +90,7 @@ flowchart TB
   classDef planned fill:#ffffff,stroke:#777777,stroke-dasharray:5 5,color:#444444
   class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,HEALTH,SCHEMA,CLOCK real
   class FEATMOD,SECURITY,ASPECTS,CONTROLLERS,GUARD,REPOS,UC,INPORTS,ENT,REPOPORTS,SECPORTS planned
-  class KEYPORT real
+  class KEYPORT,KEYIMPL real
   class KEYPLANNED planned
 
   style INFRA fill:#cfdcf3,stroke:#1e3a8a,color:#111111
@@ -107,6 +109,7 @@ How to read it:
 - The concentric view above answers statement §4.2. Mermaid cannot draw rings, so this diagram stacks the same layers: the outer layer is at the top and the domain, the center, is at the bottom.
 - Each arrow is a source-code dependency that the rules allow. No arrow points outward, away from the domain. Some arrows stay inside one layer, such as `AppModule` binding `CLOCK` to `SystemClock`.
 - A rounded node is a port: an interface that an inner layer owns and an outer layer implements.
+- A dotted arrow labelled `implements` is a realization: the class implements the port. Mermaid cannot draw the hollow triangle of UML, so the dotted line stands for it, as in the layers page of `hexablock-app`. A solid arrow is any other dependency.
 - A dashed box with the suffix "(planned)" is a component that does not exist yet. A solid box exists in `src/` today.
 - A label that names a question (Q12) marks a placement the team has not settled. The box sits where this draft puts it, and the professor's answer can move it.
 - Layer colors: yellow is the domain, purple is the application, and blue is the infrastructure. With four layers, the infrastructure has two shades: light blue for the interface adapters (layer 3) and dark blue for frameworks and drivers (layer 4). These are the colors the course uses for its three layers. The legend inside each drawing repeats them, and the class and extensibility views use the same zone colors.
@@ -128,7 +131,7 @@ How to read it:
 
 - **Entities and value objects:** `src/domain`. Examples: `User`, `GameId`, `PlayerProgress`, `LeaderboardEntry`, `LevelDefinition`. They carry no table IDs and no framework types.
 - **Use cases:** `src/application`. There is one use case per action, parameterized by `gameId`, never one per game. A use case returns an expected failure as a `Result<T, E>` value, never as an exception, so no domain error crosses the input port.
-- **Input ports:** `src/application`, one interface per use case: `RegisterUser`, `Login`, `SyncProgress`, `GetLeaderboard`, `GetLevels` and `UpdateLevels`. The controllers depend on the interface, not on the class. Each use case implements its interface, and each AOP aspect implements the same interface to wrap it (§3.5). Tests call the same interfaces.
+- **Input ports:** `src/application`, one interface per use case: `RegisterUser`, `Login`, `AuthenticateToken`, `SyncProgress`, `GetLeaderboard`, `GetLevels` and `UpdateLevels`. The controllers depend on the interface, not on the class. Each use case implements its interface, and each AOP aspect implements the same interface to wrap it (§3.5). Tests call the same interfaces.
 - **Ports:** `src/application`, next to the use cases that use them (Q10). The persistence adapters and the system adapters implement these ports. `src/application/ports/clock.ts` holds the `Clock` port.
 - **Composition root:** `AppModule` in `src/infrastructure`. It binds each port to one adapter, and the feature modules do the same for their repositories. `src/main.ts` only starts the app.
 - **Controllers:** `src/adapters/http`. They translate HTTP requests into use case calls.
@@ -136,10 +139,10 @@ How to read it:
 - **DTOs and validation:** `src/adapters/http`, next to their controllers. A DTO checks the shape of the common part. The domain checks its own rules, such as the Fit level check of assumption A5, and the validator registered for a `gameId` checks the section.
 - **Drizzle schema:** `src/adapters/persistence/schema.ts`, next to the repositories that query its tables. `drizzle-kit` reads it to write the migrations in `drizzle/`, and `src/infrastructure/database/connection.ts` passes it to Drizzle. See Q11.
 - **Drizzle repositories and row mappers:** `src/adapters/persistence`. The mappers turn rows into entities and back.
-- **JWT guard:** `src/adapters/http`. It verifies the token through the `TokenIssuer` port. This is open for the team: the guard receives requests, but `TokenIssuer` is a port the use cases call, so the guard skips the use cases. `TokenIssuer` also only issues tokens. The team will choose between a separate `TokenVerifier` port and an `AuthenticateToken` input port.
+- **JWT guard:** `src/adapters/http`. It calls the `AuthenticateToken` input port, as a controller calls its input ports, and never calls `TokenIssuer`. `AuthenticateTokenUseCase` verifies the token through the `TokenIssuer` port and returns the `UserId` or a failed `Result`. The docs named two options, a separate `TokenVerifier` port or an `AuthenticateToken` input port. This draft takes the input port, as an assumption for team review: decision 14 of [classes.md](classes.md).
 - **JWT and password hashing adapters:** `src/infrastructure`, as `SystemClock` does for the `Clock` port.
 - **AOP aspects over use cases:** custom decorators or proxies, never Nest interceptors (rule `application-imports-only-domain`). This draft puts them in `src/infrastructure`. See Q12.
-- **Logging:** this draft has no `Logger` port. The aspects sit in `src/infrastructure` and call a logging package directly, so a port would protect no inner layer. If Q12 moves the aspects to `src/application`, they need a `Logger` port there.
+- **Logging:** this draft has no `Logger` port. The aspects sit in `src/infrastructure` and call a logging package directly, so a port would protect no inner layer. If Q12 moves the aspects to `src/application`, they need a `Logger` port there. It takes a typed entry (use case name, outcome, error), and the adapter writes the text (decision 10 of [classes.md](classes.md)).
 - **Swagger and OpenAPI:** `@nestjs/swagger` decorators on controllers and DTOs in `src/adapters/http`. `src/infrastructure/http-app.ts` builds the document. `openapi/openapi.json` is its committed export.
 - **NestJS modules:** `src/infrastructure`. Nest stays out of `src/domain`, `src/application` and `src/adapters/persistence`. A Nest injection token next to a port is a plain `Symbol`, such as `CLOCK`.
 - **Outside `src/`:** `drizzle/` holds the generated SQL migrations. `compose.yaml` starts a local Postgres. Both are database details of layer 4.

@@ -1,0 +1,1334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API sync progress use case · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Use case slice 1 of 3</p>
+      <h1>Sync progress: one request through the four layers</h1>
+      <svg
+        viewBox="0 0 1240 1430"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="flow1syncprogress-title flow1syncprogress-desc"
+      >
+        <title id="flow1syncprogress-title">
+          HexaBlock API sync progress use case · UML class diagram
+        </title>
+        <desc id="flow1syncprogress-desc">
+          Cross-layer class diagram of the sync progress use case. In layer 3, JwtAuthGuard holds
+          the AuthenticateToken input port, ProgressController holds the SyncProgress input port and
+          uses ProgressDtoMapper, and DrizzleProgressRepository implements ProgressRepository. In
+          layer 4, SystemClock implements Clock. In layer 2, SyncProgressUseCase implements
+          SyncProgress, takes a SyncProgressRequest and holds the ProgressRepository and Clock
+          ports. In layer 1, the use case updates the PlayerProgress aggregate, which keeps its
+          LevelResult values.
+        </desc>
+        <defs>
+          <marker
+            id="flow1syncprogress-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="flow1syncprogress-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="1192"
+          height="128"
+          rx="8"
+          fill="#cfdcf3"
+          stroke="rgba(30,58,138,0.50)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="164"
+          width="1192"
+          height="332"
+          rx="8"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="508"
+          width="1192"
+          height="468"
+          rx="8"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="988"
+          width="1192"
+          height="244"
+          rx="8"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <!-- Relationships (drawn before boxes) -->
+        <!-- JwtAuthGuard holds AuthenticateToken: use -->
+        <path
+          d="M72 312 L72 548"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- ProgressController holds SyncProgress: use -->
+        <path
+          d="M560 312 L560 548"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- ProgressController uses ProgressDtoMapper: use -->
+        <path
+          d="M860 312 L860 348"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- ProgressDtoMapper returns a SyncProgressRequest: use -->
+        <path
+          d="M1010 448 L1010 548"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- SyncProgressUseCase implements SyncProgress: realization -->
+        <line
+          x1="726"
+          y1="704"
+          x2="726"
+          y2="620"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#flow1syncprogress-triangle)"
+        />
+        <!-- SyncProgressUseCase takes a SyncProgressRequest: use -->
+        <path
+          d="M936 720 L960 720 L960 608 L984 608"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- SyncProgressUseCase holds Clock: use -->
+        <path
+          d="M936 752 L984 752"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- SyncProgressUseCase holds ProgressRepository: use -->
+        <path
+          d="M640 828 L640 864"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- SyncProgressUseCase updates PlayerProgress: use -->
+        <path
+          d="M880 828 L880 1020"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- DrizzleProgressRepository implements ProgressRepository: realization -->
+        <line
+          x1="492"
+          y1="472"
+          x2="492"
+          y2="864"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#flow1syncprogress-triangle)"
+        />
+        <!-- SystemClock implements Clock: realization -->
+        <line
+          x1="1176"
+          y1="136"
+          x2="1176"
+          y2="704"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#flow1syncprogress-triangle)"
+        />
+        <!-- PlayerProgress holds results: LevelResult[]: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <line
+          x1="760"
+          y1="1114"
+          x2="680"
+          y2="1114"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="78" y="318" width="85" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="120"
+          y="327"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          authenticate 1
+        </text>
+        <rect x="566" y="318" width="85" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="608"
+          y="327"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          syncProgress 1
+        </text>
+        <rect x="866" y="325" width="33" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="882"
+          y="334"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          uses
+        </text>
+        <rect x="1016" y="457" width="48" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="1040"
+          y="466"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          returns
+        </text>
+        <rect x="941" y="649" width="38" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="960"
+          y="658"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          takes
+        </text>
+        <rect x="936" y="735" width="48" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="960"
+          y="744"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          clock 1
+        </text>
+        <rect x="646" y="841" width="64" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="678"
+          y="850"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          progress 1
+        </text>
+        <rect x="886" y="841" width="48" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="910"
+          y="850"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          updates
+        </text>
+        <rect x="686" y="1093" width="74" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="723"
+          y="1102"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          results 0..*
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="327" height="12" rx="2" fill="#cfdcf3" />
+        <text
+          x="40"
+          y="44"
+          fill="#1e3a8a"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 4 · FRAMEWORKS AND DRIVERS · src/infrastructure/
+        </text>
+        <rect x="36" y="175" width="268" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="40"
+          y="184"
+          fill="#1d4ed8"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 3 · INTERFACE ADAPTERS · src/adapters/
+        </text>
+        <rect x="36" y="519" width="232" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="40"
+          y="528"
+          fill="#7e22ce"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 2 · USE CASES · src/application/
+        </text>
+        <rect x="36" y="999" width="197" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="1008"
+          fill="#b45309"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 1 · ENTITIES · src/domain/
+        </text>
+        <!-- Class: SystemClock («Adapter») -->
+        <rect
+          x="984"
+          y="64"
+          width="208"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="1088"
+          y="82"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="1088"
+          y="100"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SystemClock
+        </text>
+        <line x1="984" y1="112" x2="1192" y2="112" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="1000"
+          y="128"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + now(): Date
+        </text>
+        <!-- Class: JwtAuthGuard («guard») -->
+        <rect
+          x="48"
+          y="204"
+          width="336"
+          height="108"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="216"
+          y="222"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «guard»
+        </text>
+        <text
+          x="216"
+          y="240"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          JwtAuthGuard
+        </text>
+        <text
+          x="216"
+          y="254"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-01 · decision 14
+        </text>
+        <line x1="48" y1="264" x2="384" y2="264" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="280" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - authenticate: AuthenticateToken
+        </text>
+        <line x1="48" y1="288" x2="384" y2="288" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="304" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + canActivate(ctx: ExecutionContext): Promise&lt;boolean&gt;
+        </text>
+        <!-- Class: ProgressController («controller») -->
+        <rect
+          x="516"
+          y="204"
+          width="420"
+          height="108"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="726"
+          y="222"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «controller»
+        </text>
+        <text
+          x="726"
+          y="240"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressController
+        </text>
+        <text
+          x="726"
+          y="254"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02 · guarded by JwtAuthGuard
+        </text>
+        <line x1="516" y1="264" x2="936" y2="264" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="532" y="280" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - syncProgress: SyncProgress
+        </text>
+        <line x1="516" y1="288" x2="936" y2="288" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="532" y="304" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + sync(body: SyncProgressDto, userId: UserId): Promise&lt;ProgressDto&gt;
+        </text>
+        <!-- Class: DrizzleProgressRepository («Adapter») -->
+        <rect
+          x="96"
+          y="348"
+          width="420"
+          height="124"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="306"
+          y="366"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="306"
+          y="384"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          DrizzleProgressRepository
+        </text>
+        <text
+          x="306"
+          y="398"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          DS-5 · src/adapters/persistence/
+        </text>
+        <line x1="96" y1="408" x2="516" y2="408" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="112" y="424" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - db: PgDatabase
+        </text>
+        <line x1="96" y1="432" x2="516" y2="432" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="112" y="448" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + find(userId: UserId, gameId: GameId): Promise&lt;PlayerProgress | null&gt;
+        </text>
+        <text x="112" y="464" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + save(progress: PlayerProgress): Promise&lt;void&gt;
+        </text>
+        <!-- Class: ProgressDtoMapper («mapper») -->
+        <rect
+          x="620"
+          y="348"
+          width="420"
+          height="100"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="830"
+          y="366"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «mapper»
+        </text>
+        <text
+          x="830"
+          y="384"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressDtoMapper
+        </text>
+        <text
+          x="830"
+          y="398"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02 · src/adapters/http/
+        </text>
+        <line x1="620" y1="408" x2="1040" y2="408" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="636" y="424" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toRequest(body: SyncProgressDto, userId: UserId): SyncProgressRequest
+        </text>
+        <text x="636" y="440" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toDto(progress: PlayerProgress): ProgressDto
+        </text>
+        <!-- Class: AuthenticateToken («interface» «input port») -->
+        <rect
+          x="48"
+          y="548"
+          width="420"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="258"
+          y="566"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «input port»
+        </text>
+        <text
+          x="258"
+          y="584"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AuthenticateToken
+        </text>
+        <line x1="48" y1="596" x2="468" y2="596" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="612" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(request: SessionToken): Promise&lt;Result&lt;UserId, TokenProblem&gt;&gt;
+        </text>
+        <!-- Class: SyncProgress («interface» «input port») -->
+        <rect
+          x="516"
+          y="548"
+          width="420"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="726"
+          y="566"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «input port»
+        </text>
+        <text
+          x="726"
+          y="584"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SyncProgress
+        </text>
+        <line x1="516" y1="596" x2="936" y2="596" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="532" y="612" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(request: SyncProgressRequest): Promise&lt;PlayerProgress&gt;
+        </text>
+        <!-- Class: SyncProgressRequest («request») -->
+        <rect
+          x="984"
+          y="548"
+          width="168"
+          height="120"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="1068"
+          y="566"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «request»
+        </text>
+        <text
+          x="1068"
+          y="584"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SyncProgressRequest
+        </text>
+        <line x1="984" y1="596" x2="1152" y2="596" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="1000"
+          y="612"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + userId: UserId
+        </text>
+        <text
+          x="1000"
+          y="628"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + gameId: GameId
+        </text>
+        <text
+          x="1000"
+          y="644"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + score: number | null
+        </text>
+        <text
+          x="1000"
+          y="660"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + results: LevelResult[]
+        </text>
+        <!-- Class: SyncProgressUseCase (focal, «use case») -->
+        <rect
+          x="516"
+          y="704"
+          width="420"
+          height="124"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="516" y="704" width="420" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="516" y="756" width="420" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="726"
+          y="722"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «use case»
+        </text>
+        <text
+          x="726"
+          y="740"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SyncProgressUseCase
+        </text>
+        <text
+          x="726"
+          y="754"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02 · DS-5
+        </text>
+        <line x1="516" y1="764" x2="936" y2="764" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="532" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - progress: ProgressRepository
+        </text>
+        <text x="532" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - clock: Clock
+        </text>
+        <line x1="516" y1="804" x2="936" y2="804" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="532" y="820" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(request: SyncProgressRequest): Promise&lt;PlayerProgress&gt;
+        </text>
+        <!-- Class: Clock («interface» «port») -->
+        <rect
+          x="984"
+          y="704"
+          width="208"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="1088"
+          y="722"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="1088"
+          y="740"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Clock
+        </text>
+        <line x1="984" y1="752" x2="1192" y2="752" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="1000"
+          y="768"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + now(): Date
+        </text>
+        <!-- Class: ProgressRepository («interface» «port») -->
+        <rect
+          x="300"
+          y="864"
+          width="420"
+          height="88"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="510"
+          y="882"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="510"
+          y="900"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressRepository
+        </text>
+        <line x1="300" y1="912" x2="720" y2="912" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="316" y="928" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + find(userId: UserId, gameId: GameId): Promise&lt;PlayerProgress | null&gt;
+        </text>
+        <text x="316" y="944" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + save(progress: PlayerProgress): Promise&lt;void&gt;
+        </text>
+        <!-- Class: LevelResult («value object») -->
+        <rect
+          x="420"
+          y="1048"
+          width="260"
+          height="132"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="550"
+          y="1066"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="550"
+          y="1084"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelResult
+        </text>
+        <text
+          x="550"
+          y="1098"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · DS-5
+        </text>
+        <line x1="420" y1="1108" x2="680" y2="1108" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="436"
+          y="1124"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + levelId: string
+        </text>
+        <text
+          x="436"
+          y="1140"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + stars: number
+        </text>
+        <text
+          x="436"
+          y="1156"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + moves: number
+        </text>
+        <text
+          x="436"
+          y="1172"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + elapsedMs: number
+        </text>
+        <!-- Class: PlayerProgress («entity» «aggregate root») -->
+        <rect
+          x="760"
+          y="1020"
+          width="320"
+          height="188"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="920"
+          y="1038"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «entity» «aggregate root»
+        </text>
+        <text
+          x="920"
+          y="1056"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PlayerProgress
+        </text>
+        <text
+          x="920"
+          y="1070"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02 · DS-5
+        </text>
+        <line
+          x1="760"
+          y1="1080"
+          x2="1080"
+          y2="1080"
+          stroke="rgba(23,33,42,0.22)"
+          stroke-width="1"
+        />
+        <text
+          x="776"
+          y="1096"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + userId: UserId
+        </text>
+        <text
+          x="776"
+          y="1112"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + gameId: GameId
+        </text>
+        <text
+          x="776"
+          y="1128"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + highScore: number | null
+        </text>
+        <text
+          x="776"
+          y="1144"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + updatedAt: Date
+        </text>
+        <text
+          x="776"
+          y="1160"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + results: LevelResult[]
+        </text>
+        <line
+          x1="760"
+          y1="1168"
+          x2="1080"
+          y2="1168"
+          stroke="rgba(23,33,42,0.22)"
+          stroke-width="1"
+        />
+        <text
+          x="776"
+          y="1184"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + recordScore(score: number, at: Date): void
+        </text>
+        <text
+          x="776"
+          y="1200"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + recordLevel(result: LevelResult): void
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="1256"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          One POST request crosses the layers from the top down. JwtAuthGuard verifies the bearer
+          token through the AuthenticateToken input port (Part 2, view 4).
+        </text>
+        <text
+          x="24"
+          y="1272"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          ProgressController asks ProgressDtoMapper for a SyncProgressRequest and calls the
+          SyncProgress input port. SyncProgressUseCase loads the
+        </text>
+        <text
+          x="24"
+          y="1288"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          PlayerProgress aggregate, reads the instant from Clock, records the score and each
+          LevelResult, and saves the whole aggregate (DS-5).
+        </text>
+        <text
+          x="24"
+          y="1304"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The fields of SyncProgressRequest and the userId parameter of sync() are a proposal for
+          team review. The sequence diagram of this use case
+        </text>
+        <text
+          x="24"
+          y="1320"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          is in flows.md. toDto() and the results field also use PlayerProgress and LevelResult; the
+          view draws no extra line for them.
+        </text>
+        <!-- Legend -->
+        <line
+          x1="24"
+          y1="1348"
+          x2="1216"
+          y2="1348"
+          stroke="rgba(23,33,42,0.10)"
+          stroke-width="0.8"
+        />
+        <text
+          x="24"
+          y="1366"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="1384"
+          x2="52"
+          y2="1384"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#flow1syncprogress-triangle)"
+        />
+        <text
+          x="60"
+          y="1388"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Realization
+        </text>
+        <line
+          x1="128"
+          y1="1384"
+          x2="156"
+          y2="1384"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#flow1syncprogress-open)"
+        />
+        <text
+          x="164"
+          y="1388"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · attribute, parameter, return, local or new
+        </text>
+        <rect
+          x="24"
+          y="1404"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#cfdcf3"
+          stroke="rgba(30,58,138,0.50)"
+          stroke-width="1"
+        />
+        <rect
+          x="48"
+          y="1404"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="72"
+          y="1404"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="96"
+          y="1404"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="128"
+          y="1413"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zones · Clean layers 4, 3, 2 and 1, outer on top
+        </text>
+        <rect
+          x="352"
+          y="1404"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="388"
+          y="1413"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
