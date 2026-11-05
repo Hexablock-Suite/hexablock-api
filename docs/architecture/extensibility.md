@@ -8,19 +8,19 @@ Statement §4 asks for an extensibility diagram with the engine in the center an
 
 - The colored zone is the Clean layer, with the colors of [layers.md](layers.md). The zones are bands, with the outer layer at the top and the inner layer at the bottom.
 - The teal class is the extension point of the view. In view 1 it is `UseCase`, the contract of the application core.
-- A dashed frame groups one extension axis or one pattern. Its label names the source, for example `DATABASE ENGINE · ADAPTER · §8`. Only a use arrow starts or ends on a frame, as the input adapters in view 1 hold the input ports. A realization or a diamond joins class boxes, never a frame.
-- A box with a plural name, such as `Output ports`, stands for a group. Its compartment lists the exact class names.
+- A dashed frame groups one extension axis or one pattern. Its label names the source, for example `DATABASE ENGINE · ADAPTER · §8`. No line starts or ends on a frame. When two classes of different groups depend on each other, the line joins those two classes, as each Drizzle repository in views 1 and 3 implements its own output port. A line from one frame to another frame would claim that every class of the first group uses every class of the second group. The professor asked this about a frame-to-frame arrow in the session of 2026-11-03: «todas esas usan los tres bloques de abajo, a lo mejor la respuesta es no».
+- A box with a plural name, such as `HTTP controllers`, lists the exact class names in its compartment. A line to or from that box claims that every listed class has the relation, so the view draws one only when this is true, and the note of the view says so. In view 1, every controller holds 1 or 2 input ports, and every listed use case implements its input port. When only some listed classes have a relation, the view draws those classes as separate boxes, as `UpdateLevelsUseCase` and its `LevelValidators` in view 1.
 - A grey dashed box is a declared extension with no class yet. Its name is a placeholder. A grey italic member is a placeholder too.
 - A white dashed box is a class that another view details, as in the class diagram.
 - A realization arrow points from an extension class to the contract it implements. When several classes implement one contract, each class has its own dashed line, and the lines join into one arrowhead, as the drivers in view 1 and the validators in view 2 do. A `«bind»` label on it names the type that the extension gives to the type parameter. A diamond marks an attribute only where it makes a GoF pattern visible, between two classes of one layer, as `LevelValidators` holds its validators in view 2 (a Strategy registry): hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. The professor gave this reason in the class of 2026-11-02: «Aquí sí porque quiero hacer visible el patrón estratégico». A solid line with an open arrowhead is a use: its label names the attribute and its multiplicity, a domain relation included, as `LevelDefinition` holds its section in view 2, with one line to each section type, or a verb when the other class is only a parameter, a return value, a local variable or a `new` (class of 2026-11-02). The notation is the one of the [class diagram](classes.md), decision 13.
 - The legend of each view lists only the line kinds that the view draws.
-- When a use arrow starts or ends at a box with a plural name, its label names the role of the group and the multiplicity for one member class, for example `input ports` and `1..2`.
+- When a use arrow starts at a box with a plural name, its label names the role and the multiplicity for one listed class, for example `input ports` and `1..2`.
 
 ## View 1: the core and its extension axes
 
-![Overview: UseCase and the seven use cases in the center of layer 2 with their driver and output ports; around them the drivers and the aspects in layer 4, the HTTP controllers and the Drizzle repositories in layer 3, the declared MongoDB repositories, and the level validators of layer 1 with the declared FillLevelValidator](extensibility/views/ext-1-overview.png)
+![Overview: UseCase and the seven use cases in the center of layer 2, with the three driver ports and the four output ports; around them the drivers and the aspects in layer 4, the HTTP controllers and the four Drizzle repositories in layer 3, and the level validators of layer 1 with the declared FillLevelValidator](extensibility/views/ext-1-overview.png)
 
-Five axes surround the core. The drivers and the aspects sit in layer 4. The HTTP controllers and the database adapters sit in layer 3. The level validators of each variant sit in layer 1. Every arrow from layers 3 and 4 points to the core, so a new driver, aspect, controller or database adapter adds a class and the core does not change. The core points inward to layer 1 only through `LevelValidators`, a registry that the composition root fills: a new variant registers its validator there and changes no existing class. No source declares a second transport, so the HTTP controllers are the only input adapters, and the view draws no placeholder for another one.
+Five axes surround the core. The drivers and the aspects sit in layer 4. The HTTP controllers and the database adapters sit in layer 3. The level validators of each variant sit in layer 1. Every arrow from layers 3 and 4 points to the core, so a new driver, aspect, controller or database adapter adds a class and the core does not change. Each driver and each Drizzle repository implements one port, so each one has its own line to that port. The view does not draw the ports that each use case holds: views 2.2 to 2.4 of the class diagram draw them, and view 3 draws the output ports with their use cases and the declared MongoDB adapters. The core points inward to layer 1 only through `LevelValidators`, a registry that the composition root fills: a new variant registers its validator there and changes no existing class. No source declares a second transport, so the HTTP controllers are the only input adapters, and the view draws no placeholder for another one.
 
 ## View 2: a new variant
 
@@ -30,9 +30,9 @@ The statement gives the example of a fifth variant: «por ejemplo, Hexa Fill: pi
 
 ## View 3: a new database engine
 
-![A new database engine: the four output ports of layer 2, held by the use cases and implemented by the Drizzle repositories, and the declared MongoDB repositories that implement the same ports](extensibility/views/ext-3-database-engine.png)
+![A new database engine: the four output ports of layer 2, each held by the use cases that need it and implemented by one Drizzle repository, and the declared MongoDB repositories, each of which implements the same port as the Drizzle repository above it](extensibility/views/ext-3-database-engine.png)
 
-The database engine row of §8 names MongoDB instead of Postgres (professor, class of 2026-10-26). The `Mongo` class names are placeholders.
+The database engine row of §8 names MongoDB instead of Postgres (professor, class of 2026-10-26). The `Mongo` class names are placeholders. Each column holds one output port, its Drizzle adapter, its declared Mongo adapter and the use cases that hold it, as views 2.2 to 2.4 of the class diagram show.
 
 ## Extension points
 

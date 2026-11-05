@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 1 of 3</p>
       <h1>The application core and its extension axes</h1>
       <svg
-        viewBox="0 0 1040 1226"
+        viewBox="0 0 1040 1260"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext1overview-title ext1overview-desc"
@@ -72,8 +72,9 @@
         <desc id="ext1overview-desc">
           Extensibility diagram of the API showing the UseCase contract and the use cases in the
           center, with five extension axes around them: drivers and aspects in layer 4, HTTP
-          controllers and database adapters in layer 3, and level validators per variant in layer 1,
-          plus the declared MongoDB and Fill extensions.
+          controllers and Drizzle repositories in layer 3, and level validators per variant in layer
+          1. Each driver and each Drizzle repository implements its own port, and no line starts or
+          ends on a dashed frame.
         </desc>
         <defs>
           <marker
@@ -142,7 +143,7 @@
           x="24"
           y="188"
           width="992"
-          height="204"
+          height="280"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -150,9 +151,9 @@
         />
         <rect
           x="24"
-          y="408"
+          y="484"
           width="992"
-          height="408"
+          height="348"
           rx="8"
           fill="#efe7f8"
           stroke="rgba(126,34,206,0.40)"
@@ -160,7 +161,7 @@
         />
         <rect
           x="24"
-          y="832"
+          y="848"
           width="992"
           height="160"
           rx="8"
@@ -214,10 +215,10 @@
           ASPECTS · DECORATOR · §3.5 · Q12
         </text>
         <rect
-          x="360"
+          x="392"
           y="224"
-          width="348"
-          height="152"
+          width="336"
+          height="164"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -225,7 +226,7 @@
           stroke-dasharray="4,4"
         />
         <text
-          x="372"
+          x="404"
           y="240"
           fill="#5b6873"
           font-size="8"
@@ -238,8 +239,8 @@
         <rect
           x="744"
           y="224"
-          width="248"
-          height="152"
+          width="264"
+          height="228"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -259,9 +260,9 @@
         </text>
         <rect
           x="48"
-          y="868"
+          y="872"
           width="944"
-          height="108"
+          height="120"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -270,7 +271,7 @@
         />
         <text
           x="60"
-          y="884"
+          y="888"
           fill="#5b6873"
           font-size="8"
           font-weight="500"
@@ -279,28 +280,11 @@
         >
           NEW VARIANT · STRATEGY · DS-6 · API-FR-04
         </text>
-        <!-- Relationships (drawn before boxes) -->
-        <!-- Each controller holds input ports: use -->
-        <path
-          d="M534 376 L534 460"
-          fill="none"
-          stroke-width="1"
-          stroke="#5b6873"
-          marker-end="url(#ext1overview-open)"
-        />
-        <!-- UseCaseAspect implements UseCase and wraps an inner one: realization -->
-        <path
-          d="M592 136 L592 146 L728 146 L728 508 Q728 516 720 516 L656 516"
-          fill="none"
-          stroke-width="1"
-          stroke="#17212a"
-          stroke-dasharray="5,4"
-          marker-end="url(#ext1overview-triangle)"
-        />
-        <!-- Drivers implement the driver ports: realization, one line per driver box. The dash offset aligns the dashes where the lines join. -->
+        <!-- Relationships (drawn before boxes). No line starts or ends on a dashed frame. -->
+        <!-- Each driver implements its own driver port: realization, one line per class (Part 3, view 4) -->
         <!-- SystemClock implements Clock -->
         <path
-          d="M120 136 L120 146 L336 146 L336 552 Q336 560 328 560 L180 560 Q172 560 172 568 L172 632"
+          d="M120 136 L120 148 L328 148 L328 548 L232 548"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -309,7 +293,7 @@
         />
         <!-- ScryptPasswordHasher implements PasswordHasher -->
         <path
-          d="M336 136 L336 146 L336 552 Q336 560 328 560 L180 560 Q172 560 172 568 L172 632"
+          d="M268 136 L268 142 L340 142 L340 600 L232 600"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -318,168 +302,98 @@
         />
         <!-- JwtTokenIssuer implements TokenIssuer -->
         <path
-          d="M416 136 L416 146 L336 146 L336 552 Q336 560 328 560 L180 560 Q172 560 172 568 L172 632"
-          fill="none"
-          stroke-width="1"
-          stroke="#17212a"
-          stroke-dasharray="5,4"
-          stroke-dashoffset="1"
-          marker-end="url(#ext1overview-triangle)"
-        />
-        <!-- Database adapters implement the output ports: realization, one line per adapter box. The dash offset aligns the dashes where the lines join. -->
-        <!-- Drizzle repositories implement the output ports -->
-        <path
-          d="M976 276 L984 276 L984 368 L868 368 L868 632"
-          fill="none"
-          stroke-width="1"
-          stroke="#17212a"
-          stroke-dasharray="5,4"
-          stroke-dashoffset="8"
-          marker-end="url(#ext1overview-triangle)"
-        />
-        <!-- MongoDB repositories would implement the same ports -->
-        <path
-          d="M868 360 L868 632"
+          d="M372 136 L372 652 L232 652"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- Each use case implements its input port, which binds UseCase: realization -->
+        <!-- UseCaseAspect implements UseCase and wraps an inner one: realization (Part 2, view 1) -->
         <path
-          d="M512 632 L512 584"
+          d="M650 136 L650 146 L736 146 L736 600 L720 600"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- Use cases hold the driver ports: use -->
+        <!-- Every controller holds 1 or 2 input ports, and each input port binds UseCase: use (Part 3, view 3; Part 2, view 1) -->
         <path
-          d="M368 700 L280 700"
+          d="M560 372 L560 528"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
           marker-end="url(#ext1overview-open)"
         />
-        <!-- Use cases hold the output ports: use -->
+        <!-- Each Drizzle repository implements its own output port: realization, one line per class (Part 3, views 1 and 2) -->
+        <!-- DrizzleProgressRepository implements ProgressRepository -->
         <path
-          d="M656 700 L760 700"
+          d="M944 416 L972 416 L972 548 L944 548"
           fill="none"
           stroke-width="1"
-          stroke="#5b6873"
-          marker-end="url(#ext1overview-open)"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
         />
-        <!-- UpdateLevelsUseCase holds LevelValidators: use -->
+        <!-- DrizzleLeaderboardReader implements LeaderboardReader -->
         <path
-          d="M512 800 L512 908"
+          d="M944 368 L980 368 L980 600 L944 600"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- DrizzleLevelRepository implements LevelRepository -->
+        <path
+          d="M944 320 L988 320 L988 652 L944 652"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- DrizzleUserRepository implements UserRepository -->
+        <path
+          d="M944 272 L996 272 L996 704 L944 704"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- Every listed use case implements its input port, which binds UseCase: realization (Part 2, views 1 to 4) -->
+        <path
+          d="M488 664 L488 616"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- UpdateLevelsUseCase implements UpdateLevels, which binds UseCase: realization -->
+        <path
+          d="M668 664 L668 616"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- UpdateLevelsUseCase holds LevelValidators: use (Part 2, view 3) -->
+        <path
+          d="M668 704 L668 912"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
           marker-end="url(#ext1overview-open)"
         />
         <!-- Arrow labels -->
-        <rect x="498" y="436" width="32" height="12" rx="2" fill="#efe7f8" />
+        <rect x="566" y="494" width="68" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="514"
-          y="445"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          1..2
-        </text>
-        <rect x="736" y="436" width="103" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="787.5"
-          y="445"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          WRAPS ANY USE CASE
-        </text>
-        <rect x="876" y="436" width="56" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="904"
-          y="445"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          IMPLEMENT
-        </text>
-        <rect x="272" y="300" width="56" height="12" rx="2" fill="#e2ebf8" />
-        <text
-          x="300"
-          y="309"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          IMPLEMENT
-        </text>
-        <rect x="520" y="602" width="119" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="579.5"
-          y="611"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          IMPLEMENT INPUT PORTS
-        </text>
-        <rect x="290" y="682" width="72" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="326"
-          y="691"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          driver ports
-        </text>
-        <rect x="684" y="682" width="72" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="720"
-          y="691"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          output ports
-        </text>
-        <rect x="520" y="846" width="112" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="576"
-          y="855"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          UpdateLevelsUseCase
-        </text>
-        <rect x="537" y="436" width="64" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="569"
-          y="445"
+          x="600.0"
+          y="503"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -488,34 +402,34 @@
         >
           input ports
         </text>
-        <rect x="286" y="706" width="32" height="12" rx="2" fill="#efe7f8" />
+        <rect x="566" y="510" width="28" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="302"
-          y="715"
+          x="580.0"
+          y="519"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          0..2
+          1..2
         </text>
-        <rect x="732" y="706" width="24" height="12" rx="2" fill="#efe7f8" />
+        <rect x="494" y="634" width="124" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="744"
-          y="715"
+          x="556.0"
+          y="643"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          1
+          IMPLEMENT INPUT PORTS
         </text>
-        <rect x="516" y="888" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="674" y="878" width="45" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="540"
-          y="897"
+          x="696.5"
+          y="887"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -549,10 +463,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/
         </text>
-        <rect x="36" y="419" width="245" height="12" rx="2" fill="#efe7f8" />
+        <rect x="36" y="495" width="245" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
-          y="428"
+          y="504"
           fill="#7e22ce"
           font-size="8"
           font-weight="500"
@@ -561,10 +475,10 @@
         >
           LAYER 2 · USE CASES · src/application/
         </text>
-        <rect x="36" y="843" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="859" width="208" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="852"
+          y="868"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -597,7 +511,7 @@
         </text>
         <text
           x="120"
-          y="124"
+          y="122"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -630,7 +544,7 @@
         </text>
         <text
           x="268"
-          y="124"
+          y="122"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -663,7 +577,7 @@
         </text>
         <text
           x="416"
-          y="124"
+          y="122"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -696,7 +610,7 @@
         </text>
         <text
           x="592"
-          y="124"
+          y="122"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -730,7 +644,7 @@
         </text>
         <text
           x="748"
-          y="124"
+          y="122"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -763,7 +677,7 @@
         </text>
         <text
           x="904"
-          y="124"
+          y="122"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -772,19 +686,19 @@
         >
           TimingAspect
         </text>
-        <!-- AuthController -->
+        <!-- HTTP controllers: every listed class holds 1 or 2 input ports -->
         <rect
-          x="376"
+          x="408"
           y="252"
-          width="152"
-          height="48"
+          width="304"
+          height="120"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="452"
+          x="560"
           y="270"
           fill="#5b6873"
           font-size="8"
@@ -792,201 +706,180 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «controller»
+          «controller» × 4 · VIEW 3.3
         </text>
         <text
-          x="452"
-          y="288"
+          x="560"
+          y="286"
           fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          AuthController
+          HTTP controllers
         </text>
-        <!-- ProgressController -->
-        <rect
-          x="540"
-          y="252"
-          width="152"
-          height="48"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="616"
-          y="270"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «controller»
+        <line x1="408" y1="300" x2="712" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="424" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          AuthController: register, login
         </text>
-        <text
-          x="616"
-          y="288"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          ProgressController
+        <text x="424" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ProgressController: syncProgress
         </text>
-        <!-- LeaderboardController -->
-        <rect
-          x="376"
-          y="312"
-          width="152"
-          height="48"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="452"
-          y="330"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «controller»
+        <text x="424" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LeaderboardController: getLeaderboard
         </text>
-        <text
-          x="452"
-          y="348"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          LeaderboardController
+        <text x="424" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LevelsController: getLevels, updateLevels
         </text>
-        <!-- LevelsController -->
-        <rect
-          x="540"
-          y="312"
-          width="152"
-          height="48"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="616"
-          y="330"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «controller»
-        </text>
-        <text
-          x="616"
-          y="348"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          LevelsController
-        </text>
-        <!-- Drizzle repositories -->
+        <!-- DrizzleUserRepository -->
         <rect
           x="760"
           y="252"
-          width="216"
-          height="48"
+          width="184"
+          height="40"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="868"
-          y="270"
+          x="852"
+          y="267"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter» × 4 · VIEW 3
+          «Adapter»
         </text>
         <text
-          x="868"
-          y="288"
+          x="852"
+          y="283"
           fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          Drizzle repositories
+          DrizzleUserRepository
         </text>
-        <!-- MongoDB repositories -->
+        <!-- DrizzleLevelRepository -->
         <rect
           x="760"
-          y="312"
-          width="216"
-          height="48"
+          y="300"
+          width="184"
+          height="40"
           rx="6"
-          fill="rgba(23,33,42,0.02)"
-          stroke="rgba(23,33,42,0.35)"
+          fill="#ffffff"
+          stroke="#17212a"
           stroke-width="1"
-          stroke-dasharray="4,3"
         />
         <text
-          x="868"
-          y="330"
+          x="852"
+          y="315"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
-          letter-spacing="0.14em"
+          letter-spacing="0.08em"
         >
-          DECLARED · §8 · VIEW 3
+          «Adapter»
         </text>
         <text
-          x="868"
-          y="348"
-          fill="#5b6873"
+          x="852"
+          y="331"
+          fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          MongoDB repositories
+          DrizzleLevelRepository
+        </text>
+        <!-- DrizzleLeaderboardReader -->
+        <rect
+          x="760"
+          y="348"
+          width="184"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="852"
+          y="363"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="852"
+          y="379"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          DrizzleLeaderboardReader
+        </text>
+        <!-- DrizzleProgressRepository -->
+        <rect
+          x="760"
+          y="396"
+          width="184"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="852"
+          y="411"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «Adapter»
+        </text>
+        <text
+          x="852"
+          y="427"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          DrizzleProgressRepository
         </text>
         <!-- Class: UseCase (focal, the application core) -->
         <rect
-          x="368"
-          y="460"
-          width="288"
-          height="124"
+          x="400"
+          y="528"
+          width="320"
+          height="88"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
           stroke-width="1"
         />
-        <rect x="368" y="460" width="288" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="368" y="512" width="288" height="8" fill="rgba(15,111,116,0.10)" />
+        <rect x="400" y="528" width="320" height="48" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="400" y="568" width="320" height="8" fill="rgba(15,111,116,0.10)" />
         <text
-          x="512"
-          y="478"
+          x="560"
+          y="542"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -996,8 +889,8 @@
           «interface» «input port»
         </text>
         <text
-          x="512"
-          y="496"
+          x="560"
+          y="558"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1006,9 +899,13 @@
         >
           UseCase
         </text>
+        <line x1="400" y1="576" x2="720" y2="576" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="592" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(request: TRequest): Promise&lt;TResponse&gt;
+        </text>
         <text
-          x="512"
-          y="510"
+          x="560"
+          y="570"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1017,85 +914,262 @@
         >
           §3.5 · DECISION 7
         </text>
-        <line x1="368" y1="520" x2="656" y2="520" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="384" y="536" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute(request: TRequest): Promise&lt;TResponse&gt;
-        </text>
-        <line x1="368" y1="544" x2="656" y2="544" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="384" y="560" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          bound by one input port per use case,
-        </text>
-        <text x="384" y="576" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          such as Login or AuthenticateToken
-        </text>
-        <!-- Driver ports -->
+        <!-- Clock -->
         <rect
           x="64"
-          y="632"
-          width="216"
-          height="104"
+          y="528"
+          width="168"
+          height="40"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="172"
-          y="650"
+          x="148"
+          y="543"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «port» × 3
+          «interface» «port»
         </text>
         <text
-          x="172"
-          y="668"
+          x="148"
+          y="559"
           fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          Driver ports
-        </text>
-        <line x1="64" y1="680" x2="280" y2="680" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="696" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          PasswordHasher
-        </text>
-        <text x="80" y="712" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          TokenIssuer
-        </text>
-        <text x="80" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Clock
         </text>
-        <!-- Use cases -->
+        <!-- PasswordHasher -->
         <rect
-          x="368"
-          y="632"
-          width="288"
-          height="168"
+          x="64"
+          y="580"
+          width="168"
+          height="40"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="512"
-          y="650"
+          x="148"
+          y="595"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «use case» × 7
+          «interface» «port»
         </text>
         <text
-          x="512"
-          y="668"
+          x="148"
+          y="611"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PasswordHasher
+        </text>
+        <!-- TokenIssuer -->
+        <rect
+          x="64"
+          y="632"
+          width="168"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="148"
+          y="647"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="148"
+          y="663"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          TokenIssuer
+        </text>
+        <!-- ProgressRepository -->
+        <rect
+          x="760"
+          y="528"
+          width="184"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="852"
+          y="543"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="852"
+          y="559"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ProgressRepository
+        </text>
+        <!-- LeaderboardReader -->
+        <rect
+          x="760"
+          y="580"
+          width="184"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="852"
+          y="595"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="852"
+          y="611"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LeaderboardReader
+        </text>
+        <!-- LevelRepository -->
+        <rect
+          x="760"
+          y="632"
+          width="184"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="852"
+          y="647"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="852"
+          y="663"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelRepository
+        </text>
+        <!-- UserRepository -->
+        <rect
+          x="760"
+          y="684"
+          width="184"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="852"
+          y="699"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="852"
+          y="715"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          UserRepository
+        </text>
+        <!-- Use cases: every listed class implements its input port -->
+        <rect
+          x="400"
+          y="664"
+          width="176"
+          height="152"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="488"
+          y="682"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «use case» × 6
+        </text>
+        <text
+          x="488"
+          y="698"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1104,78 +1178,62 @@
         >
           Use cases
         </text>
-        <line x1="368" y1="680" x2="656" y2="680" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="384" y="696" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="400" y1="712" x2="576" y2="712" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           RegisterUseCase
         </text>
-        <text x="384" y="712" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="744" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           LoginUseCase
         </text>
-        <text x="384" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="760" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           AuthenticateTokenUseCase
         </text>
-        <text x="384" y="744" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="776" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           SyncProgressUseCase
         </text>
-        <text x="384" y="760" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="792" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           GetLeaderboardUseCase
         </text>
-        <text x="384" y="776" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="808" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           GetLevelsUseCase
         </text>
-        <text x="384" y="792" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          UpdateLevelsUseCase
-        </text>
-        <!-- Output ports -->
+        <!-- UpdateLevelsUseCase -->
         <rect
-          x="760"
-          y="632"
-          width="216"
-          height="120"
+          x="592"
+          y="664"
+          width="152"
+          height="40"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="868"
-          y="650"
+          x="668"
+          y="679"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «port» × 4
+          «use case»
         </text>
         <text
-          x="868"
-          y="668"
+          x="668"
+          y="695"
           fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          Output ports
-        </text>
-        <line x1="760" y1="680" x2="976" y2="680" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="776" y="696" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          ProgressRepository
-        </text>
-        <text x="776" y="712" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          LeaderboardReader
-        </text>
-        <text x="776" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          LevelRepository
-        </text>
-        <text x="776" y="744" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          UserRepository
+          UpdateLevelsUseCase
         </text>
         <!-- LevelDefinition -->
         <rect
           x="72"
-          y="908"
+          y="912"
           width="184"
           height="48"
           rx="6"
@@ -1185,7 +1243,7 @@
         />
         <text
           x="164"
-          y="926"
+          y="930"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1196,7 +1254,7 @@
         </text>
         <text
           x="164"
-          y="944"
+          y="946"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1205,10 +1263,44 @@
         >
           LevelDefinition
         </text>
+        <!-- FillLevelValidator -->
+        <rect
+          x="300"
+          y="912"
+          width="136"
+          height="48"
+          rx="6"
+          fill="rgba(23,33,42,0.02)"
+          stroke="rgba(23,33,42,0.35)"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="368"
+          y="930"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          DECLARED · §3.1
+        </text>
+        <text
+          x="368"
+          y="946"
+          fill="#5b6873"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          FillLevelValidator
+        </text>
         <!-- LevelValidators -->
         <rect
-          x="424"
-          y="908"
+          x="580"
+          y="912"
           width="176"
           height="48"
           rx="6"
@@ -1217,8 +1309,8 @@
           stroke-width="1"
         />
         <text
-          x="512"
-          y="926"
+          x="668"
+          y="930"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1228,8 +1320,8 @@
           «domain service»
         </text>
         <text
-          x="512"
-          y="944"
+          x="668"
+          y="946"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1240,8 +1332,8 @@
         </text>
         <!-- LevelValidator -->
         <rect
-          x="640"
-          y="908"
+          x="784"
+          y="912"
           width="160"
           height="48"
           rx="6"
@@ -1250,8 +1342,8 @@
           stroke-width="1"
         />
         <text
-          x="720"
-          y="926"
+          x="864"
+          y="930"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1261,8 +1353,8 @@
           «interface» «Strategy»
         </text>
         <text
-          x="720"
-          y="944"
+          x="864"
+          y="946"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1271,44 +1363,10 @@
         >
           LevelValidator
         </text>
-        <!-- FillLevelValidator -->
-        <rect
-          x="840"
-          y="908"
-          width="136"
-          height="48"
-          rx="6"
-          fill="rgba(23,33,42,0.02)"
-          stroke="rgba(23,33,42,0.35)"
-          stroke-width="1"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="908"
-          y="926"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.14em"
-        >
-          DECLARED · §3.1
-        </text>
-        <text
-          x="908"
-          y="944"
-          fill="#5b6873"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          FillLevelValidator
-        </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
-          x="548"
-          y="450"
+          x="604"
+          y="518"
           width="116"
           height="18"
           rx="2"
@@ -1318,8 +1376,8 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="606"
-          y="462"
+          x="662.0"
+          y="530"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -1329,7 +1387,7 @@
         </text>
         <rect
           x="204"
-          y="898"
+          y="902"
           width="60"
           height="18"
           rx="2"
@@ -1339,8 +1397,8 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="234"
-          y="910"
+          x="234.0"
+          y="914"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -1349,8 +1407,8 @@
           TSection
         </text>
         <rect
-          x="748"
-          y="898"
+          x="892"
+          y="902"
           width="60"
           height="18"
           rx="2"
@@ -1360,8 +1418,8 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="778"
-          y="910"
+          x="922.0"
+          y="914"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -1372,7 +1430,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="1020"
+          y="1036"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1382,23 +1440,13 @@
         </text>
         <text
           x="24"
-          y="1036"
-          fill="#5b6873"
-          font-size="11"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          member of an axis is one more class in its frame. Every arrow from layers 3 and 4 points
-          to the core, so the core does not change. A box with a plural name lists its classes.
-        </text>
-        <text
-          x="24"
           y="1052"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Grey dashed boxes are declared extensions with placeholder names: MongoDB (database engine
-          row of §8) and Fill (the fifth variant example of §3.1).
+          member of an axis is one more class in its frame. No line starts or ends on a frame. Every
+          arrow from layers 3 and 4 points to the core, so the core does not change.
         </text>
         <text
           x="24"
@@ -1407,8 +1455,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          No source declares a second transport, so the HTTP controllers are the only input adapters
-          drawn. Views 2 and 3 detail the variant and database axes.
+          Each driver and each Drizzle repository implements one port, so each one has its own line.
+          A box with a plural name lists classes that all have its relation:
         </text>
         <text
           x="24"
@@ -1417,21 +1465,41 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The core points inward to layer 1 only through LevelValidators, a registry that the
-          composition root fills: a new variant registers its validator and changes no class.
+          every controller holds 1 or 2 input ports, and every listed use case implements its input
+          port, which binds UseCase. Views 2.2 to 2.4 draw the ports each use case holds.
+        </text>
+        <text
+          x="24"
+          y="1100"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The core points inward to layer 1 only through LevelValidators, which UpdateLevelsUseCase
+          holds. A new variant registers its validator and changes no class.
+        </text>
+        <text
+          x="24"
+          y="1116"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Grey dashed box: the declared Fill validator (§3.1). View 3 adds the declared MongoDB
+          adapters. No source declares a second transport.
         </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1108"
+          y1="1144"
           x2="1016"
-          y2="1108"
+          y2="1144"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1126"
+          y="1162"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1441,9 +1509,9 @@
         </text>
         <line
           x1="24"
-          y1="1144"
+          y1="1180"
           x2="52"
-          y2="1144"
+          y2="1180"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1451,7 +1519,7 @@
         />
         <text
           x="60"
-          y="1148"
+          y="1184"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1460,16 +1528,16 @@
         </text>
         <line
           x1="128"
-          y1="1144"
+          y1="1180"
           x2="156"
-          y2="1144"
+          y2="1180"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext1overview-open)"
         />
         <text
           x="164"
-          y="1148"
+          y="1184"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1478,7 +1546,7 @@
         </text>
         <rect
           x="24"
-          y="1160"
+          y="1196"
           width="12"
           height="12"
           rx="2"
@@ -1488,7 +1556,7 @@
         />
         <rect
           x="40"
-          y="1160"
+          y="1196"
           width="12"
           height="12"
           rx="2"
@@ -1498,7 +1566,7 @@
         />
         <rect
           x="56"
-          y="1160"
+          y="1196"
           width="12"
           height="12"
           rx="2"
@@ -1508,7 +1576,7 @@
         />
         <rect
           x="72"
-          y="1160"
+          y="1196"
           width="12"
           height="12"
           rx="2"
@@ -1518,7 +1586,7 @@
         />
         <text
           x="92"
-          y="1170"
+          y="1206"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1527,7 +1595,7 @@
         </text>
         <rect
           x="272"
-          y="1160"
+          y="1196"
           width="28"
           height="12"
           rx="2"
@@ -1538,7 +1606,7 @@
         />
         <text
           x="308"
-          y="1170"
+          y="1206"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1547,7 +1615,7 @@
         </text>
         <rect
           x="520"
-          y="1160"
+          y="1196"
           width="28"
           height="12"
           rx="2"
@@ -1557,7 +1625,7 @@
         />
         <text
           x="556"
-          y="1170"
+          y="1206"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1566,7 +1634,7 @@
         </text>
         <rect
           x="768"
-          y="1160"
+          y="1196"
           width="28"
           height="12"
           rx="2"
@@ -1577,7 +1645,7 @@
         />
         <text
           x="804"
-          y="1170"
+          y="1206"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1586,7 +1654,7 @@
         </text>
         <rect
           x="24"
-          y="1182"
+          y="1218"
           width="28"
           height="12"
           rx="2"
@@ -1597,7 +1665,7 @@
         />
         <text
           x="60"
-          y="1192"
+          y="1228"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

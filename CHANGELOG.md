@@ -17,6 +17,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- The extensibility overview and the database engine view draw no line that starts or ends on a dashed frame, and draw one line per class where only some classes of a group have a relation: each driver and each Drizzle repository implements its own port, and each use case holds its own output port; the reading notes of `classes.md` and `extensibility.md` follow ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - The class, extensibility and flow views draw a diamond only where it makes a GoF pattern visible, such as the `LevelValidators` Strategy registry; the progress and level schema attributes are use arrows with their role and multiplicity, and `flows.md` names `SaveProgress` as the app use case that calls the sync endpoint ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - The class and extensibility views draw realization and diamond lines only between class boxes, join a dashed frame only with a use arrow, and list in each legend only the line kinds they draw; the layer diagram draws `implements` as a dotted realization edge ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - The class diagrams draw use arrows between layers and keep diamonds inside one layer, and `JwtAuthGuard` calls a new `AuthenticateToken` input port ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
