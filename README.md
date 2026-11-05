@@ -44,6 +44,8 @@ points toward the domain.
 | 3. Interface adapters      | `src/adapters/http`, `src/adapters/persistence` | Nest controllers, DTOs and mappers; Drizzle repositories and the schema.       |
 | 4. Frameworks and drivers  | `src/infrastructure`                            | Nest modules, the database connection and system adapters such as the clock.   |
 
+The table shows the design. Most of these pieces are not code yet; their code starts in Sprint 1.
+
 - **Ports live in the application layer (Q10).** For example, the `Clock` port is in
   [src/application/ports/clock.ts](src/application/ports/clock.ts). The domain never imports a
   port: a use case reads the instant and passes it to the domain as a parameter.
@@ -75,6 +77,8 @@ definitions that the engine plays, with generic types (decision D6):
 - **`UseCase<TRequest, TResponse>`** is the one generic input port. Every use case binds it, so
   one aspect class wraps any use case.
 - **`Result<T, E>`** carries an expected failure as a value, never as an exception.
+
+These types are the design. Their code starts in Sprint 1.
 
 A new variant with level files adds a section type, a validator and one entry in the composition
 root. No existing class changes. See [docs/architecture/extensibility.md](docs/architecture/extensibility.md)
@@ -151,6 +155,8 @@ pnpm db:generate   # writes a SQL migration into drizzle/ from src/adapters/pers
 pnpm db:migrate    # applies the drizzle/ migrations to DATABASE_URL
 docker compose down
 ```
+
+The schema has no tables yet. The business tables are the design; their code starts in Sprint 1.
 
 ## Running Tests
 
