@@ -79,11 +79,19 @@ Layer 3, `src/adapters/`, and layer 4, `src/infrastructure/`. Adapters never imp
 
 ## Use case slices
 
-One use case can cross every layer. [flows.md](flows.md) follows one request through the layers: a class view of that use case only, and a UML sequence diagram with the same class names.
+One use case can cross every layer. [flows.md](flows.md) follows one request through the layers for each path that shows something new: a class view of that use case only, and a UML sequence diagram with the same class names. Its table «Other use cases» names the path that each other use case follows.
 
 ### Slice 1: sync progress
 
 ![Sync progress slice: JwtAuthGuard, ProgressController and ProgressDtoMapper in layer 3 call the SyncProgress input port; SyncProgressUseCase holds the ProgressRepository and Clock ports, which DrizzleProgressRepository and SystemClock implement, and updates the PlayerProgress aggregate](classes/views/flow-1-sync-progress.png)
+
+### Slice 2: login
+
+![Login slice: AuthController in layer 3 calls the Login input port; LoginUseCase holds the UserRepository, PasswordHasher and TokenIssuer ports, which DrizzleUserRepository, ScryptPasswordHasher and JwtTokenIssuer implement, and reads the User entity](classes/views/flow-2-login.png)
+
+### Slice 3: update levels
+
+![Update levels slice: JwtAuthGuard and LevelsController in layer 3 call the AuthenticateToken and UpdateLevels input ports; UpdateLevelsUseCase holds the LevelRepository port, which DrizzleLevelRepository implements, and LevelValidators, which holds one LevelValidator strategy per gameId](classes/views/flow-3-update-levels.png)
 
 ## Data shapes
 
