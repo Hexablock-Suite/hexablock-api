@@ -90,33 +90,6 @@
             <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
           </marker>
           <marker
-            id="domain1progress-diamond-filled"
-            markerWidth="18"
-            markerHeight="10"
-            refX="0"
-            refY="5"
-            orient="auto"
-            markerUnits="userSpaceOnUse"
-          >
-            <polygon points="0 5, 9 0, 18 5, 9 10" fill="#17212a" />
-          </marker>
-          <marker
-            id="domain1progress-diamond-hollow"
-            markerWidth="18"
-            markerHeight="10"
-            refX="0"
-            refY="5"
-            orient="auto"
-            markerUnits="userSpaceOnUse"
-          >
-            <polygon
-              points="0 5, 9 0, 18 5, 9 10"
-              fill="#ffffff"
-              stroke="#17212a"
-              stroke-width="1"
-            />
-          </marker>
-          <marker
             id="domain1progress-open"
             markerWidth="10"
             markerHeight="8"
@@ -164,35 +137,35 @@
           PROGRESS · DS-5 · §5.2.2
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- PlayerProgress holds gameId: GameId: aggregation -->
+        <!-- PlayerProgress holds gameId: GameId: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <line
           x1="680"
           y1="128"
           x2="776"
           y2="128"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-start="url(#domain1progress-diamond-hollow)"
+          marker-end="url(#domain1progress-open)"
         />
-        <!-- PlayerProgress holds results: LevelResult[]: aggregation -->
+        <!-- PlayerProgress holds results: LevelResult[]: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <line
           x1="540"
           y1="292"
           x2="540"
           y2="344"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-start="url(#domain1progress-diamond-hollow)"
+          marker-end="url(#domain1progress-open)"
         />
-        <!-- LeaderboardEntry holds result: LevelResult | null on a per-level board: aggregation -->
+        <!-- LeaderboardEntry holds result: LevelResult | null on a per-level board: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <line
           x1="776"
           y1="440"
           x2="680"
           y2="440"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-start="url(#domain1progress-diamond-hollow)"
+          marker-end="url(#domain1progress-open)"
         />
         <!-- Arrow labels and multiplicities -->
         <rect x="714" y="110" width="56" height="12" rx="2" fill="#f9f4dc" />
@@ -591,9 +564,9 @@
           y1="656"
           x2="52"
           y2="656"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-start="url(#domain1progress-diamond-hollow)"
+          marker-end="url(#domain1progress-open)"
         />
         <text
           x="60"
@@ -602,7 +575,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Aggregation · inside one layer: a pattern or a domain relation
+          Use · attribute, parameter, return, local or new
         </text>
         <rect
           x="24"

@@ -184,30 +184,30 @@
           STRATEGY · §3.3 · DS-6
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- LevelDefinition receives section: TSection: aggregation, one line per section type box -->
+        <!-- LevelDefinition receives section: TSection: use with role and multiplicity, one line per section type box; no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <!-- LevelDefinition holds section: FitSection -->
         <path
           d="M320 244 L320 268 L344 268 L344 352 L336 352"
           fill="none"
           stroke-width="1"
-          stroke="#17212a"
-          marker-start="url(#ext2variant-diamond-hollow)"
+          stroke="#5b6873"
+          marker-end="url(#ext2variant-open)"
         />
         <!-- LevelDefinition holds section: SortSection -->
         <path
           d="M320 244 L320 268 L344 268 L344 412 L336 412"
           fill="none"
           stroke-width="1"
-          stroke="#17212a"
-          marker-start="url(#ext2variant-diamond-hollow)"
+          stroke="#5b6873"
+          marker-end="url(#ext2variant-open)"
         />
         <!-- LevelDefinition holds section: FillSection -->
         <path
           d="M320 244 L320 268 L344 268 L344 472 L336 472"
           fill="none"
           stroke-width="1"
-          stroke="#17212a"
-          marker-start="url(#ext2variant-diamond-hollow)"
+          stroke="#5b6873"
+          marker-end="url(#ext2variant-open)"
         />
         <!-- LevelValidator takes a LevelDefinition as a parameter: use -->
         <path
@@ -217,7 +217,7 @@
           stroke="#5b6873"
           marker-end="url(#ext2variant-open)"
         />
-        <!-- LevelValidators holds validators, one LevelValidator per gameId with levels: aggregation, kept for the Strategy registry -->
+        <!-- LevelValidators holds validators, one LevelValidator per gameId with levels: aggregation, kept because it makes the Strategy registry visible (class of 2026-11-02) -->
         <path
           d="M704 180 L704 296"
           fill="none"
@@ -828,7 +828,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Aggregation · inside one layer: a pattern or a domain relation
+          Aggregation · inside one layer: a GoF pattern
         </text>
         <line
           x1="424"
@@ -846,7 +846,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Use · attribute across layers, parameter, return, local or new
+          Use · attribute, parameter, return, local or new
         </text>
         <rect
           x="24"

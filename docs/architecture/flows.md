@@ -11,7 +11,7 @@ The layers themselves are in [layers.md](layers.md). The full class diagram is i
 
 ## Use case 1: sync progress
 
-The app calls this endpoint when it syncs its progress and its leaderboard: `SyncLeaderboard` in `hexablock-app` sends the progress through its `ApiProgressRepository`. The endpoint is `ProgressController.sync()` (API-FR-02). It is the only endpoint that receives data from the app on each game, and it crosses all four layers: a guard, a controller and a mapper in layer 3, a use case and its ports in layer 2, the progress aggregate in layer 1, and a driver in layer 4.
+The app calls this endpoint when it syncs its progress and its leaderboard: `SaveProgress` in `hexablock-app` sends the progress through its `ApiProgressRepository`. The endpoint is `ProgressController.sync()` (API-FR-02). It is the only endpoint that receives data from the app on each game, and it crosses all four layers: a guard, a controller and a mapper in layer 3, a use case and its ports in layer 2, the progress aggregate in layer 1, and a driver in layer 4.
 
 ### Class view
 
@@ -24,7 +24,7 @@ The app calls this endpoint when it syncs its progress and its leaderboard: `Syn
 ## How to read the class view
 
 - The zones are the Clean layers, with the colors of [layers.md](layers.md): dark blue for layer 4, light blue for layer 3, purple for layer 2 and yellow for layer 1. The outer layer is at the top, so every dependency between layers points down.
-- The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A diamond stays inside one layer: here `PlayerProgress` keeps its `LevelResult` values.
+- The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A diamond appears only where it makes a GoF pattern visible («Aquí sí porque quiero hacer visible el patrón estratégico», class of 2026-11-02). This view shows no pattern, so it draws no diamond: `PlayerProgress` keeps its `LevelResult` values through a use arrow labelled `results 0..*`.
 - The view draws the input ports `SyncProgress` and `AuthenticateToken` as interface boxes, not as lollipops. A box lets the controller and the guard point at the port they hold.
 - The teal class is the focal class: the use case.
 - This view shows more than the seven classes of the other views, because it follows one request through every layer.

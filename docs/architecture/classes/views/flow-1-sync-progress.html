@@ -93,22 +93,6 @@
             <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
           </marker>
           <marker
-            id="flow1syncprogress-diamond-hollow"
-            markerWidth="18"
-            markerHeight="10"
-            refX="0"
-            refY="5"
-            orient="auto"
-            markerUnits="userSpaceOnUse"
-          >
-            <polygon
-              points="0 5, 9 0, 18 5, 9 10"
-              fill="#ffffff"
-              stroke="#17212a"
-              stroke-width="1"
-            />
-          </marker>
-          <marker
             id="flow1syncprogress-open"
             markerWidth="10"
             markerHeight="8"
@@ -260,15 +244,15 @@
           stroke-dasharray="5,4"
           marker-end="url(#flow1syncprogress-triangle)"
         />
-        <!-- PlayerProgress holds results: LevelResult[]: aggregation -->
+        <!-- PlayerProgress holds results: LevelResult[]: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <line
           x1="760"
           y1="1114"
           x2="680"
           y2="1114"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-start="url(#flow1syncprogress-diamond-hollow)"
+          marker-end="url(#flow1syncprogress-open)"
         />
         <!-- Arrow labels and multiplicities -->
         <rect x="78" y="318" width="85" height="12" rx="2" fill="#e2ebf8" />
@@ -1274,25 +1258,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Use · attribute across layers, parameter, return, local or new
-        </text>
-        <line
-          x1="436"
-          y1="1384"
-          x2="464"
-          y2="1384"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-start="url(#flow1syncprogress-diamond-hollow)"
-        />
-        <text
-          x="472"
-          y="1388"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Aggregation · inside one layer: a pattern or a domain relation
+          Use · attribute, parameter, return, local or new
         </text>
         <rect
           x="24"

@@ -163,25 +163,25 @@
           STRATEGY · §3.3 · DS-6
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- LevelDefinition&lt;FitSection&gt; receives section: FitSection: aggregation -->
+        <!-- LevelDefinition&lt;FitSection&gt; receives section: FitSection: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <line
           x1="176"
           y1="260"
           x2="176"
           y2="316"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-start="url(#domain2levels-diamond-hollow)"
+          marker-end="url(#domain2levels-open)"
         />
-        <!-- LevelDefinition&lt;SortSection&gt; receives section: SortSection: aggregation -->
+        <!-- LevelDefinition&lt;SortSection&gt; receives section: SortSection: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <path
           d="M312 260 L312 520 Q312 528 304 528 L288 528"
           fill="none"
-          stroke="#17212a"
+          stroke="#5b6873"
           stroke-width="1"
-          marker-start="url(#domain2levels-diamond-hollow)"
+          marker-end="url(#domain2levels-open)"
         />
-        <!-- LevelValidators holds validators: one LevelValidator per gameId with levels: aggregation, kept for the Strategy registry -->
+        <!-- LevelValidators holds validators: one LevelValidator per gameId with levels: aggregation, kept because it makes the Strategy registry visible (class of 2026-11-02) -->
         <line
           x1="824"
           y1="180"
@@ -831,7 +831,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Aggregation · inside one layer: a pattern or a domain relation
+          Aggregation · inside one layer: a GoF pattern
         </text>
         <line
           x1="424"
@@ -849,7 +849,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Use · attribute across layers, parameter, return, local or new
+          Use · attribute, parameter, return, local or new
         </text>
         <rect
           x="24"
