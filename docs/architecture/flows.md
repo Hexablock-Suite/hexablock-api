@@ -35,7 +35,7 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ## Use case 3: update levels
 
-The level editor of the team calls this endpoint to publish new levels without an app update. The endpoint is `LevelsController.update()` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a registry that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The class view draws a diamond only there, because it is a pattern inside one layer. The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels or returns the problems. No class of layer 4 takes part.
+A signed-in client calls this endpoint to publish new levels without an app update. The professor asks for no level editor and no roles (Q4, answered 2026-11-03), so the token guard is the only check. The endpoint is `LevelsController.update()` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a registry that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The class view draws a diamond only there, because it is a pattern inside one layer. The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels or returns the problems. No class of layer 4 takes part.
 
 ### Class view
 
