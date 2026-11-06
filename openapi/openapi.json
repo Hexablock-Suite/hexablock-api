@@ -24,6 +24,19 @@
         ],
         "type": "object"
       },
+      "CurrentUserDto": {
+        "properties": {
+          "userId": {
+            "description": "The user id.",
+            "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId"
+        ],
+        "type": "object"
+      },
       "ErrorDto": {
         "properties": {
           "details": {
@@ -94,6 +107,13 @@
         ],
         "type": "object"
       }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
     }
   },
   "info": {
@@ -150,6 +170,42 @@
             "description": "The username or the password is wrong."
           }
         },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserDto"
+                }
+              }
+            },
+            "description": "The token is valid."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": [
           "auth"
         ]

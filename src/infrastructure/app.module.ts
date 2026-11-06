@@ -4,6 +4,10 @@ import { AuthController } from '../adapters/http/auth.controller.js';
 import { HealthController } from '../adapters/http/health.controller.js';
 import { HttpErrorFilter } from '../adapters/http/http-error.filter.js';
 import { DrizzleUserRepository } from '../adapters/persistence/drizzle-user-repository.js';
+import {
+  AUTHENTICATE_TOKEN,
+  AuthenticateTokenUseCase,
+} from '../application/auth/authenticate-token.use-case.js';
 import { LOGIN, LoginUseCase } from '../application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../application/auth/register.use-case.js';
 import { CLOCK } from '../application/ports/clock.js';
@@ -47,6 +51,11 @@ import { DATABASE, DatabaseModule } from './database/database.module.js';
       inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_ISSUER],
       useFactory: (users: UserRepository, hasher: PasswordHasher, tokens: TokenIssuer) =>
         new LoginUseCase(users, hasher, tokens),
+    },
+    {
+      provide: AUTHENTICATE_TOKEN,
+      inject: [TOKEN_ISSUER],
+      useFactory: (tokens: TokenIssuer) => new AuthenticateTokenUseCase(tokens),
     },
     // Every route, also the routes of later modules, answers errors with ErrorDto.
     { provide: APP_FILTER, useClass: HttpErrorFilter },
