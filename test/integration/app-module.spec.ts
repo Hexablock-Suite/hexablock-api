@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../../src/adapters/persistence/drizzle-user-repository.js';
@@ -8,8 +9,9 @@ import {
 } from '../../src/application/progress/get-progress.use-case.js';
 import {
   SYNC_PROGRESS,
-  SyncProgressUseCase,
+  type SyncProgress,
 } from '../../src/application/progress/sync-progress.use-case.js';
+import { UserId } from '../../src/domain/user/user-id.js';
 import { LOGIN, LoginUseCase } from '../../src/application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../../src/application/auth/register.use-case.js';
 import { PASSWORD_HASHER } from '../../src/application/ports/password-hasher.js';
@@ -17,6 +19,7 @@ import { TOKEN_ISSUER } from '../../src/application/ports/token-issuer.js';
 import { USER_ID_GENERATOR } from '../../src/application/ports/user-id-generator.js';
 import { USER_REPOSITORY } from '../../src/application/ports/user-repository.js';
 import { AppModule } from '../../src/infrastructure/app.module.js';
+import { LoggingAspect } from '../../src/infrastructure/aspects/logging-aspect.js';
 import { JwtTokenIssuer } from '../../src/infrastructure/auth/jwt-token-issuer.js';
 import { RandomUserIdGenerator } from '../../src/infrastructure/auth/random-user-id-generator.js';
 import { ScryptPasswordHasher } from '../../src/infrastructure/auth/scrypt-password-hasher.js';
@@ -26,6 +29,7 @@ import { stubTestEnvironment } from '../support/http/test-app.js';
 describe('AppModule account wiring', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.restoreAllMocks();
   });
 
   it('should_bind_account_ports_to_their_adapters_when_app_module_compiles', async () => {
@@ -46,8 +50,32 @@ describe('AppModule account wiring', () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
     expect(moduleRef.get(PROGRESS_REPOSITORY)).toBeInstanceOf(DrizzleProgressRepository);
-    expect(moduleRef.get(SYNC_PROGRESS)).toBeInstanceOf(SyncProgressUseCase);
+    expect(moduleRef.get(SYNC_PROGRESS)).toBeInstanceOf(LoggingAspect);
     expect(moduleRef.get(GET_PROGRESS)).toBeInstanceOf(GetProgressUseCase);
+    await moduleRef.close();
+  });
+
+  // The invalid gameId fails before any query, so no database is needed.
+  it('should_run_sync_progress_inside_logging_aspect_when_sync_progress_port_is_called', async () => {
+    stubTestEnvironment();
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const sync = moduleRef.get<SyncProgress>(SYNC_PROGRESS);
+
+    const result = await sync.execute({
+      userId: UserId.from('user-1'),
+      gameId: 'Hexa Lines',
+      results: [],
+    });
+
+    const error = {
+      kind: 'invalid-progress',
+      problems: ['gameId must be a lowercase slug, got "Hexa Lines".'],
+    };
+    expect(result).toEqual({ ok: false, error });
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      `useCase=SyncProgress outcome=failure error=${JSON.stringify(error)}`,
+    );
     await moduleRef.close();
   });
 

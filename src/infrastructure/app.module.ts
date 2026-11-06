@@ -26,6 +26,7 @@ import {
   SYNC_PROGRESS,
   SyncProgressUseCase,
 } from '../application/progress/sync-progress.use-case.js';
+import { LoggingAspect } from './aspects/logging-aspect.js';
 import { createJwtService, readJwtSecret } from './auth/auth-config.js';
 import { JwtTokenIssuer } from './auth/jwt-token-issuer.js';
 import { RandomUserIdGenerator } from './auth/random-user-id-generator.js';
@@ -74,11 +75,12 @@ import { DATABASE, DatabaseModule } from './database/database.module.js';
       useFactory: (database: Database): ProgressRepository =>
         new DrizzleProgressRepository(database),
     },
+    // LoggingAspect wraps the use case, so the use case holds no logging code.
     {
       provide: SYNC_PROGRESS,
       inject: [PROGRESS_REPOSITORY, CLOCK],
       useFactory: (progress: ProgressRepository, clock: Clock) =>
-        new SyncProgressUseCase(progress, clock),
+        new LoggingAspect(new SyncProgressUseCase(progress, clock), 'SyncProgress'),
     },
     {
       provide: GET_PROGRESS,

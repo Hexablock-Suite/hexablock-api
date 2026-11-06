@@ -135,7 +135,10 @@ imports no package (rule R-application-pure).
 Where the aspects live is still open: **Q12** in [layers.md](docs/architecture/layers.md#open-questions-for-the-professor).
 The draft puts them in `src/infrastructure`, where they call a logging package directly, so there
 is no `Logger` port. If Q12 moves them to `src/application`, they need a `Logger` port there.
-The aspects are not built yet.
+The code follows this draft: `UseCaseAspect` and `LoggingAspect` live in
+[src/infrastructure/aspects](src/infrastructure/aspects), and `AppModule` wraps
+`SyncProgressUseCase` in `LoggingAspect`. It logs the use case name, the outcome and the error.
+`TimingAspect` is not built yet.
 
 ## Getting Started
 
