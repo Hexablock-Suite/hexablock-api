@@ -121,6 +121,17 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(stored?.updatedAt).toEqual(AT);
   });
 
+  // Both syncs read no progress before either saves. The repository keeps
+  // the highest score (API-FR-02), whatever save comes last.
+  it('should_keep_highest_score_when_two_syncs_of_same_game_overlap', async () => {
+    await Promise.all([
+      sync.execute(syncRequest({ score: 500 })),
+      sync.execute(syncRequest({ score: 100 })),
+    ]);
+
+    expect((await progress.find(ADA, GameId.of('hexa-lines')))?.highScore).toBe(500);
+  });
+
   // A broken Clock is a fault of the server, not of the request (decision 11).
   // The use case throws, so the client gets a 500, not a 400.
   it('should_reject_and_save_nothing_when_clock_returns_an_invalid_date', async () => {

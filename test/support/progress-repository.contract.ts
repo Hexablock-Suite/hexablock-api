@@ -58,6 +58,23 @@ export function describeProgressRepositoryContract(
       expect((await repository.find(USER, FIT))?.highScore).toBe(300);
     });
 
+    // Two syncs can read the same old state. The one that saves last must
+    // not lower the stored high score (API-FR-02).
+    it('should_keep_highest_score_when_a_stale_aggregate_saves_a_lower_score', async () => {
+      const repository = await createRepository();
+      const higher = PlayerProgress.start(USER, FIT, AT);
+      higher.recordScore(500, AT);
+      const stale = PlayerProgress.start(USER, FIT, AT);
+      stale.recordScore(100, LATER);
+      await repository.save(higher);
+
+      await repository.save(stale);
+
+      const found = await repository.find(USER, FIT);
+      expect(found?.highScore).toBe(500);
+      expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
+    });
+
     // The Drizzle adapter writes rows and reads new objects. A repository
     // that keeps the saved object would show later changes as saved state.
     it('should_return_the_saved_state_when_an_aggregate_changes_after_save_or_find', async () => {

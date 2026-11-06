@@ -1,4 +1,4 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import type { ProgressRepository } from '../../application/ports/progress-repository.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
@@ -31,8 +31,10 @@ export class DrizzleProgressRepository implements ProgressRepository {
   }
 
   // The primary key on userId and gameId keeps one progress row: a second
-  // save updates it. The level_results rows of the key are written again.
-  // The foreign key to users.id rejects an unknown user.
+  // save updates it. The update keeps the higher of the stored and the new
+  // high_score, so a save from a stale read does not lower it (API-FR-02).
+  // greatest() ignores a null. The level_results rows of the key are
+  // written again. The foreign key to users.id rejects an unknown user.
   async save(aggregate: PlayerProgress): Promise<void> {
     const row = ProgressRowMapper.toProgressRow(aggregate);
     const resultRows = ProgressRowMapper.toLevelResultRows(aggregate);
@@ -42,7 +44,10 @@ export class DrizzleProgressRepository implements ProgressRepository {
         .values(row)
         .onConflictDoUpdate({
           target: [progress.userId, progress.gameId],
-          set: { highScore: row.highScore, updatedAt: row.updatedAt },
+          set: {
+            highScore: sql`greatest(${progress.highScore}, excluded.high_score)`,
+            updatedAt: row.updatedAt,
+          },
         });
       await tx
         .delete(levelResults)

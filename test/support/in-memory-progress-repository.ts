@@ -4,8 +4,9 @@ import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import type { UserId } from '../../src/domain/user/user-id.js';
 
 // Test double for the ProgressRepository port. It keeps one progress per
-// userId and gameId: a second save for the same key replaces the first.
-// It keeps a copy and returns a copy, as the Drizzle adapter keeps rows.
+// userId and gameId: a second save for the same key replaces the first, but
+// keeps the higher high score, as the Drizzle upsert does. It keeps a copy
+// and returns a copy, as the Drizzle adapter keeps rows.
 export class InMemoryProgressRepository implements ProgressRepository {
   private readonly progressByKey = new Map<string, PlayerProgress>();
 
@@ -15,7 +16,9 @@ export class InMemoryProgressRepository implements ProgressRepository {
   }
 
   save(progress: PlayerProgress): Promise<void> {
-    this.progressByKey.set(keyOf(progress.userId, progress.gameId), copyOf(progress));
+    const key = keyOf(progress.userId, progress.gameId);
+    const storedScore = this.progressByKey.get(key)?.highScore ?? null;
+    this.progressByKey.set(key, copyOf(progress, higherOf(storedScore, progress.highScore)));
     return Promise.resolve();
   }
 }
@@ -25,13 +28,24 @@ function keyOf(userId: UserId, gameId: GameId): string {
   return JSON.stringify([userId.value, gameId.value]);
 }
 
+// The higher of two scores. A null is no score, as in Postgres greatest().
+function higherOf(first: number | null, second: number | null): number | null {
+  if (first === null) {
+    return second;
+  }
+  return second === null ? first : Math.max(first, second);
+}
+
 // A new aggregate with the same state. LevelResult is immutable, so the
-// copy shares the results.
-function copyOf(progress: PlayerProgress): PlayerProgress {
+// copy shares the results. A save passes the high score to keep.
+function copyOf(
+  progress: PlayerProgress,
+  highScore: number | null = progress.highScore,
+): PlayerProgress {
   return PlayerProgress.restore({
     userId: progress.userId,
     gameId: progress.gameId,
-    highScore: progress.highScore,
+    highScore,
     updatedAt: progress.updatedAt,
     results: progress.results,
   });

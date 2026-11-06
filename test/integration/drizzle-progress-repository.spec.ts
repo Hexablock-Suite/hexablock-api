@@ -2,11 +2,13 @@ import { sql } from 'drizzle-orm';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import { ProgressRowMapper } from '../../src/adapters/persistence/progress-row.mapper.js';
 import { users } from '../../src/adapters/persistence/schema.js';
+import { SyncProgressUseCase } from '../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import { ProgressError } from '../../src/domain/progress/progress-error.js';
 import { UserId } from '../../src/domain/user/user-id.js';
+import { FixedClock } from '../support/fixed-clock.js';
 import {
   CONTRACT_USER_IDS,
   describeProgressRepositoryContract,
@@ -153,6 +155,25 @@ describe('DrizzleProgressRepository', () => {
     const found = await repository.find(ADA, FIT);
     expect(found?.highScore).toBe(300);
     expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
+  });
+
+  // Both syncs read no row before either saves. The upsert keeps the
+  // highest score in the row (API-FR-02), whatever save comes last.
+  it('should_keep_highest_score_when_two_syncs_of_same_game_overlap', async () => {
+    const database = await openDatabase();
+    const repository = new DrizzleProgressRepository(database.db);
+    const sync = new SyncProgressUseCase(repository, new FixedClock(AT));
+    const syncRequest = (score: number) => ({
+      userId: ADA,
+      gameId: FIT.value,
+      score,
+      results: [],
+    });
+
+    await Promise.all([sync.execute(syncRequest(500)), sync.execute(syncRequest(100))]);
+
+    expect((await repository.find(ADA, FIT))?.highScore).toBe(500);
+    expect(await countRows(database, 'progress')).toBe(1);
   });
 
   it('should_read_back_every_level_result_when_aggregate_is_saved_and_found', async () => {
