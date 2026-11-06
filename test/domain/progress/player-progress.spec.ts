@@ -206,4 +206,42 @@ describe('PlayerProgress', () => {
       PlayerProgress.restore({ ...valid, results: [undefined as unknown as LevelResult] }),
     ).toThrow(ProgressError);
   });
+
+  it('should_reject_restore_when_stored_high_score_is_infinite_or_an_unsafe_integer', () => {
+    const valid = { userId: USER, gameId: FIT, highScore: 1, updatedAt: START, results: [] };
+
+    for (const highScore of [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, 2 ** 53]) {
+      expect(() => PlayerProgress.restore({ ...valid, highScore })).toThrow(ProgressError);
+    }
+  });
+
+  // restore() checks the rule of recordScore(): -0 counts as a zero score.
+  it('should_restore_a_zero_high_score_when_stored_high_score_is_negative_zero', () => {
+    const progress = PlayerProgress.restore({
+      userId: USER,
+      gameId: FIT,
+      highScore: -0,
+      updatedAt: START,
+      results: [],
+    });
+
+    expect(progress.highScore === 0).toBe(true);
+  });
+
+  // restore() records each stored result with recordLevel(), so the rule of
+  // one result per levelId holds: the last result of a levelId stays.
+  it('should_keep_the_last_result_per_level_when_stored_results_repeat_a_level_id', () => {
+    const second = level('fit-02', 1);
+    const retry = level('fit-01', 3);
+
+    const progress = PlayerProgress.restore({
+      userId: USER,
+      gameId: FIT,
+      highScore: null,
+      updatedAt: START,
+      results: [level('fit-01', 2), second, retry],
+    });
+
+    expect(progress.results).toEqual([retry, second]);
+  });
 });

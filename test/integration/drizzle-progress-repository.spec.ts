@@ -1,9 +1,11 @@
 import { sql } from 'drizzle-orm';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
+import { ProgressRowMapper } from '../../src/adapters/persistence/progress-row.mapper.js';
 import { users } from '../../src/adapters/persistence/schema.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
+import { ProgressError } from '../../src/domain/progress/progress-error.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import {
   CONTRACT_USER_IDS,
@@ -198,5 +200,17 @@ describe('DrizzleProgressRepository', () => {
 
     expect(await countRows(database, 'progress')).toBe(0);
     expect(await countRows(database, 'level_results')).toBe(0);
+  });
+
+  // find() filters on a valid GameId, so it never reads a row with another
+  // game_id. The test calls the mapper of the adapter directly: a stored
+  // row must pass the domain rules, as PlayerProgress.restore() says.
+  it('should_reject_stored_row_when_game_id_is_not_a_slug', () => {
+    const row = { userId: ADA.value, gameId: 'Hexa Lines', highScore: null, updatedAt: AT };
+
+    expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(ProgressError);
+    expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
+      'gameId must be a lowercase slug, got "Hexa Lines".',
+    );
   });
 });
