@@ -7,7 +7,8 @@ import { UseCaseAspect } from './use-case-aspect.js';
 // It sits in layer 4 and calls the Nest logger directly, so it needs no
 // Logger port (decision 10 of docs/architecture/classes.md, open in Q12).
 // A success logs at log level. A failed Result logs at warn level. A thrown
-// error logs at error level, and the aspect throws it again.
+// error logs at error level, and the aspect throws it again. A logger that
+// throws does not change the outcome of the use case.
 export class LoggingAspect<TRequest, TValue, TError> extends UseCaseAspect<
   TRequest,
   Result<TValue, TError>
@@ -27,17 +28,31 @@ export class LoggingAspect<TRequest, TValue, TError> extends UseCaseAspect<
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`useCase=${this.name} outcome=error error=${message}`, stack);
+      this.safely(() =>
+        this.logger.error(`useCase=${this.name} outcome=error error=${message}`, stack),
+      );
       throw error;
     }
     if (result.ok) {
-      this.logger.log(`useCase=${this.name} outcome=success`);
+      this.safely(() => this.logger.log(`useCase=${this.name} outcome=success`));
     } else {
-      this.logger.warn(
-        `useCase=${this.name} outcome=failure error=${JSON.stringify(result.error, bigintAsText)}`,
+      this.safely(() =>
+        this.logger.warn(
+          `useCase=${this.name} outcome=failure error=${JSON.stringify(result.error, bigintAsText)}`,
+        ),
       );
     }
     return result;
+  }
+
+  // Runs one log write. A failure of the write stops here: the caller gets
+  // the result or the error of the inner use case.
+  private safely(write: () => void): void {
+    try {
+      write();
+    } catch {
+      // No source gives a policy for a failed log write, so the aspect drops it.
+    }
   }
 }
 

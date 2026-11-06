@@ -89,6 +89,36 @@ describe('LoggingAspect', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  // A logger that throws does not change the outcome of the use case.
+  it('should_return_inner_result_unchanged_when_logger_throws_on_success_or_failure', async () => {
+    for (const result of [ok('done'), err({ kind: 'progress-not-found' })] as EchoResult[]) {
+      const { inner } = echo(() => Promise.resolve(result));
+      const logger = recordingLogger();
+      const sinkIsFull = () => {
+        throw new Error('log sink is full');
+      };
+      logger.log.mockImplementation(sinkIsFull);
+      logger.warn.mockImplementation(sinkIsFull);
+      const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+      await expect(aspect.execute('ping')).resolves.toBe(result);
+      expect(result.ok ? logger.log : logger.warn).toHaveBeenCalledOnce();
+    }
+  });
+
+  it('should_rethrow_inner_error_when_logger_throws_while_it_logs_that_error', async () => {
+    const failure = new Error('database is down');
+    const { inner } = echo(() => Promise.reject(failure));
+    const logger = recordingLogger();
+    logger.error.mockImplementation(() => {
+      throw new Error('log sink is full');
+    });
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).rejects.toBe(failure);
+    expect(logger.error).toHaveBeenCalledOnce();
+  });
+
   // A thrown value that is not an Error has no message and no stack. The
   // aspect logs its text and throws the same value again.
   it('should_log_thrown_text_without_stack_and_rethrow_it_when_inner_use_case_throws_a_non_error', async () => {
