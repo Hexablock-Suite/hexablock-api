@@ -121,6 +121,17 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(stored?.updatedAt).toEqual(AT);
   });
 
+  // A broken Clock is a fault of the server, not of the request (decision 11).
+  // The use case throws, so the client gets a 500, not a 400.
+  it('should_reject_and_save_nothing_when_clock_returns_an_invalid_date', async () => {
+    const broken = new SyncProgressUseCase(progress, new FixedClock(new Date(Number.NaN)));
+
+    await expect(broken.execute(syncRequest())).rejects.toThrow(
+      'The Clock must return a valid Date.',
+    );
+    expect(await progress.find(ADA, GameId.of('hexa-lines'))).toBeNull();
+  });
+
   it('should_fail_with_invalid_progress_and_save_nothing_when_level_result_breaks_a_rule', async () => {
     const result = await sync.execute(
       syncRequest({

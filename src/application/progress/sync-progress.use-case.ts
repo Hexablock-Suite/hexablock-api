@@ -24,7 +24,8 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 
 // Loads the one progress of the user and the game, or starts it, records the
 // score and the level results at the Clock instant, and saves it. A broken
-// rule saves nothing.
+// rule saves nothing. A Clock that gives an invalid Date is a fault of the
+// server, so the use case throws before the read (decision 11).
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
@@ -41,6 +42,9 @@ export class SyncProgressUseCase implements SyncProgress {
     }
     const { gameId, results } = values.value;
     const at = this.clock.now();
+    if (!(at instanceof Date) || Number.isNaN(at.getTime())) {
+      throw new Error('The Clock must return a valid Date.');
+    }
     const stored = await this.progress.find(request.userId, gameId);
     const updated = withProgressRules(() => {
       const progress = stored ?? PlayerProgress.start(request.userId, gameId, at);
