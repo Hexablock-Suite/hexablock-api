@@ -3,14 +3,18 @@ import {
   Body,
   ConflictException,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Inject,
   Post,
+  Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -21,7 +25,9 @@ import type { CredentialField, Credentials } from '../../application/auth/creden
 import { LOGIN, type Login } from '../../application/auth/login.use-case.js';
 import { REGISTER_USER, type RegisterUser } from '../../application/auth/register.use-case.js';
 import { CredentialsDto } from './credentials.dto.js';
+import { CurrentUserDto } from './current-user.dto.js';
 import { ErrorDto } from './error.dto.js';
+import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
 import { TokenDto } from './token.dto.js';
 
 const RULES: Record<CredentialField, string> = {
@@ -29,8 +35,9 @@ const RULES: Record<CredentialField, string> = {
   password: 'password must have 8 to 128 characters',
 };
 
-// Sign-up and sign-in (API-FR-01). No route here has a token guard, because
-// the player has no token yet. A failed Result becomes an HttpException, and
+// Sign-up, sign-in and the signed-in user (API-FR-01). Sign-up and sign-in
+// have no token guard, because the player has no token yet. GET /auth/me
+// has the guard. A failed Result becomes an HttpException, and
 // HttpErrorFilter answers it with ErrorDto (API-FR-06).
 @ApiTags('auth')
 @Controller('auth')
@@ -69,6 +76,18 @@ export class AuthController {
       throw new UnauthorizedException('Invalid username or password');
     }
     return { accessToken: result.value };
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: CurrentUserDto, description: 'The token is valid.' })
+  @ApiUnauthorizedResponse({
+    type: ErrorDto,
+    description: 'The bearer token is missing, malformed, expired or signed with another key.',
+  })
+  me(@Req() request: AuthenticatedRequest): CurrentUserDto {
+    return { userId: request.userId.value };
   }
 }
 
