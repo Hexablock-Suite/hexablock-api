@@ -29,7 +29,8 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 
 Today `src/` holds the health endpoint, the `Clock` port and its adapter, the database
 connection, the `HttpErrorFilter` that gives every HTTP error the `ErrorDto` body, and the
-`PlayerProgress` aggregate in `src/domain/progress` with its `ProgressRepository` port. The rest
+`PlayerProgress` aggregate in `src/domain/progress` with its `ProgressRepository` port, which
+`DrizzleProgressRepository` implements over the `progress` and `level_results` tables. The rest
 is designed in [docs/architecture/](docs/architecture/) and is not built yet.
 
 ## Architecture
