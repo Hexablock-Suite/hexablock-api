@@ -6,6 +6,8 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-06
+
 ### Added
 
 - A token guard (API-FR-01): `JwtAuthGuard` calls the `AuthenticateToken` input port, and `AuthenticateTokenUseCase` verifies the bearer token through `TokenIssuer`. `GET /auth/me` is the first guarded route: it answers 200 with the `userId` of the token, or 401 with the `ErrorDto` body when the token is missing, malformed, expired or signed with another key. `openapi/openapi.json` declares the bearer security scheme ([#31](https://github.com/Hexablock-Suite/hexablock-api/issues/31)).
