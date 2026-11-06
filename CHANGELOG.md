@@ -13,6 +13,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- `docs/REQUIREMENTS.md` §4 adds two offline sync rules that the team closed on 2026-11-06. DS-11: the level copy with the higher `version` wins, so a level update reaches players only when it raises `version`. DS-12: the level results table keeps the best result per user, game and level, and the high score keeps the highest value. DS-12 closes the every-attempt question of DS-4; the order that defines the best result stays open in DS-4.
 - Sprint 0 closes with `v0.0.0`: the README marks the planned pieces as design, and `AI_USAGE.md` logs the work of 2026-11-04.
 - `docs/REQUIREMENTS.md` records the answers of the session of 2026-11-03: C7 confirms A5, Q4 keeps the level update behind the token guard with no roles, and API-NFR-08 names Clean plus an architecture for games. Class view 2.2 drops a stray «results 1» label under «clock 1» ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - The extensibility overview and the database engine view draw no line that starts or ends on a dashed frame, and draw one line per class where only some classes of a group have a relation: each driver and each Drizzle repository implements its own port, and each use case holds its own output port; the reading notes of `classes.md` and `extensibility.md` follow ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
