@@ -2,9 +2,9 @@ import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
-import { UserId } from '../../../src/domain/progress/user-id.js';
+import { UserId } from '../../../src/domain/user/user-id.js';
 
-const USER = UserId.of('user-1');
+const USER = UserId.from('user-1');
 const FIT = GameId.of('fit');
 const START = new Date('2026-11-06T10:00:00.000Z');
 const LATER = new Date('2026-11-06T10:05:00.000Z');
@@ -134,5 +134,54 @@ describe('PlayerProgress', () => {
     at.setUTCFullYear(1999);
 
     expect(progress.updatedAt.toISOString()).toBe(LATER.toISOString());
+  });
+
+  it('should_return_the_stored_state_when_progress_is_restored', () => {
+    const first = level('fit-01', 2);
+    const second = level('fit-02', 3);
+
+    const progress = PlayerProgress.restore({
+      userId: USER,
+      gameId: FIT,
+      highScore: 120,
+      updatedAt: LATER,
+      results: [first, second],
+    });
+
+    expect(progress.userId.equals(USER)).toBe(true);
+    expect(progress.gameId.equals(FIT)).toBe(true);
+    expect(progress.highScore).toBe(120);
+    expect(progress.updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progress.results).toEqual([first, second]);
+  });
+
+  it('should_restore_no_high_score_when_stored_high_score_is_null', () => {
+    const progress = PlayerProgress.restore({
+      userId: USER,
+      gameId: FIT,
+      highScore: null,
+      updatedAt: START,
+      results: [],
+    });
+
+    expect(progress.highScore).toBeNull();
+    expect(progress.results).toEqual([]);
+  });
+
+  it('should_reject_restore_when_stored_state_breaks_a_rule', () => {
+    const valid = { userId: USER, gameId: FIT, highScore: 1, updatedAt: START, results: [] };
+
+    for (const highScore of [-1, 2.5, Number.NaN]) {
+      expect(() => PlayerProgress.restore({ ...valid, highScore })).toThrow(ProgressError);
+    }
+    expect(() => PlayerProgress.restore({ ...valid, updatedAt: new Date(Number.NaN) })).toThrow(
+      ProgressError,
+    );
+    expect(() => PlayerProgress.restore({ ...valid, gameId: 'fit' as unknown as GameId })).toThrow(
+      ProgressError,
+    );
+    expect(() =>
+      PlayerProgress.restore({ ...valid, results: [undefined as unknown as LevelResult] }),
+    ).toThrow(ProgressError);
   });
 });

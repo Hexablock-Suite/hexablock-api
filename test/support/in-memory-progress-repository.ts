@@ -1,7 +1,7 @@
 import type { ProgressRepository } from '../../src/application/ports/progress-repository.js';
 import type { GameId } from '../../src/domain/progress/game-id.js';
 import type { PlayerProgress } from '../../src/domain/progress/player-progress.js';
-import type { UserId } from '../../src/domain/progress/user-id.js';
+import type { UserId } from '../../src/domain/user/user-id.js';
 
 // Test double for the ProgressRepository port. It keeps one progress per
 // userId and gameId: a second save for the same key replaces the first.

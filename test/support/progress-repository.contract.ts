@@ -2,10 +2,16 @@ import type { ProgressRepository } from '../../src/application/ports/progress-re
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
-import { UserId } from '../../src/domain/progress/user-id.js';
+import { UserId } from '../../src/domain/user/user-id.js';
 
-const USER = UserId.of('user-1');
-const OTHER_USER = UserId.of('user-2');
+// UUIDs, because the Drizzle adapter keys progress on users.id (#34). An
+// adapter with a users table adds these users before the contract runs.
+export const CONTRACT_USER_IDS = [
+  '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01',
+  '0b9e7f4a-5c3d-4e2b-8a1f-9c8d7e6f5a40',
+] as const;
+const USER = UserId.from(CONTRACT_USER_IDS[0]);
+const OTHER_USER = UserId.from(CONTRACT_USER_IDS[1]);
 const FIT = GameId.of('fit');
 const LINES = GameId.of('lines');
 const AT = new Date('2026-11-06T10:00:00.000Z');
@@ -32,9 +38,9 @@ export function describeProgressRepositoryContract(
       progress.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 1 }));
 
       await repository.save(progress);
-      const found = await repository.find(UserId.of('user-1'), GameId.of('fit'));
+      const found = await repository.find(UserId.from(CONTRACT_USER_IDS[0]), GameId.of('fit'));
 
-      expect(found?.userId.value).toBe('user-1');
+      expect(found?.userId.value).toBe(CONTRACT_USER_IDS[0]);
       expect(found?.gameId.value).toBe('fit');
       expect(found?.highScore).toBe(120);
       expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
