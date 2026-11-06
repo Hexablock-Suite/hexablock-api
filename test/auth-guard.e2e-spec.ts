@@ -55,6 +55,16 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(response.body).toEqual({ userId });
   });
 
+  it('should_return_signed_in_user_when_scheme_name_is_not_capitalized', async () => {
+    const { token, userId } = await signIn(server(), USERNAME);
+    // RFC 7235: the scheme name is case-insensitive (review comment 6683774229).
+    for (const scheme of ['bearer', 'BEARER']) {
+      const response = await callProtected(`${scheme} ${token}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ userId });
+    }
+  });
+
   it('should_return_unauthorized_error_body_when_token_is_missing', async () => {
     const response = await callProtected();
 

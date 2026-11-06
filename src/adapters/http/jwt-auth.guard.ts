@@ -11,7 +11,9 @@ import {
 } from '../../application/auth/authenticate-token.use-case.js';
 import type { UserId } from '../../domain/user/user-id.js';
 
-const BEARER_PREFIX = 'Bearer ';
+// RFC 7235: the scheme name is case-insensitive, so the guard compares it
+// in lower case.
+const BEARER_PREFIX = 'bearer ';
 
 // A request that passed JwtAuthGuard. The guard sets userId.
 export interface AuthenticatedRequest {
@@ -42,9 +44,13 @@ export class JwtAuthGuard implements CanActivate {
   }
 }
 
-// The token after "Bearer ", or undefined when the header has no bearer token.
+// The token after "Bearer " in any letter case, or undefined when the header
+// has no bearer token.
 function bearerTokenOf(header: string | string[] | undefined): string | undefined {
-  if (typeof header !== 'string' || !header.startsWith(BEARER_PREFIX)) {
+  if (
+    typeof header !== 'string' ||
+    header.slice(0, BEARER_PREFIX.length).toLowerCase() !== BEARER_PREFIX
+  ) {
     return undefined;
   }
   const token = header.slice(BEARER_PREFIX.length).trim();
