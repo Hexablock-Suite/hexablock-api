@@ -74,6 +74,18 @@ describe('LoggingAspect', () => {
     );
   });
 
+  it('should_log_nested_bigints_as_text_and_return_inner_result_unchanged_when_failure_nests_them', async () => {
+    const result = err({ kind: 'big', sizes: [1n, { inner: 2n }], count: 3 });
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).resolves.toBe(result);
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=Echo outcome=failure error={"kind":"big","sizes":["1",{"inner":"2"}],"count":3}',
+    );
+  });
+
   it('should_log_name_error_and_rethrow_same_error_when_inner_use_case_throws', async () => {
     const failure = new Error('database is down');
     const { inner } = echo(() => Promise.reject(failure));
@@ -117,6 +129,22 @@ describe('LoggingAspect', () => {
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.error).toHaveBeenCalledOnce();
+  });
+
+  it('should_rethrow_same_non_error_object_when_logger_throws_while_it_logs_that_value', async () => {
+    const failure = { reason: 'database is down' };
+    const { inner } = echo(() => Promise.reject(failure));
+    const logger = recordingLogger();
+    logger.error.mockImplementation(() => {
+      throw new Error('log sink is full');
+    });
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).rejects.toBe(failure);
+    expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+      'useCase=Echo outcome=error error=[object Object]',
+      undefined,
+    );
   });
 
   // A thrown value that is not an Error has no message and no stack. The

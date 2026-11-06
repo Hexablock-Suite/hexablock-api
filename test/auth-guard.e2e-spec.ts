@@ -65,6 +65,22 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     }
   });
 
+  // Only the scheme name ignores case. A header without the space after the
+  // scheme, or with no token, still gets the missing-token error.
+  it('should_accept_mixed_case_scheme_and_keep_rejections_when_header_varies', async () => {
+    const { token, userId } = await signIn(server(), USERNAME);
+
+    const accepted = await callProtected(`BeArEr ${token}`);
+
+    expect(accepted.status).toBe(200);
+    expect(accepted.body).toEqual({ userId });
+    for (const authorization of ['Bearer ', `Bearer${token}`, `Bearer\t${token}`]) {
+      const response = await callProtected(authorization);
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual(unauthorizedBody('Missing bearer token'));
+    }
+  });
+
   it('should_return_unauthorized_error_body_when_token_is_missing', async () => {
     const response = await callProtected();
 

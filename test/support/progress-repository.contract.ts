@@ -75,6 +75,20 @@ export function describeProgressRepositoryContract(
       expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
     });
 
+    // A stale aggregate can hold no score at all. Its save must not clear
+    // the stored high score (API-FR-02).
+    it('should_keep_highest_score_when_a_stale_aggregate_without_score_saves', async () => {
+      const repository = await createRepository();
+      const scored = PlayerProgress.start(USER, FIT, AT);
+      scored.recordScore(500, AT);
+      const stale = PlayerProgress.start(USER, FIT, LATER);
+      await repository.save(scored);
+
+      await repository.save(stale);
+
+      expect((await repository.find(USER, FIT))?.highScore).toBe(500);
+    });
+
     // The Drizzle adapter writes rows and reads new objects. A repository
     // that keeps the saved object would show later changes as saved state.
     it('should_return_the_saved_state_when_an_aggregate_changes_after_save_or_find', async () => {
