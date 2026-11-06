@@ -8,6 +8,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Added
 
+- One error body for every HTTP error (API-FR-06): `HttpErrorFilter` answers each exception with `ErrorDto` (`statusCode`, `error`, `message`, `details`, `path`); an unexpected error becomes a 500 that hides its message; `openapi/openapi.json` lists `ErrorDto` ([#29](https://github.com/Hexablock-Suite/hexablock-api/issues/29)).
 - Two more use case flows in `docs/architecture/flows.md`, each with a class view and a UML sequence diagram: login, with its unknown-user and wrong-password branches, and update levels, with the `LevelValidators` Strategy registry; a table names the path that each other use case follows ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - A use case flow page, `docs/architecture/flows.md`, with a class view and a UML sequence diagram of the sync progress endpoint across the four layers ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 
