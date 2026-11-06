@@ -1,14 +1,13 @@
-import { JwtService } from '@nestjs/jwt';
 import { eq } from 'drizzle-orm';
 import request from 'supertest';
 import { progress } from '../src/adapters/persistence/schema.js';
 import { FixedClock } from './support/fixed-clock.js';
-import { createTestApp, TEST_JWT_SECRET, type TestApp } from './support/http/test-app.js';
+import { signIn as signInTo } from './support/http/sign-in.js';
+import { createTestApp, type TestApp } from './support/http/test-app.js';
 
 // API-FR-02: one progress entry per user and per gameId. The userId comes
 // from the bearer token, never from the body. API-FR-06: every error has the
 // shared ErrorDto body.
-const PASSWORD = 'correct horse battery';
 const AT = new Date('2026-11-06T10:00:00.000Z');
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 const LATER = new Date(AT.getTime() + FIVE_MINUTES_MS);
@@ -29,16 +28,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
 
   const server = () => testApp.app.getHttpServer();
 
-  // Signs up and signs in. It returns the bearer token and its userId.
-  async function signIn(username: string): Promise<{ token: string; userId: string }> {
-    await request(server()).post('/auth/register').send({ username, password: PASSWORD });
-    const login = await request(server())
-      .post('/auth/login')
-      .send({ username, password: PASSWORD });
-    const token: string = login.body.accessToken;
-    const userId = new JwtService({ secret: TEST_JWT_SECRET }).decode<{ sub: string }>(token).sub;
-    return { token, userId };
-  }
+  const signIn = (username: string) => signInTo(server(), username);
 
   const sync = (token: string, body: object) =>
     request(server()).post('/progress').set('Authorization', `Bearer ${token}`).send(body);
