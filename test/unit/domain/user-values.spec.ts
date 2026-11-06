@@ -1,4 +1,5 @@
 import { Password } from '../../../src/domain/user/password.js';
+import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
 
@@ -43,5 +44,11 @@ describe('UserId', () => {
     expect(UserId.from('user-1').value).toBe('user-1');
     expect(UserId.from('user-1').equals(UserId.from('user-1'))).toBe(true);
     expect(UserId.from('user-1').equals(UserId.from('user-2'))).toBe(false);
+  });
+});
+
+describe('PasswordHash', () => {
+  it('should_reject_password_hash_when_value_is_empty', () => {
+    expect(() => PasswordHash.from('')).toThrow('A PasswordHash needs a value.');
   });
 });

@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { DrizzleUserRepository } from '../../src/adapters/persistence/drizzle-user-repository.js';
 import { users } from '../../src/adapters/persistence/schema.js';
+import { UserRowMapper } from '../../src/adapters/persistence/user-row.mapper.js';
 import { RegisterUseCase } from '../../src/application/auth/register.use-case.js';
 import { PasswordHash } from '../../src/domain/user/password-hash.js';
 import { User } from '../../src/domain/user/user.js';
@@ -98,5 +99,22 @@ describe('DrizzleUserRepository', () => {
     expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
     const rows = await database.db.select().from(users);
     expect(rows).toEqual([{ id: ADA_ID, username: 'ada', passwordHash: 'scrypt$hash' }]);
+  });
+
+  it('should_rethrow_database_error_when_insert_fails_for_another_reason', async () => {
+    // The id column is a uuid, so Postgres rejects this id with
+    // invalid_text_representation (22P02), not with unique_violation.
+    const added = repository.add(userNamed('not-a-uuid', 'ada', 'scrypt$hash'));
+
+    await expect(added).rejects.toMatchObject({ cause: { code: '22P02' } });
+    expect(await database.db.select().from(users)).toEqual([]);
+  });
+
+  it('should_throw_when_stored_row_holds_an_invalid_username', () => {
+    const row = { id: ADA_ID, username: 'ada lovelace', passwordHash: 'scrypt$hash' };
+
+    expect(() => UserRowMapper.toEntity(row)).toThrow(
+      `The users row ${ADA_ID} holds an invalid username.`,
+    );
   });
 });

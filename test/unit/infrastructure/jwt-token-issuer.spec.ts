@@ -6,6 +6,12 @@ import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';
 
 const USER_ID = UserId.from('6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01');
 
+// A token with alg "none" and an empty signature, as an attacker can write it.
+function unsignedToken(payload: object): string {
+  const encode = (part: object) => Buffer.from(JSON.stringify(part)).toString('base64url');
+  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode(payload)}.`;
+}
+
 describe('JwtTokenIssuer', () => {
   const issuer = new JwtTokenIssuer(createJwtService(TEST_JWT_SECRET));
 
@@ -48,5 +54,18 @@ describe('JwtTokenIssuer', () => {
     for (const token of ['', 'not-a-jwt', noSubject]) {
       expect(issuer.verify(token)).toBeNull();
     }
+  });
+
+  it('should_return_null_when_token_has_alg_none_and_no_signature', () => {
+    expect(issuer.verify(unsignedToken({ sub: USER_ID.value }))).toBeNull();
+  });
+
+  it('should_return_null_when_token_is_signed_with_hs512_and_the_right_secret', () => {
+    const hs512 = new JwtService({ secret: TEST_JWT_SECRET }).sign(
+      { sub: USER_ID.value },
+      { algorithm: 'HS512' },
+    );
+
+    expect(issuer.verify(hs512)).toBeNull();
   });
 });

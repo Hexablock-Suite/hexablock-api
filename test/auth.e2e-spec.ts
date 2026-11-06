@@ -1,4 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
+import { sql } from 'drizzle-orm';
 import request from 'supertest';
 import { users } from '../src/adapters/persistence/schema.js';
 import { createTestApp, TEST_JWT_SECRET, type TestApp } from './support/http/test-app.js';
@@ -6,6 +7,7 @@ import { createTestApp, TEST_JWT_SECRET, type TestApp } from './support/http/tes
 // API-FR-01: sign-up and sign-in with JWT. API-FR-06: errors use ErrorDto.
 const USERNAME = 'ada';
 const PASSWORD = 'correct horse battery';
+const MISSING_FIELDS = ['username must be a string', 'password must be a string'];
 
 describe('auth endpoints (API-FR-01)', () => {
   let testApp: TestApp;
@@ -136,5 +138,78 @@ describe('auth endpoints (API-FR-01)', () => {
       details: ['username must be a string', 'password must be a string'],
       path: '/auth/login',
     });
+  });
+
+  it('should_create_two_accounts_when_usernames_differ_only_in_case', async () => {
+    // The username rule is case-sensitive (proposal in the body of PR #40).
+    const upper = await post('/auth/register', { username: 'Ada', password: PASSWORD });
+    const lower = await post('/auth/register', { username: 'ada', password: PASSWORD });
+
+    expect(upper.status).toBe(201);
+    expect(lower.status).toBe(201);
+    const rows = await testApp.database.db.select().from(users);
+    expect(rows.map((row) => row.username).sort()).toEqual(['Ada', 'ada']);
+    expect(rows[0].id).not.toBe(rows[1].id);
+  });
+
+  it('should_return_validation_error_body_when_body_is_not_a_json_object', async () => {
+    const server = testApp.app.getHttpServer();
+    for (const path of ['/auth/register', '/auth/login']) {
+      const responses = [
+        await request(server).post(path).send([]),
+        await request(server).post(path).set('Content-Type', 'text/plain').send('ada'),
+      ];
+
+      for (const response of responses) {
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Request validation failed',
+          details: MISSING_FIELDS,
+          path,
+        });
+      }
+    }
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+  });
+
+  it('should_return_bad_request_error_body_when_json_body_is_null', async () => {
+    const response = await request(testApp.app.getHttpServer())
+      .post('/auth/register')
+      .set('Content-Type', 'application/json')
+      .send('null');
+
+    // The JSON parser rejects a body that is not an object or an array. Its
+    // message comes from the JavaScript engine, so the test does not pin it.
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: expect.any(String),
+      details: [],
+      path: '/auth/register',
+    });
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+  });
+
+  it('should_hide_database_error_when_storing_the_user_fails', async () => {
+    // A check constraint makes every insert fail with a code other than
+    // unique_violation, as a broken database does.
+    await testApp.database.db.execute(
+      sql`alter table users add constraint users_reject_all check (false) not valid`,
+    );
+
+    const response = await post('/auth/register', { username: USERNAME, password: PASSWORD });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'Internal server error',
+      details: [],
+      path: '/auth/register',
+    });
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
 });
