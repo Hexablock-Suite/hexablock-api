@@ -82,6 +82,28 @@ describe('PlayerProgress', () => {
     expect(progress.updatedAt.toISOString()).toBe(START.toISOString());
   });
 
+  it('should_reject_score_and_keep_state_when_score_is_negative_infinity_or_an_unsafe_integer', () => {
+    const progress = PlayerProgress.start(USER, FIT, START);
+    progress.recordScore(50, START);
+
+    for (const bad of [Number.NEGATIVE_INFINITY, 2 ** 53, -(2 ** 53)]) {
+      expect(() => progress.recordScore(bad, LATER)).toThrow(ProgressError);
+    }
+
+    expect(progress.highScore).toBe(50);
+    expect(progress.updatedAt.toISOString()).toBe(START.toISOString());
+  });
+
+  // -0 is a non-negative integer: -0 < 0 is false. It counts as a zero score.
+  it('should_record_a_zero_score_when_score_is_negative_zero', () => {
+    const progress = PlayerProgress.start(USER, FIT, START);
+
+    progress.recordScore(-0, LATER);
+
+    expect(progress.highScore === 0).toBe(true);
+    expect(progress.updatedAt.toISOString()).toBe(LATER.toISOString());
+  });
+
   it('should_add_the_level_result_when_level_is_recorded', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
     const first = level('fit-01', 2);

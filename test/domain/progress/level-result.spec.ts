@@ -30,4 +30,12 @@ describe('LevelResult', () => {
       }
     }
   });
+
+  it('should_reject_level_result_when_a_count_is_negative_infinity_or_an_unsafe_integer', () => {
+    for (const field of ['stars', 'moves', 'elapsedMs'] as const) {
+      for (const bad of [Number.NEGATIVE_INFINITY, 2 ** 53, -(2 ** 53)]) {
+        expect(() => LevelResult.of({ ...VALID, [field]: bad })).toThrow(ProgressError);
+      }
+    }
+  });
 });

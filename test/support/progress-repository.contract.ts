@@ -58,6 +58,26 @@ export function describeProgressRepositoryContract(
       expect((await repository.find(USER, FIT))?.highScore).toBe(300);
     });
 
+    // The Drizzle adapter writes rows and reads new objects. A repository
+    // that keeps the saved object would show later changes as saved state.
+    it('should_return_the_saved_state_when_an_aggregate_changes_after_save_or_find', async () => {
+      const repository = await createRepository();
+      const progress = PlayerProgress.start(USER, FIT, AT);
+      progress.recordScore(120, AT);
+      progress.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 1, moves: 9, elapsedMs: 1 }));
+      await repository.save(progress);
+
+      progress.recordScore(300, LATER);
+      progress.recordLevel(LevelResult.of({ levelId: 'fit-02', stars: 3, moves: 5, elapsedMs: 2 }));
+      const found = await repository.find(USER, FIT);
+      found?.recordScore(500, LATER);
+      const foundAgain = await repository.find(USER, FIT);
+
+      expect(foundAgain?.highScore).toBe(120);
+      expect(foundAgain?.updatedAt.toISOString()).toBe(AT.toISOString());
+      expect(foundAgain?.results.map((result) => result.levelId)).toEqual(['fit-01']);
+    });
+
     it('should_keep_two_entries_when_one_user_saves_two_variants', async () => {
       const repository = await createRepository();
       const fit = PlayerProgress.start(USER, FIT, AT);

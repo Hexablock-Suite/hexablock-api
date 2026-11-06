@@ -37,7 +37,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(stored?.highScore).toBe(120);
     expect(stored?.updatedAt).toEqual(AT);
     expect(stored?.results).toEqual([]);
-    expect(result.ok && result.value).toBe(stored);
+    expect(result.ok && result.value).toEqual(stored);
   });
 
   it('should_keep_one_progress_with_highest_score_when_same_game_syncs_twice', async () => {
@@ -47,7 +47,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     const result = await sync.execute(syncRequest({ score: 80 }));
 
     const stored = await progress.find(ADA, GameId.of('hexa-lines'));
-    expect(result.ok && result.value).toBe(stored);
+    expect(result.ok && result.value).toEqual(stored);
     expect(stored?.highScore).toBe(120);
     expect(stored?.updatedAt).toEqual(LATER);
   });
