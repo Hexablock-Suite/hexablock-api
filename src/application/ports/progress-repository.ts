@@ -8,3 +8,6 @@ export interface ProgressRepository {
   find(userId: UserId, gameId: GameId): Promise<PlayerProgress | null>;
   save(progress: PlayerProgress): Promise<void>;
 }
+
+// Nest injection token for the ProgressRepository port.
+export const PROGRESS_REPOSITORY = Symbol('ProgressRepository');
