@@ -74,6 +74,23 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(stored?.results).toEqual([LevelResult.of(level)]);
   });
 
+  // The DTO says: a later result for a levelId replaces the earlier one.
+  it('should_replace_level_result_and_keep_other_levels_when_stored_progress_syncs_again', async () => {
+    const first = { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 };
+    const retry = { levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 30000 };
+    const next = { levelId: 'fit-02', stars: 2, moves: 12, elapsedMs: 45000 };
+    await sync.execute(syncRequest({ gameId: 'hexa-fit', score: undefined, results: [first] }));
+
+    const result = await sync.execute(
+      syncRequest({ gameId: 'hexa-fit', score: undefined, results: [retry, next] }),
+    );
+
+    const stored = await progress.find(ADA, GameId.of('hexa-fit'));
+    expect(result.ok && result.value).toEqual(stored);
+    expect(stored?.highScore).toBeNull();
+    expect(stored?.results).toEqual([LevelResult.of(retry), LevelResult.of(next)]);
+  });
+
   it('should_fail_with_invalid_progress_and_save_nothing_when_game_id_is_not_a_slug', async () => {
     const result = await sync.execute(syncRequest({ gameId: 'Hexa Lines' }));
 

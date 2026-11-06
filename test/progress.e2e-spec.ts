@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import request from 'supertest';
+import { DrizzleProgressRepository } from '../src/adapters/persistence/drizzle-progress-repository.js';
 import { progress } from '../src/adapters/persistence/schema.js';
 import { FixedClock } from './support/fixed-clock.js';
 import { signIn as signInTo } from './support/http/sign-in.js';
@@ -138,6 +139,142 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       path: '/progress',
     });
     expect(readBack.body.highScore).toBe(120);
+  });
+
+  const storedRows = (userId: string) =>
+    testApp.database.db.select().from(progress).where(eq(progress.userId, userId));
+
+  it('should_return_bad_request_error_body_and_save_nothing_when_score_is_an_unsafe_integer', async () => {
+    const { token, userId } = await signIn('ada');
+
+    const response = await sync(token, { gameId: 'hexa-lines', score: 2 ** 53 });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['score must be a non-negative integer, got 9007199254740992.'],
+      path: '/progress',
+    });
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
+  // JSON.stringify writes -0 as 0, so the test sends the raw JSON text.
+  // -0 is a non-negative integer: -0 < 0 is false.
+  it('should_save_a_zero_high_score_when_score_is_negative_zero', async () => {
+    const { token, userId } = await signIn('ada');
+
+    const response = await request(server())
+      .post('/progress')
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json')
+      .send('{"gameId":"hexa-lines","score":-0}');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      gameId: 'hexa-lines',
+      highScore: 0,
+      updatedAt: AT.toISOString(),
+      results: [],
+    });
+    expect((await storedRows(userId)).map((row) => row.highScore)).toEqual([0]);
+  });
+
+  // The DTO declares score as nullable: null means no score in this sync.
+  it('should_save_entry_without_high_score_when_score_is_null', async () => {
+    const { token, userId } = await signIn('ada');
+
+    const response = await sync(token, { gameId: 'hexa-fit', score: null, results: [FIT_LEVEL] });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      gameId: 'hexa-fit',
+      highScore: null,
+      updatedAt: AT.toISOString(),
+      results: [FIT_LEVEL],
+    });
+    expect((await storedRows(userId)).map((row) => row.highScore)).toEqual([null]);
+  });
+
+  it('should_return_bad_request_error_body_and_save_nothing_when_results_is_not_an_array_of_objects', async () => {
+    const { token, userId } = await signIn('ada');
+
+    const notArray = await sync(token, { gameId: 'hexa-fit', results: 'fit-01' });
+    const nullInside = await sync(token, { gameId: 'hexa-fit', results: [FIT_LEVEL, null] });
+
+    const error = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['results must be an array of objects'],
+      path: '/progress',
+    };
+    expect(notArray.status).toBe(400);
+    expect(notArray.body).toEqual(error);
+    expect(nullInside.status).toBe(400);
+    expect(nullInside.body).toEqual(error);
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
+  // The route declares a 400 response for a gameId that breaks its rule.
+  it('should_return_bad_request_error_body_when_read_game_id_is_not_a_slug', async () => {
+    const { token } = await signIn('ada');
+
+    const response = await read(token, 'Hexa%20Lines');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['gameId must be a lowercase slug, got "Hexa Lines".'],
+      path: '/progress/Hexa%20Lines',
+    });
+  });
+
+  // A repository failure is not an expected failure: HttpErrorFilter answers
+  // 500 and hides the message (API-FR-06).
+  it('should_return_internal_error_body_when_progress_repository_find_throws', async () => {
+    const { token } = await signIn('ada');
+    const find = vi
+      .spyOn(DrizzleProgressRepository.prototype, 'find')
+      .mockRejectedValue(new Error('database is down'));
+
+    const readResponse = await read(token, 'hexa-lines');
+    const syncResponse = await sync(token, { gameId: 'hexa-lines', score: 120 });
+    find.mockRestore();
+
+    const error = {
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'Internal server error',
+      details: [],
+    };
+    expect(readResponse.status).toBe(500);
+    expect(readResponse.body).toEqual({ ...error, path: '/progress/hexa-lines' });
+    expect(syncResponse.status).toBe(500);
+    expect(syncResponse.body).toEqual({ ...error, path: '/progress' });
+  });
+
+  it('should_return_internal_error_body_and_save_nothing_when_progress_repository_save_throws', async () => {
+    const { token, userId } = await signIn('ada');
+    const save = vi
+      .spyOn(DrizzleProgressRepository.prototype, 'save')
+      .mockRejectedValue(new Error('database is down'));
+
+    const response = await sync(token, { gameId: 'hexa-lines', score: 120 });
+    save.mockRestore();
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'Internal server error',
+      details: [],
+      path: '/progress',
+    });
+    expect(await storedRows(userId)).toEqual([]);
   });
 
   it('should_return_unauthorized_error_body_when_sync_has_no_token', async () => {
