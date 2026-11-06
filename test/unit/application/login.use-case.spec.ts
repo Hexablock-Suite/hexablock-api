@@ -1,5 +1,6 @@
 import { LoginUseCase } from '../../../src/application/auth/login.use-case.js';
 import { RegisterUseCase } from '../../../src/application/auth/register.use-case.js';
+import type { PasswordHasher } from '../../../src/application/ports/password-hasher.js';
 import {
   InMemoryUserRepository,
   PrefixPasswordHasher,
@@ -53,6 +54,43 @@ describe('LoginUseCase', () => {
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
     expect(verify).toHaveBeenCalledWith('correct horse', 'hashed:unknown-user-dummy-password');
+  });
+
+  it('should_not_hash_during_login_when_first_unknown_username_signs_in', async () => {
+    const hash = vi.spyOn(hasher, 'hash');
+    const result = await login.execute({ username: 'grace', password: 'correct horse' });
+    // An unknown username costs one hash check, as a wrong password does.
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(hash).not.toHaveBeenCalled();
+  });
+
+  // The constructor starts the dummy hash. Its failure is not an unhandled
+  // rejection, and the first unknown username still gets the failure.
+  it('should_reject_unknown_username_login_with_hash_failure_when_dummy_hash_fails_early', async () => {
+    const failure = new Error('hasher is down');
+    const unhandled: unknown[] = [];
+    const record = (reason: unknown) => unhandled.push(reason);
+    // A vi.fn spy handles the promises it returns, so this hasher is a plain object.
+    const failingHasher: PasswordHasher = {
+      hash: () => Promise.reject(failure),
+      verify: () => Promise.resolve(false),
+    };
+    process.on('unhandledRejection', record);
+    try {
+      const early = new LoginUseCase(
+        new InMemoryUserRepository(),
+        failingHasher,
+        new PrefixTokenIssuer(),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(unhandled).toEqual([]);
+      await expect(early.execute({ username: 'grace', password: 'correct horse' })).rejects.toBe(
+        failure,
+      );
+    } finally {
+      process.off('unhandledRejection', record);
+    }
   });
 
   it('should_verify_password_once_when_password_is_wrong', async () => {

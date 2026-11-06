@@ -22,28 +22,28 @@ const DUMMY_PASSWORD = 'unknown-user-dummy-password';
 
 // Checks the password against the stored hash and issues a SessionToken.
 export class LoginUseCase implements Login {
-  private dummyHash: Promise<string> | undefined;
+  // The constructor starts the dummy hash, so no sign-in pays for it. A
+  // failed hash does not throw here. Each unknown username gets the failure.
+  private readonly dummyHash: Promise<string>;
 
   constructor(
     private readonly users: UserRepository,
     private readonly hasher: PasswordHasher,
     private readonly tokens: TokenIssuer,
-  ) {}
+  ) {
+    this.dummyHash = hasher.hash(DUMMY_PASSWORD);
+    // This handler stops an unhandled rejection. A later await still sees the failure.
+    this.dummyHash.catch(() => undefined);
+  }
 
   async execute(request: Credentials): Promise<Result<SessionToken, LoginProblem>> {
     const username = Username.create(request.username);
     const user = username.ok ? await this.users.findByUsername(username.value) : null;
-    const hash = user === null ? await this.dummy() : user.passwordHash.value;
+    const hash = user === null ? await this.dummyHash : user.passwordHash.value;
     const matches = await this.hasher.verify(request.password, hash);
     if (user === null || !matches) {
       return err('invalid-credentials');
     }
     return ok(this.tokens.issue(user.id));
-  }
-
-  // The dummy hash is made once, on the first unknown username.
-  private dummy(): Promise<string> {
-    this.dummyHash ??= this.hasher.hash(DUMMY_PASSWORD);
-    return this.dummyHash;
   }
 }
