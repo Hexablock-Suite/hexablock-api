@@ -94,6 +94,99 @@
         ],
         "type": "object"
       },
+      "LevelResultDto": {
+        "properties": {
+          "elapsedMs": {
+            "description": "A non-negative integer.",
+            "example": 45000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "levelId": {
+            "example": "fit-01",
+            "type": "string"
+          },
+          "moves": {
+            "description": "A non-negative integer.",
+            "example": 12,
+            "minimum": 0,
+            "type": "number"
+          },
+          "stars": {
+            "description": "A non-negative integer.",
+            "example": 3,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "levelId",
+          "stars",
+          "moves",
+          "elapsedMs"
+        ],
+        "type": "object"
+      },
+      "ProgressDto": {
+        "properties": {
+          "gameId": {
+            "example": "hexa-lines",
+            "type": "string"
+          },
+          "highScore": {
+            "description": "The highest score, or null when no sync sent a score.",
+            "example": 120,
+            "nullable": true,
+            "type": "number"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/LevelResultDto"
+            },
+            "type": "array"
+          },
+          "updatedAt": {
+            "example": "2026-11-06T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gameId",
+          "highScore",
+          "updatedAt",
+          "results"
+        ],
+        "type": "object"
+      },
+      "SyncProgressDto": {
+        "properties": {
+          "gameId": {
+            "description": "The game variant. Required.",
+            "example": "hexa-lines",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "type": "string"
+          },
+          "results": {
+            "description": "Level results. A later result for a levelId replaces the earlier one.",
+            "items": {
+              "$ref": "#/components/schemas/LevelResultDto"
+            },
+            "type": "array"
+          },
+          "score": {
+            "description": "The score of the game. The API keeps the highest one.",
+            "example": 120,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "gameId"
+        ],
+        "type": "object"
+      },
       "TokenDto": {
         "properties": {
           "accessToken": {
@@ -273,6 +366,127 @@
         },
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/progress": {
+      "post": {
+        "operationId": "ProgressController_sync",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncProgressDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressDto"
+                }
+              }
+            },
+            "description": "The progress entry after the sync."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "A field is missing or breaks its rule."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/progress/{gameId}": {
+      "get": {
+        "operationId": "ProgressController_read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressDto"
+                }
+              }
+            },
+            "description": "The progress entry of the gameId."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The gameId breaks its rule."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The user has no progress for the gameId."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "progress"
         ]
       }
     }

@@ -1,4 +1,5 @@
 import { Password } from '../../../src/domain/user/password.js';
+import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
 
 describe('Username', () => {
@@ -30,5 +31,17 @@ describe('Password', () => {
     for (const raw of ['', '1234567', 'x'.repeat(129)]) {
       expect(Password.create(raw)).toEqual({ ok: false, error: 'invalid-password' });
     }
+  });
+});
+
+describe('UserId', () => {
+  it('should_reject_user_id_when_value_is_empty', () => {
+    expect(() => UserId.from('')).toThrow('A UserId needs a value.');
+  });
+
+  it('should_be_equal_when_two_user_ids_hold_the_same_value', () => {
+    expect(UserId.from('user-1').value).toBe('user-1');
+    expect(UserId.from('user-1').equals(UserId.from('user-1'))).toBe(true);
+    expect(UserId.from('user-1').equals(UserId.from('user-2'))).toBe(false);
   });
 });

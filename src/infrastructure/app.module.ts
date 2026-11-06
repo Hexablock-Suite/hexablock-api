@@ -3,6 +3,8 @@ import { APP_FILTER } from '@nestjs/core';
 import { AuthController } from '../adapters/http/auth.controller.js';
 import { HealthController } from '../adapters/http/health.controller.js';
 import { HttpErrorFilter } from '../adapters/http/http-error.filter.js';
+import { ProgressController } from '../adapters/http/progress.controller.js';
+import { DrizzleProgressRepository } from '../adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../adapters/persistence/drizzle-user-repository.js';
 import {
   AUTHENTICATE_TOKEN,
@@ -10,11 +12,21 @@ import {
 } from '../application/auth/authenticate-token.use-case.js';
 import { LOGIN, LoginUseCase } from '../application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../application/auth/register.use-case.js';
-import { CLOCK } from '../application/ports/clock.js';
+import { CLOCK, type Clock } from '../application/ports/clock.js';
 import { PASSWORD_HASHER, type PasswordHasher } from '../application/ports/password-hasher.js';
+import {
+  PROGRESS_REPOSITORY,
+  type ProgressRepository,
+} from '../application/ports/progress-repository.js';
 import { TOKEN_ISSUER, type TokenIssuer } from '../application/ports/token-issuer.js';
 import { USER_ID_GENERATOR, type UserIdGenerator } from '../application/ports/user-id-generator.js';
 import { USER_REPOSITORY, type UserRepository } from '../application/ports/user-repository.js';
+import { GET_PROGRESS, GetProgressUseCase } from '../application/progress/get-progress.use-case.js';
+import {
+  SYNC_PROGRESS,
+  SyncProgressUseCase,
+} from '../application/progress/sync-progress.use-case.js';
+import { LoggingAspect } from './aspects/logging-aspect.js';
 import { createJwtService, readJwtSecret } from './auth/auth-config.js';
 import { JwtTokenIssuer } from './auth/jwt-token-issuer.js';
 import { RandomUserIdGenerator } from './auth/random-user-id-generator.js';
@@ -26,7 +38,7 @@ import { DATABASE, DatabaseModule } from './database/database.module.js';
 // The composition root: it binds each port to its adapter.
 @Module({
   imports: [DatabaseModule],
-  controllers: [HealthController, AuthController],
+  controllers: [HealthController, AuthController, ProgressController],
   providers: [
     { provide: CLOCK, useClass: SystemClock },
     { provide: PASSWORD_HASHER, useClass: ScryptPasswordHasher },
@@ -56,6 +68,24 @@ import { DATABASE, DatabaseModule } from './database/database.module.js';
       provide: AUTHENTICATE_TOKEN,
       inject: [TOKEN_ISSUER],
       useFactory: (tokens: TokenIssuer) => new AuthenticateTokenUseCase(tokens),
+    },
+    {
+      provide: PROGRESS_REPOSITORY,
+      inject: [DATABASE],
+      useFactory: (database: Database): ProgressRepository =>
+        new DrizzleProgressRepository(database),
+    },
+    // LoggingAspect wraps the use case, so the use case holds no logging code.
+    {
+      provide: SYNC_PROGRESS,
+      inject: [PROGRESS_REPOSITORY, CLOCK],
+      useFactory: (progress: ProgressRepository, clock: Clock) =>
+        new LoggingAspect(new SyncProgressUseCase(progress, clock), 'SyncProgress'),
+    },
+    {
+      provide: GET_PROGRESS,
+      inject: [PROGRESS_REPOSITORY],
+      useFactory: (progress: ProgressRepository) => new GetProgressUseCase(progress),
     },
     // Every route, also the routes of later modules, answers errors with ErrorDto.
     { provide: APP_FILTER, useClass: HttpErrorFilter },
