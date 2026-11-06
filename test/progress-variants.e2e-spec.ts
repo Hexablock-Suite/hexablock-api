@@ -48,6 +48,15 @@ const SORT: Variant = {
   },
 };
 
+// GameId is an open value (classes.md decision 5): a variant that is not one
+// of the four saves and loads with no code change.
+const NEW_LEVEL = { levelId: 'new-01', stars: 1, moves: 4, elapsedMs: 8000 };
+const NEW: Variant = {
+  gameId: 'hexa-new',
+  save: { gameId: 'hexa-new', score: 7, results: [NEW_LEVEL] },
+  entry: { gameId: 'hexa-new', highScore: 7, updatedAt: AT.toISOString(), results: [NEW_LEVEL] },
+};
+
 describe('progress save and load per variant (API-NFR-03)', () => {
   let testApp: TestApp;
 
@@ -102,5 +111,33 @@ describe('progress save and load per variant (API-NFR-03)', () => {
 
   it('should_load_only_merge_high_score_when_merge_and_sort_are_saved', async () => {
     await expectSaveAndLoad(MERGE, SORT);
+  });
+
+  it('should_load_only_new_variant_entry_when_new_variant_and_lines_are_saved', async () => {
+    await expectSaveAndLoad(NEW, LINES);
+  });
+
+  // A later sync of the same variant keeps the stored levels, replaces the
+  // result of a levelId it sends again, and adds a new levelId. The test
+  // compares the results without order: the port contract fixes no order.
+  it('should_load_replaced_and_new_level_results_when_sort_is_saved_again', async () => {
+    const { token } = await signIn(server(), 'ada');
+    const retry = { levelId: 'sort-01', stars: 3, moves: 18, elapsedMs: 60000 };
+    const next = { levelId: 'sort-02', stars: 1, moves: 40, elapsedMs: 120000 };
+    await save(token, SORT.save);
+
+    const savedAgain = await save(token, { gameId: 'hexa-sort', results: [retry, next] });
+    const loaded = await load(token, 'hexa-sort');
+
+    for (const response of [savedAgain, loaded]) {
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        gameId: 'hexa-sort',
+        highScore: null,
+        updatedAt: AT.toISOString(),
+        results: expect.arrayContaining([retry, next]),
+      });
+      expect(response.body.results).toHaveLength(2);
+    }
   });
 });
