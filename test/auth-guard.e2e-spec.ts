@@ -1,5 +1,8 @@
 import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
+import { users } from '../src/adapters/persistence/schema.js';
+import { JwtTokenIssuer } from '../src/infrastructure/auth/jwt-token-issuer.js';
+import { signIn } from './support/http/sign-in.js';
 import { createTestApp, TEST_JWT_SECRET, type TestApp } from './support/http/test-app.js';
 
 // API-FR-01: a protected endpoint answers 200 with a valid token and 401
@@ -13,6 +16,12 @@ function unauthorizedBody(message: string) {
   return { statusCode: 401, error: 'Unauthorized', message, details: [], path: PROTECTED_PATH };
 }
 
+// A token with alg "none" and an empty signature, as an attacker can write it.
+function unsignedToken(payload: object): string {
+  const encode = (part: object) => Buffer.from(JSON.stringify(part)).toString('base64url');
+  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode(payload)}.`;
+}
+
 describe('token guard (API-FR-01, API-FR-06)', () => {
   let testApp: TestApp;
 
@@ -21,6 +30,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await testApp.close();
   });
 
@@ -85,5 +95,47 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual(unauthorizedBody('Invalid or expired token'));
+  });
+
+  it('should_return_signed_in_user_when_user_is_deleted_after_sign_in', async () => {
+    const { token, userId } = await signIn(server(), USERNAME);
+    await testApp.database.db.delete(users);
+
+    const response = await callProtected(`Bearer ${token}`);
+
+    // The guard reads only the token. It does not look the user up
+    // (flows.md, row AuthenticateTokenUseCase; body of PR #41).
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ userId });
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+  });
+
+  it('should_return_unauthorized_error_body_when_token_has_alg_none', async () => {
+    const { userId } = await signIn(server(), USERNAME);
+
+    const response = await callProtected(`Bearer ${unsignedToken({ sub: userId })}`);
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual(unauthorizedBody('Invalid or expired token'));
+  });
+
+  it('should_return_internal_error_body_when_token_check_throws', async () => {
+    const { token } = await signIn(server(), USERNAME);
+    vi.spyOn(JwtTokenIssuer.prototype, 'verify').mockImplementation(() => {
+      throw new Error('key store is unreachable');
+    });
+
+    const response = await callProtected(`Bearer ${token}`);
+
+    // A failure of the token check is not a rejected token, so it is no 401.
+    // HttpErrorFilter hides its message behind a 500.
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'Internal server error',
+      details: [],
+      path: PROTECTED_PATH,
+    });
   });
 });
