@@ -12,6 +12,7 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
     .setTitle('HexaBlock API')
     .setDescription('Users, progress, leaderboards and level definitions.')
     .setVersion('0.0.1')
+    .addBearerAuth()
     .build();
   // ErrorDto is in the document even before an endpoint names it, so the
   // client can generate the error type (API-FR-06).

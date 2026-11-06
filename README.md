@@ -28,7 +28,8 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 - **Errors (API-FR-06):** one error body shape for every HTTP error.
 
 Today `src/` holds the health endpoint, the `Clock` port and its adapter, the database
-connection, and the `HttpErrorFilter` that gives every HTTP error the `ErrorDto` body. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
+connection, and the `HttpErrorFilter` that gives every HTTP error the `ErrorDto` body. It also
+holds sign-up, sign-in and `GET /auth/me`, the first route behind `JwtAuthGuard`. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
 
 ## Architecture
 
@@ -156,6 +157,8 @@ pnpm start:dev
 
 The pool connects on the first query, so `/health` answers without a running database.
 Sign-up and sign-in (`POST /auth/register`, `POST /auth/login`) need the database and its migrations.
+`GET /auth/me` needs the header `Authorization: Bearer <accessToken>` from `POST /auth/login`.
+Without a valid token it answers 401 with the `ErrorDto` body.
 
 For database work, start the local Postgres from `compose.yaml` and point `DATABASE_URL` at it:
 
