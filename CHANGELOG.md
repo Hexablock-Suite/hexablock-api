@@ -20,6 +20,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- The README section "SOLID Principles" gives one example per principle from the progress slice, each with a link to its source file: `LoggingAspect`, `UseCaseAspect`, the `ProgressRepository` port and its contract, `DrizzleProgressRepository`, the `SyncProgress` port and `AppModule`. The gate `test/gates/solid-principles.gate.spec.ts` checks the five principles and every link (API-NFR-06, [#38](https://github.com/Hexablock-Suite/hexablock-api/issues/38)).
 - Sprint 0 closes with `v0.0.0`: the README marks the planned pieces as design, and `AI_USAGE.md` logs the work of 2026-11-04.
 - `docs/REQUIREMENTS.md` records the answers of the session of 2026-11-03: C7 confirms A5, Q4 keeps the level update behind the token guard with no roles, and API-NFR-08 names Clean plus an architecture for games. Class view 2.2 drops a stray «results 1» label under «clock 1» ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).
 - The extensibility overview and the database engine view draw no line that starts or ends on a dashed frame, and draw one line per class where only some classes of a group have a relation: each driver and each Drizzle repository implements its own port, and each use case holds its own output port; the reading notes of `classes.md` and `extensibility.md` follow ([#27](https://github.com/Hexablock-Suite/hexablock-api/pull/27)).

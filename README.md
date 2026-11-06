@@ -105,24 +105,27 @@ does not use it: a variant has one product, its level validator (decision 8 of `
 
 ## SOLID Principles
 
-The design docs give the decisions below. Each one shows one principle. Only the `Clock` example
-exists in code today; the others link the design doc until their code lands.
+Each principle has one example from the progress slice. Each link opens the source file.
 
-- **Single responsibility:** `ProgressDtoMapper` and `LevelDtoMapper` translate between DTOs and
-  entities, so a controller holds no translation code (decision 12,
-  [view 3.5](docs/architecture/classes.md#view-35-http-mappers)).
-- **Open/closed:** a new variant with level files adds a `LevelValidator` and one entry in the
-  composition root, and changes no existing class (decision 5,
-  [extensibility.md](docs/architecture/extensibility.md#extension-points)).
-- **Liskov substitution:** each aspect implements the same input port as the use case it wraps,
-  so a controller takes either one (layers.md, "Where each piece lives";
-  [view 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)).
-- **Interface segregation:** each use case has its own input port, such as `SyncProgress` or
-  `GetLevels`. A controller depends only on the ports it calls
-  ([layers.md](docs/architecture/layers.md#where-each-piece-lives)).
-- **Dependency inversion:** the application owns the `Clock` port in
-  [src/application/ports/clock.ts](src/application/ports/clock.ts), and
-  [SystemClock](src/infrastructure/clock/system-clock.ts) in the infrastructure implements it.
+- **Single responsibility:** [LoggingAspect](src/infrastructure/aspects/logging-aspect.ts) only
+  logs each call, so [SyncProgressUseCase](src/application/progress/sync-progress.use-case.ts)
+  holds no logging code.
+- **Open/closed:** a new cross-cutting concern extends
+  [UseCaseAspect](src/infrastructure/aspects/use-case-aspect.ts) and changes one binding in
+  [AppModule](src/infrastructure/app.module.ts); no use case changes, as `LoggingAspect` showed.
+- **Liskov substitution:**
+  [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) and the
+  in-memory fake pass the same
+  [ProgressRepository contract](test/support/progress-repository.contract.ts), so a use case
+  takes either one.
+- **Interface segregation:** the [SyncProgress](src/application/progress/sync-progress.use-case.ts)
+  input port has one `execute` method, and
+  [ProgressController](src/adapters/http/progress.controller.ts) depends only on `SyncProgress`
+  and `GetProgress`, the two ports it calls.
+- **Dependency inversion:** the application owns the
+  [ProgressRepository](src/application/ports/progress-repository.ts) port,
+  [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) implements
+  it, and [AppModule](src/infrastructure/app.module.ts) binds one to the other.
 
 ## AOP
 
