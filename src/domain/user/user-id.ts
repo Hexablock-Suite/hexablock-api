@@ -3,7 +3,7 @@ export class UserId {
   private constructor(readonly value: string) {}
 
   static from(value: string): UserId {
-    if (value.length === 0) {
+    if (typeof value !== 'string' || value.trim() === '') {
       throw new Error('A UserId needs a value.');
     }
     return new UserId(value);

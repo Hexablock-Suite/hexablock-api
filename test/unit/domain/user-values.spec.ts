@@ -40,6 +40,12 @@ describe('UserId', () => {
     expect(() => UserId.from('')).toThrow('A UserId needs a value.');
   });
 
+  // #39 rejected blank ids. A caller outside TypeScript can pass no string.
+  it('should_reject_user_id_when_value_is_blank_or_not_a_string', () => {
+    expect(() => UserId.from('   ')).toThrow('A UserId needs a value.');
+    expect(() => UserId.from(undefined as unknown as string)).toThrow('A UserId needs a value.');
+  });
+
   it('should_be_equal_when_two_user_ids_hold_the_same_value', () => {
     expect(UserId.from('user-1').value).toBe('user-1');
     expect(UserId.from('user-1').equals(UserId.from('user-1'))).toBe(true);
