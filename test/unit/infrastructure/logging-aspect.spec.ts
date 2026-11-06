@@ -75,6 +75,22 @@ describe('LoggingAspect', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  // A thrown value that is not an Error has no message and no stack. The
+  // aspect logs its text and throws the same value again.
+  it('should_log_thrown_text_without_stack_and_rethrow_it_when_inner_use_case_throws_a_non_error', async () => {
+    const { inner } = echo(() => Promise.reject('database is down'));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).rejects.toBe('database is down');
+    expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+      'useCase=Echo outcome=error error=database is down',
+      undefined,
+    );
+    expect(logger.log).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   // SyncProgressUseCase holds no logging code: the log line comes from the aspect.
   it('should_log_sync_progress_outcome_when_aspect_wraps_use_case_without_logging_code', async () => {
     const logger = recordingLogger();
