@@ -19,6 +19,10 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 - The README section "SOLID Principles" gives one example per principle from the progress slice, each with a link to its source file: `LoggingAspect`, `UseCaseAspect`, the `ProgressRepository` port and its contract, `DrizzleProgressRepository`, the `SyncProgress` port and `AppModule`. The gate `test/gates/solid-principles.gate.spec.ts` checks the five principles and every link (API-NFR-06, [#38](https://github.com/Hexablock-Suite/hexablock-api/issues/38)).
 
+### Fixed
+
+- Seven defects that the test-gap review found ([#51](https://github.com/Hexablock-Suite/hexablock-api/issues/51)): a blank or non-string `UserId` is rejected; the dummy password is hashed when the login use case starts, so an unknown username costs one scrypt check, as a wrong password does; the guard accepts the `bearer` scheme in any letter case (RFC 7235); an invalid clock date gives a 500, not a 400; two overlapping syncs keep the highest score (`greatest()` in the upsert); `LoggingAspect` writes a `bigint` as text and never lets a logger failure change the result of the use case.
+
 ## [0.1.0] - 2026-11-06
 
 ### Added
