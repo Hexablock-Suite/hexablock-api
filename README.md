@@ -27,8 +27,9 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 - **API docs (API-FR-05):** Swagger at `/docs` and the committed `openapi/openapi.json`.
 - **Errors (API-FR-06):** one error body shape for every HTTP error.
 
-Today `src/` holds the health endpoint, the `Clock` port and its adapter, and the database
-connection. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
+Today `src/` holds the health endpoint, the `Clock` port and its adapter, the database
+connection, and the `PlayerProgress` aggregate in `src/domain/progress` with its
+`ProgressRepository` port. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
 
 ## Architecture
 
