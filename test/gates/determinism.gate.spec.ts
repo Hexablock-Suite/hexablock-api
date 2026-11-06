@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { CLOCK } from '../../src/application/ports/clock.js';
 import { AppModule } from '../../src/infrastructure/app.module.js';
 import { SystemClock } from '../../src/infrastructure/clock/system-clock.js';
+import { stubTestEnvironment } from '../support/http/test-app.js';
 import { codesOf, lintFile } from '../support/lint.js';
 
 // Gate S6: the domain and the application never read the system clock or
@@ -31,8 +32,11 @@ describe('determinism gate', () => {
   });
 
   it('should_bind_the_application_clock_port_to_system_clock_when_app_module_compiles', async () => {
+    stubTestEnvironment();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
     expect(moduleRef.get(CLOCK)).toBeInstanceOf(SystemClock);
+    await moduleRef.close();
+    vi.unstubAllEnvs();
   });
 });

@@ -1,29 +1,23 @@
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
-import { AppModule } from '../src/infrastructure/app.module.js';
-import { configureHttpApp } from '../src/infrastructure/http-app.js';
 import { ErrorProbeController } from './support/http/error-probe.controller.js';
+import { createTestApp, type TestApp } from './support/http/test-app.js';
 
 // API-FR-06: every HTTP error has the same body shape.
 const ERROR_BODY_KEYS = ['details', 'error', 'message', 'path', 'statusCode'];
 
 describe('HTTP error body (API-FR-06)', () => {
+  let testApp: TestApp;
   let app: INestApplication<App>;
 
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-      controllers: [ErrorProbeController],
-    }).compile();
-    app = moduleRef.createNestApplication({ logger: false });
-    configureHttpApp(app);
-    await app.init();
+    testApp = await createTestApp([ErrorProbeController]);
+    app = testApp.app;
   });
 
   afterEach(async () => {
-    await app.close();
+    await testApp.close();
   });
 
   it('should_return_error_body_when_resource_does_not_exist', async () => {
