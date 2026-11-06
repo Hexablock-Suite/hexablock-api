@@ -1,6 +1,48 @@
 {
   "components": {
     "schemas": {
+      "ErrorDto": {
+        "properties": {
+          "details": {
+            "description": "One entry per problem when a request has several. Empty otherwise.",
+            "example": [
+              "gameId should not be empty"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "error": {
+            "description": "The standard reason phrase of the status.",
+            "example": "Not Found",
+            "type": "string"
+          },
+          "message": {
+            "description": "One sentence that a client can show or log.",
+            "example": "Cannot GET /levels/unknown",
+            "type": "string"
+          },
+          "path": {
+            "description": "The request path.",
+            "example": "/levels/unknown",
+            "type": "string"
+          },
+          "statusCode": {
+            "description": "The HTTP status code.",
+            "example": 404,
+            "type": "number"
+          }
+        },
+        "required": [
+          "statusCode",
+          "error",
+          "message",
+          "details",
+          "path"
+        ],
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
