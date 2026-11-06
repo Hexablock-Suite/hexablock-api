@@ -52,7 +52,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: start the API
-        run: nohup node dist/main.js > api.log 2>&1 &
+        # The example values start the app; /health reads no database and no token.
+        run: nohup node --env-file=.env.example dist/main.js > api.log 2>&1 &
       - name: wait for /health
         run: |
           for _ in $(seq 1 30); do

@@ -144,7 +144,18 @@ pnpm install       # also installs the git hooks
 pnpm start:dev     # http://localhost:3000/health, docs at /docs, JSON at /docs-json
 ```
 
-The API listens on `PORT` (default `3000`). It starts without a database: no module uses one yet.
+The API reads `PORT` (default `3000`), `DATABASE_URL` and `JWT_SECRET` from the environment, and does not
+start without the last two. `.env.example` lists them. Copy it to `.env`, set `JWT_SECRET` to a random
+value of at least 32 characters, and load it before you start the API:
+
+```bash
+cp .env.example .env   # .gitignore keeps .env out of git
+set -a && . ./.env && set +a
+pnpm start:dev
+```
+
+The pool connects on the first query, so `/health` answers without a running database.
+Sign-up and sign-in (`POST /auth/register`, `POST /auth/login`) need the database and its migrations.
 
 For database work, start the local Postgres from `compose.yaml` and point `DATABASE_URL` at it:
 
@@ -156,7 +167,7 @@ pnpm db:migrate    # applies the drizzle/ migrations to DATABASE_URL
 docker compose down
 ```
 
-The schema has no tables yet. The business tables are the design; their code starts in Sprint 1.
+The schema has the `users` table of API-FR-01. The other business tables are still the design.
 
 ## Running Tests
 
