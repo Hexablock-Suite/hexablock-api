@@ -60,6 +60,20 @@ describe('LoggingAspect', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  // JSON.stringify throws on a bigint. The aspect writes it as text and
+  // returns the inner result unchanged.
+  it('should_log_bigint_as_text_and_return_inner_result_unchanged_when_failure_holds_a_bigint', async () => {
+    const result: EchoResult = err({ kind: 'big', size: 1n });
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).resolves.toBe(result);
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=Echo outcome=failure error={"kind":"big","size":"1"}',
+    );
+  });
+
   it('should_log_name_error_and_rethrow_same_error_when_inner_use_case_throws', async () => {
     const failure = new Error('database is down');
     const { inner } = echo(() => Promise.reject(failure));

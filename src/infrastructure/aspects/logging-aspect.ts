@@ -34,9 +34,14 @@ export class LoggingAspect<TRequest, TValue, TError> extends UseCaseAspect<
       this.logger.log(`useCase=${this.name} outcome=success`);
     } else {
       this.logger.warn(
-        `useCase=${this.name} outcome=failure error=${JSON.stringify(result.error)}`,
+        `useCase=${this.name} outcome=failure error=${JSON.stringify(result.error, bigintAsText)}`,
       );
     }
     return result;
   }
+}
+
+// JSON.stringify throws on a bigint. This replacer writes it as text.
+function bigintAsText(_key: string, value: unknown): unknown {
+  return typeof value === 'bigint' ? value.toString() : value;
 }
