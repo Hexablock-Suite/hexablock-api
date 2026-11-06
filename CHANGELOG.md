@@ -17,6 +17,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- `docs/REQUIREMENTS.md` §4 adds two offline sync rules that the team closed on 2026-11-06. DS-11: the level copy with the higher `version` wins, so a level update reaches players only when it raises `version`. DS-12: the level results table keeps the best result per user, game and level, and the high score keeps the highest value. DS-12 closes the every-attempt question of DS-4; the order that defines the best result stays open in DS-4.
 - The README section "SOLID Principles" gives one example per principle from the progress slice, each with a link to its source file: `LoggingAspect`, `UseCaseAspect`, the `ProgressRepository` port and its contract, `DrizzleProgressRepository`, the `SyncProgress` port and `AppModule`. The gate `test/gates/solid-principles.gate.spec.ts` checks the five principles and every link (API-NFR-06, [#38](https://github.com/Hexablock-Suite/hexablock-api/issues/38)).
 
 ### Fixed
