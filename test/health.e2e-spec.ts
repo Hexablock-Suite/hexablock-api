@@ -1,26 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
-import { AppModule } from '../src/infrastructure/app.module.js';
-import { configureHttpApp } from '../src/infrastructure/http-app.js';
+import { createTestApp, type TestApp } from './support/http/test-app.js';
 
 describe('HTTP entry points', () => {
+  let testApp: TestApp;
   let app: INestApplication<App>;
 
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureHttpApp(app);
-    await app.init();
+    testApp = await createTestApp();
+    app = testApp.app;
   });
 
   afterEach(async () => {
-    await app.close();
+    await testApp.close();
   });
 
   it('should_return_ok_status_when_health_is_requested', async () => {

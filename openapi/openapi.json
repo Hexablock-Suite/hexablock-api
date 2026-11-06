@@ -1,6 +1,71 @@
 {
   "components": {
     "schemas": {
+      "CredentialsDto": {
+        "properties": {
+          "password": {
+            "example": "correct horse battery",
+            "maxLength": 128,
+            "minLength": 8,
+            "type": "string"
+          },
+          "username": {
+            "description": "Letters, digits, dots, hyphens or underscores.",
+            "example": "ada",
+            "maxLength": 32,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9._-]{3,32}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
+      "ErrorDto": {
+        "properties": {
+          "details": {
+            "description": "One entry per problem when a request has several. Empty otherwise.",
+            "example": [
+              "gameId should not be empty"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "error": {
+            "description": "The standard reason phrase of the status.",
+            "example": "Not Found",
+            "type": "string"
+          },
+          "message": {
+            "description": "One sentence that a client can show or log.",
+            "example": "Cannot GET /levels/unknown",
+            "type": "string"
+          },
+          "path": {
+            "description": "The request path.",
+            "example": "/levels/unknown",
+            "type": "string"
+          },
+          "statusCode": {
+            "description": "The HTTP status code.",
+            "example": 404,
+            "type": "number"
+          }
+        },
+        "required": [
+          "statusCode",
+          "error",
+          "message",
+          "details",
+          "path"
+        ],
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -15,6 +80,19 @@
           "status"
         ],
         "type": "object"
+      },
+      "TokenDto": {
+        "properties": {
+          "accessToken": {
+            "description": "A signed JWT.",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken"
+        ],
+        "type": "object"
       }
     }
   },
@@ -26,6 +104,101 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_signIn",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenDto"
+                }
+              }
+            },
+            "description": "The credentials are valid."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "A field is missing or is not a string."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The username or the password is wrong."
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_signUp",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The user exists. The body is empty."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "A field is missing or breaks its rule."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "Another user has this username."
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "HealthController_check",
