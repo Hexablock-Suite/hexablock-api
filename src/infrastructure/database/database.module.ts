@@ -3,7 +3,7 @@ import { createDatabase, type Database } from './connection.js';
 
 export const DATABASE = Symbol('DATABASE');
 
-// AppModule does not import this module yet. See README.md in this folder.
+// AppModule imports this module. The pool opens a connection on the first query.
 @Module({
   providers: [{ provide: DATABASE, useFactory: (): Database => createDatabase() }],
   exports: [DATABASE],

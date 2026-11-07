@@ -27,8 +27,12 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 - **API docs (API-FR-05):** Swagger at `/docs` and the committed `openapi/openapi.json`.
 - **Errors (API-FR-06):** one error body shape for every HTTP error.
 
-Today `src/` holds the health endpoint, the `Clock` port and its adapter, and the database
-connection. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
+Today `src/` holds the health endpoint, the `Clock` port and its adapter, the database
+connection, the `HttpErrorFilter` that gives every HTTP error the `ErrorDto` body, and the
+`PlayerProgress` aggregate in `src/domain/progress` with its `ProgressRepository` port and its
+Drizzle repository. It also holds sign-up, sign-in and `GET /auth/me`, the first route behind
+`JwtAuthGuard`, and the progress sync `POST /progress` with its read `GET /progress/{gameId}`,
+both behind the guard. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
 
 ## Architecture
 
@@ -101,24 +105,27 @@ does not use it: a variant has one product, its level validator (decision 8 of `
 
 ## SOLID Principles
 
-The design docs give the decisions below. Each one shows one principle. Only the `Clock` example
-exists in code today; the others link the design doc until their code lands.
+Each principle has one example from the progress slice. Each link opens the source file.
 
-- **Single responsibility:** `ProgressDtoMapper` and `LevelDtoMapper` translate between DTOs and
-  entities, so a controller holds no translation code (decision 12,
-  [view 3.5](docs/architecture/classes.md#view-35-http-mappers)).
-- **Open/closed:** a new variant with level files adds a `LevelValidator` and one entry in the
-  composition root, and changes no existing class (decision 5,
-  [extensibility.md](docs/architecture/extensibility.md#extension-points)).
-- **Liskov substitution:** each aspect implements the same input port as the use case it wraps,
-  so a controller takes either one (layers.md, "Where each piece lives";
-  [view 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)).
-- **Interface segregation:** each use case has its own input port, such as `SyncProgress` or
-  `GetLevels`. A controller depends only on the ports it calls
-  ([layers.md](docs/architecture/layers.md#where-each-piece-lives)).
-- **Dependency inversion:** the application owns the `Clock` port in
-  [src/application/ports/clock.ts](src/application/ports/clock.ts), and
-  [SystemClock](src/infrastructure/clock/system-clock.ts) in the infrastructure implements it.
+- **Single responsibility:** [LoggingAspect](src/infrastructure/aspects/logging-aspect.ts) only
+  logs each call, so [SyncProgressUseCase](src/application/progress/sync-progress.use-case.ts)
+  holds no logging code.
+- **Open/closed:** a new cross-cutting concern extends
+  [UseCaseAspect](src/infrastructure/aspects/use-case-aspect.ts) and changes one binding in
+  [AppModule](src/infrastructure/app.module.ts); no use case changes, as `LoggingAspect` showed.
+- **Liskov substitution:**
+  [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) and the
+  in-memory fake pass the same
+  [ProgressRepository contract](test/support/progress-repository.contract.ts), so a use case
+  takes either one.
+- **Interface segregation:** the [SyncProgress](src/application/progress/sync-progress.use-case.ts)
+  input port has one `execute` method, and
+  [ProgressController](src/adapters/http/progress.controller.ts) depends only on `SyncProgress`
+  and `GetProgress`, the two ports it calls.
+- **Dependency inversion:** the application owns the
+  [ProgressRepository](src/application/ports/progress-repository.ts) port,
+  [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) implements
+  it, and [AppModule](src/infrastructure/app.module.ts) binds one to the other.
 
 ## AOP
 
@@ -131,7 +138,10 @@ imports no package (rule R-application-pure).
 Where the aspects live is still open: **Q12** in [layers.md](docs/architecture/layers.md#open-questions-for-the-professor).
 The draft puts them in `src/infrastructure`, where they call a logging package directly, so there
 is no `Logger` port. If Q12 moves them to `src/application`, they need a `Logger` port there.
-The aspects are not built yet.
+The code follows this draft: `UseCaseAspect` and `LoggingAspect` live in
+[src/infrastructure/aspects](src/infrastructure/aspects), and `AppModule` wraps
+`SyncProgressUseCase` in `LoggingAspect`. It logs the use case name, the outcome and the error.
+`TimingAspect` is not built yet.
 
 ## Getting Started
 
@@ -144,7 +154,21 @@ pnpm install       # also installs the git hooks
 pnpm start:dev     # http://localhost:3000/health, docs at /docs, JSON at /docs-json
 ```
 
-The API listens on `PORT` (default `3000`). It starts without a database: no module uses one yet.
+The API reads `PORT` (default `3000`), `DATABASE_URL` and `JWT_SECRET` from the environment, and does not
+start without the last two. `.env.example` lists them. Copy it to `.env`, set `JWT_SECRET` to a random
+value of at least 32 characters, and load it before you start the API:
+
+```bash
+cp .env.example .env   # .gitignore keeps .env out of git
+set -a && . ./.env && set +a
+pnpm start:dev
+```
+
+The pool connects on the first query, so `/health` answers without a running database.
+Sign-up and sign-in (`POST /auth/register`, `POST /auth/login`) need the database and its migrations.
+`GET /auth/me`, `POST /progress` and `GET /progress/{gameId}` need the header
+`Authorization: Bearer <accessToken>` from `POST /auth/login`.
+Without a valid token it answers 401 with the `ErrorDto` body.
 
 For database work, start the local Postgres from `compose.yaml` and point `DATABASE_URL` at it:
 
@@ -156,7 +180,7 @@ pnpm db:migrate    # applies the drizzle/ migrations to DATABASE_URL
 docker compose down
 ```
 
-The schema has no tables yet. The business tables are the design; their code starts in Sprint 1.
+The schema has the `users` table of API-FR-01. The other business tables are still the design.
 
 ## Running Tests
 

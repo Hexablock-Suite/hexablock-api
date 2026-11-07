@@ -1,6 +1,84 @@
 {
   "components": {
     "schemas": {
+      "CredentialsDto": {
+        "properties": {
+          "password": {
+            "example": "correct horse battery",
+            "maxLength": 128,
+            "minLength": 8,
+            "type": "string"
+          },
+          "username": {
+            "description": "Letters, digits, dots, hyphens or underscores.",
+            "example": "ada",
+            "maxLength": 32,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9._-]{3,32}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
+      "CurrentUserDto": {
+        "properties": {
+          "userId": {
+            "description": "The user id.",
+            "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId"
+        ],
+        "type": "object"
+      },
+      "ErrorDto": {
+        "properties": {
+          "details": {
+            "description": "One entry per problem when a request has several. Empty otherwise.",
+            "example": [
+              "gameId should not be empty"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "error": {
+            "description": "The standard reason phrase of the status.",
+            "example": "Not Found",
+            "type": "string"
+          },
+          "message": {
+            "description": "One sentence that a client can show or log.",
+            "example": "Cannot GET /levels/unknown",
+            "type": "string"
+          },
+          "path": {
+            "description": "The request path.",
+            "example": "/levels/unknown",
+            "type": "string"
+          },
+          "statusCode": {
+            "description": "The HTTP status code.",
+            "example": 404,
+            "type": "number"
+          }
+        },
+        "required": [
+          "statusCode",
+          "error",
+          "message",
+          "details",
+          "path"
+        ],
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -15,6 +93,119 @@
           "status"
         ],
         "type": "object"
+      },
+      "LevelResultDto": {
+        "properties": {
+          "elapsedMs": {
+            "description": "A non-negative integer.",
+            "example": 45000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "levelId": {
+            "example": "fit-01",
+            "type": "string"
+          },
+          "moves": {
+            "description": "A non-negative integer.",
+            "example": 12,
+            "minimum": 0,
+            "type": "number"
+          },
+          "stars": {
+            "description": "A non-negative integer.",
+            "example": 3,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "levelId",
+          "stars",
+          "moves",
+          "elapsedMs"
+        ],
+        "type": "object"
+      },
+      "ProgressDto": {
+        "properties": {
+          "gameId": {
+            "example": "hexa-lines",
+            "type": "string"
+          },
+          "highScore": {
+            "description": "The highest score, or null when no sync sent a score.",
+            "example": 120,
+            "nullable": true,
+            "type": "number"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/LevelResultDto"
+            },
+            "type": "array"
+          },
+          "updatedAt": {
+            "example": "2026-11-06T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gameId",
+          "highScore",
+          "updatedAt",
+          "results"
+        ],
+        "type": "object"
+      },
+      "SyncProgressDto": {
+        "properties": {
+          "gameId": {
+            "description": "The game variant. Required.",
+            "example": "hexa-lines",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "type": "string"
+          },
+          "results": {
+            "description": "Level results. A later result for a levelId replaces the earlier one.",
+            "items": {
+              "$ref": "#/components/schemas/LevelResultDto"
+            },
+            "type": "array"
+          },
+          "score": {
+            "description": "The score of the game. The API keeps the highest one.",
+            "example": 120,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "gameId"
+        ],
+        "type": "object"
+      },
+      "TokenDto": {
+        "properties": {
+          "accessToken": {
+            "description": "A signed JWT.",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
@@ -26,6 +217,137 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_signIn",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenDto"
+                }
+              }
+            },
+            "description": "The credentials are valid."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "A field is missing or is not a string."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The username or the password is wrong."
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserDto"
+                }
+              }
+            },
+            "description": "The token is valid."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_signUp",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The user exists. The body is empty."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "A field is missing or breaks its rule."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "Another user has this username."
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -44,6 +366,127 @@
         },
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/progress": {
+      "post": {
+        "operationId": "ProgressController_sync",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncProgressDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressDto"
+                }
+              }
+            },
+            "description": "The progress entry after the sync."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "A field is missing or breaks its rule."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/progress/{gameId}": {
+      "get": {
+        "operationId": "ProgressController_read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressDto"
+                }
+              }
+            },
+            "description": "The progress entry of the gameId."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The gameId breaks its rule."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The user has no progress for the gameId."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "progress"
         ]
       }
     }

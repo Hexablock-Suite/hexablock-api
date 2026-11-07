@@ -612,7 +612,7 @@
           + find(userId: UserId, gameId: GameId): Promise&lt;PlayerProgress | null&gt;
         </text>
         <text x="112" y="464" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + save(progress: PlayerProgress): Promise&lt;void&gt;
+          + update(userId, gameId, change): Promise&lt;PlayerProgress | null&gt;
         </text>
         <!-- Class: ProgressDtoMapper («mapper») -->
         <rect
@@ -947,7 +947,7 @@
           + find(userId: UserId, gameId: GameId): Promise&lt;PlayerProgress | null&gt;
         </text>
         <text x="316" y="944" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + save(progress: PlayerProgress): Promise&lt;void&gt;
+          + update(userId, gameId, change): Promise&lt;PlayerProgress | null&gt;
         </text>
         <!-- Class: LevelResult («value object») -->
         <rect
@@ -1172,7 +1172,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           ProgressController asks ProgressDtoMapper for a SyncProgressRequest and calls the
-          SyncProgress input port. SyncProgressUseCase loads the
+          SyncProgress input port. SyncProgressUseCase runs one
         </text>
         <text
           x="24"
@@ -1181,8 +1181,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          PlayerProgress aggregate, reads the instant from Clock, records the score and each
-          LevelResult, and saves the whole aggregate (DS-5).
+          ProgressRepository.update() under a lock: it reads the instant from Clock, records the
+          score and each LevelResult, and the adapter saves the whole aggregate (DS-5).
         </text>
         <text
           x="24"

@@ -28,7 +28,7 @@ API-FR-01 to API-FR-06 keep the numbers of statement §5.2.
 ## 2. Quality requirements that reach the backend (non-functional)
 
 - **API-NFR-01 — Unit tests (§3.6).** Unit tests with mocks or stubs. Names follow `should_[result]_when_[condition]` with Arrange-Act-Assert. _Check:_ gate `test/gates/test-name.gate.spec.ts` (rule R-test-names).
-- **API-NFR-02 — Integration tests (§3.6).** Integration tests of use cases with real repositories on an in-memory database. _Check:_ repository tests run on PGlite through `test/support/test-database.ts`, and gate `test/integration/in-memory-database.spec.ts` covers the harness (rule R-database-harness).
+- **API-NFR-02 — Integration tests (§3.6).** Integration tests of use cases with real repositories on an in-memory database. _Check:_ repository tests run on PGlite through `test/support/test-database.ts`, and gate `test/integration/in-memory-database.spec.ts` covers the harness (rule R-database-harness). The advisory-lock suite also runs on a throwaway Postgres in the CI job `postgres-lock`, because PGlite cannot show two sessions.
 - **API-NFR-03 — Endpoint tests (§3.6).** Endpoint tests with an HTTP test client, including filtering by `gameId`; save and load progress end to end for each variant. _Check:_ the e2e suite has one save-and-load test per variant.
 - **API-NFR-04 — Contract tests (§3.6).** Pact contract tests (recommended). _Check:_ the CI `contract` job runs `scripts/contract/verify-provider.js` against the client's pact (rule R-contract).
 - **API-NFR-05 — CI (§3.6).** CI on every pull request. _Check:_ the CI `verify` job runs on every pull request, and gate `test/gates/ci-contract.spec.ts` keeps it in step with `pnpm verify` (rule R-verify-parity).

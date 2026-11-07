@@ -299,7 +299,7 @@
           + find(userId: UserId, gameId: GameId): Promise&lt;PlayerProgress | null&gt;
         </text>
         <text x="80" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + save(progress: PlayerProgress): Promise&lt;void&gt;
+          + update(userId, gameId, change): Promise&lt;PlayerProgress | null&gt;
         </text>
         <!-- Class: DrizzleLeaderboardReader («Adapter») -->
         <rect
@@ -479,7 +479,7 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          DrizzleProgressRepository saves the whole aggregate to both tables in one transaction.
+          DrizzleProgressRepository saves the whole aggregate in one transaction that locks its key.
           ProgressRows holds the progress row and its level result rows.
         </text>
         <text
