@@ -386,7 +386,7 @@
           + find(userId: UserId, gameId: GameId): Promise&lt;PlayerProgress | null&gt;
         </text>
         <text x="584" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + save(progress: PlayerProgress): Promise&lt;void&gt;
+          + update(userId, gameId, change): Promise&lt;PlayerProgress | null&gt;
         </text>
         <!-- Class: Clock («interface» «port») -->
         <rect
@@ -512,7 +512,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The use case reads the instant from the Clock port and passes it to the domain.
+          The use case reads the Clock instant inside ProgressRepository.update(), under a lock per
+          userId and gameId, and passes it to the domain.
         </text>
         <!-- Legend -->
         <line x1="24" y1="532" x2="1016" y2="532" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

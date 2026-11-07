@@ -21,6 +21,8 @@ The app calls this endpoint when it syncs its progress and its leaderboard: `Sav
 
 ![Sync progress sequence: the HTTP request enters JwtAuthGuard, ProgressController builds a SyncProgressRequest and calls SyncProgress, SyncProgressUseCase finds, updates and saves the PlayerProgress through its ports, and the controller answers with a ProgressDto](flows/views/seq-1-sync-progress.png)
 
+The code runs the find, the change and the save of this view as one call, `ProgressRepository.update(userId, gameId, change)`. `DrizzleProgressRepository` opens one transaction, takes a Postgres advisory lock for the `userId` and `gameId`, reads the aggregate and passes it, or `null`, to the change. The change reads `Clock.now()` first, then starts or changes the `PlayerProgress`. The adapter saves what the change returns in the same transaction. So two overlapping syncs of one key run one after the other: no level result is lost, and `updatedAt` never moves back. A row lock is not enough, because the first sync of a game has no row yet. The view still draws `find()` and `save()`; it needs a new layout to draw the change as a call back into the use case.
+
 ## Use case 2: login
 
 The app calls this endpoint when a player signs in. The endpoint is `AuthController.signIn()` (API-FR-01). Its path is new in two ways. First, it has no guard, because the player has no token yet. Second, the use case holds three ports, and two of their adapters live in layer 4: `ScryptPasswordHasher` checks the password and `JwtTokenIssuer` issues the `SessionToken` that every guarded request then carries. The use case answers no in two places, an unknown username and a wrong password, so the sequence diagram has two `alt` fragments.
