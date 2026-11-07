@@ -19,6 +19,7 @@ type HttpResponse = { status(code: number): { json(body: ErrorDto): void } };
 // Turns every exception into the ErrorDto body (API-FR-06).
 // An HttpException keeps its status and message. Any other error becomes a
 // 500 that hides its message, because that message can hold internal data.
+// No part of the body holds the query of the request.
 @Catch()
 export class HttpErrorFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpErrorFilter.name);
@@ -26,12 +27,14 @@ export class HttpErrorFilter implements ExceptionFilter {
   catch(error: unknown, host: ArgumentsHost): void {
     const http = host.switchToHttp();
     const request = http.getRequest<HttpRequest>();
-    const path = pathOf(request.originalUrl ?? request.url);
+    const url = request.originalUrl ?? request.url;
+    const path = pathOf(url);
     const body =
       error instanceof HttpException
         ? fromHttpException(error, path)
         : this.unexpected(error, path);
-    http.getResponse<HttpResponse>().status(body.statusCode).json(body);
+    const reply = withoutQuery(body, url.slice(path.length));
+    http.getResponse<HttpResponse>().status(reply.statusCode).json(reply);
   }
 
   private unexpected(error: unknown, path: string): ErrorDto {
@@ -54,6 +57,18 @@ export class HttpErrorFilter implements ExceptionFilter {
 function pathOf(url: string): string {
   const queryStart = url.indexOf('?');
   return queryStart === -1 ? url : url.slice(0, queryStart);
+}
+
+// An exception message can quote the request URL. For example, Nest answers
+// an unknown route with «Cannot GET <url>». This function removes each copy
+// of the query from the message and the details. A query that is only «?»
+// holds no data, so the body stays as it is.
+function withoutQuery(body: ErrorDto, query: string): ErrorDto {
+  if (query.length <= 1) {
+    return body;
+  }
+  const strip = (text: string): string => text.replaceAll(query, '');
+  return errorBody(body.statusCode, strip(body.message), body.details.map(strip), body.path);
 }
 
 function fromHttpException(error: HttpException, path: string): ErrorDto {

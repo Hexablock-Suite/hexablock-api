@@ -12,14 +12,15 @@ export class ErrorDto {
 
   @ApiProperty({
     example: 'Cannot GET /levels/unknown',
-    description: 'One sentence that a client can show or log.',
+    description: 'One sentence that a client can show or log. It never holds the query string.',
   })
   readonly message!: string;
 
   @ApiProperty({
     type: [String],
     example: ['gameId should not be empty'],
-    description: 'One entry per problem when a request has several. Empty otherwise.',
+    description:
+      'One entry per problem when a request has several. Empty otherwise. No entry holds the query string.',
   })
   readonly details!: string[];
 
