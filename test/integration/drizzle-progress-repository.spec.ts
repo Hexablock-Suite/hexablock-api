@@ -33,6 +33,7 @@ async function openDatabase(): Promise<TestDatabase> {
     CONTRACT_USER_IDS.map((id, index) => ({
       id,
       username: `player${index}`,
+      usernameKey: `player${index}`,
       passwordHash: 'scrypt$hash',
     })),
   );

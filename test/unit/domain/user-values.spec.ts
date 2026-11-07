@@ -29,6 +29,16 @@ describe('Username', () => {
       expect(Username.create(raw)).toEqual({ ok: false, error: 'invalid-username' });
     }
   });
+
+  // #73: the key is the name in lower case. Two names with the same key
+  // are the same name for uniqueness. The value keeps the typed case.
+  it('should_give_the_same_key_when_usernames_differ_only_in_letter_case', () => {
+    for (const raw of ['ada', 'Ada', 'ADA']) {
+      const result = Username.create(raw);
+
+      expect(result.ok && [result.value.value, result.value.key]).toEqual([raw, 'ada']);
+    }
+  });
 });
 
 describe('Password', () => {

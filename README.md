@@ -207,6 +207,14 @@ decision, so no migration chooses the account or changes the rows
 ([#69](https://github.com/Hexablock-Suite/hexablock-api/issues/69)). The test
 `test/integration/username-lower-unique.migration.spec.ts` pins this behavior.
 
+The migration `drizzle/0003_username_key.sql` replaces that index
+([#73](https://github.com/Hexablock-Suite/hexablock-api/issues/73)). It adds the column
+`username_key` with a plain unique index. The column holds `Username.key`: the name in lower case,
+which the domain computes. The database applies no letter case rule of its own. The column is
+`NOT NULL`, and the migration fills no value. No database holds users today. Before a database
+with users runs this migration, the team adds a backfill of `username_key`, after the duplicate
+check above.
+
 The schema has the `users` table of API-FR-01. The other business tables are still the design.
 
 ## Running Tests

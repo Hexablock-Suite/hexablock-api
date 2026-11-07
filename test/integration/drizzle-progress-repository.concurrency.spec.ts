@@ -60,11 +60,11 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
   async function newPlayer(): Promise<string> {
     const id = randomUUID();
     createdUsers.push(id);
-    await pool.query('insert into users (id, username, password_hash) values ($1, $2, $3)', [
-      id,
-      `lock-${id}`,
-      'scrypt$hash',
-    ]);
+    // randomUUID() gives lower case, so the name is its own key (#73).
+    await pool.query(
+      'insert into users (id, username, username_key, password_hash) values ($1, $2, $2, $3)',
+      [id, `lock-${id}`, 'scrypt$hash'],
+    );
     return id;
   }
 

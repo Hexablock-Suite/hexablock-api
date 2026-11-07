@@ -6,7 +6,9 @@ import type { users } from './schema.js';
 
 export type UserRow = typeof users.$inferSelect;
 
-// Turns a users row into the User entity and back.
+// Turns a users row into the User entity and back. toRow() writes
+// Username.key into username_key. toEntity() reads only the name, and the
+// domain computes the key again.
 export const UserRowMapper = {
   toEntity(row: UserRow): User {
     const username = Username.create(row.username);
@@ -20,6 +22,7 @@ export const UserRowMapper = {
     return {
       id: user.id.value,
       username: user.username.value,
+      usernameKey: user.username.key,
       passwordHash: user.passwordHash.value,
     };
   },

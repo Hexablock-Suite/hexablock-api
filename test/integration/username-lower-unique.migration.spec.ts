@@ -6,7 +6,6 @@ import { sql } from 'drizzle-orm';
 import { drizzle, type PgliteDatabase } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import * as schema from '../../src/adapters/persistence/schema.js';
-import { users } from '../../src/adapters/persistence/schema.js';
 
 const MIGRATIONS = resolve(import.meta.dirname, '../../drizzle');
 const LAST_BEFORE_INDEX = '0001_create_progress';
@@ -40,6 +39,8 @@ async function migrationsThrough(lastTag: string): Promise<string> {
 // Migration 0002 adds the unique index on lower(username) of #62. It does not
 // resolve names that already differ only in letter case. Which account keeps
 // the name is a product decision, so the migration fails and changes nothing.
+// Migration 0003 later replaces that index with one on username_key (#73).
+// When 0002 fails, the migrator stops, so 0003 does not run either.
 describe('migration 0002_username_lower_unique', () => {
   let client: PGlite;
   let db: PgliteDatabase<typeof schema>;
@@ -56,21 +57,26 @@ describe('migration 0002_username_lower_unique', () => {
     await rm(partialMigrations, { recursive: true, force: true });
   });
 
+  // The rows use plain SQL. The Drizzle table of schema.ts has the
+  // username_key column of migration 0003 (#73), and the table after 0001
+  // does not.
   it('should_fail_the_migration_and_keep_every_row_when_two_usernames_differ_only_in_case', async () => {
     await migrate(db, { migrationsFolder: partialMigrations });
-    await db.insert(users).values([
-      { id: ADA_ID, username: 'ada', passwordHash: 'scrypt$ada' },
-      { id: CAPITAL_ADA_ID, username: 'Ada', passwordHash: 'scrypt$capital' },
-    ]);
+    await db.execute(
+      sql`insert into users (id, username, password_hash) values
+          (${ADA_ID}, 'ada', 'scrypt$ada'),
+          (${CAPITAL_ADA_ID}, 'Ada', 'scrypt$capital')`,
+    );
 
     const migrated = migrate(db, { migrationsFolder: MIGRATIONS });
 
     await expect(migrated).rejects.toMatchObject({
       cause: { code: '23505', constraint: 'users_username_lower_unique' },
     });
-    expect(await db.select().from(users).orderBy(users.id)).toEqual([
-      { id: CAPITAL_ADA_ID, username: 'Ada', passwordHash: 'scrypt$capital' },
-      { id: ADA_ID, username: 'ada', passwordHash: 'scrypt$ada' },
+    const rows = await db.execute(sql`select * from users order by id`);
+    expect(rows.rows).toEqual([
+      { id: CAPITAL_ADA_ID, username: 'Ada', password_hash: 'scrypt$capital' },
+      { id: ADA_ID, username: 'ada', password_hash: 'scrypt$ada' },
     ]);
     const index = await db.execute(
       sql`select indexname from pg_indexes where indexname = 'users_username_lower_unique'`,

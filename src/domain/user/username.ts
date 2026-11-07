@@ -14,10 +14,18 @@ export const USERNAME_PATTERN = `^[${ALLOWED_CHARACTERS}]{${USERNAME_LENGTH.min}
 export type UsernameProblem = 'invalid-username';
 
 // The name a player signs in with. It keeps the letter case that the player
-// typed. It is unique among users when letter case is ignored, so `Ada`
-// cannot register after `ada` (#62). Sign-in compares the name as typed.
+// typed. Sign-in compares the name as typed.
+// The key is the name in lower case. Two users never have the same key, so
+// `Ada` cannot register after `ada` (#62). The key is the one definition of
+// that rule: the persistence adapter stores it and compares it, and the
+// database only keeps it unique (#73).
 export class Username {
-  private constructor(readonly value: string) {}
+  readonly key: string;
+
+  // Every allowed character is ASCII, so toLowerCase() changes only A to Z.
+  private constructor(readonly value: string) {
+    this.key = value.toLowerCase();
+  }
 
   // Every allowed character is ASCII, so the UTF-16 length of an accepted
   // name equals its code point count.
