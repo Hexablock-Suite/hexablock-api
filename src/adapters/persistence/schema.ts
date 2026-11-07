@@ -18,6 +18,9 @@ import {
 // API-FR-01. The table keeps the password hash, never the plain password.
 // The username is stored as typed. The index on lower(username) rejects a
 // second name that differs only in letter case (#62).
+// The exact constraint users_username_unique stays next to that index.
+// The index implies it, so the constraint rejects no other row. Only a new
+// migration can drop it, and no change asks for that (#69).
 export const users = pgTable(
   'users',
   {
