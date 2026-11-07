@@ -79,6 +79,18 @@ describe('RegisterUseCase', () => {
     expect(users.users).toHaveLength(1);
   });
 
+  it('should_not_hash_password_when_username_differs_only_in_case', async () => {
+    await register.execute({ username: 'ada', password: 'correct horse' });
+    const hash = vi.spyOn(hasher, 'hash');
+
+    const result = await register.execute({ username: 'Ada', password: 'other password' });
+
+    // The lookup ignores letter case, so it finds `ada` before the hash runs.
+    expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
+    expect(hash).not.toHaveBeenCalled();
+    expect(users.users).toHaveLength(1);
+  });
+
   it('should_reject_without_storing_user_when_password_hasher_fails', async () => {
     const failure = new Error('scrypt failed');
     vi.spyOn(hasher, 'hash').mockRejectedValue(failure);
