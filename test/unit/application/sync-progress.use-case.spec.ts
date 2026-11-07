@@ -95,8 +95,8 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(stored?.results).toEqual([LevelResult.of(level)]);
   });
 
-  // The DTO says: a later result for a levelId replaces the earlier one.
-  it('should_replace_level_result_and_keep_other_levels_when_stored_progress_syncs_again', async () => {
+  // A better result for a stored levelId takes its place (DS-4, DS-12).
+  it('should_store_better_level_result_and_keep_other_levels_when_stored_progress_syncs_again', async () => {
     const first = { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 };
     const retry = { levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 30000 };
     const next = { levelId: 'fit-02', stars: 2, moves: 12, elapsedMs: 45000 };
@@ -110,6 +110,37 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(result.ok && result.value).toEqual(stored);
     expect(stored?.highScore).toBeNull();
     expect(stored?.results).toEqual([LevelResult.of(retry), LevelResult.of(next)]);
+  });
+
+  // DS-12 check: a better result and then a worse one for the same level
+  // keep the better one, and the opposite order stores the same row. DS-4
+  // gives the order: more stars, then fewer moves, then less time.
+  it('should_store_better_level_result_in_either_order_when_a_worse_result_of_same_level_syncs', async () => {
+    const better = { levelId: 'fit-01', stars: 3, moves: 30, elapsedMs: 90000 };
+    const worse = { levelId: 'fit-01', stars: 2, moves: 9, elapsedMs: 30000 };
+    const stored: unknown[] = [];
+    for (const levels of [
+      [better, worse],
+      [worse, better],
+    ]) {
+      const repository = new InMemoryProgressRepository();
+      const ordered = new SyncProgressUseCase(repository, clock);
+
+      const results = [];
+      for (const level of levels) {
+        results.push(
+          await ordered.execute(
+            syncRequest({ gameId: 'hexa-fit', score: undefined, results: [level] }),
+          ),
+        );
+      }
+
+      const found = await repository.find(ADA, GameId.of('hexa-fit'));
+      expect(found?.results).toEqual([LevelResult.of(better)]);
+      expect(results[1]?.ok && results[1].value).toEqual(found);
+      stored.push(found);
+    }
+    expect(stored[1]).toEqual(stored[0]);
   });
 
   it('should_fail_with_invalid_progress_and_save_nothing_when_game_id_is_not_a_slug', async () => {
