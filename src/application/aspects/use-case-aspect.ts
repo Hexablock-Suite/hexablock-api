@@ -1,4 +1,4 @@
-import type { UseCase } from '../../application/use-case.js';
+import type { UseCase } from '../use-case.js';
 
 // The abstract Decorator of the use cases (§3.5, decision 7 of
 // docs/architecture/classes.md). It implements the input port and keeps the
