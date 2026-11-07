@@ -130,6 +130,18 @@ describe('LoggingAspect', () => {
     });
   });
 
+  // String() throws a TypeError on an object without a prototype. The log
+  // never changes the result, so the caller gets the thrown object itself.
+  it('should_rethrow_same_object_when_inner_use_case_throws_an_object_without_prototype', async () => {
+    const failure: unknown = Object.create(null);
+    const { inner } = echo(() => Promise.reject(failure));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).rejects.toBe(failure);
+    expect(logger.log).not.toHaveBeenCalled();
+  });
+
   // SyncProgressUseCase holds no logging code: the log entry comes from the aspect.
   it('should_log_sync_progress_outcome_when_aspect_wraps_use_case_without_logging_code', async () => {
     const logger = recordingLogger();

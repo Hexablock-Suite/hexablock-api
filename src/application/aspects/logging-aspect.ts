@@ -25,9 +25,12 @@ export class LoggingAspect<TRequest, TValue, TError> extends UseCaseAspect<
     try {
       result = await super.execute(request);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.safely(() => this.logger.log({ useCase: this.name, outcome: 'error', message, stack }));
+      // String() can throw, for example on an object without a prototype.
+      // So the aspect builds the text inside safely(), and the caller still
+      // gets the thrown value.
+      this.safely(() =>
+        this.logger.log({ useCase: this.name, outcome: 'error', ...describe(error) }),
+      );
       throw error;
     }
     if (result.ok) {
@@ -49,4 +52,12 @@ export class LoggingAspect<TRequest, TValue, TError> extends UseCaseAspect<
       // No source gives a policy for a failed log write, so the aspect drops it.
     }
   }
+}
+
+// The message and the stack of a thrown value. A value that is not an Error
+// has no stack, and its message is its text.
+function describe(error: unknown): { message: string; stack: string | undefined } {
+  return error instanceof Error
+    ? { message: error.message, stack: error.stack }
+    : { message: String(error), stack: undefined };
 }
