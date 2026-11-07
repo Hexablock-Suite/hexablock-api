@@ -1,16 +1,15 @@
-import type { LoggerService } from '@nestjs/common';
+import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
+import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.js';
+import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { UseCase } from '../../../src/application/use-case.js';
 import { SyncProgressUseCase } from '../../../src/application/progress/sync-progress.use-case.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { LoggingAspect } from '../../../src/infrastructure/aspects/logging-aspect.js';
-import { UseCaseAspect } from '../../../src/infrastructure/aspects/use-case-aspect.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
 import { testUserId } from '../../support/user-ids.js';
 
 type EchoResult = Result<string, { kind: string }>;
-type LogCall = (message: unknown, ...rest: unknown[]) => void;
 
 // A stand-in use case. Its execute mock answers each request with the given step.
 function echo(answer: () => Promise<EchoResult>) {
@@ -19,13 +18,9 @@ function echo(answer: () => Promise<EchoResult>) {
   return { inner, execute };
 }
 
-// Records each call of the logging package, so a test reads what the aspect wrote.
+// Records each entry that the aspect writes to the Logger port.
 function recordingLogger() {
-  return {
-    log: vi.fn<LogCall>(),
-    warn: vi.fn<LogCall>(),
-    error: vi.fn<LogCall>(),
-  } satisfies LoggerService;
+  return { log: vi.fn<(entry: UseCaseLogEntry) => void>() } satisfies Logger;
 }
 
 // LoggingAspect wraps any use case (§3.5, decision 10 of docs/architecture/classes.md).
@@ -40,12 +35,10 @@ describe('LoggingAspect', () => {
 
     expect(returned).toBe(result);
     expect(execute).toHaveBeenCalledExactlyOnceWith('ping');
-    expect(logger.log).toHaveBeenCalledExactlyOnceWith('useCase=Echo outcome=success');
-    expect(logger.warn).not.toHaveBeenCalled();
-    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({ useCase: 'Echo', outcome: 'success' });
   });
 
-  it('should_log_name_failure_and_error_and_return_inner_result_unchanged_when_inner_use_case_fails', async () => {
+  it('should_log_name_failure_and_kind_and_return_inner_result_unchanged_when_inner_use_case_fails', async () => {
     const result: EchoResult = err({ kind: 'progress-not-found' });
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
@@ -54,37 +47,47 @@ describe('LoggingAspect', () => {
     const returned = await aspect.execute('ping');
 
     expect(returned).toBe(result);
-    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=failure error={"kind":"progress-not-found"}',
-    );
-    expect(logger.log).not.toHaveBeenCalled();
-    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'progress-not-found',
+    });
   });
 
-  // JSON.stringify throws on a bigint. The aspect writes it as text and
-  // returns the inner result unchanged.
-  it('should_log_bigint_as_text_and_return_inner_result_unchanged_when_failure_holds_a_bigint', async () => {
-    const result: EchoResult = err({ kind: 'big', size: 1n });
+  // A failure can carry a value that the client sent, such as an invalid
+  // gameId. The log keeps only the kind, so that value never reaches the log.
+  it('should_log_only_kind_and_no_client_value_when_failure_carries_a_client_value', async () => {
+    const result = err({
+      kind: 'invalid-progress',
+      problems: ['gameId must be a lowercase slug, got "Hexa Lines".'],
+    });
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
     const aspect = new LoggingAspect(inner, 'Echo', logger);
 
     await expect(aspect.execute('ping')).resolves.toBe(result);
-    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=failure error={"kind":"big","size":"1"}',
-    );
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'invalid-progress',
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain('Hexa Lines');
   });
 
-  it('should_log_nested_bigints_as_text_and_return_inner_result_unchanged_when_failure_nests_them', async () => {
+  // JSON.stringify throws on a bigint. The aspect logs only the kind, so a
+  // bigint in the failure never reaches the log, and the result stays unchanged.
+  it('should_log_only_kind_and_return_inner_result_unchanged_when_failure_holds_bigints', async () => {
     const result = err({ kind: 'big', sizes: [1n, { inner: 2n }], count: 3 });
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
     const aspect = new LoggingAspect(inner, 'Echo', logger);
 
     await expect(aspect.execute('ping')).resolves.toBe(result);
-    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=failure error={"kind":"big","sizes":["1",{"inner":"2"}],"count":3}',
-    );
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'big',
+    });
   });
 
   it('should_log_name_error_and_rethrow_same_error_when_inner_use_case_throws', async () => {
@@ -94,12 +97,12 @@ describe('LoggingAspect', () => {
     const aspect = new LoggingAspect(inner, 'Echo', logger);
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
-    expect(logger.error).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=error error=database is down',
-      failure.stack,
-    );
-    expect(logger.log).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'error',
+      message: 'database is down',
+      stack: failure.stack,
+    });
   });
 
   // A logger that throws does not change the outcome of the use case.
@@ -107,15 +110,13 @@ describe('LoggingAspect', () => {
     for (const result of [ok('done'), err({ kind: 'progress-not-found' })] as EchoResult[]) {
       const { inner } = echo(() => Promise.resolve(result));
       const logger = recordingLogger();
-      const sinkIsFull = () => {
+      logger.log.mockImplementation(() => {
         throw new Error('log sink is full');
-      };
-      logger.log.mockImplementation(sinkIsFull);
-      logger.warn.mockImplementation(sinkIsFull);
+      });
       const aspect = new LoggingAspect(inner, 'Echo', logger);
 
       await expect(aspect.execute('ping')).resolves.toBe(result);
-      expect(result.ok ? logger.log : logger.warn).toHaveBeenCalledOnce();
+      expect(logger.log).toHaveBeenCalledOnce();
     }
   });
 
@@ -123,29 +124,31 @@ describe('LoggingAspect', () => {
     const failure = new Error('database is down');
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    logger.error.mockImplementation(() => {
+    logger.log.mockImplementation(() => {
       throw new Error('log sink is full');
     });
     const aspect = new LoggingAspect(inner, 'Echo', logger);
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
-    expect(logger.error).toHaveBeenCalledOnce();
+    expect(logger.log).toHaveBeenCalledOnce();
   });
 
   it('should_rethrow_same_non_error_object_when_logger_throws_while_it_logs_that_value', async () => {
     const failure = { reason: 'database is down' };
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    logger.error.mockImplementation(() => {
+    logger.log.mockImplementation(() => {
       throw new Error('log sink is full');
     });
     const aspect = new LoggingAspect(inner, 'Echo', logger);
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
-    expect(logger.error).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=error error=[object Object]',
-      undefined,
-    );
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'error',
+      message: '[object Object]',
+      stack: undefined,
+    });
   });
 
   // A thrown value that is not an Error has no message and no stack. The
@@ -156,15 +159,27 @@ describe('LoggingAspect', () => {
     const aspect = new LoggingAspect(inner, 'Echo', logger);
 
     await expect(aspect.execute('ping')).rejects.toBe('database is down');
-    expect(logger.error).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=error error=database is down',
-      undefined,
-    );
-    expect(logger.log).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'error',
+      message: 'database is down',
+      stack: undefined,
+    });
   });
 
-  // SyncProgressUseCase holds no logging code: the log line comes from the aspect.
+  // String() throws a TypeError on an object without a prototype. The log
+  // never changes the result, so the caller gets the thrown object itself.
+  it('should_rethrow_same_object_when_inner_use_case_throws_an_object_without_prototype', async () => {
+    const failure: unknown = Object.create(null);
+    const { inner } = echo(() => Promise.reject(failure));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).rejects.toBe(failure);
+    expect(logger.log).not.toHaveBeenCalled();
+  });
+
+  // SyncProgressUseCase holds no logging code: the log entry comes from the aspect.
   it('should_log_sync_progress_outcome_when_aspect_wraps_use_case_without_logging_code', async () => {
     const logger = recordingLogger();
     const sync = new SyncProgressUseCase(
@@ -182,6 +197,9 @@ describe('LoggingAspect', () => {
 
     expect(result.ok).toBe(true);
     expect(aspect).toBeInstanceOf(UseCaseAspect);
-    expect(logger.log).toHaveBeenCalledExactlyOnceWith('useCase=SyncProgress outcome=success');
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'SyncProgress',
+      outcome: 'success',
+    });
   });
 });

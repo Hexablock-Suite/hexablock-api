@@ -2,6 +2,8 @@ import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../../src/adapters/persistence/drizzle-user-repository.js';
+import { LoggingAspect } from '../../src/application/aspects/logging-aspect.js';
+import { LOGGER } from '../../src/application/ports/logger.js';
 import { PROGRESS_REPOSITORY } from '../../src/application/ports/progress-repository.js';
 import {
   GET_PROGRESS,
@@ -19,10 +21,10 @@ import { TOKEN_ISSUER } from '../../src/application/ports/token-issuer.js';
 import { USER_ID_GENERATOR } from '../../src/application/ports/user-id-generator.js';
 import { USER_REPOSITORY } from '../../src/application/ports/user-repository.js';
 import { AppModule } from '../../src/infrastructure/app.module.js';
-import { LoggingAspect } from '../../src/infrastructure/aspects/logging-aspect.js';
 import { JwtTokenIssuer } from '../../src/infrastructure/auth/jwt-token-issuer.js';
 import { RandomUserIdGenerator } from '../../src/infrastructure/auth/random-user-id-generator.js';
 import { ScryptPasswordHasher } from '../../src/infrastructure/auth/scrypt-password-hasher.js';
+import { NestLogger } from '../../src/infrastructure/logging/nest-logger.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
 import { testUserId } from '../support/user-ids.js';
 
@@ -51,6 +53,7 @@ describe('AppModule account wiring', () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
     expect(moduleRef.get(PROGRESS_REPOSITORY)).toBeInstanceOf(DrizzleProgressRepository);
+    expect(moduleRef.get(LOGGER)).toBeInstanceOf(NestLogger);
     expect(moduleRef.get(SYNC_PROGRESS)).toBeInstanceOf(LoggingAspect);
     expect(moduleRef.get(GET_PROGRESS)).toBeInstanceOf(GetProgressUseCase);
     await moduleRef.close();
@@ -75,8 +78,9 @@ describe('AppModule account wiring', () => {
     };
     expect(result).toEqual({ ok: false, error });
     expect(warn).toHaveBeenCalledExactlyOnceWith(
-      `useCase=SyncProgress outcome=failure error=${JSON.stringify(error)}`,
+      'useCase=SyncProgress outcome=failure kind=invalid-progress',
     );
+    expect(JSON.stringify(warn.mock.calls)).not.toContain('Hexa Lines');
     await moduleRef.close();
   });
 
