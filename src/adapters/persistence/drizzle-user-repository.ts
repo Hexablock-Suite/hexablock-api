@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 import type { UserRepository } from '../../application/ports/user-repository.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
@@ -24,8 +24,20 @@ export class DrizzleUserRepository implements UserRepository {
     return row === undefined ? null : UserRowMapper.toEntity(row);
   }
 
-  // The unique constraint on username rejects a second user with the same
-  // name, also when two sign-ups pass the lookup at the same time.
+  // The expression matches the unique index on lower(username), so the
+  // index answers the lookup.
+  async isUsernameTaken(username: Username): Promise<boolean> {
+    const rows = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(sql`lower(${users.username}) = lower(${username.value})`)
+      .limit(1);
+    return rows.length > 0;
+  }
+
+  // The unique index on lower(username) rejects a second user whose name
+  // differs only in letter case, also when two sign-ups pass the lookup at
+  // the same time.
   async add(user: User): Promise<Result<void, 'username-taken'>> {
     try {
       await this.db.insert(users).values(UserRowMapper.toRow(user));

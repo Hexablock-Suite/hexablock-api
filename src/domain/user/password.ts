@@ -1,18 +1,26 @@
+import { Range } from '../shared/range.js';
 import { err, ok, type Result } from '../shared/result.js';
 
-// The upper limit keeps the hash work of one request bounded. Both limits
-// are a proposal for team review: API-FR-01 sets no rule.
-const MIN_LENGTH = 8;
-const MAX_LENGTH = 128;
+// The length of a password in code points. The upper limit keeps the hash
+// work of one request bounded. Both limits are a proposal for team review:
+// API-FR-01 sets no rule.
+export const PASSWORD_LENGTH = Range.ofNumbers(8, 128);
 
 export type PasswordProblem = 'invalid-password';
+
+// Counts Unicode code points, not UTF-16 units: an emoji is one character
+// (NIST SP 800-63B §5.1.1.2). Array.from gives the same code points as
+// [...raw]. The lint rule no-misused-spread forbids the spread of a string.
+export function passwordLength(raw: string): number {
+  return Array.from(raw).length;
+}
 
 // A plain password that a new user chooses. Only the hash is stored.
 export class Password {
   private constructor(readonly value: string) {}
 
   static create(raw: string): Result<Password, PasswordProblem> {
-    return raw.length >= MIN_LENGTH && raw.length <= MAX_LENGTH
+    return PASSWORD_LENGTH.contains(passwordLength(raw))
       ? ok(new Password(raw))
       : err('invalid-password');
   }

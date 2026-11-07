@@ -33,6 +33,40 @@ jobs:
         run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
       - run: pnpm verify
 
+  # Runs the advisory-lock suite of DrizzleProgressRepository.update() on a
+  # throwaway Postgres (rule R-database-harness). PGlite runs one session, so
+  # only a real server shows two syncs that wait for one lock.
+  postgres-lock:
+    name: postgres-lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      HB_TEST_PG_URL: postgres://postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run test/integration/drizzle-progress-repository.concurrency.spec.ts --reporter=default --reporter=json --outputFile=postgres-lock.json
+      # A skipped suite would pass without testing the lock, so the job fails on it.
+      - name: fail when the suite was skipped
+        run: jq -e '.numPassedTests > 0 and .numPendingTests == 0 and .numTodoTests == 0' postgres-lock.json
+
   # Verifies the pact from the client main branch against this commit (spec S9).
   contract:
     name: contract

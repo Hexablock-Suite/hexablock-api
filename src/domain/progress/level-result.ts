@@ -29,4 +29,16 @@ export class LevelResult {
     }
     return new LevelResult(levelId, stars, moves, elapsedMs);
   }
+
+  // The order of DS-4: more stars wins, then fewer moves, then less time. A
+  // full tie is not better, so the caller keeps the result it has.
+  isBetterThan(other: LevelResult): boolean {
+    if (this.stars !== other.stars) {
+      return this.stars > other.stars;
+    }
+    if (this.moves !== other.moves) {
+      return this.moves < other.moves;
+    }
+    return this.elapsedMs < other.elapsedMs;
+  }
 }
