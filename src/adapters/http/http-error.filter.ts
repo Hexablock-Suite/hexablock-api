@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { describeThrown } from '../../application/thrown-value.js';
 import type { ErrorDto } from './error.dto.js';
 
 const VALIDATION_MESSAGE = 'Request validation failed';
@@ -37,8 +38,16 @@ export class HttpErrorFilter implements ExceptionFilter {
   }
 
   private unexpected(error: unknown, path: string): ErrorDto {
-    // The client never sees the cause, so the log keeps it.
-    this.logger.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
+    // The client never sees the cause, so the log keeps its name, its string
+    // code and its frames. The log never keeps the message, because it can
+    // quote a value that the client sent. A getter of the error can throw,
+    // so a failed log line stops here, and the client still gets the 500.
+    try {
+      const { name, code, frames } = describeThrown(error);
+      this.logger.error(`error=${name}${code === undefined ? '' : ` code=${code}`}`, frames);
+    } catch {
+      // No source gives a policy for a failed log line, so the filter drops it.
+    }
     return errorBody(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_MESSAGE, [], path);
   }
 }

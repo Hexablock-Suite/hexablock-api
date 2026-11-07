@@ -1,6 +1,6 @@
 # Layers (Clean Architecture)
 
-Status: draft for review with the professor, 2026-10-30. Q10 answered in the class of 2026-10-30; the ports moved to the application layer on 2026-10-31.
+Status: draft for review with the professor, 2026-10-30. Q10 answered in the class of 2026-10-30; the ports moved to the application layer on 2026-10-31. Q12 answered in the session of 2026-11-06; the aspects moved to the application layer on 2026-11-06.
 
 This page shows the four Clean layers of the API (statement §3.4 and §4.2). It places each main component in its layer. The rules in [`.dependency-cruiser.cjs`](../../.dependency-cruiser.cjs) forbid every outward import in `src/` on each `pnpm arch` run. They do not prove that each drawn arrow exists. Question IDs such as Q12 use the numbers of the shared question list in `hexablock-app`, `docs/REQUIREMENTS.md` §11. The classes of each layer are in [classes.md](classes.md). The extension points are in [extensibility.md](extensibility.md).
 
@@ -25,7 +25,7 @@ flowchart TB
     DB["database/: DatabaseModule, connection.ts<br/>(AppModule does not import them yet)"]
     SYSCLOCK["clock/SystemClock"]
     SECURITY["JWT token issuer and password hasher<br/>adapters (planned)"]
-    ASPECTS["AOP aspects: logging and timing<br/>wrappers over use cases (planned, Q12)"]
+    NESTLOGGER["logging/NestLogger"]
   end
 
   subgraph ADAPTERS["3. Interface adapters: src/adapters"]
@@ -42,6 +42,8 @@ flowchart TB
     REPOPORTS(["Repository ports: User, Progress,<br/>Leaderboard, Level (planned)"])
     SECPORTS(["PasswordHasher and TokenIssuer<br/>ports (planned)"])
     CLOCK(["Clock port and CLOCK token<br/>ports/clock.ts"])
+    ASPECTS["aspects/: UseCaseAspect, LoggingAspect;<br/>TimingAspect (planned)"]
+    LOGPORT(["Logger port and LOGGER token<br/>ports/logger.ts"])
   end
 
   subgraph DOMAIN["1. Domain (entities): src/domain"]
@@ -57,6 +59,8 @@ flowchart TB
   APP --> DOMAIN
   SYSCLOCK -.->|implements| CLOCK
   APPMOD -->|binds CLOCK to| SYSCLOCK
+  NESTLOGGER -.->|implements| LOGPORT
+  ASPECTS -->|uses| LOGPORT
   CONTROLLERS -->|calls| INPORTS
   GUARD -->|calls| INPORTS
   UC -.->|implements| INPORTS
@@ -88,8 +92,8 @@ flowchart TB
 
   classDef real fill:#ffffff,stroke:#222222,color:#111111
   classDef planned fill:#ffffff,stroke:#777777,stroke-dasharray:5 5,color:#444444
-  class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,HEALTH,SCHEMA,CLOCK real
-  class FEATMOD,SECURITY,ASPECTS,CONTROLLERS,GUARD,REPOS,UC,INPORTS,ENT,REPOPORTS,SECPORTS planned
+  class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,NESTLOGGER,HEALTH,SCHEMA,CLOCK,ASPECTS,LOGPORT real
+  class FEATMOD,SECURITY,CONTROLLERS,GUARD,REPOS,UC,INPORTS,ENT,REPOPORTS,SECPORTS planned
   class KEYPORT,KEYIMPL real
   class KEYPLANNED planned
 
@@ -111,21 +115,21 @@ How to read it:
 - A rounded node is a port: an interface that an inner layer owns and an outer layer implements.
 - A dotted arrow labelled `implements` is a realization: the class implements the port. Mermaid cannot draw the hollow triangle of UML, so the dotted line stands for it, as in the layers page of `hexablock-app`. A solid arrow is any other dependency.
 - A dashed box with the suffix "(planned)" is a component that does not exist yet. A solid box exists in `src/` today.
-- A label that names a question (Q12) marks a placement the team has not settled. The box sits where this draft puts it, and the professor's answer can move it.
+- A label that names an open question marks a placement the team has not settled. The box sits where this draft puts it, and the professor's answer can move it. No label names an open question today.
 - Layer colors: yellow is the domain, purple is the application, and blue is the infrastructure. With four layers, the infrastructure has two shades: light blue for the interface adapters (layer 3) and dark blue for frameworks and drivers (layer 4). These are the colors the course uses for its three layers. The legend inside each drawing repeats them, and the class and extensibility views use the same zone colors.
-- The clock is the real example of a port and its adapter. `Clock` lives in `src/application/ports/clock.ts`. `SystemClock` in the infrastructure implements it. `AppModule` binds the `CLOCK` token to `SystemClock`.
+- The clock is the real example of a port and its adapter. `Clock` lives in `src/application/ports/clock.ts`. `SystemClock` in the infrastructure implements it. `AppModule` binds the `CLOCK` token to `SystemClock`. The logger follows the same shape: `NestLogger` implements the `Logger` port, and `AppModule` binds the `LOGGER` token to it.
 - Every port lives in the application layer (Q10). Domain code never imports a port: a use case reads the instant from `Clock` and passes it to the domain as a parameter.
 - `AppModule` is the composition root: it binds each port to its adapter. `src/main.ts` is the bootstrap: it creates the Nest app from `AppModule` and starts the HTTP server.
 
 ## Layers and allowed dependencies
 
-| Layer                      | Folder                                          | What lives there                                                                            | May depend on                                                                                                                                                                                                                                 |
-| -------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Domain (entities)       | `src/domain`                                    | Entities, value objects and domain services. No ports (Q10): the instant is a parameter.    | Only `src/domain`. No package and no Node built-in. Rule `domain-imports-only-domain`.                                                                                                                                                        |
-| 2. Application (use cases) | `src/application`                               | Use cases, input ports and the output ports that the adapters implement (Q10).              | `src/application` and `src/domain`. No package, so no `@nestjs/*`. Rule `application-imports-only-domain`.                                                                                                                                    |
-| 3. Interface adapters      | `src/adapters/http`, `src/adapters/persistence` | Nest controllers, DTOs, guards and filters. Drizzle repositories that implement the ports.  | `src/application`, `src/domain` and packages. Never `src/infrastructure`: rule `adapters-never-import-infrastructure`. `src/adapters/persistence` may use `drizzle-orm` but never `@nestjs/*`: rule `persistence-adapters-never-import-nest`. |
-| 4. Frameworks and drivers  | `src/infrastructure`                            | Nest modules, configuration, the database connection and system adapters such as the clock. | Every layer and any package. No rule restricts it. The three rules above stop every inner layer from importing it.                                                                                                                            |
-| Bootstrap                  | `src/main.ts`                                   | It creates the Nest app from `AppModule`, the composition root, and starts the server.      | `src/infrastructure`. No rule restricts it.                                                                                                                                                                                                   |
+| Layer                      | Folder                                          | What lives there                                                                           | May depend on                                                                                                                                                                                                                                 |
+| -------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Domain (entities)       | `src/domain`                                    | Entities, value objects and domain services. No ports (Q10): the instant is a parameter.   | Only `src/domain`. No package and no Node built-in. Rule `domain-imports-only-domain`.                                                                                                                                                        |
+| 2. Application (use cases) | `src/application`                               | Use cases, input ports, output ports that the adapters implement (Q10), and the aspects.   | `src/application` and `src/domain`. No package, so no `@nestjs/*`. Rule `application-imports-only-domain`.                                                                                                                                    |
+| 3. Interface adapters      | `src/adapters/http`, `src/adapters/persistence` | Nest controllers, DTOs, guards and filters. Drizzle repositories that implement the ports. | `src/application`, `src/domain` and packages. Never `src/infrastructure`: rule `adapters-never-import-infrastructure`. `src/adapters/persistence` may use `drizzle-orm` but never `@nestjs/*`: rule `persistence-adapters-never-import-nest`. |
+| 4. Frameworks and drivers  | `src/infrastructure`                            | Nest modules, configuration, the database connection, system adapters (clock, logger).     | Every layer and any package. No rule restricts it. The three rules above stop every inner layer from importing it.                                                                                                                            |
+| Bootstrap                  | `src/main.ts`                                   | It creates the Nest app from `AppModule`, the composition root, and starts the server.     | `src/infrastructure`. No rule restricts it.                                                                                                                                                                                                   |
 
 ## Where each piece lives
 
@@ -141,17 +145,18 @@ How to read it:
 - **Drizzle repositories and row mappers:** `src/adapters/persistence`. The mappers turn rows into entities and back.
 - **JWT guard:** `src/adapters/http`. It calls the `AuthenticateToken` input port, as a controller calls its input ports, and never calls `TokenIssuer`. `AuthenticateTokenUseCase` verifies the token through the `TokenIssuer` port and returns the `UserId` or a failed `Result`. The docs named two options, a separate `TokenVerifier` port or an `AuthenticateToken` input port. This draft takes the input port, as an assumption for team review: decision 14 of [classes.md](classes.md).
 - **JWT and password hashing adapters:** `src/infrastructure`, as `SystemClock` does for the `Clock` port.
-- **AOP aspects over use cases:** custom decorators or proxies, never Nest interceptors (rule `application-imports-only-domain`). This draft puts them in `src/infrastructure`. See Q12.
-- **Logging:** this draft has no `Logger` port. The aspects sit in `src/infrastructure` and call a logging package directly, so a port would protect no inner layer. If Q12 moves the aspects to `src/application`, they need a `Logger` port there. It takes a typed entry (use case name, outcome, error), and the adapter writes the text (decision 10 of [classes.md](classes.md)).
+- **AOP aspects over use cases:** `src/application/aspects`, as custom decorators, never Nest interceptors (rule `application-imports-only-domain`). `UseCaseAspect` implements the `UseCase` input port, and each aspect extends it. See Q12.
+- **Logging:** the `Logger` port lives in `src/application/ports/logger.ts`. It takes a typed entry (use case name, outcome, and the `kind` of a failure, or the name, string `code` and stack frames of a thrown error, never its message). `NestLogger` in `src/infrastructure/logging` implements it and writes the text (decision 10 of [classes.md](classes.md)). A failure logs only its `kind`, so a value that the client sent never reaches the log.
 - **Swagger and OpenAPI:** `@nestjs/swagger` decorators on controllers and DTOs in `src/adapters/http`. `src/infrastructure/http-app.ts` builds the document. `openapi/openapi.json` is its committed export.
 - **NestJS modules:** `src/infrastructure`. Nest stays out of `src/domain`, `src/application` and `src/adapters/persistence`. A Nest injection token next to a port is a plain `Symbol`, such as `CLOCK`.
 - **Outside `src/`:** `drizzle/` holds the generated SQL migrations. `compose.yaml` starts a local Postgres. Both are database details of layer 4.
 
 ## Open questions for the professor
 
-- **Q12. Where do the AOP aspects live?** An aspect wraps a use case. It can live in `src/application` as a plain decorator over a logger port, or in `src/infrastructure` as a wrapper that the Nest modules apply. Which layer do you expect?
+None today.
 
 ## Resolved questions
 
 - **Q10. Answered in the class of 2026-10-30: the ports live in `src/application`.** The professor said that the ports belong to the application layer. Statement §3.4 says the same: the use cases depend on ports defined in their own layer. The diagram and the class diagram put every port there. The `Clock` port moved to `src/application/ports/clock.ts` on 2026-10-31.
 - **Q11. Resolved by the team on 2026-10-30: the Drizzle schema lives in `src/adapters/persistence/schema.ts`.** It sat in `src/infrastructure/database/schema.ts`, and rule `adapters-never-import-infrastructure` kept the repositories from importing it. The infrastructure may import the adapters, so `connection.ts` now takes the schema from there. The architecture gate test pins the path that `drizzle.config.ts` gives to `drizzle-kit`.
+- **Q12. Answered in the session of 2026-11-06: the aspects live in `src/application`.** An aspect wraps a use case. It could live in `src/application` as a plain decorator over a logger port, or in `src/infrastructure` as a wrapper that the Nest modules apply. The professor answered that the aspects talk to the use case, so they belong in the application layer, built as decorators with one interface common to the use cases, without libraries. `UseCaseAspect` and `LoggingAspect` moved to `src/application/aspects` on 2026-11-06, behind the `Logger` port that `NestLogger` implements.

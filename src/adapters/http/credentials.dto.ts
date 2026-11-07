@@ -1,16 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PASSWORD_LENGTH } from '../../domain/user/password.js';
+import { USERNAME_LENGTH, USERNAME_PATTERN } from '../../domain/user/username.js';
 
-// The body of POST /auth/register and POST /auth/login (API-FR-01).
+// The body of POST /auth/register (API-FR-01). The limits come from the
+// domain, so OpenAPI publishes the rules that Username and Password check.
 export class CredentialsDto {
   @ApiProperty({
     example: 'ada',
-    minLength: 3,
-    maxLength: 32,
-    pattern: '^[A-Za-z0-9._-]{3,32}$',
+    minLength: USERNAME_LENGTH.min,
+    maxLength: USERNAME_LENGTH.max,
+    pattern: USERNAME_PATTERN,
     description: 'Letters, digits, dots, hyphens or underscores.',
   })
   readonly username!: string;
 
-  @ApiProperty({ example: 'correct horse battery', minLength: 8, maxLength: 128 })
+  @ApiProperty({
+    example: 'correct horse battery',
+    minLength: PASSWORD_LENGTH.min,
+    maxLength: PASSWORD_LENGTH.max,
+  })
   readonly password!: string;
 }

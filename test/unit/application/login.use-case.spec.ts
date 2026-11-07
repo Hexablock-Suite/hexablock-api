@@ -7,6 +7,10 @@ import {
   PrefixTokenIssuer,
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
+import { testUserId } from '../../support/user-ids.js';
+
+// One code point, two UTF-16 units.
+const EMOJI = '\u{1F600}';
 
 describe('LoginUseCase', () => {
   let login: LoginUseCase;
@@ -25,7 +29,7 @@ describe('LoginUseCase', () => {
   it('should_return_token_for_user_when_credentials_are_valid', async () => {
     const result = await login.execute({ username: 'ada', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: true, value: 'token-for:user-1' });
+    expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
   });
 
   it('should_fail_with_invalid_credentials_when_password_is_wrong', async () => {
@@ -36,6 +40,13 @@ describe('LoginUseCase', () => {
 
   it('should_fail_with_invalid_credentials_when_username_is_unknown', async () => {
     const result = await login.execute({ username: 'grace', password: 'correct horse' });
+
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+  });
+
+  // Login finds the user by the name as typed (#62).
+  it('should_fail_with_invalid_credentials_when_username_differs_only_in_case', async () => {
+    const result = await login.execute({ username: 'ADA', password: 'correct horse' });
 
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
   });
@@ -91,6 +102,30 @@ describe('LoginUseCase', () => {
     } finally {
       process.off('unhandledRejection', record);
     }
+  });
+
+  // The maximum bounds the hash work of one request (#60).
+  it('should_fail_with_invalid_credentials_without_hashing_when_password_has_more_than_128_characters', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+    const hash = vi.spyOn(hasher, 'hash');
+
+    for (const password of ['x'.repeat(129), EMOJI.repeat(129)]) {
+      const result = await login.execute({ username: 'ada', password });
+
+      expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    }
+    expect(verify).not.toHaveBeenCalled();
+    expect(hash).not.toHaveBeenCalled();
+  });
+
+  it('should_verify_password_when_it_has_128_code_points', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+
+    for (const password of ['x'.repeat(128), EMOJI.repeat(128)]) {
+      await login.execute({ username: 'ada', password });
+    }
+
+    expect(verify).toHaveBeenCalledTimes(2);
   });
 
   it('should_verify_password_once_when_password_is_wrong', async () => {

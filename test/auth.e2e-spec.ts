@@ -71,6 +71,55 @@ describe('auth endpoints (API-FR-01)', () => {
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
 
+  // Four emoji are 8 UTF-16 units but 4 code points (#60).
+  it('should_return_validation_error_body_when_password_has_four_emoji', async () => {
+    const response = await post('/auth/register', {
+      username: USERNAME,
+      password: '\u{1F600}'.repeat(4),
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['password must have 8 to 128 characters'],
+      path: '/auth/register',
+    });
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+  });
+
+  it('should_accept_registration_when_password_has_128_emoji_code_points', async () => {
+    const password = '\u{1F600}'.repeat(128);
+
+    const registered = await post('/auth/register', { username: USERNAME, password });
+    const login = await post('/auth/login', { username: USERNAME, password });
+
+    expect(registered.status).toBe(201);
+    expect(registered.body).toEqual({});
+    expect(login.status).toBe(200);
+    expect(Object.keys(login.body)).toEqual(['accessToken']);
+  });
+
+  it('should_return_validation_error_body_when_password_has_129_emoji_code_points', async () => {
+    const emoji = await post('/auth/register', {
+      username: USERNAME,
+      password: '\u{1F600}'.repeat(129),
+    });
+    const ascii = await post('/auth/register', { username: USERNAME, password: 'x'.repeat(129) });
+
+    expect(emoji.status).toBe(400);
+    expect(emoji.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['password must have 8 to 128 characters'],
+      path: '/auth/register',
+    });
+    expect(emoji.body).toEqual(ascii.body);
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+  });
+
   it('should_return_validation_error_body_when_credentials_are_missing', async () => {
     const response = await post('/auth/register', { username: 7 });
 
@@ -127,6 +176,45 @@ describe('auth endpoints (API-FR-01)', () => {
     });
   });
 
+  it('should_return_unauthorized_error_body_when_login_password_has_more_than_128_characters', async () => {
+    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+
+    const response = await post('/auth/login', { username: USERNAME, password: 'x'.repeat(129) });
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: 'Invalid username or password',
+      details: [],
+      path: '/auth/login',
+    });
+  });
+
+  // Login answers 401, never 400, so its schema publishes no length rule (#60).
+  it('should_publish_login_body_without_length_rules_when_openapi_document_is_requested', async () => {
+    const response = await request(testApp.app.getHttpServer()).get('/docs-json');
+
+    const { paths, components } = response.body;
+    const bodyOf = (path: string) => paths[path].post.requestBody.content['application/json'];
+    expect(bodyOf('/auth/login').schema).toEqual({ $ref: '#/components/schemas/LoginDto' });
+    expect(bodyOf('/auth/register').schema).toEqual({
+      $ref: '#/components/schemas/CredentialsDto',
+    });
+    const login = components.schemas.LoginDto;
+    expect(login.required).toEqual(['username', 'password']);
+    for (const property of Object.values<object>(login.properties)) {
+      expect(property).toMatchObject({ type: 'string' });
+      expect(property).not.toHaveProperty('minLength');
+      expect(property).not.toHaveProperty('maxLength');
+      expect(property).not.toHaveProperty('pattern');
+    }
+    expect(components.schemas.CredentialsDto.properties).toMatchObject({
+      username: { minLength: 3, maxLength: 32, pattern: '^[A-Za-z0-9._-]{3,32}$' },
+      password: { minLength: 8, maxLength: 128 },
+    });
+  });
+
   it('should_return_validation_error_body_when_login_body_is_missing_fields', async () => {
     const response = await post('/auth/login', {});
 
@@ -140,16 +228,50 @@ describe('auth endpoints (API-FR-01)', () => {
     });
   });
 
-  it('should_create_two_accounts_when_usernames_differ_only_in_case', async () => {
-    // The username rule is case-sensitive (proposal in the body of PR #40).
-    const upper = await post('/auth/register', { username: 'Ada', password: PASSWORD });
+  // A name that differs only in letter case is taken, with the same answer
+  // as an exact duplicate (#62). It replaces the two-account rule of #49.
+  it('should_return_conflict_error_body_when_username_differs_only_in_case', async () => {
     const lower = await post('/auth/register', { username: 'ada', password: PASSWORD });
 
-    expect(upper.status).toBe(201);
+    const upper = await post('/auth/register', { username: 'Ada', password: 'other password' });
+
     expect(lower.status).toBe(201);
+    expect(upper.status).toBe(409);
+    expect(upper.body).toEqual({
+      statusCode: 409,
+      error: 'Conflict',
+      message: 'Username is already taken',
+      details: [],
+      path: '/auth/register',
+    });
     const rows = await testApp.database.db.select().from(users);
-    expect(rows.map((row) => row.username).sort()).toEqual(['Ada', 'ada']);
-    expect(rows[0].id).not.toBe(rows[1].id);
+    expect(rows.map((row) => row.username)).toEqual(['ada']);
+  });
+
+  it('should_store_username_as_typed_when_it_has_capital_letters', async () => {
+    const response = await post('/auth/register', { username: 'Ada', password: PASSWORD });
+    const login = await post('/auth/login', { username: 'Ada', password: PASSWORD });
+
+    expect(response.status).toBe(201);
+    expect(login.status).toBe(200);
+    const rows = await testApp.database.db.select().from(users);
+    expect(rows.map((row) => row.username)).toEqual(['Ada']);
+  });
+
+  // Login finds the user by the name as typed (#62).
+  it('should_return_unauthorized_error_body_when_login_username_differs_only_in_case', async () => {
+    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+
+    const response = await post('/auth/login', { username: 'ADA', password: PASSWORD });
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: 'Invalid username or password',
+      details: [],
+      path: '/auth/login',
+    });
   });
 
   it('should_return_validation_error_body_when_body_is_not_a_json_object', async () => {
