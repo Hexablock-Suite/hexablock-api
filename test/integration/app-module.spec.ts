@@ -77,8 +77,9 @@ describe('AppModule account wiring', () => {
     };
     expect(result).toEqual({ ok: false, error });
     expect(warn).toHaveBeenCalledExactlyOnceWith(
-      `useCase=SyncProgress outcome=failure error=${JSON.stringify(error)}`,
+      'useCase=SyncProgress outcome=failure kind=invalid-progress',
     );
+    expect(JSON.stringify(warn.mock.calls)).not.toContain('Hexa Lines');
     await moduleRef.close();
   });
 

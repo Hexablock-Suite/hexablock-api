@@ -1,9 +1,10 @@
 // Port. The aspects write one entry per use case call here. The entry holds
 // data, not text: the adapter in src/infrastructure writes the text
-// (decision 10 of docs/architecture/classes.md).
+// (decision 10 of docs/architecture/classes.md). A failure gives only its
+// kind, because the rest of a failure can hold values that the client sent.
 export type UseCaseLogEntry =
   | { readonly useCase: string; readonly outcome: 'success' }
-  | { readonly useCase: string; readonly outcome: 'failure'; readonly error: unknown }
+  | { readonly useCase: string; readonly outcome: 'failure'; readonly kind: string }
   | {
       readonly useCase: string;
       readonly outcome: 'error';

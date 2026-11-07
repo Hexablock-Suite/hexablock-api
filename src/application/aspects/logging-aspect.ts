@@ -3,15 +3,17 @@ import type { Logger } from '../ports/logger.js';
 import type { UseCase } from '../use-case.js';
 import { UseCaseAspect } from './use-case-aspect.js';
 
-// Logs each call of the inner use case: its name, the outcome and the error.
-// It writes a typed entry to the Logger port, and the adapter writes the text
-// (decision 10 of docs/architecture/classes.md, Q12). A thrown error is
-// logged, and the aspect throws it again. A logger that throws does not
-// change the outcome of the use case.
-export class LoggingAspect<TRequest, TValue, TError> extends UseCaseAspect<
+// Logs each call of the inner use case: its name and the outcome. It writes
+// a typed entry to the Logger port, and the adapter writes the text
+// (decision 10 of docs/architecture/classes.md, Q12). A failed Result logs
+// only its kind, so a value that the client sent never reaches the log. A
+// thrown error logs its message and stack, and the aspect throws it again.
+// A logger that throws does not change the outcome of the use case.
+export class LoggingAspect<
   TRequest,
-  Result<TValue, TError>
-> {
+  TValue,
+  TError extends { readonly kind: string },
+> extends UseCaseAspect<TRequest, Result<TValue, TError>> {
   constructor(
     inner: UseCase<TRequest, Result<TValue, TError>>,
     private readonly name: string,
@@ -37,7 +39,7 @@ export class LoggingAspect<TRequest, TValue, TError> extends UseCaseAspect<
       this.safely(() => this.logger.log({ useCase: this.name, outcome: 'success' }));
     } else {
       this.safely(() =>
-        this.logger.log({ useCase: this.name, outcome: 'failure', error: result.error }),
+        this.logger.log({ useCase: this.name, outcome: 'failure', kind: result.error.kind }),
       );
     }
     return result;

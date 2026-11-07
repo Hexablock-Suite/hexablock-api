@@ -29,35 +29,16 @@ describe('NestLogger', () => {
     expect(nest.error).not.toHaveBeenCalled();
   });
 
-  it('should_write_name_failure_and_error_at_warn_level_when_entry_is_a_failure', () => {
+  it('should_write_name_failure_and_kind_at_warn_level_when_entry_is_a_failure', () => {
     const nest = recordingNestLogger();
 
-    new NestLogger(nest).log({
-      useCase: 'Echo',
-      outcome: 'failure',
-      error: { kind: 'progress-not-found' },
-    });
+    new NestLogger(nest).log({ useCase: 'Echo', outcome: 'failure', kind: 'progress-not-found' });
 
     expect(nest.warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=failure error={"kind":"progress-not-found"}',
+      'useCase=Echo outcome=failure kind=progress-not-found',
     );
     expect(nest.log).not.toHaveBeenCalled();
     expect(nest.error).not.toHaveBeenCalled();
-  });
-
-  // JSON.stringify throws on a bigint. The adapter writes it as text.
-  it('should_write_nested_bigints_as_text_when_failure_error_nests_them', () => {
-    const nest = recordingNestLogger();
-
-    new NestLogger(nest).log({
-      useCase: 'Echo',
-      outcome: 'failure',
-      error: { kind: 'big', sizes: [1n, { inner: 2n }], count: 3 },
-    });
-
-    expect(nest.warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=failure error={"kind":"big","sizes":["1",{"inner":"2"}],"count":3}',
-    );
   });
 
   it('should_write_name_error_and_stack_at_error_level_when_entry_is_an_error', () => {

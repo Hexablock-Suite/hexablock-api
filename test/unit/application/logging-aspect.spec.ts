@@ -37,7 +37,7 @@ describe('LoggingAspect', () => {
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({ useCase: 'Echo', outcome: 'success' });
   });
 
-  it('should_log_name_failure_and_error_and_return_inner_result_unchanged_when_inner_use_case_fails', async () => {
+  it('should_log_name_failure_and_kind_and_return_inner_result_unchanged_when_inner_use_case_fails', async () => {
     const result: EchoResult = err({ kind: 'progress-not-found' });
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
@@ -49,7 +49,43 @@ describe('LoggingAspect', () => {
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'Echo',
       outcome: 'failure',
-      error: { kind: 'progress-not-found' },
+      kind: 'progress-not-found',
+    });
+  });
+
+  // A failure can carry a value that the client sent, such as an invalid
+  // gameId. The log keeps only the kind, so that value never reaches the log.
+  it('should_log_only_kind_and_no_client_value_when_failure_carries_a_client_value', async () => {
+    const result = err({
+      kind: 'invalid-progress',
+      problems: ['gameId must be a lowercase slug, got "Hexa Lines".'],
+    });
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).resolves.toBe(result);
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'invalid-progress',
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain('Hexa Lines');
+  });
+
+  // JSON.stringify throws on a bigint. The aspect logs only the kind, so a
+  // bigint in the failure never reaches the log, and the result stays unchanged.
+  it('should_log_only_kind_and_return_inner_result_unchanged_when_failure_holds_bigints', async () => {
+    const result = err({ kind: 'big', sizes: [1n, { inner: 2n }], count: 3 });
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).resolves.toBe(result);
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'big',
     });
   });
 

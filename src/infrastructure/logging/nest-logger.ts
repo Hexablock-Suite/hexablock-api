@@ -2,8 +2,8 @@ import { Logger as NestBuiltInLogger, type LoggerService } from '@nestjs/common'
 import type { Logger, UseCaseLogEntry } from '../../application/ports/logger.js';
 
 // Adapter for the Logger port. It writes each entry as one line through the
-// Nest logger: a success at log level, a failure at warn level, and an error
-// at error level with its stack.
+// Nest logger: a success at log level, a failure with its kind at warn
+// level, and an error at error level with its stack.
 export class NestLogger implements Logger {
   constructor(private readonly nest: LoggerService = new NestBuiltInLogger('LoggingAspect')) {}
 
@@ -14,16 +14,11 @@ export class NestLogger implements Logger {
         this.nest.log(head);
         return;
       case 'failure':
-        this.nest.warn(`${head} error=${JSON.stringify(entry.error, bigintAsText)}`);
+        this.nest.warn(`${head} kind=${entry.kind}`);
         return;
       case 'error':
         this.nest.error(`${head} error=${entry.message}`, entry.stack);
         return;
     }
   }
-}
-
-// JSON.stringify throws on a bigint. This replacer writes it as text.
-function bigintAsText(_key: string, value: unknown): unknown {
-  return typeof value === 'bigint' ? value.toString() : value;
 }
