@@ -89,6 +89,37 @@ describe('auth endpoints (API-FR-01)', () => {
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
 
+  it('should_accept_registration_when_password_has_128_emoji_code_points', async () => {
+    const password = '\u{1F600}'.repeat(128);
+
+    const registered = await post('/auth/register', { username: USERNAME, password });
+    const login = await post('/auth/login', { username: USERNAME, password });
+
+    expect(registered.status).toBe(201);
+    expect(registered.body).toEqual({});
+    expect(login.status).toBe(200);
+    expect(Object.keys(login.body)).toEqual(['accessToken']);
+  });
+
+  it('should_return_validation_error_body_when_password_has_129_emoji_code_points', async () => {
+    const emoji = await post('/auth/register', {
+      username: USERNAME,
+      password: '\u{1F600}'.repeat(129),
+    });
+    const ascii = await post('/auth/register', { username: USERNAME, password: 'x'.repeat(129) });
+
+    expect(emoji.status).toBe(400);
+    expect(emoji.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['password must have 8 to 128 characters'],
+      path: '/auth/register',
+    });
+    expect(emoji.body).toEqual(ascii.body);
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+  });
+
   it('should_return_validation_error_body_when_credentials_are_missing', async () => {
     const response = await post('/auth/register', { username: 7 });
 

@@ -2,9 +2,8 @@
 // a positive number. NaN means that the two values have no order.
 export type Compare<T> = (left: T, right: T) => number;
 
-// A closed interval [min, max] over any ordered type. The professor modeled
-// the limits of the statement as a generic range with a contains method in
-// the session of 2026-11-06.
+// A closed interval [min, max] over any ordered type. The bounds are
+// read-only. contains() tells if a value lies inside the bounds.
 export class Range<T> {
   private constructor(
     readonly min: T,
