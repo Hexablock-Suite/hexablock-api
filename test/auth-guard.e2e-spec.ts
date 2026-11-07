@@ -56,6 +56,17 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(response.body).toEqual({ userId });
   });
 
+  it('should_return_lower_case_user_when_token_subject_is_an_upper_case_uuid', async () => {
+    const { userId } = await signIn(server(), USERNAME);
+    const upper = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub: userId.toUpperCase() });
+
+    const response = await callProtected(`Bearer ${upper}`);
+
+    // The UserId keeps the lower-case form that Postgres returns.
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ userId: userId.toLowerCase() });
+  });
+
   it('should_return_signed_in_user_when_scheme_name_is_not_capitalized', async () => {
     const { token, userId } = await signIn(server(), USERNAME);
     // RFC 7235: the scheme name is case-insensitive (review comment 6683774229).

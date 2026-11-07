@@ -82,12 +82,20 @@ describe('UserId', () => {
       ADA_ID.replace('-', ''),
       `${ADA_ID}0`,
       ` ${ADA_ID}`,
+      `${ADA_ID}\n`,
       ADA_ID.replace('6', 'g'),
     ];
 
     for (const value of invalid) {
       expect(() => UserId.from(value)).toThrow('A UserId must be a UUID.');
     }
+  });
+
+  // RFC 9562 defines the nil UUID, and a uuid column stores it.
+  it('should_accept_user_id_when_value_is_the_nil_uuid', () => {
+    const nil = '00000000-0000-0000-0000-000000000000';
+
+    expect(UserId.from(nil).value).toBe(nil);
   });
 
   // Postgres returns a uuid in lower case, so equals() matches a stored id.
