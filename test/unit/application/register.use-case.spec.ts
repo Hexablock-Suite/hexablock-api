@@ -37,6 +37,26 @@ describe('RegisterUseCase', () => {
     expect(users.users[0].passwordHash.value).toBe('hashed:correct horse');
   });
 
+  // The name is stored as typed, but a name that differs only in letter
+  // case from a stored one is taken (#62).
+  it('should_fail_with_username_taken_when_username_differs_only_in_case', async () => {
+    await register.execute({ username: 'ada', password: 'correct horse' });
+
+    const result = await register.execute({ username: 'Ada', password: 'other password' });
+
+    expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
+    expect(users.users).toHaveLength(1);
+    expect(users.users[0].username.value).toBe('ada');
+    expect(users.users[0].passwordHash.value).toBe('hashed:correct horse');
+  });
+
+  it('should_store_username_as_typed_when_it_has_capital_letters', async () => {
+    const result = await register.execute({ username: 'AdaLovelace', password: 'correct horse' });
+
+    expect(result).toEqual({ ok: true, value: UserId.from('user-1') });
+    expect(users.users.map((user) => user.username.value)).toEqual(['AdaLovelace']);
+  });
+
   it('should_fail_with_each_invalid_field_when_credentials_break_the_rules', async () => {
     const result = await register.execute({ username: 'a!', password: 'short' });
 

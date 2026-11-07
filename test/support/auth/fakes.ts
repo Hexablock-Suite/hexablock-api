@@ -17,8 +17,14 @@ export class InMemoryUserRepository implements UserRepository {
     return this.users.find((user) => user.username.value === username.value) ?? null;
   }
 
+  // Ignores letter case, as the unique index on lower(username) does.
+  async isUsernameTaken(username: Username): Promise<boolean> {
+    const name = username.value.toLowerCase();
+    return this.users.some((user) => user.username.value.toLowerCase() === name);
+  }
+
   async add(user: User): Promise<Result<void, 'username-taken'>> {
-    if (this.users.some((stored) => stored.username.value === user.username.value)) {
+    if (await this.isUsernameTaken(user.username)) {
       return err('username-taken');
     }
     this.users.push(user);
