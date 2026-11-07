@@ -3,8 +3,9 @@ import { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { testUserId } from '../../support/user-ids.js';
 
-const USER = UserId.from('user-1');
+const USER = UserId.from(testUserId(1));
 const FIT = GameId.of('fit');
 const START = new Date('2026-11-06T10:00:00.000Z');
 const LATER = new Date('2026-11-06T10:05:00.000Z');

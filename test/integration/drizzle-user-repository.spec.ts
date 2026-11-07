@@ -140,11 +140,12 @@ describe('DrizzleUserRepository', () => {
   });
 
   it('should_rethrow_database_error_when_insert_fails_for_another_reason', async () => {
-    // The id column is a uuid, so Postgres rejects this id with
-    // invalid_text_representation (22P02), not with unique_violation.
-    const added = repository.add(userNamed('not-a-uuid', 'ada', 'scrypt$hash'));
+    // A UserId is always a UUID (#64), so the hash carries the bad value.
+    // Postgres text rejects a NUL byte with character_not_in_repertoire
+    // (22021), not with unique_violation.
+    const added = repository.add(userNamed(ADA_ID, 'ada', 'scrypt$\u0000hash'));
 
-    await expect(added).rejects.toMatchObject({ cause: { code: '22P02' } });
+    await expect(added).rejects.toMatchObject({ cause: { code: '22021' } });
     expect(await database.db.select().from(users)).toEqual([]);
   });
 

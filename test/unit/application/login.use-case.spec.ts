@@ -7,6 +7,7 @@ import {
   PrefixTokenIssuer,
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
+import { testUserId } from '../../support/user-ids.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';
@@ -28,7 +29,7 @@ describe('LoginUseCase', () => {
   it('should_return_token_for_user_when_credentials_are_valid', async () => {
     const result = await login.execute({ username: 'ada', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: true, value: 'token-for:user-1' });
+    expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
   });
 
   it('should_fail_with_invalid_credentials_when_password_is_wrong', async () => {

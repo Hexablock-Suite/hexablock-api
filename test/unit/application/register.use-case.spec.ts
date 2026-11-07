@@ -5,6 +5,7 @@ import {
   PrefixPasswordHasher,
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
+import { testUserId } from '../../support/user-ids.js';
 
 describe('RegisterUseCase', () => {
   let users: InMemoryUserRepository;
@@ -20,9 +21,9 @@ describe('RegisterUseCase', () => {
   it('should_store_hashed_password_when_user_registers', async () => {
     const result = await register.execute({ username: 'ada', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: true, value: UserId.from('user-1') });
+    expect(result).toEqual({ ok: true, value: UserId.from(testUserId(1)) });
     expect(users.users).toHaveLength(1);
-    expect(users.users[0].id.value).toBe('user-1');
+    expect(users.users[0].id.value).toBe(testUserId(1));
     expect(users.users[0].username.value).toBe('ada');
     expect(users.users[0].passwordHash.value).toBe('hashed:correct horse');
   });
@@ -53,7 +54,7 @@ describe('RegisterUseCase', () => {
   it('should_store_username_as_typed_when_it_has_capital_letters', async () => {
     const result = await register.execute({ username: 'AdaLovelace', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: true, value: UserId.from('user-1') });
+    expect(result).toEqual({ ok: true, value: UserId.from(testUserId(1)) });
     expect(users.users.map((user) => user.username.value)).toEqual(['AdaLovelace']);
   });
 
