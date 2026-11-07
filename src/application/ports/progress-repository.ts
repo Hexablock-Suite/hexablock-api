@@ -2,11 +2,22 @@ import type { GameId } from '../../domain/progress/game-id.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import type { UserId } from '../../domain/user/user-id.js';
 
-// Port. It saves and finds the whole PlayerProgress aggregate, one per
+// One change of one progress. It gets the stored aggregate, or null when
+// none is stored. It returns the aggregate to save, or null to save nothing.
+// It is synchronous domain code and does no I/O.
+export type ProgressChange = (stored: PlayerProgress | null) => PlayerProgress | null;
+
+// Port. It finds and changes the whole PlayerProgress aggregate, one per
 // userId and gameId. It names no table and no library type.
 export interface ProgressRepository {
   find(userId: UserId, gameId: GameId): Promise<PlayerProgress | null>;
-  save(progress: PlayerProgress): Promise<void>;
+
+  // Runs the change while it holds a lock for the userId and the gameId,
+  // and saves what the change returns. Two updates of one key run one after
+  // the other, so each change reads what the previous one saved. The
+  // promise resolves to the value that the change returns. When the change
+  // throws, the repository saves nothing and rejects with that error.
+  update(userId: UserId, gameId: GameId, change: ProgressChange): Promise<PlayerProgress | null>;
 }
 
 // Nest injection token for the ProgressRepository port.

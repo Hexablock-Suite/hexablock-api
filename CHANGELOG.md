@@ -22,7 +22,8 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Fixed
 
-- Seven defects that the test-gap review found ([#51](https://github.com/Hexablock-Suite/hexablock-api/issues/51)): a blank or non-string `UserId` is rejected; the dummy password is hashed when the login use case starts, so an unknown username costs one scrypt check, as a wrong password does; the guard accepts the `bearer` scheme in any letter case (RFC 7235); an invalid clock date gives a 500, not a 400; two overlapping syncs keep the highest score (`greatest()` in the upsert); `LoggingAspect` writes a `bigint` as text and never lets a logger failure change the result of the use case.
+- Seven defects that the test-gap review found ([#51](https://github.com/Hexablock-Suite/hexablock-api/issues/51)): a blank or non-string `UserId` is rejected; the dummy password is hashed when the login use case starts, so an unknown username costs one scrypt check, as a wrong password does; the guard accepts the `bearer` scheme in any letter case (RFC 7235); an invalid clock date gives a 500, not a 400; two overlapping syncs of one user and game keep the highest score: `ProgressRepository.update()` runs the read, the change and the save of a sync under a Postgres advisory lock per user and game, and the rule stays in the domain; `LoggingAspect` writes a `bigint` as text and never lets a logger failure change the result of the use case.
+- Two overlapping syncs of one user and game lost the level results of one of them, and a stale sync could move `updatedAt` back. The same lock of `ProgressRepository.update()` makes the second sync read what the first one saved, and the use case reads the clock under that lock ([#51](https://github.com/Hexablock-Suite/hexablock-api/issues/51)).
 
 ## [0.1.0] - 2026-11-06
 

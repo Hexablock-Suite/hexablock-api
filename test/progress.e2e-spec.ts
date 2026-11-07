@@ -234,37 +234,36 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
   });
 
   // A repository failure is not an expected failure: HttpErrorFilter answers
-  // 500 and hides the message (API-FR-06).
+  // 500 and hides the message (API-FR-06). The read uses find().
   it('should_return_internal_error_body_when_progress_repository_find_throws', async () => {
     const { token } = await signIn('ada');
+    await sync(token, { gameId: 'hexa-lines', score: 120 });
     const find = vi
       .spyOn(DrizzleProgressRepository.prototype, 'find')
       .mockRejectedValue(new Error('database is down'));
 
     const readResponse = await read(token, 'hexa-lines');
-    const syncResponse = await sync(token, { gameId: 'hexa-lines', score: 120 });
     find.mockRestore();
 
-    const error = {
+    expect(readResponse.status).toBe(500);
+    expect(readResponse.body).toEqual({
       statusCode: 500,
       error: 'Internal Server Error',
       message: 'Internal server error',
       details: [],
-    };
-    expect(readResponse.status).toBe(500);
-    expect(readResponse.body).toEqual({ ...error, path: '/progress/hexa-lines' });
-    expect(syncResponse.status).toBe(500);
-    expect(syncResponse.body).toEqual({ ...error, path: '/progress' });
+      path: '/progress/hexa-lines',
+    });
   });
 
-  it('should_return_internal_error_body_and_save_nothing_when_progress_repository_save_throws', async () => {
+  // The sync reads, changes and saves the progress in one update() call.
+  it('should_return_internal_error_body_and_save_nothing_when_progress_repository_update_throws', async () => {
     const { token, userId } = await signIn('ada');
-    const save = vi
-      .spyOn(DrizzleProgressRepository.prototype, 'save')
+    const update = vi
+      .spyOn(DrizzleProgressRepository.prototype, 'update')
       .mockRejectedValue(new Error('database is down'));
 
     const response = await sync(token, { gameId: 'hexa-lines', score: 120 });
-    save.mockRestore();
+    update.mockRestore();
 
     expect(response.status).toBe(500);
     expect(response.body).toEqual({

@@ -12,6 +12,7 @@ import { FixedClock } from '../support/fixed-clock.js';
 import {
   CONTRACT_USER_IDS,
   describeProgressRepositoryContract,
+  storeProgress,
 } from '../support/progress-repository.contract.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 
@@ -145,11 +146,11 @@ describe('DrizzleProgressRepository', () => {
   it('should_keep_one_progress_row_when_same_user_and_game_is_saved_twice', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    await repository.save(PlayerProgress.start(ADA, FIT, AT));
+    await storeProgress(repository, PlayerProgress.start(ADA, FIT, AT));
     const second = PlayerProgress.start(ADA, FIT, AT);
     second.recordScore(300, LATER);
 
-    await repository.save(second);
+    await storeProgress(repository, second);
 
     expect(await countRows(database, 'progress')).toBe(1);
     const found = await repository.find(ADA, FIT);
@@ -157,8 +158,10 @@ describe('DrizzleProgressRepository', () => {
     expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
-  // Both syncs read no row before either saves. The upsert keeps the
-  // highest score in the row (API-FR-02), whatever save comes last.
+  // The advisory lock makes the second sync read what the first one saved,
+  // and the domain keeps the highest score (API-FR-02). PGlite runs one
+  // session, so this test shows the result, not the lock under real
+  // concurrent Postgres sessions.
   it('should_keep_highest_score_when_two_syncs_of_same_game_overlap', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
@@ -185,7 +188,7 @@ describe('DrizzleProgressRepository', () => {
     progress.recordLevel(first);
     progress.recordLevel(second);
 
-    await repository.save(progress);
+    await storeProgress(repository, progress);
     const found = await repository.find(ADA, FIT);
 
     expect(found?.results).toEqual([first, second]);
@@ -198,12 +201,12 @@ describe('DrizzleProgressRepository', () => {
     const repository = new DrizzleProgressRepository(database.db);
     const progress = PlayerProgress.start(ADA, FIT, AT);
     progress.recordLevel(level('fit-01', 1, 20, 60_000));
-    await repository.save(progress);
+    await storeProgress(repository, progress);
     const retry = level('fit-01', 3, 9, 30_000);
 
     progress.recordLevel(retry);
     progress.recordLevel(level('fit-02', 2, 12, 45_000));
-    await repository.save(progress);
+    await storeProgress(repository, progress);
 
     expect((await repository.find(ADA, FIT))?.results).toEqual(progress.results);
     expect((await repository.find(ADA, FIT))?.results[0]).toEqual(retry);
@@ -217,7 +220,9 @@ describe('DrizzleProgressRepository', () => {
     progress.recordLevel(level('fit-01', 3, 9, 1_000));
 
     // Postgres code 23503 is foreign_key_violation.
-    await expect(repository.save(progress)).rejects.toMatchObject({ cause: { code: '23503' } });
+    await expect(storeProgress(repository, progress)).rejects.toMatchObject({
+      cause: { code: '23503' },
+    });
 
     expect(await countRows(database, 'progress')).toBe(0);
     expect(await countRows(database, 'level_results')).toBe(0);
