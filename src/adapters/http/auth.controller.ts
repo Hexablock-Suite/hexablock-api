@@ -53,7 +53,10 @@ export class AuthController {
   @Post('register')
   @ApiCreatedResponse({ description: 'The user exists. The body is empty.' })
   @ApiBadRequestResponse({ type: ErrorDto, description: 'A field is missing or breaks its rule.' })
-  @ApiConflictResponse({ type: ErrorDto, description: 'Another user has this username.' })
+  @ApiConflictResponse({
+    type: ErrorDto,
+    description: 'Another user has this username, or one that differs only in letter case.',
+  })
   async signUp(@Body() body: CredentialsDto): Promise<void> {
     const result = await this.register.execute(credentialsFrom(body));
     if (result.ok) {

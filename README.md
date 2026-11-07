@@ -18,7 +18,9 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 (`hexablock-app`) with the functional requirements of statement §5.2, listed in
 [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md):
 
-- **Accounts (API-FR-01):** sign-up and sign-in with JWT.
+- **Accounts (API-FR-01):** sign-up and sign-in with JWT. A username is stored as typed. Sign-up
+  rejects a username that differs from a stored one only in letter case (`Ada` after `ada`) with
+  the same 409 as an exact duplicate, and sign-in compares the name as typed.
 - **Progress (API-FR-02):** progress sync, one entry per user and per `gameId`.
 - **Leaderboard (API-FR-03):** a global leaderboard per `gameId`, and a per-level leaderboard for
   Fit and Sort. The per-level leaderboard ranks more stars first, then fewer moves, then less

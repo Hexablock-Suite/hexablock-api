@@ -357,7 +357,7 @@
                 }
               }
             },
-            "description": "Another user has this username."
+            "description": "Another user has this username, or one that differs only in letter case."
           }
         },
         "tags": [

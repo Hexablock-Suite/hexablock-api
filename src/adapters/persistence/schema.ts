@@ -2,6 +2,7 @@
 // migrations in drizzle/. The schema lives in the persistence adapter because
 // the repositories query these tables, and rule
 // adapters-never-import-infrastructure forbids them to import src/infrastructure.
+import { sql } from 'drizzle-orm';
 import {
   bigint,
   foreignKey,
@@ -10,15 +11,22 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 
 // API-FR-01. The table keeps the password hash, never the plain password.
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey(),
-  username: text('username').notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
-});
+// The username is stored as typed. The index on lower(username) rejects a
+// second name that differs only in letter case (#62).
+export const users = pgTable(
+  'users',
+  {
+    id: uuid('id').primaryKey(),
+    username: text('username').notNull().unique(),
+    passwordHash: text('password_hash').notNull(),
+  },
+  (table) => [uniqueIndex('users_username_lower_unique').on(sql`lower(${table.username})`)],
+);
 
 // API-FR-02 and DS-5: one row per user and gameId. highScore and updatedAt
 // follow the proposal of classes.md decision 3. The bigint columns hold any
