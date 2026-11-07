@@ -56,6 +56,13 @@ describe('JwtTokenIssuer', () => {
     }
   });
 
+  // A sub that is not a UUID is one more bad token (#64).
+  it('should_return_null_when_token_subject_is_not_a_uuid', () => {
+    const notUuid = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub: 'not-a-uuid' });
+
+    expect(issuer.verify(notUuid)).toBeNull();
+  });
+
   it('should_return_null_when_token_has_alg_none_and_no_signature', () => {
     expect(issuer.verify(unsignedToken({ sub: USER_ID.value }))).toBeNull();
   });

@@ -38,4 +38,37 @@ describe('LevelResult', () => {
       }
     }
   });
+
+  // DS-4: more stars first, then fewer moves, then less time.
+  it('should_rank_more_stars_then_fewer_moves_then_less_time_first_when_results_are_compared', () => {
+    const pairs = [
+      [
+        { stars: 3, moves: 25, elapsedMs: 90_000 },
+        { stars: 2, moves: 10, elapsedMs: 30_000 },
+      ],
+      [
+        { stars: 2, moves: 12, elapsedMs: 90_000 },
+        { stars: 2, moves: 13, elapsedMs: 30_000 },
+      ],
+      [
+        { stars: 2, moves: 12, elapsedMs: 44_999 },
+        { stars: 2, moves: 12, elapsedMs: 45_000 },
+      ],
+    ];
+
+    for (const [better, worse] of pairs) {
+      const first = LevelResult.of({ ...VALID, ...better });
+      const second = LevelResult.of({ ...VALID, ...worse });
+      expect(first.isBetterThan(second)).toBe(true);
+      expect(second.isBetterThan(first)).toBe(false);
+    }
+  });
+
+  it('should_not_rank_either_result_first_when_stars_moves_and_time_are_equal', () => {
+    const first = LevelResult.of(VALID);
+    const second = LevelResult.of(VALID);
+
+    expect(first.isBetterThan(second)).toBe(false);
+    expect(second.isBetterThan(first)).toBe(false);
+  });
 });

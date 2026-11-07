@@ -18,10 +18,13 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 (`hexablock-app`) with the functional requirements of statement §5.2, listed in
 [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md):
 
-- **Accounts (API-FR-01):** sign-up and sign-in with JWT.
+- **Accounts (API-FR-01):** sign-up and sign-in with JWT. A username is stored as typed. Sign-up
+  rejects a username that differs from a stored one only in letter case (`Ada` after `ada`) with
+  the same 409 as an exact duplicate, and sign-in compares the name as typed.
 - **Progress (API-FR-02):** progress sync, one entry per user and per `gameId`.
 - **Leaderboard (API-FR-03):** a global leaderboard per `gameId`, and a per-level leaderboard for
-  Fit and Sort. What orders the per-level leaderboard is still open (DS-4).
+  Fit and Sort. The per-level leaderboard ranks more stars first, then fewer moves, then less
+  time (DS-4).
 - **Levels (API-FR-04):** read and update the level definitions of Fit and Sort, so new levels
   reach players without an app update.
 - **API docs (API-FR-05):** Swagger at `/docs` and the committed `openapi/openapi.json`.
@@ -81,6 +84,11 @@ definitions that the engine plays, with generic types (decision D6):
 - **`UseCase<TRequest, TResponse>`** is the one generic input port. Every use case binds it, so
   one aspect class wraps any use case.
 - **`Result<T, E>`** carries an expected failure as a value, never as an exception.
+- **[`Range<T>`](src/domain/shared/range.ts)** is a closed interval over any ordered type, with
+  `contains(value: T): boolean`. The username (3 to 32) and password (8 to 128) length limits are
+  the `Range<number>` values `USERNAME_LENGTH` and `PASSWORD_LENGTH` in `src/domain/user`. The value
+  objects, the HTTP error messages and `CredentialsDto` read them. The professor modeled the limits
+  of the statement as a generic range with a contains method in the session of 2026-11-06.
 
 These types are the design. Their code starts in Sprint 1.
 
@@ -182,6 +190,22 @@ pnpm db:generate   # writes a SQL migration into drizzle/ from src/adapters/pers
 pnpm db:migrate    # applies the drizzle/ migrations to DATABASE_URL
 docker compose down
 ```
+
+The migration `drizzle/0002_username_lower_unique.sql` adds a unique index on `lower(username)`
+([#62](https://github.com/Hexablock-Suite/hexablock-api/issues/62)). It fails with `23505` on a
+database that already holds two usernames that differ only in letter case, such as `ada` and `Ada`.
+The failed migration keeps every row, and the migrator does not record it, so it can run again
+later. Before you deploy it, run this query on the target database. An empty result means that the
+migration can run:
+
+```sql
+SELECT lower(username), count(*) FROM users GROUP BY 1 HAVING count(*) > 1;
+```
+
+When the query returns a row, the team decides which account keeps the name. That is a product
+decision, so no migration chooses the account or changes the rows
+([#69](https://github.com/Hexablock-Suite/hexablock-api/issues/69)). The test
+`test/integration/username-lower-unique.migration.spec.ts` pins this behavior.
 
 The schema has the `users` table of API-FR-01. The other business tables are still the design.
 

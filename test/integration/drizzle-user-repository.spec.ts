@@ -89,24 +89,63 @@ describe('DrizzleUserRepository', () => {
   it('should_fail_with_username_taken_when_registration_loses_the_race', async () => {
     await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
     // The lookup misses, as when two sign-ups run at the same time.
-    vi.spyOn(repository, 'findByUsername').mockResolvedValue(null);
+    vi.spyOn(repository, 'isUsernameTaken').mockResolvedValue(false);
     const register = new RegisterUseCase(repository, new PrefixPasswordHasher(), {
       next: () => UserId.from(OTHER_ID),
     });
 
-    const result = await register.execute({ username: 'ada', password: 'other password' });
+    for (const name of ['ada', 'Ada']) {
+      const result = await register.execute({ username: name, password: 'other password' });
 
-    expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
+      expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
+    }
     const rows = await database.db.select().from(users);
     expect(rows).toEqual([{ id: ADA_ID, username: 'ada', passwordHash: 'scrypt$hash' }]);
   });
 
-  it('should_rethrow_database_error_when_insert_fails_for_another_reason', async () => {
-    // The id column is a uuid, so Postgres rejects this id with
-    // invalid_text_representation (22P02), not with unique_violation.
-    const added = repository.add(userNamed('not-a-uuid', 'ada', 'scrypt$hash'));
+  // The unique index on lower(username) guards the case rule of #62, also
+  // against a writer that skips the repository.
+  it('should_reject_second_row_when_username_differs_only_in_case', async () => {
+    await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
 
-    await expect(added).rejects.toMatchObject({ cause: { code: '22P02' } });
+    const added = repository.add(userNamed(OTHER_ID, 'Ada', 'scrypt$other'));
+    const inserted = database.db.execute(
+      sql`insert into users (id, username, password_hash) values (${OTHER_ID}, 'ADA', 'x')`,
+    );
+
+    await expect(added).resolves.toEqual({ ok: false, error: 'username-taken' });
+    await expect(inserted).rejects.toMatchObject({
+      cause: { code: '23505', constraint: 'users_username_lower_unique' },
+    });
+    expect(await database.db.select().from(users)).toEqual([
+      { id: ADA_ID, username: 'ada', passwordHash: 'scrypt$hash' },
+    ]);
+  });
+
+  it('should_report_username_taken_when_stored_name_differs_only_in_case', async () => {
+    await repository.add(userNamed(ADA_ID, 'Ada', 'scrypt$hash'));
+
+    for (const name of ['Ada', 'ada', 'ADA']) {
+      expect(await repository.isUsernameTaken(username(name))).toBe(true);
+    }
+    expect(await repository.isUsernameTaken(username('grace'))).toBe(false);
+  });
+
+  it('should_return_null_when_username_differs_only_in_case', async () => {
+    await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
+
+    const found = await repository.findByUsername(username('ADA'));
+
+    expect(found).toBeNull();
+  });
+
+  it('should_rethrow_database_error_when_insert_fails_for_another_reason', async () => {
+    // A UserId is always a UUID (#64), so the hash carries the bad value.
+    // Postgres text rejects a NUL byte with character_not_in_repertoire
+    // (22021), not with unique_violation.
+    const added = repository.add(userNamed(ADA_ID, 'ada', 'scrypt$\u0000hash'));
+
+    await expect(added).rejects.toMatchObject({ cause: { code: '22021' } });
     expect(await database.db.select().from(users)).toEqual([]);
   });
 

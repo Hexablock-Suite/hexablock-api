@@ -27,6 +27,9 @@ import { FixedClock } from '../support/fixed-clock.js';
 //     pnpm vitest run test/integration/drizzle-progress-repository.concurrency.spec.ts
 //   docker stop hb-pg-lock
 //
+// The CI job postgres-lock runs the suite on a Postgres service and fails
+// when the suite is skipped.
+//
 // The suite applies the drizzle/ migrations. Each test uses new user ids and
 // deletes its rows after the suite, so a second run on the same database
 // passes.

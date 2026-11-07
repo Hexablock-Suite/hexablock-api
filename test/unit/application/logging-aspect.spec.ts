@@ -7,6 +7,7 @@ import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
+import { testUserId } from '../../support/user-ids.js';
 
 type EchoResult = Result<string, { kind: string }>;
 
@@ -188,7 +189,7 @@ describe('LoggingAspect', () => {
     const aspect = new LoggingAspect(sync, 'SyncProgress', logger);
 
     const result = await aspect.execute({
-      userId: UserId.from('user-1'),
+      userId: UserId.from(testUserId(1)),
       gameId: 'hexa-lines',
       score: 120,
       results: [],

@@ -6,6 +6,7 @@ import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import type { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import type { Username } from '../../../src/domain/user/username.js';
+import { testUserId } from '../user-ids.js';
 
 // Test doubles for the account ports. Each one is plain and predictable,
 // so a use case test can read the stored state.
@@ -17,8 +18,14 @@ export class InMemoryUserRepository implements UserRepository {
     return this.users.find((user) => user.username.value === username.value) ?? null;
   }
 
+  // Ignores letter case, as the unique index on lower(username) does.
+  async isUsernameTaken(username: Username): Promise<boolean> {
+    const name = username.value.toLowerCase();
+    return this.users.some((user) => user.username.value.toLowerCase() === name);
+  }
+
   async add(user: User): Promise<Result<void, 'username-taken'>> {
-    if (this.users.some((stored) => stored.username.value === user.username.value)) {
+    if (await this.isUsernameTaken(user.username)) {
       return err('username-taken');
     }
     this.users.push(user);
@@ -45,17 +52,23 @@ export class PrefixTokenIssuer implements TokenIssuer {
     return `${TOKEN_PREFIX}${userId.value}`;
   }
 
+  // Like JwtTokenIssuer, it returns null for a subject that is not a UUID.
   verify(token: SessionToken): UserId | null {
-    return token.startsWith(TOKEN_PREFIX) ? UserId.from(token.slice(TOKEN_PREFIX.length)) : null;
+    if (!token.startsWith(TOKEN_PREFIX)) return null;
+    try {
+      return UserId.from(token.slice(TOKEN_PREFIX.length));
+    } catch {
+      return null;
+    }
   }
 }
 
-// Gives user-1, user-2 and so on.
+// Gives testUserId(1), testUserId(2) and so on.
 export class SequenceUserIdGenerator implements UserIdGenerator {
   private count = 0;
 
   next(): UserId {
     this.count += 1;
-    return UserId.from(`user-${this.count}`);
+    return UserId.from(testUserId(this.count));
   }
 }
