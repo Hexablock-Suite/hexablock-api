@@ -70,6 +70,39 @@ describe('HTTP error body (API-FR-06)', () => {
     expect(JSON.stringify(response.body)).not.toContain('?');
   });
 
+  // The message names the method, and a query can start with a second «?» or
+  // hold encoded characters. The body holds no part of the query in each case.
+  it('should_return_no_query_in_the_error_body_when_the_unknown_route_uses_any_method_or_a_double_question_mark', async () => {
+    const server = app.getHttpServer();
+    const responses = await Promise.all([
+      request(server).post('/no-such-resource?token=secret-value'),
+      request(server).delete('/no-such-resource?token=secret-value'),
+      request(server).get('/no-such-resource??token=secret-value'),
+      request(server).get('/no-such-resource?a=%E2%9C%93&b=%20secret-value'),
+    ]);
+
+    for (const response of responses) {
+      expect(response.status).toBe(404);
+      expect(response.body.path).toBe('/no-such-resource');
+      expect(JSON.stringify(response.body)).not.toContain('secret-value');
+    }
+  });
+
+  // The filter removes only the query. A message or a detail that does not
+  // quote the query keeps its exact text.
+  it('should_keep_message_and_details_unchanged_when_the_error_has_no_query', async () => {
+    const response = await request(app.getHttpServer()).get('/error-probe/invalid-fields?x=1');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['name must be a string', 'gameId should not be empty'],
+      path: '/error-probe/invalid-fields',
+    });
+  });
+
   it('should_return_error_body_when_path_parameter_fails_validation', async () => {
     const response = await request(app.getHttpServer()).get('/error-probe/items/abc');
 
