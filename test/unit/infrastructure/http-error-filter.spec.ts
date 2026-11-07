@@ -19,9 +19,9 @@ interface SentResponse {
   body?: ErrorDto;
 }
 
-// Gives the filter a request on PATH. It records the status and the body
-// that the filter sends.
-function httpHost(): { host: ArgumentsHost; sent: SentResponse } {
+// Gives the filter a request on url (PATH by default). It records the status
+// and the body that the filter sends.
+function httpHost(url: string = PATH): { host: ArgumentsHost; sent: SentResponse } {
   const sent: SentResponse = {};
   const response = {
     status(code: number) {
@@ -34,7 +34,7 @@ function httpHost(): { host: ArgumentsHost; sent: SentResponse } {
     },
   };
   const http = {
-    getRequest: () => ({ originalUrl: PATH, url: PATH }),
+    getRequest: () => ({ originalUrl: url, url }),
     getResponse: () => response,
   };
   const host = { switchToHttp: () => http } as unknown as ArgumentsHost;
@@ -134,6 +134,41 @@ describe('HttpErrorFilter', () => {
       message: 'Request validation failed',
       details: ['404', 'true', 'null', 'name must be a string'],
       path: PATH,
+    });
+  });
+
+  // An exception can quote the request URL. The query of that URL can hold a
+  // secret, so the body keeps no part of it.
+  it('should_remove_the_query_from_message_and_details_when_an_http_exception_quotes_the_url', () => {
+    const url = `${PATH}?token=secret-value&next=1`;
+    const quoted = [
+      new ConflictException(`Level ${url} is locked`),
+      new BadRequestException([`Cannot read ${url}`, 'name must be a string']),
+    ];
+    const expected = [
+      {
+        statusCode: 409,
+        error: 'Conflict',
+        message: `Level ${PATH} is locked`,
+        details: [],
+        path: PATH,
+      },
+      {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Request validation failed',
+        details: [`Cannot read ${PATH}`, 'name must be a string'],
+        path: PATH,
+      },
+    ];
+
+    quoted.forEach((error, index) => {
+      const { host, sent } = httpHost(url);
+
+      filter.catch(error, host);
+
+      expect(sent.body).toEqual(expected[index]);
+      expect(JSON.stringify(sent.body)).not.toContain('token');
     });
   });
 });

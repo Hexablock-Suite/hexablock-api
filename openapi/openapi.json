@@ -40,7 +40,7 @@
       "ErrorDto": {
         "properties": {
           "details": {
-            "description": "One entry per problem when a request has several. Empty otherwise.",
+            "description": "One entry per problem when a request has several. Empty otherwise. No entry holds the query string.",
             "example": [
               "gameId should not be empty"
             ],
@@ -55,7 +55,7 @@
             "type": "string"
           },
           "message": {
-            "description": "One sentence that a client can show or log.",
+            "description": "One sentence that a client can show or log. It never holds the query string.",
             "example": "Cannot GET /levels/unknown",
             "type": "string"
           },

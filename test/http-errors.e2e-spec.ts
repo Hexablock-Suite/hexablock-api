@@ -53,6 +53,23 @@ describe('HTTP error body (API-FR-06)', () => {
     expect(unknown.body.path).toBe('/no-such-resource');
   });
 
+  // Nest answers an unknown route with «Cannot GET <url>». That url holds the
+  // query, so the filter removes the query from the message too.
+  it('should_return_no_query_in_the_error_body_when_the_route_is_unknown', async () => {
+    const response = await request(app.getHttpServer()).get('/no-such-resource?token=secret-value');
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'Cannot GET /no-such-resource',
+      details: [],
+      path: '/no-such-resource',
+    });
+    expect(JSON.stringify(response.body)).not.toContain('secret-value');
+    expect(JSON.stringify(response.body)).not.toContain('?');
+  });
+
   it('should_return_error_body_when_path_parameter_fails_validation', async () => {
     const response = await request(app.getHttpServer()).get('/error-probe/items/abc');
 
