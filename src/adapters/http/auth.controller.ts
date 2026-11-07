@@ -24,15 +24,18 @@ import {
 import type { CredentialField, Credentials } from '../../application/auth/credentials.js';
 import { LOGIN, type Login } from '../../application/auth/login.use-case.js';
 import { REGISTER_USER, type RegisterUser } from '../../application/auth/register.use-case.js';
+import { PASSWORD_LENGTH } from '../../domain/user/password.js';
+import { USERNAME_LENGTH } from '../../domain/user/username.js';
 import { CredentialsDto } from './credentials.dto.js';
 import { CurrentUserDto } from './current-user.dto.js';
 import { ErrorDto } from './error.dto.js';
 import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
+import { LoginDto } from './login.dto.js';
 import { TokenDto } from './token.dto.js';
 
 const RULES: Record<CredentialField, string> = {
-  username: 'username must have 3 to 32 characters: letters, digits, dots, hyphens or underscores',
-  password: 'password must have 8 to 128 characters',
+  username: `username must have ${USERNAME_LENGTH.min} to ${USERNAME_LENGTH.max} characters: letters, digits, dots, hyphens or underscores`,
+  password: `password must have ${PASSWORD_LENGTH.min} to ${PASSWORD_LENGTH.max} characters`,
 };
 
 // Sign-up, sign-in and the signed-in user (API-FR-01). Sign-up and sign-in
@@ -70,7 +73,7 @@ export class AuthController {
     type: ErrorDto,
     description: 'The username or the password is wrong.',
   })
-  async signIn(@Body() body: CredentialsDto): Promise<TokenDto> {
+  async signIn(@Body() body: LoginDto): Promise<TokenDto> {
     const result = await this.login.execute(credentialsFrom(body));
     if (!result.ok) {
       throw new UnauthorizedException('Invalid username or password');

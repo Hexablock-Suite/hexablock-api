@@ -1,7 +1,17 @@
-import { Password } from '../../../src/domain/user/password.js';
+import { PASSWORD_LENGTH, Password } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { Username } from '../../../src/domain/user/username.js';
+import { USERNAME_LENGTH, Username } from '../../../src/domain/user/username.js';
+
+// One code point, two UTF-16 units.
+const EMOJI = '\u{1F600}';
+
+describe('credential limits', () => {
+  it('should_export_username_and_password_ranges_when_domain_sets_the_limits', () => {
+    expect([USERNAME_LENGTH.min, USERNAME_LENGTH.max]).toEqual([3, 32]);
+    expect([PASSWORD_LENGTH.min, PASSWORD_LENGTH.max]).toEqual([8, 128]);
+  });
+});
 
 describe('Username', () => {
   it('should_accept_username_when_it_has_3_to_32_allowed_characters', () => {
@@ -31,6 +41,21 @@ describe('Password', () => {
   it('should_reject_password_when_it_has_fewer_than_8_or_more_than_128_characters', () => {
     for (const raw of ['', '1234567', 'x'.repeat(129)]) {
       expect(Password.create(raw)).toEqual({ ok: false, error: 'invalid-password' });
+    }
+  });
+
+  // The length counts code points, not UTF-16 units (#60).
+  it('should_reject_password_when_it_has_fewer_than_8_or_more_than_128_code_points', () => {
+    for (const raw of [EMOJI.repeat(4), EMOJI.repeat(129)]) {
+      expect(Password.create(raw)).toEqual({ ok: false, error: 'invalid-password' });
+    }
+  });
+
+  it('should_accept_password_when_it_has_8_to_128_code_points_in_more_utf16_units', () => {
+    for (const raw of [EMOJI.repeat(8), EMOJI.repeat(128)]) {
+      const result = Password.create(raw);
+
+      expect(result.ok && result.value.value).toBe(raw);
     }
   });
 });
