@@ -188,6 +188,22 @@ pnpm db:migrate    # applies the drizzle/ migrations to DATABASE_URL
 docker compose down
 ```
 
+The migration `drizzle/0002_username_lower_unique.sql` adds a unique index on `lower(username)`
+([#62](https://github.com/Hexablock-Suite/hexablock-api/issues/62)). It fails with `23505` on a
+database that already holds two usernames that differ only in letter case, such as `ada` and `Ada`.
+The failed migration keeps every row, and the migrator does not record it, so it can run again
+later. Before you deploy it, run this query on the target database. An empty result means that the
+migration can run:
+
+```sql
+SELECT lower(username), count(*) FROM users GROUP BY 1 HAVING count(*) > 1;
+```
+
+When the query returns a row, the team decides which account keeps the name. That is a product
+decision, so no migration chooses the account or changes the rows
+([#69](https://github.com/Hexablock-Suite/hexablock-api/issues/69)). The test
+`test/integration/username-lower-unique.migration.spec.ts` pins this behavior.
+
 The schema has the `users` table of API-FR-01. The other business tables are still the design.
 
 ## Running Tests

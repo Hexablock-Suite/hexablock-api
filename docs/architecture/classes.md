@@ -109,10 +109,10 @@ The team closed two data shape decisions on 2026-10-30. The app draws the same n
 | Part         | Fields                                              | Checked by                         |
 | ------------ | --------------------------------------------------- | ---------------------------------- |
 | Common       | `gameId`, `levelId`, `order`, `version`, `topology` | `LevelDto` (shape)                 |
-| Fit section  | `figure`, `pieces`, `witness`                       | `FitLevelValidator` (shape and A5) |
+| Fit section  | `figure`, `pieces`, `witness`, `stars`              | `FitLevelValidator` (shape and A5) |
 | Sort section | `radius`, `goals`, `source`, `stars`                | `SortLevelValidator` (shape)       |
 
-The Sort `stars` field is a list of `SortStarThreshold`, each one a `maxMoves` count (stars by moves, [hexablock-app#59](https://github.com/Hexablock-Suite/hexablock-app/issues/59), 2026-11-06).
+The Fit `stars` field is a list of `FitStarThreshold`, each one a `maxMoves` count and a `maxElapsedMs` time, and a Fit star needs both ([hexablock-app#60](https://github.com/Hexablock-Suite/hexablock-app/issues/60), 2026-11-06). The Sort `stars` field is a list of `SortStarThreshold`, each one a `maxMoves` count (stars by moves, [hexablock-app#59](https://github.com/Hexablock-Suite/hexablock-app/issues/59), 2026-11-06). In both sections the stars are cumulative: star N needs star N-1.
 
 The API rejects a Fit level that fails A5: the piece areas differ from the figure area, or the witness does not cover the figure exactly. `UpdateLevelsUseCase` checks every level before it saves any level.
 
