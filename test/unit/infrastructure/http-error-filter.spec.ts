@@ -55,8 +55,8 @@ describe('HttpErrorFilter', () => {
 
   it('should_hide_thrown_value_and_log_it_when_handler_throws_a_value_that_is_not_an_error', () => {
     for (const [thrown, logged] of [
-      ['disk quota exceeded', 'disk quota exceeded'],
-      [undefined, 'undefined'],
+      ['disk quota exceeded', 'error=string'],
+      [undefined, 'error=undefined'],
     ] as const) {
       const { host, sent } = httpHost();
       logError.mockClear();
@@ -72,7 +72,7 @@ describe('HttpErrorFilter', () => {
         path: PATH,
       });
       expect(logError).toHaveBeenCalledOnce();
-      expect(logError).toHaveBeenCalledWith(logged);
+      expect(logError).toHaveBeenCalledWith(logged, undefined);
     }
   });
 

@@ -1,5 +1,6 @@
 import type { Result } from '../../domain/shared/result.js';
 import type { Logger } from '../ports/logger.js';
+import { describeThrown } from '../thrown-value.js';
 import type { UseCase } from '../use-case.js';
 import { UseCaseAspect } from './use-case-aspect.js';
 
@@ -32,7 +33,7 @@ export class LoggingAspect<
       // So the aspect builds the entry inside safely(), and the caller still
       // gets the thrown value.
       this.safely(() =>
-        this.logger.log({ useCase: this.name, outcome: 'error', ...describe(error) }),
+        this.logger.log({ useCase: this.name, outcome: 'error', ...describeThrown(error) }),
       );
       throw error;
     }
@@ -55,37 +56,4 @@ export class LoggingAspect<
       // No source gives a policy for a failed log write, so the aspect drops it.
     }
   }
-}
-
-// The name, the string code and the stack frames of a thrown value. It never
-// reads the message into the entry. A value that is not an Error gives only
-// its type, because its text can quote a value that the client sent.
-function describe(error: unknown): {
-  name: string;
-  code: string | undefined;
-  frames: string | undefined;
-} {
-  if (!(error instanceof Error)) {
-    return { name: typeof error, code: undefined, frames: undefined };
-  }
-  const code: unknown = (error as { code?: unknown }).code;
-  return {
-    name: typeof error.name === 'string' ? error.name : 'Error',
-    code: typeof code === 'string' ? code : undefined,
-    frames: framesOf(error),
-  };
-}
-
-// The stack without its header. V8 writes the header as the text of
-// Error.prototype.toString(): the name, then the message, and the message
-// can span lines. A stack that does not start with that exact header can
-// hold the message anywhere, so the function then gives no frames.
-function framesOf(error: Error): string | undefined {
-  const stack: unknown = error.stack;
-  const header = `${Error.prototype.toString.call(error)}\n`;
-  if (typeof stack !== 'string' || !stack.startsWith(header)) {
-    return undefined;
-  }
-  const frames = stack.slice(header.length);
-  return frames === '' ? undefined : frames;
 }
