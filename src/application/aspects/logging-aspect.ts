@@ -1,5 +1,6 @@
 import type { Result } from '../../domain/shared/result.js';
 import type { Logger } from '../ports/logger.js';
+import { describeThrown } from '../thrown-value.js';
 import type { UseCase } from '../use-case.js';
 import { UseCaseAspect } from './use-case-aspect.js';
 
@@ -7,8 +8,9 @@ import { UseCaseAspect } from './use-case-aspect.js';
 // a typed entry to the Logger port, and the adapter writes the text
 // (decision 10 of docs/architecture/classes.md, Q12). A failed Result logs
 // only its kind, so a value that the client sent never reaches the log. A
-// thrown error logs its message and stack, and the aspect throws it again.
-// A logger that throws does not change the outcome of the use case.
+// thrown error logs its name, its string code and its stack frames, never
+// its message, and the aspect throws it again. A logger that throws does not
+// change the outcome of the use case.
 export class LoggingAspect<
   TRequest,
   TValue,
@@ -27,11 +29,11 @@ export class LoggingAspect<
     try {
       result = await super.execute(request);
     } catch (error) {
-      // String() can throw, for example on an object without a prototype.
-      // So the aspect builds the text inside safely(), and the caller still
+      // A getter of the thrown value can throw while the aspect reads it.
+      // So the aspect builds the entry inside safely(), and the caller still
       // gets the thrown value.
       this.safely(() =>
-        this.logger.log({ useCase: this.name, outcome: 'error', ...describe(error) }),
+        this.logger.log({ useCase: this.name, outcome: 'error', ...describeThrown(error) }),
       );
       throw error;
     }
@@ -54,12 +56,4 @@ export class LoggingAspect<
       // No source gives a policy for a failed log write, so the aspect drops it.
     }
   }
-}
-
-// The message and the stack of a thrown value. A value that is not an Error
-// has no stack, and its message is its text.
-function describe(error: unknown): { message: string; stack: string | undefined } {
-  return error instanceof Error
-    ? { message: error.message, stack: error.stack }
-    : { message: String(error), stack: undefined };
 }

@@ -41,36 +41,40 @@ describe('NestLogger', () => {
     expect(nest.error).not.toHaveBeenCalled();
   });
 
-  it('should_write_name_error_and_stack_at_error_level_when_entry_is_an_error', () => {
+  // The entry of a thrown error holds no message, so the line holds the name
+  // and the code of the error, and the frames go to the stack argument.
+  it('should_write_name_code_and_frames_and_no_message_at_error_level_when_entry_is_an_error', () => {
     const nest = recordingNestLogger();
 
     new NestLogger(nest).log({
       useCase: 'Echo',
       outcome: 'error',
-      message: 'database is down',
-      stack: 'Error: database is down\n    at test',
+      name: 'DriverError',
+      code: 'ECONNREFUSED',
+      frames: '    at connect (driver.ts:1:1)',
     });
 
     expect(nest.error).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=error error=database is down',
-      'Error: database is down\n    at test',
+      'useCase=Echo outcome=error error=DriverError code=ECONNREFUSED',
+      '    at connect (driver.ts:1:1)',
     );
     expect(nest.log).not.toHaveBeenCalled();
     expect(nest.warn).not.toHaveBeenCalled();
   });
 
-  it('should_write_error_without_stack_when_entry_has_no_stack', () => {
+  it('should_write_name_without_code_or_frames_when_entry_has_neither', () => {
     const nest = recordingNestLogger();
 
     new NestLogger(nest).log({
       useCase: 'Echo',
       outcome: 'error',
-      message: 'database is down',
-      stack: undefined,
+      name: 'string',
+      code: undefined,
+      frames: undefined,
     });
 
     expect(nest.error).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=error error=database is down',
+      'useCase=Echo outcome=error error=string',
       undefined,
     );
   });
