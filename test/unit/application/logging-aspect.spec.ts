@@ -1,3 +1,4 @@
+import type { LoggerService } from '@nestjs/common';
 import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
 import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.js';
 import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
@@ -5,6 +6,7 @@ import type { UseCase } from '../../../src/application/use-case.js';
 import { SyncProgressUseCase } from '../../../src/application/progress/sync-progress.use-case.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { NestLogger } from '../../../src/infrastructure/logging/nest-logger.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
 
@@ -20,6 +22,16 @@ function echo(answer: () => Promise<EchoResult>) {
 // Records each entry that the aspect writes to the Logger port.
 function recordingLogger() {
   return { log: vi.fn<(entry: UseCaseLogEntry) => void>() } satisfies Logger;
+}
+
+// Records each call of the Nest logger, so a test reads the text that NestLogger wrote.
+function recordingNestLogger() {
+  type LogCall = (message: unknown, ...rest: unknown[]) => void;
+  return {
+    log: vi.fn<LogCall>(),
+    warn: vi.fn<LogCall>(),
+    error: vi.fn<LogCall>(),
+  } satisfies LoggerService;
 }
 
 // An error class with its own name, as a database driver throws.
@@ -219,6 +231,45 @@ describe('LoggingAspect', () => {
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).not.toHaveBeenCalled();
+  });
+
+  // A message can hold a line that looks like a stack frame. The header of
+  // the stack holds the whole message, so the frames leave that line out,
+  // and the text that NestLogger writes never holds it.
+  it('should_log_no_message_in_the_nest_text_when_the_error_quotes_a_client_value_in_a_fake_frame_line', async () => {
+    const failure = new Error('x\n    at SECRETVAL (file:1:1)');
+    const { inner } = echo(() => Promise.reject(failure));
+    const nest = recordingNestLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', new NestLogger(nest));
+
+    await expect(aspect.execute('ping')).rejects.toBe(failure);
+    expect(nest.error).toHaveBeenCalledOnce();
+    expect(nest.log).not.toHaveBeenCalled();
+    expect(nest.warn).not.toHaveBeenCalled();
+    expect(
+      JSON.stringify([nest.log.mock.calls, nest.warn.mock.calls, nest.error.mock.calls]),
+    ).not.toContain('SECRETVAL');
+  });
+
+  // V8 writes the stack text when code first reads it. A message that changes
+  // after that read no longer matches the header, so the aspect logs no frames.
+  it('should_log_no_frames_and_rethrow_when_the_message_changes_after_the_stack_is_read', async () => {
+    const failure = new Error('orig');
+    void failure.stack;
+    failure.message = 'changed SECRETVAL';
+    const { inner } = echo(() => Promise.reject(failure));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger);
+
+    await expect(aspect.execute('ping')).rejects.toBe(failure);
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'error',
+      name: 'Error',
+      code: undefined,
+      frames: undefined,
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain('SECRETVAL');
   });
 
   // A logger that throws does not change the outcome of the use case.
