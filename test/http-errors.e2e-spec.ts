@@ -33,6 +33,26 @@ describe('HTTP error body (API-FR-06)', () => {
     });
   });
 
+  // The query can hold a secret, such as a token, and a client can log the
+  // error body. So path ends at the first «?» (RFC 3986 §3.3, gap G2.4).
+  it('should_return_path_without_query_when_url_has_a_query', async () => {
+    const server = app.getHttpServer();
+
+    const probe = await request(server).get('/error-probe/items/abc?token=secret-value');
+    const unknown = await request(server).get('/no-such-resource?token=secret-value?next=1');
+
+    expect(probe.status).toBe(400);
+    expect(probe.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Validation failed (numeric string is expected)',
+      details: [],
+      path: '/error-probe/items/abc',
+    });
+    expect(unknown.status).toBe(404);
+    expect(unknown.body.path).toBe('/no-such-resource');
+  });
+
   it('should_return_error_body_when_path_parameter_fails_validation', async () => {
     const response = await request(app.getHttpServer()).get('/error-probe/items/abc');
 

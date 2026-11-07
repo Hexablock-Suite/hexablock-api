@@ -56,6 +56,27 @@ export function describeProgressRepositoryContract(
       expect(found?.results.map((result) => result.levelId)).toEqual(['fit-01']);
     });
 
+    // The port promises the level results by levelId, compared as text:
+    // fit-10 comes before fit-9. The Drizzle adapter sorts them in SQL.
+    it('should_return_level_results_by_level_id_when_they_are_saved_out_of_order', async () => {
+      const repository = await createRepository();
+      const progress = PlayerProgress.start(USER, FIT, AT);
+      for (const levelId of ['fit-9', 'fit-10', 'fit-01']) {
+        progress.recordLevel(LevelResult.of({ levelId, stars: 1, moves: 9, elapsedMs: 1 }));
+      }
+      await storeProgress(repository, progress);
+      const seen: string[][] = [];
+
+      const found = await repository.find(USER, FIT);
+      await repository.update(USER, FIT, (stored) => {
+        seen.push(stored === null ? [] : stored.results.map((result) => result.levelId));
+        return null;
+      });
+
+      expect(found?.results.map((result) => result.levelId)).toEqual(['fit-01', 'fit-10', 'fit-9']);
+      expect(seen).toEqual([['fit-01', 'fit-10', 'fit-9']]);
+    });
+
     it('should_keep_one_entry_when_same_user_and_game_is_saved_twice', async () => {
       const repository = await createRepository();
       await storeProgress(repository, PlayerProgress.start(USER, FIT, AT));

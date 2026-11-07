@@ -10,6 +10,12 @@ import { codesOf, lintFile } from '../support/lint.js';
 // Clock port. The domain takes the instant as a parameter, because ports
 // live in the application layer and the domain never imports it.
 describe('determinism gate', () => {
+  // An afterEach runs when a test fails too. So no stubbed variable, such
+  // as JWT_SECRET, reaches the next tests.
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('should_report_each_ambient_read_when_domain_calls_clock_or_random', () => {
     const codes = codesOf(lintFile('test/fixtures/arch/src/domain/reads-ambient-state.ts'));
 
@@ -37,6 +43,5 @@ describe('determinism gate', () => {
 
     expect(moduleRef.get(CLOCK)).toBeInstanceOf(SystemClock);
     await moduleRef.close();
-    vi.unstubAllEnvs();
   });
 });
