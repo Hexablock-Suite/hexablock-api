@@ -2,13 +2,14 @@ import type { Result } from '../../domain/shared/result.js';
 import type { User } from '../../domain/user/user.js';
 import type { Username } from '../../domain/user/username.js';
 
-// Port. The store of the User entities. Two users never have usernames
-// that differ only in letter case. add() fails with username-taken when
-// such a user exists, also after a lookup that missed it.
+// Port. The store of the User entities. Two users never have the same
+// Username.key, so their names never differ only in letter case. add()
+// fails with username-taken when such a user exists, also after a lookup
+// that missed it.
 export interface UserRepository {
   // Finds the user whose username equals the name exactly, letter case included.
   findByUsername(username: Username): Promise<User | null>;
-  // Tells if a user has this username when letter case is ignored.
+  // Tells if a user has a username with the same key.
   isUsernameTaken(username: Username): Promise<boolean>;
   add(user: User): Promise<Result<void, 'username-taken'>>;
 }

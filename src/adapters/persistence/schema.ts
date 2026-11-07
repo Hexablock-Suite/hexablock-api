@@ -2,7 +2,6 @@
 // migrations in drizzle/. The schema lives in the persistence adapter because
 // the repositories query these tables, and rule
 // adapters-never-import-infrastructure forbids them to import src/infrastructure.
-import { sql } from 'drizzle-orm';
 import {
   bigint,
   foreignKey,
@@ -16,19 +15,22 @@ import {
 } from 'drizzle-orm/pg-core';
 
 // API-FR-01. The table keeps the password hash, never the plain password.
-// The username is stored as typed. The index on lower(username) rejects a
-// second name that differs only in letter case (#62).
-// The exact constraint users_username_unique stays next to that index.
-// The index implies it, so the constraint rejects no other row. Only a new
-// migration can drop it, and no change asks for that (#69).
+// The username is stored as typed. username_key holds Username.key, which
+// the domain computes. Its unique index rejects a second name with the same
+// key, so `Ada` after `ada` fails (#62). The database applies no letter case
+// rule of its own (#73).
+// The exact constraint users_username_unique stays next to that index. It
+// also rejects a writer that skips the repository and stores the same name
+// with another key.
 export const users = pgTable(
   'users',
   {
     id: uuid('id').primaryKey(),
     username: text('username').notNull().unique(),
+    usernameKey: text('username_key').notNull(),
     passwordHash: text('password_hash').notNull(),
   },
-  (table) => [uniqueIndex('users_username_lower_unique').on(sql`lower(${table.username})`)],
+  (table) => [uniqueIndex('users_username_key_unique').on(table.usernameKey)],
 );
 
 // API-FR-02 and DS-5: one row per user and gameId. highScore and updatedAt

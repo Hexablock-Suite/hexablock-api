@@ -53,6 +53,31 @@ describe('DrizzleUserRepository', () => {
       { column_name: 'id', data_type: 'uuid', is_nullable: 'NO' },
       { column_name: 'password_hash', data_type: 'text', is_nullable: 'NO' },
       { column_name: 'username', data_type: 'text', is_nullable: 'NO' },
+      { column_name: 'username_key', data_type: 'text', is_nullable: 'NO' },
+    ]);
+  });
+
+  // #73: a plain unique index on username_key replaces the index on
+  // lower(username), so no index of the table applies a letter case rule.
+  it('should_index_username_key_instead_of_lower_username_when_migrations_run', async () => {
+    const result = await database.db.execute<{ indexname: string; indexdef: string }>(
+      sql`select indexname, indexdef from pg_indexes
+          where tablename = 'users' order by indexname`,
+    );
+
+    expect(result.rows.map((row) => row.indexname)).toEqual([
+      'users_pkey',
+      'users_username_key_unique',
+      'users_username_unique',
+    ]);
+    expect(result.rows.filter((row) => /lower/i.test(row.indexdef))).toEqual([]);
+  });
+
+  it('should_store_the_username_key_when_username_has_capital_letters', async () => {
+    await repository.add(userNamed(ADA_ID, 'Ada', 'scrypt$hash'));
+
+    expect(await database.db.select().from(users)).toEqual([
+      { id: ADA_ID, username: 'Ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' },
     ]);
   });
 
@@ -100,25 +125,29 @@ describe('DrizzleUserRepository', () => {
       expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
     }
     const rows = await database.db.select().from(users);
-    expect(rows).toEqual([{ id: ADA_ID, username: 'ada', passwordHash: 'scrypt$hash' }]);
+    expect(rows).toEqual([
+      { id: ADA_ID, username: 'ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' },
+    ]);
   });
 
-  // The unique index on lower(username) guards the case rule of #62, also
-  // against a writer that skips the repository.
+  // The unique index on username_key guards the case rule of #62, also
+  // against a writer that skips the repository and gives the domain key
+  // (#73).
   it('should_reject_second_row_when_username_differs_only_in_case', async () => {
     await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
 
     const added = repository.add(userNamed(OTHER_ID, 'Ada', 'scrypt$other'));
     const inserted = database.db.execute(
-      sql`insert into users (id, username, password_hash) values (${OTHER_ID}, 'ADA', 'x')`,
+      sql`insert into users (id, username, username_key, password_hash)
+          values (${OTHER_ID}, 'ADA', 'ada', 'x')`,
     );
 
     await expect(added).resolves.toEqual({ ok: false, error: 'username-taken' });
     await expect(inserted).rejects.toMatchObject({
-      cause: { code: '23505', constraint: 'users_username_lower_unique' },
+      cause: { code: '23505', constraint: 'users_username_key_unique' },
     });
     expect(await database.db.select().from(users)).toEqual([
-      { id: ADA_ID, username: 'ada', passwordHash: 'scrypt$hash' },
+      { id: ADA_ID, username: 'ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' },
     ]);
   });
 
@@ -150,7 +179,12 @@ describe('DrizzleUserRepository', () => {
   });
 
   it('should_throw_when_stored_row_holds_an_invalid_username', () => {
-    const row = { id: ADA_ID, username: 'ada lovelace', passwordHash: 'scrypt$hash' };
+    const row = {
+      id: ADA_ID,
+      username: 'ada lovelace',
+      usernameKey: 'ada lovelace',
+      passwordHash: 'scrypt$hash',
+    };
 
     expect(() => UserRowMapper.toEntity(row)).toThrow(
       `The users row ${ADA_ID} holds an invalid username.`,
