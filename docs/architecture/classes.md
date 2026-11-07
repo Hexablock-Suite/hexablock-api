@@ -4,6 +4,19 @@ Status: draft for team review, 2026-10-31. Part 1 covers layer 1: the progress e
 
 This page answers statement §4.1 for the API, as decision D6 asks (it replaces assumption A9). It shows the generic types in UML template notation, the layer of each class, and the design patterns. Each view shows at most seven classes and eight relationships. IDs such as A5, D6 and Q10 refer to [`docs/REQUIREMENTS.md`](../REQUIREMENTS.md). DS-4, DS-5 and DS-6 are the data shape decisions of its §4. The layers themselves are in [layers.md](layers.md). The extension points are in [extensibility.md](extensibility.md). The use case flows are in [flows.md](flows.md).
 
+## Whole model in draw.io
+
+[`classes.drawio`](classes.drawio) holds the whole class model in one draw.io file, with 4 pages. Open it in draw.io or diagrams.net.
+
+- Page 1, `All classes`, holds every class, interface and type of the model once, by layer: layer 4 at the top and layer 1 at the bottom, so every dependency points down.
+- Pages 2 to 4, `Domain`, `Use cases` and `Adapters`, hold one part each. A part page shows the types of its part in full. A grey box with the name only is a type of another part that one of its lines touches, and its eyebrow names the page that details it.
+- A solid box is a type that exists in the code at `94b912d`. A dashed box with `«planned»` is design from the views of this page that the code does not have yet. It keeps the `«Sprint N»` of its view when the view gives one.
+- `members not designed yet` marks a planned class that no view details.
+- `«dataType»` marks a type in the code that only carries data; it has no operations by design. `«module»` marks `AppModule`, a Nest module that only holds decorator metadata.
+- The pages follow the reading rules of the next section, and each page has a legend.
+
+The file is generated from the code at `94b912d` plus the views of this page. A hand edit is lost at the next generation.
+
 ## How to read it
 
 - The colored zone is the Clean layer, with the colors of [layers.md](layers.md): yellow for layer 1, purple for layer 2, light blue for layer 3 and dark blue for layer 4.
