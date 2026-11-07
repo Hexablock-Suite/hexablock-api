@@ -43,6 +43,13 @@ describe('LoginUseCase', () => {
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
   });
 
+  // Login finds the user by the name as typed (#62).
+  it('should_fail_with_invalid_credentials_when_username_differs_only_in_case', async () => {
+    const result = await login.execute({ username: 'ADA', password: 'correct horse' });
+
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+  });
+
   it('should_fail_with_invalid_credentials_when_username_breaks_the_rules', async () => {
     const result = await login.execute({ username: 'a!', password: 'correct horse' });
 

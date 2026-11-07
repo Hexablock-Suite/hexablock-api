@@ -37,7 +37,8 @@ export class RegisterUseCase implements RegisterUser {
       if (!password.ok) fields.push('password');
       return err({ kind: 'invalid-credentials', fields });
     }
-    if ((await this.users.findByUsername(username.value)) !== null) {
+    // A name that differs from a stored one only in letter case is taken.
+    if (await this.users.isUsernameTaken(username.value)) {
       return err({ kind: 'username-taken' });
     }
     const hash = PasswordHash.from(await this.hasher.hash(password.value.value));
