@@ -171,4 +171,40 @@ describe('HttpErrorFilter', () => {
       expect(JSON.stringify(sent.body)).not.toContain('token');
     });
   });
+
+  // A message or a detail can quote the URL more than once. The body keeps no
+  // copy of the query. One exception fills the message only, and a validation
+  // exception fills the details only, so the test uses one of each.
+  it('should_remove_every_copy_of_the_query_when_the_message_quotes_the_url_twice', () => {
+    const url = `${PATH}?token=secret-value`;
+    const quoted = [
+      new ConflictException(`Move ${url} to ${url}`),
+      new BadRequestException([`Cannot read ${url} or ${url}`]),
+    ];
+    const expected = [
+      {
+        statusCode: 409,
+        error: 'Conflict',
+        message: `Move ${PATH} to ${PATH}`,
+        details: [],
+        path: PATH,
+      },
+      {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Request validation failed',
+        details: [`Cannot read ${PATH} or ${PATH}`],
+        path: PATH,
+      },
+    ];
+
+    quoted.forEach((error, index) => {
+      const { host, sent } = httpHost(url);
+
+      filter.catch(error, host);
+
+      expect(sent.body).toEqual(expected[index]);
+      expect(JSON.stringify(sent.body)).not.toContain('secret-value');
+    });
+  });
 });
