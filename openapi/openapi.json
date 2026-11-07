@@ -60,7 +60,7 @@
             "type": "string"
           },
           "path": {
-            "description": "The request path.",
+            "description": "The request path, without the query string.",
             "example": "/levels/unknown",
             "type": "string"
           },

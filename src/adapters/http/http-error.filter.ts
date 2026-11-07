@@ -25,7 +25,7 @@ export class HttpErrorFilter implements ExceptionFilter {
   catch(error: unknown, host: ArgumentsHost): void {
     const http = host.switchToHttp();
     const request = http.getRequest<HttpRequest>();
-    const path = request.originalUrl ?? request.url;
+    const path = pathOf(request.originalUrl ?? request.url);
     const body =
       error instanceof HttpException
         ? fromHttpException(error, path)
@@ -38,6 +38,13 @@ export class HttpErrorFilter implements ExceptionFilter {
     this.logger.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
     return errorBody(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_MESSAGE, [], path);
   }
+}
+
+// The path ends at the first «?» (RFC 3986 §3.3). The query can hold a
+// secret, such as a token, and a client can log the error body.
+function pathOf(url: string): string {
+  const queryStart = url.indexOf('?');
+  return queryStart === -1 ? url : url.slice(0, queryStart);
 }
 
 function fromHttpException(error: HttpException, path: string): ErrorDto {

@@ -23,6 +23,9 @@ export class ErrorDto {
   })
   readonly details!: string[];
 
-  @ApiProperty({ example: '/levels/unknown', description: 'The request path.' })
+  @ApiProperty({
+    example: '/levels/unknown',
+    description: 'The request path, without the query string.',
+  })
   readonly path!: string;
 }
