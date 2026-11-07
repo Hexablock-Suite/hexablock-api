@@ -21,7 +21,8 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 - **Accounts (API-FR-01):** sign-up and sign-in with JWT.
 - **Progress (API-FR-02):** progress sync, one entry per user and per `gameId`.
 - **Leaderboard (API-FR-03):** a global leaderboard per `gameId`, and a per-level leaderboard for
-  Fit and Sort. What orders the per-level leaderboard is still open (DS-4).
+  Fit and Sort. The per-level leaderboard ranks more stars first, then fewer moves, then less
+  time (DS-4).
 - **Levels (API-FR-04):** read and update the level definitions of Fit and Sort, so new levels
   reach players without an app update.
 - **API docs (API-FR-05):** Swagger at `/docs` and the committed `openapi/openapi.json`.
