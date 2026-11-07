@@ -24,6 +24,7 @@ import { JwtTokenIssuer } from '../../src/infrastructure/auth/jwt-token-issuer.j
 import { RandomUserIdGenerator } from '../../src/infrastructure/auth/random-user-id-generator.js';
 import { ScryptPasswordHasher } from '../../src/infrastructure/auth/scrypt-password-hasher.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
+import { testUserId } from '../support/user-ids.js';
 
 // AppModule is the composition root: it binds each account port to one adapter.
 describe('AppModule account wiring', () => {
@@ -63,7 +64,7 @@ describe('AppModule account wiring', () => {
     const sync = moduleRef.get<SyncProgress>(SYNC_PROGRESS);
 
     const result = await sync.execute({
-      userId: UserId.from('user-1'),
+      userId: UserId.from(testUserId(1)),
       gameId: 'Hexa Lines',
       results: [],
     });

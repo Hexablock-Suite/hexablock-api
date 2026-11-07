@@ -1,9 +1,10 @@
 import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
-import { users } from '../src/adapters/persistence/schema.js';
+import { progress, users } from '../src/adapters/persistence/schema.js';
 import { JwtTokenIssuer } from '../src/infrastructure/auth/jwt-token-issuer.js';
 import { signIn } from './support/http/sign-in.js';
 import { createTestApp, TEST_JWT_SECRET, type TestApp } from './support/http/test-app.js';
+import { testUserId } from './support/user-ids.js';
 
 // API-FR-01: a protected endpoint answers 200 with a valid token and 401
 // without one. API-FR-06: every 401 has the shared ErrorDto body.
@@ -55,6 +56,17 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(response.body).toEqual({ userId });
   });
 
+  it('should_return_lower_case_user_when_token_subject_is_an_upper_case_uuid', async () => {
+    const { userId } = await signIn(server(), USERNAME);
+    const upper = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub: userId.toUpperCase() });
+
+    const response = await callProtected(`Bearer ${upper}`);
+
+    // The UserId keeps the lower-case form that Postgres returns.
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ userId: userId.toLowerCase() });
+  });
+
   it('should_return_signed_in_user_when_scheme_name_is_not_capitalized', async () => {
     const { token, userId } = await signIn(server(), USERNAME);
     // RFC 7235: the scheme name is case-insensitive (review comment 6683774229).
@@ -104,7 +116,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
 
   it('should_return_unauthorized_error_body_when_token_is_expired', async () => {
     const expired = new JwtService({ secret: TEST_JWT_SECRET }).sign({
-      sub: 'user-1',
+      sub: testUserId(1),
       exp: Math.floor(Date.now() / 1000) - 60,
     });
 
@@ -115,12 +127,34 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
   });
 
   it('should_return_unauthorized_error_body_when_token_has_foreign_signature', async () => {
-    const foreign = new JwtService({ secret: FOREIGN_SECRET }).sign({ sub: 'user-1' });
+    const foreign = new JwtService({ secret: FOREIGN_SECRET }).sign({ sub: testUserId(1) });
 
     const response = await callProtected(`Bearer ${foreign}`);
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual(unauthorizedBody('Invalid or expired token'));
+  });
+
+  // A UserId is a UUID (#64). A valid signature over another sub is still a
+  // bad token: it gets the same 401 and never reaches a repository.
+  it('should_return_unauthorized_error_body_when_token_subject_is_not_a_uuid', async () => {
+    const notUuid = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub: 'not-a-uuid' });
+
+    const me = await callProtected(`Bearer ${notUuid}`);
+    const sync = await request(server())
+      .post('/progress')
+      .set('Authorization', `Bearer ${notUuid}`)
+      .send({ gameId: 'hexa-lines', score: 120 });
+
+    expect(me.status).toBe(401);
+    expect(me.body).toEqual(unauthorizedBody('Invalid or expired token'));
+    expect(sync.status).toBe(401);
+    expect(sync.body).toEqual({
+      ...unauthorizedBody('Invalid or expired token'),
+      path: '/progress',
+    });
+    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+    expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
   });
 
   it('should_return_signed_in_user_when_user_is_deleted_after_sign_in', async () => {

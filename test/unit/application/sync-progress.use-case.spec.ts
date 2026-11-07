@@ -8,8 +8,9 @@ import { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
+import { testUserId } from '../../support/user-ids.js';
 
-const ADA = UserId.from('user-1');
+const ADA = UserId.from(testUserId(1));
 const AT = new Date('2026-11-06T10:00:00.000Z');
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 const LATER = new Date(AT.getTime() + FIVE_MINUTES_MS);
