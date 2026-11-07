@@ -92,7 +92,8 @@ The flows need some members that the small views of [classes.md](classes.md) do 
 - `Credentials` holds `username` and `password`. View 2.4 names the type but not its fields.
 - `LoginUseCase.execute()` returns `Promise<SessionToken>` in view 2.4, so it has no value for an unknown username or a wrong password. Decision 11 says that a use case returns an expected failure as a value. The proposal: `Login` returns `Result<SessionToken, LoginProblem>`, as `AuthenticateToken` returns `Result<UserId, TokenProblem>`. The sequence diagram labels that reply `failure (proposal)`.
 - `AuthController` answers a failed login with 401 and the error body of API-FR-06. API-FR-01 fixes 401 only for a call without a token.
-- `AuthController` builds `Credentials` from `CredentialsDto` and `TokenDto` from `SessionToken`. View 3.5 has no auth mapper. The team decides between a mapper such as `AuthDtoMapper` and code in the controller.
+- `AuthController` builds `Credentials` from `LoginDto`, which has no length rules, and `TokenDto` from `SessionToken`. View 3.5 has no auth mapper. The team decides between a mapper such as `AuthDtoMapper` and code in the controller.
+- `LoginUseCase` first rejects a password longer than the maximum of `PASSWORD_LENGTH`, before it calls a port, with the same failure as a wrong password (#60). This check bounds the hash work of one request. The sequence diagram does not draw it.
 
 ### Flow 3: update levels
 

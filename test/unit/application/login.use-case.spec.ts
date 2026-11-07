@@ -8,6 +8,9 @@ import {
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
 
+// One code point, two UTF-16 units.
+const EMOJI = '\u{1F600}';
+
 describe('LoginUseCase', () => {
   let login: LoginUseCase;
   let hasher: PrefixPasswordHasher;
@@ -91,6 +94,30 @@ describe('LoginUseCase', () => {
     } finally {
       process.off('unhandledRejection', record);
     }
+  });
+
+  // The maximum bounds the hash work of one request (#60).
+  it('should_fail_with_invalid_credentials_without_hashing_when_password_has_more_than_128_characters', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+    const hash = vi.spyOn(hasher, 'hash');
+
+    for (const password of ['x'.repeat(129), EMOJI.repeat(129)]) {
+      const result = await login.execute({ username: 'ada', password });
+
+      expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    }
+    expect(verify).not.toHaveBeenCalled();
+    expect(hash).not.toHaveBeenCalled();
+  });
+
+  it('should_verify_password_when_it_has_128_code_points', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+
+    for (const password of ['x'.repeat(128), EMOJI.repeat(128)]) {
+      await login.execute({ username: 'ada', password });
+    }
+
+    expect(verify).toHaveBeenCalledTimes(2);
   });
 
   it('should_verify_password_once_when_password_is_wrong', async () => {
