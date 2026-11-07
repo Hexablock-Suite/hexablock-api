@@ -14,13 +14,13 @@ export interface PlayerProgressState {
 }
 
 // Aggregate root: one progress per userId and gameId (API-FR-02, classes.md
-// decision 2). It keeps the level results of its game. recordLevel() is the
-// only way to add one. highScore and updatedAt follow the proposal of
+// decision 2). It keeps the best level result of each level of its game.
+// recordLevel() is the only way to add one. highScore and updatedAt follow the proposal of
 // classes.md decision 3. The instant is a parameter: the use case reads it
 // from the Clock port.
 export class PlayerProgress {
-  // One result per levelId, in the order of the first record. Assumption
-  // until DS-4 (#24): the last recorded result replaces the earlier one.
+  // One result per levelId, in the order of the first record. It holds the
+  // best result of each level by the order of DS-4 (DS-12).
   private readonly resultsByLevel = new Map<string, LevelResult>();
 
   private constructor(
@@ -74,11 +74,16 @@ export class PlayerProgress {
     this.updatedAtMs = atMs;
   }
 
+  // Keeps the best result of the level (DS-4, DS-12). A result that is not
+  // better than the stored one changes nothing, so a tie keeps the stored one.
   recordLevel(result: LevelResult): void {
     if (!(result instanceof LevelResult)) {
       throw new ProgressError('recordLevel needs a LevelResult.');
     }
-    this.resultsByLevel.set(result.levelId, result);
+    const stored = this.resultsByLevel.get(result.levelId);
+    if (stored === undefined || result.isBetterThan(stored)) {
+      this.resultsByLevel.set(result.levelId, result);
+    }
   }
 }
 

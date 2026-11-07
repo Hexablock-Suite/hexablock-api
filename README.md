@@ -18,10 +18,13 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 (`hexablock-app`) with the functional requirements of statement §5.2, listed in
 [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md):
 
-- **Accounts (API-FR-01):** sign-up and sign-in with JWT.
+- **Accounts (API-FR-01):** sign-up and sign-in with JWT. A username is stored as typed. Sign-up
+  rejects a username that differs from a stored one only in letter case (`Ada` after `ada`) with
+  the same 409 as an exact duplicate, and sign-in compares the name as typed.
 - **Progress (API-FR-02):** progress sync, one entry per user and per `gameId`.
 - **Leaderboard (API-FR-03):** a global leaderboard per `gameId`, and a per-level leaderboard for
-  Fit and Sort. What orders the per-level leaderboard is still open (DS-4).
+  Fit and Sort. The per-level leaderboard ranks more stars first, then fewer moves, then less
+  time (DS-4).
 - **Levels (API-FR-04):** read and update the level definitions of Fit and Sort, so new levels
   reach players without an app update.
 - **API docs (API-FR-05):** Swagger at `/docs` and the committed `openapi/openapi.json`.
@@ -81,6 +84,11 @@ definitions that the engine plays, with generic types (decision D6):
 - **`UseCase<TRequest, TResponse>`** is the one generic input port. Every use case binds it, so
   one aspect class wraps any use case.
 - **`Result<T, E>`** carries an expected failure as a value, never as an exception.
+- **[`Range<T>`](src/domain/shared/range.ts)** is a closed interval over any ordered type, with
+  `contains(value: T): boolean`. The username (3 to 32) and password (8 to 128) length limits are
+  the `Range<number>` values `USERNAME_LENGTH` and `PASSWORD_LENGTH` in `src/domain/user`. The value
+  objects, the HTTP error messages and `CredentialsDto` read them. The professor modeled the limits
+  of the statement as a generic range with a contains method in the session of 2026-11-06.
 
 These types are the design. Their code starts in Sprint 1.
 
@@ -96,7 +104,7 @@ points to the design doc; links move to the source files as code lands.
 | Pattern                            | Classes                                                                           | Quality it protects                                 | Reason                                                                                                 | Link                                                                                                                                                 |
 | ---------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Strategy                           | `LevelValidator`, `FitLevelValidator`, `SortLevelValidator`                       | Extensibility: a new variant adds one validator     | Each `gameId` with levels registers the validator that checks its section (§3.3, DS-6, API-FR-04, A5). | [classes.md, view 1.2](docs/architecture/classes.md#view-12-the-level-schema)                                                                        |
-| Decorator                          | `UseCaseAspect`, `LoggingAspect`, `TimingAspect`                                  | Separation: no cross-cutting code inside a use case | The aspects of §3.5 wrap any use case and add no code to it (API-NFR-07, A2). Q12 decides their layer. | [classes.md, view 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)                                                   |
+| Decorator                          | `UseCaseAspect`, `LoggingAspect`, `TimingAspect`                                  | Separation: no cross-cutting code inside a use case | The aspects of §3.5 wrap any use case and add no code to it (API-NFR-07, A2). Q12 put them in layer 2. | [classes.md, view 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)                                                   |
 | Adapter                            | The Drizzle repositories; `SystemClock`, `ScryptPasswordHasher`, `JwtTokenIssuer` | Replaceability: a new database engine or driver     | A new database engine means new adapters, and the use cases do not change (§3.3, §3.4, §8).            | [classes.md, views 3.1, 3.2, 3.4](docs/architecture/classes.md#part-3-adapters-and-drivers); [SystemClock](src/infrastructure/clock/system-clock.ts) |
 | Singleton (single-scope injection) | `AppModule` and its providers                                                     | Consistency: one shared instance of each adapter    | One instance of each adapter for the whole API (§3.3).                                                 | [classes.md, view 3.4](docs/architecture/classes.md#view-34-wiring); [AppModule](src/infrastructure/app.module.ts)                                   |
 
@@ -107,11 +115,11 @@ does not use it: a variant has one product, its level validator (decision 8 of `
 
 Each principle has one example from the progress slice. Each link opens the source file.
 
-- **Single responsibility:** [LoggingAspect](src/infrastructure/aspects/logging-aspect.ts) only
+- **Single responsibility:** [LoggingAspect](src/application/aspects/logging-aspect.ts) only
   logs each call, so [SyncProgressUseCase](src/application/progress/sync-progress.use-case.ts)
   holds no logging code.
 - **Open/closed:** a new cross-cutting concern extends
-  [UseCaseAspect](src/infrastructure/aspects/use-case-aspect.ts) and changes one binding in
+  [UseCaseAspect](src/application/aspects/use-case-aspect.ts) and changes one binding in
   [AppModule](src/infrastructure/app.module.ts); no use case changes, as `LoggingAspect` showed.
 - **Liskov substitution:**
   [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) and the
@@ -135,13 +143,16 @@ extend it ([view 2.1](docs/architecture/classes.md#view-21-the-use-case-contract
 They are custom decorators or proxies, never Nest interceptors, because `src/application`
 imports no package (rule R-application-pure).
 
-Where the aspects live is still open: **Q12** in [layers.md](docs/architecture/layers.md#open-questions-for-the-professor).
-The draft puts them in `src/infrastructure`, where they call a logging package directly, so there
-is no `Logger` port. If Q12 moves them to `src/application`, they need a `Logger` port there.
-The code follows this draft: `UseCaseAspect` and `LoggingAspect` live in
-[src/infrastructure/aspects](src/infrastructure/aspects), and `AppModule` wraps
-`SyncProgressUseCase` in `LoggingAspect`. It logs the use case name, the outcome and the error.
-`TimingAspect` is not built yet.
+The aspects live in the application layer: **Q12** in [layers.md](docs/architecture/layers.md#resolved-questions).
+In the session of 2026-11-06 the professor answered that the aspects talk to the use case, so they
+belong there, built as decorators with one interface common to the use cases, without libraries.
+`UseCaseAspect` and `LoggingAspect` live in [src/application/aspects](src/application/aspects).
+`LoggingAspect` writes a typed entry to the `Logger` port
+([src/application/ports/logger.ts](src/application/ports/logger.ts)), and `NestLogger` in
+[src/infrastructure/logging](src/infrastructure/logging) implements it and writes the text.
+`AppModule` wraps `SyncProgressUseCase` in `LoggingAspect`. It logs the use case name, the
+outcome and, for a failure, only its `kind`, so a value that the client sent never reaches the
+log. `TimingAspect` is not built yet.
 
 ## Getting Started
 
@@ -179,6 +190,22 @@ pnpm db:generate   # writes a SQL migration into drizzle/ from src/adapters/pers
 pnpm db:migrate    # applies the drizzle/ migrations to DATABASE_URL
 docker compose down
 ```
+
+The migration `drizzle/0002_username_lower_unique.sql` adds a unique index on `lower(username)`
+([#62](https://github.com/Hexablock-Suite/hexablock-api/issues/62)). It fails with `23505` on a
+database that already holds two usernames that differ only in letter case, such as `ada` and `Ada`.
+The failed migration keeps every row, and the migrator does not record it, so it can run again
+later. Before you deploy it, run this query on the target database. An empty result means that the
+migration can run:
+
+```sql
+SELECT lower(username), count(*) FROM users GROUP BY 1 HAVING count(*) > 1;
+```
+
+When the query returns a row, the team decides which account keeps the name. That is a product
+decision, so no migration chooses the account or changes the rows
+([#69](https://github.com/Hexablock-Suite/hexablock-api/issues/69)). The test
+`test/integration/username-lower-unique.migration.spec.ts` pins this behavior.
 
 The schema has the `users` table of API-FR-01. The other business tables are still the design.
 

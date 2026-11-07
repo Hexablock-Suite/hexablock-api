@@ -117,10 +117,10 @@ describe('progress save and load per variant (API-NFR-03)', () => {
     await expectSaveAndLoad(NEW, LINES);
   });
 
-  // A later sync of the same variant keeps the stored levels, replaces the
-  // result of a levelId it sends again, and adds a new levelId. The test
-  // compares the results without order: the port contract fixes no order.
-  it('should_load_replaced_and_new_level_results_when_sort_is_saved_again', async () => {
+  // A later sync of the same variant keeps the stored levels, stores a better
+  // result of a levelId it sends again (DS-4), and adds a new levelId. The
+  // test compares the results without order: the port contract fixes no order.
+  it('should_load_better_and_new_level_results_when_sort_is_saved_again', async () => {
     const { token } = await signIn(server(), 'ada');
     const retry = { levelId: 'sort-01', stars: 3, moves: 18, elapsedMs: 60000 };
     const next = { levelId: 'sort-02', stars: 1, moves: 40, elapsedMs: 120000 };

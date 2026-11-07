@@ -17,7 +17,8 @@ export class JwtTokenIssuer implements TokenIssuer {
       const { sub } = this.jwt.verify<{ sub?: unknown }>(token);
       return typeof sub === 'string' && sub.length > 0 ? UserId.from(sub) : null;
     } catch {
-      // A bad signature, an expired token or a malformed token.
+      // A bad signature, an expired token, a malformed token or a sub that
+      // is not a UUID (UserId.from throws for it).
       return null;
     }
   }

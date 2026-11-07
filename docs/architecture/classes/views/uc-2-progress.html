@@ -72,7 +72,7 @@
         <desc id="uc2progress-desc">
           Class diagram of layer 2 showing SyncProgressUseCase, which holds the ProgressRepository
           port for the whole progress aggregate and the Clock port, and GetLeaderboardUseCase, which
-          holds the LeaderboardReader port whose order is still open in DS-4.
+          holds the LeaderboardReader port, which ranks by the order of DS-4.
         </desc>
         <defs>
           <marker
@@ -502,8 +502,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          records the score and each level result, and saves the whole aggregate (DS-5). The order
-          of LeaderboardReader.top() is DS-4, still open.
+          records the score and each level result, and saves the whole aggregate (DS-5).
+          LeaderboardReader.top() ranks by DS-4: stars, then moves, then time.
         </text>
         <text
           x="24"

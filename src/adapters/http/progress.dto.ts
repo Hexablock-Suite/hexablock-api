@@ -36,7 +36,8 @@ export class SyncProgressDto {
 
   @ApiPropertyOptional({
     type: [LevelResultDto],
-    description: 'Level results. A later result for a levelId replaces the earlier one.',
+    description:
+      'Level results. For each levelId the better result stays: more stars, then fewer moves, then less time; on a full tie the stored result stays.',
   })
   readonly results?: LevelResultDto[];
 }

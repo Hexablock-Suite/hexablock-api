@@ -127,6 +127,23 @@
         ],
         "type": "object"
       },
+      "LoginDto": {
+        "properties": {
+          "password": {
+            "example": "correct horse battery",
+            "type": "string"
+          },
+          "username": {
+            "example": "ada",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
       "ProgressDto": {
         "properties": {
           "gameId": {
@@ -168,7 +185,7 @@
             "type": "string"
           },
           "results": {
-            "description": "Level results. A later result for a levelId replaces the earlier one.",
+            "description": "Level results. For each levelId the better result stays: more stars, then fewer moves, then less time; on a full tie the stored result stays.",
             "items": {
               "$ref": "#/components/schemas/LevelResultDto"
             },
@@ -225,7 +242,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CredentialsDto"
+                "$ref": "#/components/schemas/LoginDto"
               }
             }
           },
@@ -340,7 +357,7 @@
                 }
               }
             },
-            "description": "Another user has this username."
+            "description": "Another user has this username, or one that differs only in letter case."
           }
         },
         "tags": [

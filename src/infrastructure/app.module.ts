@@ -12,7 +12,9 @@ import {
 } from '../application/auth/authenticate-token.use-case.js';
 import { LOGIN, LoginUseCase } from '../application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../application/auth/register.use-case.js';
+import { LoggingAspect } from '../application/aspects/logging-aspect.js';
 import { CLOCK, type Clock } from '../application/ports/clock.js';
+import { LOGGER, type Logger } from '../application/ports/logger.js';
 import { PASSWORD_HASHER, type PasswordHasher } from '../application/ports/password-hasher.js';
 import {
   PROGRESS_REPOSITORY,
@@ -26,7 +28,6 @@ import {
   SYNC_PROGRESS,
   SyncProgressUseCase,
 } from '../application/progress/sync-progress.use-case.js';
-import { LoggingAspect } from './aspects/logging-aspect.js';
 import { createJwtService, readJwtSecret } from './auth/auth-config.js';
 import { JwtTokenIssuer } from './auth/jwt-token-issuer.js';
 import { RandomUserIdGenerator } from './auth/random-user-id-generator.js';
@@ -34,6 +35,7 @@ import { ScryptPasswordHasher } from './auth/scrypt-password-hasher.js';
 import { SystemClock } from './clock/system-clock.js';
 import type { Database } from './database/connection.js';
 import { DATABASE, DatabaseModule } from './database/database.module.js';
+import { NestLogger } from './logging/nest-logger.js';
 
 // The composition root: it binds each port to its adapter.
 @Module({
@@ -41,6 +43,7 @@ import { DATABASE, DatabaseModule } from './database/database.module.js';
   controllers: [HealthController, AuthController, ProgressController],
   providers: [
     { provide: CLOCK, useClass: SystemClock },
+    { provide: LOGGER, useFactory: (): Logger => new NestLogger() },
     { provide: PASSWORD_HASHER, useClass: ScryptPasswordHasher },
     { provide: USER_ID_GENERATOR, useClass: RandomUserIdGenerator },
     {
@@ -78,9 +81,9 @@ import { DATABASE, DatabaseModule } from './database/database.module.js';
     // LoggingAspect wraps the use case, so the use case holds no logging code.
     {
       provide: SYNC_PROGRESS,
-      inject: [PROGRESS_REPOSITORY, CLOCK],
-      useFactory: (progress: ProgressRepository, clock: Clock) =>
-        new LoggingAspect(new SyncProgressUseCase(progress, clock), 'SyncProgress'),
+      inject: [PROGRESS_REPOSITORY, CLOCK, LOGGER],
+      useFactory: (progress: ProgressRepository, clock: Clock, logger: Logger) =>
+        new LoggingAspect(new SyncProgressUseCase(progress, clock), 'SyncProgress', logger),
     },
     {
       provide: GET_PROGRESS,
