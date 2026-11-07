@@ -3,6 +3,7 @@ import type {
   ProgressRepository,
 } from '../../src/application/ports/progress-repository.js';
 import type { GameId } from '../../src/domain/progress/game-id.js';
+import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import type { UserId } from '../../src/domain/user/user-id.js';
 
@@ -52,13 +53,23 @@ function keyOf(userId: UserId, gameId: GameId): string {
 }
 
 // A new aggregate with the same state. LevelResult is immutable, so the
-// copy shares the results.
+// copy shares the results. The copy holds the results by levelId, as the
+// port promises and the Drizzle adapter reads them.
 function copyOf(progress: PlayerProgress): PlayerProgress {
   return PlayerProgress.restore({
     userId: progress.userId,
     gameId: progress.gameId,
     highScore: progress.highScore,
     updatedAt: progress.updatedAt,
-    results: progress.results,
+    results: progress.results.toSorted(byLevelId),
   });
+}
+
+// Text order by UTF-16 code unit. For ASCII levelId values it is the order
+// of a Postgres text column with the C collation, which PGlite uses.
+function byLevelId(left: LevelResult, right: LevelResult): number {
+  if (left.levelId === right.levelId) {
+    return 0;
+  }
+  return left.levelId < right.levelId ? -1 : 1;
 }

@@ -185,7 +185,8 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
       );
 
       const stored = await repository.find(ADA, GameId.of('hexa-fit'));
-      expect(stored?.results).toEqual(levels.map((level) => LevelResult.of(level)));
+      // The port gives the results by levelId, whatever the sync order.
+      expect(stored?.results).toEqual([first, second].map((level) => LevelResult.of(level)));
       expect(results[1]?.ok && results[1].value).toEqual(stored);
     }
   });
