@@ -54,6 +54,12 @@ export class PlayerProgress {
     return progress;
   }
 
+  // Two progresses are the same progress when they have the same user and the same game.
+  // The other data does not count.
+  equals(other: PlayerProgress): boolean {
+    return this.userId.equals(other.userId) && this.gameId.equals(other.gameId);
+  }
+
   get highScore(): number | null {
     return this.best;
   }

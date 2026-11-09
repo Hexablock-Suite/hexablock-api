@@ -10,4 +10,9 @@ export class User {
     readonly username: Username,
     readonly passwordHash: PasswordHash,
   ) {}
+
+  // Two users are the same user when they have the same id. The other data does not count.
+  equals(other: User): boolean {
+    return this.id.equals(other.id);
+  }
 }

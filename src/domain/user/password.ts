@@ -24,4 +24,10 @@ export class Password {
       ? ok(new Password(raw))
       : err('invalid-password');
   }
+
+  // Two passwords are equal when they hold the same text.
+  // Sign-in never uses this method: it checks a password through the PasswordHasher port.
+  equals(other: Password): boolean {
+    return this.value === other.value;
+  }
 }

@@ -72,3 +72,25 @@ describe('LevelResult', () => {
     expect(second.isBetterThan(first)).toBe(false);
   });
 });
+
+describe('LevelResult equals', () => {
+  it('should_be_equal_when_two_results_hold_the_same_fields', () => {
+    const result = LevelResult.of(VALID);
+    const twin = LevelResult.of({ ...VALID });
+
+    expect(twin).not.toBe(result);
+    expect(result.equals(twin)).toBe(true);
+    expect(twin.equals(result)).toBe(true);
+    for (const change of [
+      { levelId: 'fit-02' },
+      { stars: 2 },
+      { moves: 13 },
+      { elapsedMs: 45_001 },
+    ]) {
+      const other = LevelResult.of({ ...VALID, ...change });
+
+      expect(result.equals(other)).toBe(false);
+      expect(other.equals(result)).toBe(false);
+    }
+  });
+});

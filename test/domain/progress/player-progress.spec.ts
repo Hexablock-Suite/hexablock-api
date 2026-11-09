@@ -324,3 +324,26 @@ describe('PlayerProgress', () => {
     expect(progress.results).toEqual([best, second]);
   });
 });
+
+describe('PlayerProgress identity', () => {
+  it('should_be_the_same_progress_when_user_and_game_match_whatever_the_rest_holds', () => {
+    const played = PlayerProgress.restore({
+      userId: USER,
+      gameId: FIT,
+      highScore: 900,
+      updatedAt: LATER,
+      results: [level('fit-01', 3)],
+    });
+    const fresh = PlayerProgress.start(UserId.from(testUserId(1)), GameId.of('fit'), START);
+    const otherUser = PlayerProgress.start(UserId.from(testUserId(2)), FIT, START);
+    const otherGame = PlayerProgress.start(USER, GameId.of('sort'), START);
+
+    expect(fresh).not.toBe(played);
+    expect(played.equals(fresh)).toBe(true);
+    expect(fresh.equals(played)).toBe(true);
+    for (const other of [otherUser, otherGame]) {
+      expect(fresh.equals(other)).toBe(false);
+      expect(other.equals(fresh)).toBe(false);
+    }
+  });
+});

@@ -30,6 +30,16 @@ export class LevelResult {
     return new LevelResult(levelId, stars, moves, elapsedMs);
   }
 
+  // Two results are equal when every field is equal.
+  equals(other: LevelResult): boolean {
+    return (
+      this.levelId === other.levelId &&
+      this.stars === other.stars &&
+      this.moves === other.moves &&
+      this.elapsedMs === other.elapsedMs
+    );
+  }
+
   // The order of DS-4: more stars wins, then fewer moves, then less time. A
   // full tie is not better, so the caller keeps the result it has.
   isBetterThan(other: LevelResult): boolean {
