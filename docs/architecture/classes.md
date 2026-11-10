@@ -10,12 +10,12 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 
 - Page 1, `All classes`, holds every class, interface and type of the model once, by layer: layer 4 at the top and layer 1 at the bottom, so every dependency points down.
 - Pages 2 to 4, `Domain`, `Use cases` and `Adapters`, hold one part each. A part page shows the types of its part in full. A grey box with the name only is a type of another part that one of its lines touches, and its eyebrow names the page that details it.
-- A solid box is a type that exists in the code at `d24bdbf`. A dashed box with `«planned»` is design from the views of this page that the code does not have yet. It keeps the `«Sprint N»` of its view when the view gives one.
+- A solid box is a type that exists in the code at `768d60a`. A dashed box with `«planned»` is design from the views of this page that the code does not have yet. It keeps the `«Sprint N»` of its view when the view gives one.
 - `members not designed yet` marks a planned class that no view details.
 - `«dataType»` marks a type in the code that only carries data; it has no operations by design. `«module»` marks `AppModule`, a Nest module that only holds decorator metadata.
 - The pages follow the reading rules of the next section, and each page has a legend.
 
-The file is generated from the code at `d24bdbf` plus the views of this page. A hand edit is lost at the next generation.
+The file is generated from the code at `768d60a` plus the views of this page. A hand edit is lost at the next generation.
 
 ## How to read it
 
