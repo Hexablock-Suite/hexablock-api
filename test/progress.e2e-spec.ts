@@ -90,6 +90,32 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
     expect(rows).toHaveLength(1);
   });
 
+  // An equal score is not higher, so the high score stays. The sync still
+  // moves updatedAt to its instant.
+  it('should_keep_high_score_and_move_updated_at_forward_when_an_equal_score_syncs', async () => {
+    const { token, userId } = await signIn('ada');
+    await sync(token, { gameId: 'hexa-lines', score: 120 });
+    clock.advanceBy(FIVE_MINUTES_MS);
+
+    const second = await sync(token, { gameId: 'hexa-lines', score: 120 });
+    const readBack = await read(token, 'hexa-lines');
+
+    const entry = {
+      gameId: 'hexa-lines',
+      highScore: 120,
+      updatedAt: LATER.toISOString(),
+      results: [],
+    };
+    expect(second.status).toBe(200);
+    expect(second.body).toEqual(entry);
+    expect(readBack.body).toEqual(entry);
+    const rows = await testApp.database.db
+      .select()
+      .from(progress)
+      .where(eq(progress.userId, userId));
+    expect(rows.map((row) => [row.highScore, row.updatedAt])).toEqual([[120, LATER]]);
+  });
+
   it('should_save_progress_for_token_user_when_body_names_another_user', async () => {
     const ada = await signIn('ada');
     const grace = await signIn('grace');
