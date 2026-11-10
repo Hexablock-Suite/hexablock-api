@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 1 of 5</p>
       <h1>Progress store: two Drizzle adapters over two tables</h1>
       <svg
-        viewBox="0 0 1040 714"
+        viewBox="0 0 1040 1038"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad1progressstore-title ad1progressstore-desc"
@@ -72,10 +72,11 @@
           HexaBlock API progress persistence · UML class diagram
         </title>
         <desc id="ad1progressstore-desc">
-          Class diagram of layers 3 and 2 showing DrizzleProgressRepository and
+          Class diagram of layers 3, 2 and 1 showing DrizzleProgressRepository and
           DrizzleLeaderboardReader, which implement the two progress ports of layer 2, and
           ProgressRowMapper, which turns the rows of both progress tables into the PlayerProgress
-          aggregate and back.
+          aggregate and back. The mapper reads the aggregate through its PlayerProgressState
+          snapshot, the Memento of layer 1.
         </desc>
         <defs>
           <marker
@@ -134,7 +135,7 @@
           x="24"
           y="24"
           width="992"
-          height="376"
+          height="472"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -142,12 +143,22 @@
         />
         <rect
           x="24"
-          y="416"
+          y="512"
           width="992"
           height="120"
           rx="8"
           fill="#efe7f8"
           stroke="rgba(126,34,206,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="648"
+          width="992"
+          height="196"
+          rx="8"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
           stroke-width="1"
         />
         <!-- Pattern and group frames -->
@@ -184,12 +195,22 @@
           stroke-width="1"
           marker-end="url(#ad1progressstore-open)"
         />
+        <!-- ProgressRowMapper uses PlayerProgressState: use (it reads snapshot() and passes the state to restore()) -->
+        <line
+          x1="320"
+          y1="440"
+          x2="320"
+          y2="688"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad1progressstore-open)"
+        />
         <!-- DrizzleProgressRepository implements ProgressRepository: realization -->
         <line
           x1="376"
           y1="228"
           x2="376"
-          y2="464"
+          y2="560"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -200,7 +221,7 @@
           x1="688"
           y1="196"
           x2="688"
-          y2="464"
+          y2="560"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -219,6 +240,18 @@
         >
           USES
         </text>
+        <rect x="326" y="452" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="342"
+          y="461"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          READS
+        </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="360" height="12" rx="2" fill="#e2ebf8" />
         <text
@@ -232,10 +265,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/persistence/
         </text>
-        <rect x="36" y="427" width="248" height="12" rx="2" fill="#efe7f8" />
+        <rect x="36" y="523" width="248" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
-          y="436"
+          y="532"
           fill="#7e22ce"
           font-size="8"
           font-weight="500"
@@ -243,6 +276,18 @@
           letter-spacing="0.18em"
         >
           LAYER 2 · USE CASES · src/application/
+        </text>
+        <rect x="36" y="659" width="264" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="668"
+          fill="#b45309"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 1 · ENTITIES · src/domain/progress/
         </text>
         <!-- Class: DrizzleProgressRepository (focal, «Adapter») -->
         <rect
@@ -362,7 +407,7 @@
           x="64"
           y="288"
           width="288"
-          height="88"
+          height="152"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -392,15 +437,27 @@
         </text>
         <line x1="64" y1="336" x2="352" y2="336" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="352" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toEntity(rows: ProgressRows): PlayerProgress
+          + toAggregate(row: ProgressRow,
         </text>
-        <text x="80" y="368" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toRows(progress: PlayerProgress): ProgressRows
+        <text x="102" y="368" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          resultRows: LevelResultRow[]): PlayerProgress
+        </text>
+        <text x="80" y="384" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toProgressRow(aggregate: PlayerProgress):
+        </text>
+        <text x="102" y="400" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ProgressRow
+        </text>
+        <text x="80" y="416" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toLevelResultRows(aggregate: PlayerProgress):
+        </text>
+        <text x="102" y="432" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LevelResultRow[]
         </text>
         <!-- Class: ProgressRepository (PART 2 · VIEW 2) -->
         <rect
           x="272"
-          y="464"
+          y="560"
           width="224"
           height="48"
           rx="6"
@@ -411,7 +468,7 @@
         />
         <text
           x="384"
-          y="482"
+          y="578"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -422,7 +479,7 @@
         </text>
         <text
           x="384"
-          y="500"
+          y="596"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -434,7 +491,7 @@
         <!-- Class: LeaderboardReader (PART 2 · VIEW 2) -->
         <rect
           x="584"
-          y="464"
+          y="560"
           width="208"
           height="48"
           rx="6"
@@ -445,7 +502,7 @@
         />
         <text
           x="688"
-          y="482"
+          y="578"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -456,7 +513,7 @@
         </text>
         <text
           x="688"
-          y="500"
+          y="596"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -465,10 +522,70 @@
         >
           LeaderboardReader
         </text>
+        <!-- Class: PlayerProgressState (Memento of PlayerProgress, no tactical stereotype) -->
+        <rect
+          x="64"
+          y="688"
+          width="288"
+          height="148"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="208"
+          y="706"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface»
+        </text>
+        <text
+          x="208"
+          y="724"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PlayerProgressState
+        </text>
+        <text
+          x="208"
+          y="738"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          role: Memento of PlayerProgress
+        </text>
+        <line x1="64" y1="748" x2="352" y2="748" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + userId: UserId {readOnly}
+        </text>
+        <text x="80" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + gameId: GameId {readOnly}
+        </text>
+        <text x="80" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + highScore: Score | null {readOnly}
+        </text>
+        <text x="80" y="812" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + updatedAt: Date {readOnly}
+        </text>
+        <text x="80" y="828" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + results: LevelResult[] {readOnly}
+        </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="560"
+          y="868"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -478,17 +595,17 @@
         </text>
         <text
           x="24"
-          y="576"
+          y="884"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
           DrizzleProgressRepository saves the whole aggregate in one transaction that locks its key.
-          ProgressRows holds the progress row and its level result rows.
+          ProgressRowMapper writes its progress row and level_results rows.
         </text>
         <text
           x="24"
-          y="592"
+          y="900"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -498,18 +615,28 @@
         </text>
         <text
           x="24"
-          y="608"
+          y="916"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Rule persistence-adapters-never-import-nest applies.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="632" x2="1016" y2="632" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="650"
+          y="932"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The aggregate has no getter: the mapper reads PlayerProgress.snapshot(), a copy of its
+          state (Memento), and gives that state back to PlayerProgress.restore().
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="956" x2="1016" y2="956" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -519,9 +646,9 @@
         </text>
         <line
           x1="24"
-          y1="668"
+          y1="992"
           x2="52"
-          y2="668"
+          y2="992"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -529,7 +656,7 @@
         />
         <text
           x="60"
-          y="672"
+          y="996"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -538,16 +665,16 @@
         </text>
         <line
           x1="128"
-          y1="668"
+          y1="992"
           x2="156"
-          y2="668"
+          y2="992"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad1progressstore-open)"
         />
         <text
           x="164"
-          y="672"
+          y="996"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -556,7 +683,7 @@
         </text>
         <rect
           x="24"
-          y="688"
+          y="1012"
           width="20"
           height="12"
           rx="2"
@@ -566,7 +693,7 @@
         />
         <rect
           x="48"
-          y="688"
+          y="1012"
           width="20"
           height="12"
           rx="2"
@@ -574,9 +701,19 @@
           stroke="rgba(126,34,206,0.40)"
           stroke-width="1"
         />
+        <rect
+          x="72"
+          y="1012"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
         <text
-          x="80"
-          y="697"
+          x="104"
+          y="1021"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -585,7 +722,7 @@
         </text>
         <rect
           x="264"
-          y="688"
+          y="1012"
           width="28"
           height="12"
           rx="2"
@@ -596,7 +733,7 @@
         />
         <text
           x="300"
-          y="697"
+          y="1021"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -605,7 +742,7 @@
         </text>
         <rect
           x="470"
-          y="688"
+          y="1012"
           width="28"
           height="12"
           rx="2"
@@ -615,7 +752,7 @@
         />
         <text
           x="506"
-          y="697"
+          y="1021"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -624,7 +761,7 @@
         </text>
         <rect
           x="616"
-          y="688"
+          y="1012"
           width="28"
           height="12"
           rx="2"
@@ -635,7 +772,7 @@
         />
         <text
           x="652"
-          y="697"
+          y="1021"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

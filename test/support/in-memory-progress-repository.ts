@@ -46,7 +46,8 @@ export class InMemoryProgressRepository implements ProgressRepository {
   // Not part of the port. A test seeds a stored progress with it, for
   // example the tests of GetProgress. It runs through update().
   async save(progress: PlayerProgress): Promise<void> {
-    await this.update(progress.userId, progress.gameId, () => progress);
+    const { userId, gameId } = progress.snapshot();
+    await this.update(userId, gameId, () => progress);
   }
 }
 

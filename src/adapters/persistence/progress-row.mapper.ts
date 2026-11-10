@@ -23,21 +23,24 @@ export const ProgressRowMapper = {
     });
   },
 
+  // The mapper reads the snapshot of the aggregate, its Memento.
   toProgressRow(aggregate: PlayerProgress): ProgressRow {
+    const { userId, gameId, highScore, updatedAt } = aggregate.snapshot();
     return {
-      userId: aggregate.userId.value,
-      gameId: aggregate.gameId.value,
+      userId: userId.value,
+      gameId: gameId.value,
       // The high_score column keeps a number.
-      highScore: aggregate.highScore?.value ?? null,
-      updatedAt: aggregate.updatedAt,
+      highScore: highScore?.value ?? null,
+      updatedAt,
     };
   },
 
   toLevelResultRows(aggregate: PlayerProgress): LevelResultRow[] {
+    const { userId, gameId, results } = aggregate.snapshot();
     // The level_results columns keep a text and three numbers.
-    return aggregate.results.map((result) => ({
-      userId: aggregate.userId.value,
-      gameId: aggregate.gameId.value,
+    return results.map((result) => ({
+      userId: userId.value,
+      gameId: gameId.value,
       levelId: result.levelId.value,
       stars: result.stars.value,
       moves: result.moves.value,

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 5 of 5</p>
       <h1>HTTP mappers: the controllers translate between DTOs and entities</h1>
       <svg
-        viewBox="0 0 1040 722"
+        viewBox="0 0 1040 738"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad5httpmappers-title ad5httpmappers-desc"
@@ -72,8 +72,9 @@
         <desc id="ad5httpmappers-desc">
           Class diagram of layers 3 and 1 showing ProgressDtoMapper and LevelDtoMapper in
           src/adapters/http: ProgressController uses ProgressDtoMapper to turn PlayerProgress into
-          the response DTO, and LevelsController uses LevelDtoMapper to turn each LevelDto into a
-          level and a failed Result into the error body.
+          the response DTO through the PlayerProgressState snapshot of the aggregate, and
+          LevelsController uses LevelDtoMapper to turn each LevelDto into a level and a failed
+          Result into the error body.
         </desc>
         <defs>
           <marker
@@ -179,6 +180,16 @@
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
+        <!-- ProgressDtoMapper reads PlayerProgressState, the snapshot of PlayerProgress: use -->
+        <line
+          x1="424"
+          y1="328"
+          x2="424"
+          y2="488"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
         <!-- LevelDtoMapper returns a LevelDefinition: use -->
         <line
           x1="640"
@@ -213,6 +224,18 @@
           letter-spacing="0.06em"
         >
           USES
+        </text>
+        <rect x="430" y="376" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="450"
+          y="385"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          READS
         </text>
         <rect x="150" y="376" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
@@ -481,6 +504,40 @@
         >
           PlayerProgress
         </text>
+        <!-- Class: PlayerProgressState (PART 3 · VIEW 1) -->
+        <rect
+          x="380"
+          y="488"
+          width="168"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="464"
+          y="506"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 3 · VIEW 1
+        </text>
+        <text
+          x="464"
+          y="524"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PlayerProgressState
+        </text>
         <!-- Class: LevelDefinition (PART 1 · VIEW 2) -->
         <rect
           x="560"
@@ -555,8 +612,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          ProgressDtoMapper builds the domain values of a request and turns PlayerProgress into
-          ProgressDto. LevelDtoMapper keeps the section as it arrives; the validator of the gameId
+          ProgressDtoMapper builds the domain values of a request. It reads
+          PlayerProgress.snapshot(), a copy of the state, to build the ProgressDto: the aggregate
+          has no getter.
         </text>
         <text
           x="24"
@@ -565,14 +623,24 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          checks it in the use case. A failed Result of UpdateLevels becomes the error body of
-          API-FR-06 through toErrorBody(). The mappers hold no state.
+          LevelDtoMapper keeps the section as it arrives; the validator of the gameId checks it in
+          the use case.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="640" x2="1016" y2="640" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="658"
+          y="632"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          A failed Result of UpdateLevels becomes the error body of API-FR-06 through toErrorBody().
+          The mappers hold no state.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="656" x2="1016" y2="656" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="674"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -582,16 +650,16 @@
         </text>
         <line
           x1="24"
-          y1="676"
+          y1="692"
           x2="52"
-          y2="676"
+          y2="692"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
         <text
           x="60"
-          y="680"
+          y="696"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -600,7 +668,7 @@
         </text>
         <rect
           x="24"
-          y="696"
+          y="712"
           width="20"
           height="12"
           rx="2"
@@ -610,7 +678,7 @@
         />
         <rect
           x="48"
-          y="696"
+          y="712"
           width="20"
           height="12"
           rx="2"
@@ -620,7 +688,7 @@
         />
         <text
           x="80"
-          y="705"
+          y="721"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -629,7 +697,7 @@
         </text>
         <rect
           x="470"
-          y="696"
+          y="712"
           width="28"
           height="12"
           rx="2"
@@ -639,7 +707,7 @@
         />
         <text
           x="506"
-          y="705"
+          y="721"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -648,7 +716,7 @@
         </text>
         <rect
           x="616"
-          y="696"
+          y="712"
           width="28"
           height="12"
           rx="2"
@@ -659,7 +727,7 @@
         />
         <text
           x="652"
-          y="705"
+          y="721"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

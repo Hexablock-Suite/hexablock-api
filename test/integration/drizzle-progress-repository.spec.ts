@@ -156,8 +156,8 @@ describe('DrizzleProgressRepository', () => {
 
     expect(await countRows(database, 'progress')).toBe(1);
     const found = await repository.find(ADA, FIT);
-    expect(found?.highScore?.equals(Score.of(300))).toBe(true);
-    expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(found?.snapshot().highScore?.equals(Score.of(300))).toBe(true);
+    expect(found?.snapshot().updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
   // The advisory lock makes the second sync read what the first one saved,
@@ -177,7 +177,9 @@ describe('DrizzleProgressRepository', () => {
 
     await Promise.all([sync.execute(syncRequest(500)), sync.execute(syncRequest(100))]);
 
-    expect((await repository.find(ADA, FIT))?.highScore?.equals(Score.of(500))).toBe(true);
+    expect((await repository.find(ADA, FIT))?.snapshot().highScore?.equals(Score.of(500))).toBe(
+      true,
+    );
     expect(await countRows(database, 'progress')).toBe(1);
   });
 
@@ -193,8 +195,8 @@ describe('DrizzleProgressRepository', () => {
     await storeProgress(repository, progress);
     const found = await repository.find(ADA, FIT);
 
-    expect(found?.results).toEqual([first, second]);
-    expect(found?.highScore).toBeNull();
+    expect(found?.snapshot().results).toEqual([first, second]);
+    expect(found?.snapshot().highScore).toBeNull();
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 
@@ -210,8 +212,10 @@ describe('DrizzleProgressRepository', () => {
     progress.recordLevel(level('fit-02', 2, 12, 45_000));
     await storeProgress(repository, progress);
 
-    expect((await repository.find(ADA, FIT))?.results).toEqual(progress.results);
-    expect((await repository.find(ADA, FIT))?.results[0]).toEqual(retry);
+    expect((await repository.find(ADA, FIT))?.snapshot().results).toEqual(
+      progress.snapshot().results,
+    );
+    expect((await repository.find(ADA, FIT))?.snapshot().results[0]).toEqual(retry);
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 

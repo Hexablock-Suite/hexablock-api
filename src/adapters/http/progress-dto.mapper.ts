@@ -47,13 +47,15 @@ export const ProgressDtoMapper = {
     return built.ok ? ok({ userId, gameId: built.value }) : err(built.error.problems);
   },
 
+  // The mapper reads the snapshot of the aggregate, its Memento.
   toDto(progress: PlayerProgress): ProgressDto {
+    const { gameId, highScore, updatedAt, results } = progress.snapshot();
     return {
-      gameId: progress.gameId.value,
+      gameId: gameId.value,
       // The JSON body keeps numbers and strings.
-      highScore: progress.highScore?.value ?? null,
-      updatedAt: progress.updatedAt.toISOString(),
-      results: progress.results.map((result) => ({
+      highScore: highScore?.value ?? null,
+      updatedAt: updatedAt.toISOString(),
+      results: results.map((result) => ({
         levelId: result.levelId.value,
         stars: result.stars.value,
         moves: result.moves.value,

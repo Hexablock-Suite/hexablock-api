@@ -244,7 +244,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#flow1syncprogress-triangle)"
         />
-        <!-- PlayerProgress holds results: LevelResult[]: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <!-- PlayerProgress holds levelResults: LevelResult[]: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <line
           x1="760"
           y1="1274"
@@ -351,9 +351,9 @@
         >
           updates
         </text>
-        <rect x="686" y="1253" width="74" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="686" y="1253" width="72" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="723"
+          x="722"
           y="1262"
           fill="#7d8a94"
           font-size="8"
@@ -361,7 +361,19 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          results 0..*
+          levelResults
+        </text>
+        <rect x="706" y="1280" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="722"
+          y="1289"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          0..*
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="327" height="12" rx="2" fill="#cfdcf3" />
@@ -1135,7 +1147,7 @@
           x="760"
           y="1180"
           width="320"
-          height="268"
+          height="284"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1189,7 +1201,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + userId: UserId
+          - userId: UserId
         </text>
         <text
           x="776"
@@ -1198,7 +1210,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + gameId: GameId
+          - gameId: GameId
         </text>
         <text
           x="776"
@@ -1207,7 +1219,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + highScore: Score | null
+          - best: Score | null
         </text>
         <text
           x="776"
@@ -1216,7 +1228,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + updatedAt: Date
+          - updatedAtMs: number
         </text>
         <text
           x="776"
@@ -1225,7 +1237,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + results: LevelResult[]
+          - levelResults: LevelResult[]
         </text>
         <line
           x1="760"
@@ -1291,11 +1303,20 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + recordScore(score: Score, at: Date): void
+          + snapshot(): PlayerProgressState
         </text>
         <text
           x="776"
           y="1440"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + recordScore(score: Score, at: Date): void
+        </text>
+        <text
+          x="776"
+          y="1456"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1350,8 +1371,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          of this use case is in flows.md. toDto() and the results field also use PlayerProgress and
-          LevelResult; the view draws no extra line for them.
+          of this use case is in flows.md. toDto() reads PlayerProgress.snapshot(), and the
+          levelResults field uses LevelResult; the view draws no extra line for them.
         </text>
         <!-- Legend -->
         <line
