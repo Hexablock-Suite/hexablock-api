@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 2 of 3</p>
       <h1>Login: one sign-in request through the four layers</h1>
       <svg
-        viewBox="0 0 1240 1258"
+        viewBox="0 0 1240 1410"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow2login-title flow2login-desc"
@@ -117,7 +117,7 @@
           x="24"
           y="208"
           width="1192"
-          height="192"
+          height="240"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -125,9 +125,9 @@
         />
         <rect
           x="24"
-          y="412"
+          y="460"
           width="1192"
-          height="452"
+          height="532"
           rx="8"
           fill="#efe7f8"
           stroke="rgba(126,34,206,0.40)"
@@ -135,9 +135,9 @@
         />
         <rect
           x="24"
-          y="876"
+          y="1004"
           width="1192"
-          height="168"
+          height="192"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -146,7 +146,7 @@
         <!-- Relationships (drawn before boxes) -->
         <!-- AuthController holds Login: use -->
         <path
-          d="M470 380 L470 452"
+          d="M470 396 L470 500"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -155,9 +155,9 @@
         <!-- LoginUseCase implements Login: realization -->
         <line
           x1="560"
-          y1="572"
+          y1="636"
           x2="560"
-          y2="524"
+          y2="588"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -165,7 +165,7 @@
         />
         <!-- LoginUseCase holds PasswordHasher: use -->
         <path
-          d="M640 600 L670 600 L670 496 L700 496"
+          d="M640 664 L670 664 L670 544 L700 544"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -173,7 +173,7 @@
         />
         <!-- LoginUseCase holds TokenIssuer: use -->
         <path
-          d="M640 656 L900 656"
+          d="M640 720 L900 720"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -181,7 +181,7 @@
         />
         <!-- LoginUseCase holds UserRepository: use -->
         <path
-          d="M340 712 L340 744"
+          d="M340 808 L340 840"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -189,7 +189,7 @@
         />
         <!-- LoginUseCase reads the User that findByUsername() returns: use -->
         <path
-          d="M600 712 L600 916"
+          d="M600 808 L600 1044"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -198,9 +198,9 @@
         <!-- DrizzleUserRepository implements UserRepository: realization -->
         <line
           x1="80"
-          y1="380"
+          y1="412"
           x2="80"
-          y2="744"
+          y2="840"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -211,7 +211,7 @@
           x1="800"
           y1="156"
           x2="800"
-          y2="452"
+          y2="500"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -222,17 +222,17 @@
           x1="1160"
           y1="180"
           x2="1160"
-          y2="600"
+          y2="664"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
           marker-end="url(#flow2login-triangle)"
         />
         <!-- Arrow labels and multiplicities -->
-        <rect x="476" y="386" width="48" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="476" y="434" width="48" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="500"
-          y="395"
+          y="443"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -241,10 +241,10 @@
         >
           login 1
         </text>
-        <rect x="676" y="556" width="54" height="12" rx="2" fill="#efe7f8" />
+        <rect x="676" y="620" width="54" height="12" rx="2" fill="#efe7f8" />
         <text
           x="703"
-          y="565"
+          y="629"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -253,10 +253,10 @@
         >
           hasher 1
         </text>
-        <rect x="840" y="639" width="54" height="12" rx="2" fill="#efe7f8" />
+        <rect x="840" y="703" width="54" height="12" rx="2" fill="#efe7f8" />
         <text
           x="867"
-          y="648"
+          y="712"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -265,10 +265,10 @@
         >
           tokens 1
         </text>
-        <rect x="346" y="726" width="48" height="12" rx="2" fill="#efe7f8" />
+        <rect x="346" y="822" width="48" height="12" rx="2" fill="#efe7f8" />
         <text
           x="370"
-          y="735"
+          y="831"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -277,10 +277,10 @@
         >
           users 1
         </text>
-        <rect x="606" y="890" width="37" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="606" y="1018" width="37" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="624.5"
-          y="899"
+          y="1027"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -314,10 +314,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/
         </text>
-        <rect x="36" y="423" width="232" height="12" rx="2" fill="#efe7f8" />
+        <rect x="36" y="471" width="232" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
-          y="432"
+          y="480"
           fill="#7e22ce"
           font-size="8"
           font-weight="500"
@@ -326,10 +326,10 @@
         >
           LAYER 2 · USE CASES · src/application/
         </text>
-        <rect x="36" y="887" width="197" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="1015" width="197" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="896"
+          y="1024"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -435,7 +435,7 @@
         </text>
         <line x1="900" y1="116" x2="1192" y2="116" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="916" y="132" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - secret: string
+          - jwt: JwtService
         </text>
         <line x1="900" y1="140" x2="1192" y2="140" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="916" y="156" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -449,7 +449,7 @@
           x="48"
           y="240"
           width="340"
-          height="140"
+          height="172"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -464,7 +464,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter»
+          «Adapter» «repository»
         </text>
         <text
           x="218"
@@ -490,24 +490,32 @@
         </text>
         <line x1="48" y1="300" x2="388" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="64" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - db: PgDatabase
+          - db: PersistenceDatabase
         </text>
         <line x1="48" y1="324" x2="388" y2="324" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="64" y="340" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + findByUsername(username: string): Promise&lt;User | null&gt;
+          + findByUsername(username: Username):
         </text>
-        <text x="64" y="356" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + isUsernameTaken(username: string): Promise&lt;boolean&gt;
+        <text x="86" y="356" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;User | null&gt;
         </text>
+
         <text x="64" y="372" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + add(user: User): Promise&lt;void&gt;
+          + isUsernameTaken(username: Username): Promise&lt;boolean&gt;
         </text>
+        <text x="64" y="388" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + add(user: User):
+        </text>
+        <text x="86" y="404" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;void, 'username-taken'&gt;&gt;
+        </text>
+
         <!-- Class: AuthController («controller») -->
         <rect
           x="420"
           y="240"
           width="340"
-          height="140"
+          height="156"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -560,12 +568,16 @@
         <text x="436" y="372" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + signIn(body: LoginDto): Promise&lt;TokenDto&gt;
         </text>
+        <text x="436" y="388" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + me(request: AuthenticatedRequest): CurrentUserDto
+        </text>
+
         <!-- Class: Login («interface» «input port») -->
         <rect
           x="300"
-          y="452"
+          y="500"
           width="340"
-          height="72"
+          height="88"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -573,7 +585,7 @@
         />
         <text
           x="470"
-          y="470"
+          y="518"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -584,7 +596,7 @@
         </text>
         <text
           x="470"
-          y="488"
+          y="536"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -593,14 +605,18 @@
         >
           Login
         </text>
-        <line x1="300" y1="500" x2="640" y2="500" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="316" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute(request: Credentials): Promise&lt;SessionToken&gt;
+        <line x1="300" y1="548" x2="640" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="316" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(request: Credentials):
         </text>
+        <text x="338" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;SessionToken, LoginProblem&gt;&gt;
+        </text>
+
         <!-- Class: PasswordHasher («interface» «port») -->
         <rect
           x="700"
-          y="452"
+          y="500"
           width="340"
           height="88"
           rx="6"
@@ -610,7 +626,7 @@
         />
         <text
           x="870"
-          y="470"
+          y="518"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -621,7 +637,7 @@
         </text>
         <text
           x="870"
-          y="488"
+          y="536"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -630,29 +646,29 @@
         >
           PasswordHasher
         </text>
-        <line x1="700" y1="500" x2="1040" y2="500" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="716" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="700" y1="548" x2="1040" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="716" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + hash(plain: string): Promise&lt;string&gt;
         </text>
-        <text x="716" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="716" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + verify(plain: string, hash: string): Promise&lt;boolean&gt;
         </text>
         <!-- Class: LoginUseCase (focal, «use case») -->
         <rect
           x="300"
-          y="572"
+          y="636"
           width="340"
-          height="140"
+          height="172"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
           stroke-width="1"
         />
-        <rect x="300" y="572" width="340" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="300" y="624" width="340" height="8" fill="rgba(15,111,116,0.10)" />
+        <rect x="300" y="636" width="340" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="300" y="688" width="340" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="470"
-          y="590"
+          y="654"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -663,7 +679,7 @@
         </text>
         <text
           x="470"
-          y="608"
+          y="672"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -674,7 +690,7 @@
         </text>
         <text
           x="470"
-          y="622"
+          y="686"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -683,24 +699,32 @@
         >
           API-FR-01
         </text>
-        <line x1="300" y1="632" x2="640" y2="632" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="316" y="648" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="300" y1="696" x2="640" y2="696" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="316" y="712" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - users: UserRepository
         </text>
-        <text x="316" y="664" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="316" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - hasher: PasswordHasher
         </text>
-        <text x="316" y="680" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="316" y="744" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - tokens: TokenIssuer
         </text>
-        <line x1="300" y1="688" x2="640" y2="688" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="316" y="704" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute(request: Credentials): Promise&lt;SessionToken&gt;
+        <text x="316" y="760" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - dummyHash: Promise&lt;string&gt;
         </text>
+
+        <line x1="300" y1="768" x2="640" y2="768" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="316" y="784" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(request: Credentials):
+        </text>
+        <text x="338" y="800" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;SessionToken, LoginProblem&gt;&gt;
+        </text>
+
         <!-- Class: TokenIssuer («interface» «port») -->
         <rect
           x="900"
-          y="600"
+          y="664"
           width="292"
           height="88"
           rx="6"
@@ -710,7 +734,7 @@
         />
         <text
           x="1046"
-          y="618"
+          y="682"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -721,7 +745,7 @@
         </text>
         <text
           x="1046"
-          y="636"
+          y="700"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -730,19 +754,19 @@
         >
           TokenIssuer
         </text>
-        <line x1="900" y1="648" x2="1192" y2="648" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="916" y="664" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="900" y1="712" x2="1192" y2="712" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="916" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + issue(userId: UserId): SessionToken
         </text>
-        <text x="916" y="680" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="916" y="744" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + verify(token: SessionToken): UserId | null
         </text>
         <!-- Class: UserRepository («interface» «port») -->
         <rect
           x="48"
-          y="744"
+          y="840"
           width="340"
-          height="104"
+          height="136"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -750,18 +774,18 @@
         />
         <text
           x="218"
-          y="762"
+          y="858"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «port»
+          «interface» «port» «repository»
         </text>
         <text
           x="218"
-          y="780"
+          y="876"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -770,22 +794,30 @@
         >
           UserRepository
         </text>
-        <line x1="48" y1="792" x2="388" y2="792" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="64" y="808" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + findByUsername(username: string): Promise&lt;User | null&gt;
+        <line x1="48" y1="888" x2="388" y2="888" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="904" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + findByUsername(username: Username):
         </text>
-        <text x="64" y="824" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + isUsernameTaken(username: string): Promise&lt;boolean&gt;
+        <text x="86" y="920" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;User | null&gt;
         </text>
-        <text x="64" y="840" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + add(user: User): Promise&lt;void&gt;
+
+        <text x="64" y="936" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isUsernameTaken(username: Username): Promise&lt;boolean&gt;
         </text>
+        <text x="64" y="952" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + add(user: User):
+        </text>
+        <text x="86" y="968" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;void, 'username-taken'&gt;&gt;
+        </text>
+
         <!-- Class: User («entity») -->
         <rect
           x="560"
-          y="916"
+          y="1044"
           width="240"
-          height="104"
+          height="128"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -793,7 +825,7 @@
         />
         <text
           x="680"
-          y="934"
+          y="1062"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -804,7 +836,7 @@
         </text>
         <text
           x="680"
-          y="952"
+          y="1080"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -813,26 +845,49 @@
         >
           User
         </text>
-        <line x1="560" y1="964" x2="800" y2="964" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="576" y="980" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + id: UserId
-        </text>
-        <text x="576" y="996" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + username: string
-        </text>
+        <line x1="560" y1="1092" x2="800" y2="1092" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="576"
-          y="1012"
+          y="1108"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + passwordHash: string
+          + id: UserId
         </text>
+        <text
+          x="576"
+          y="1124"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + username: Username
+        </text>
+        <text
+          x="576"
+          y="1140"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + passwordHash: PasswordHash
+        </text>
+        <line x1="560" y1="1148" x2="800" y2="1148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="576"
+          y="1164"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + equals(other: User): boolean
+        </text>
+
         <!-- Footnote -->
         <text
           x="24"
-          y="1068"
+          y="1220"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -842,7 +897,7 @@
         </text>
         <text
           x="24"
-          y="1084"
+          y="1236"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -852,7 +907,7 @@
         </text>
         <text
           x="24"
-          y="1100"
+          y="1252"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -862,7 +917,7 @@
         </text>
         <text
           x="24"
-          y="1116"
+          y="1268"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -872,7 +927,7 @@
         </text>
         <text
           x="24"
-          y="1132"
+          y="1284"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -882,7 +937,7 @@
         </text>
         <text
           x="24"
-          y="1148"
+          y="1300"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -893,15 +948,15 @@
         <!-- Legend -->
         <line
           x1="24"
-          y1="1176"
+          y1="1328"
           x2="1216"
-          y2="1176"
+          y2="1328"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1194"
+          y="1346"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -911,9 +966,9 @@
         </text>
         <line
           x1="24"
-          y1="1212"
+          y1="1364"
           x2="52"
-          y2="1212"
+          y2="1364"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -921,7 +976,7 @@
         />
         <text
           x="60"
-          y="1216"
+          y="1368"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -930,16 +985,16 @@
         </text>
         <line
           x1="128"
-          y1="1212"
+          y1="1364"
           x2="156"
-          y2="1212"
+          y2="1364"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#flow2login-open)"
         />
         <text
           x="164"
-          y="1216"
+          y="1368"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -948,7 +1003,7 @@
         </text>
         <rect
           x="24"
-          y="1232"
+          y="1384"
           width="20"
           height="12"
           rx="2"
@@ -958,7 +1013,7 @@
         />
         <rect
           x="48"
-          y="1232"
+          y="1384"
           width="20"
           height="12"
           rx="2"
@@ -968,7 +1023,7 @@
         />
         <rect
           x="72"
-          y="1232"
+          y="1384"
           width="20"
           height="12"
           rx="2"
@@ -978,7 +1033,7 @@
         />
         <rect
           x="96"
-          y="1232"
+          y="1384"
           width="20"
           height="12"
           rx="2"
@@ -988,7 +1043,7 @@
         />
         <text
           x="128"
-          y="1241"
+          y="1393"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -997,7 +1052,7 @@
         </text>
         <rect
           x="352"
-          y="1232"
+          y="1384"
           width="28"
           height="12"
           rx="2"
@@ -1007,7 +1062,7 @@
         />
         <text
           x="388"
-          y="1241"
+          y="1393"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

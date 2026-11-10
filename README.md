@@ -57,7 +57,8 @@ The table shows the design. Most of these pieces are not code yet; their code st
   [src/application/ports/clock.ts](src/application/ports/clock.ts). The domain never imports a
   port: a use case reads the instant and passes it to the domain as a parameter.
 - **Adapters live in layers 3 and 4.** [SystemClock](src/infrastructure/clock/system-clock.ts)
-  implements `Clock`. The planned Drizzle repositories implement the repository ports.
+  implements `Clock`. The Drizzle repositories in `src/adapters/persistence` implement the
+  repository ports of users and progress; the level repository is planned.
 - **`AppModule` is the composition root.** [src/infrastructure/app.module.ts](src/infrastructure/app.module.ts)
   binds each port to one adapter. `src/main.ts` only starts the app.
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
@@ -98,8 +99,8 @@ and views 1.2 and 2.3 of [docs/architecture/classes.md](docs/architecture/classe
 
 ## Design Patterns
 
-The patterns come from the backend class diagram. Most classes are not built yet, so each link
-points to the design doc; links move to the source files as code lands.
+The patterns come from the backend class diagram. The level validators and `TimingAspect` are
+not built yet, so each link points to the design doc; links move to the source files as code lands.
 
 | Pattern                            | Classes                                                                           | Quality it protects                                 | Reason                                                                                                 | Link                                                                                                                                                 |
 | ---------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |

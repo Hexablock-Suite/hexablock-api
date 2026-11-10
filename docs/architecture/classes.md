@@ -22,7 +22,8 @@ The file is generated from the code at `94b912d` plus the views of this page. A 
 - The colored zone is the Clean layer, with the colors of [layers.md](layers.md): yellow for layer 1, purple for layer 2, light blue for layer 3 and dark blue for layer 4.
 - One view can show several layers. The zones are bands, with the outer layer at the top and the inner layer at the bottom, so every dependency between layers points down.
 - A dashed frame groups the classes of one GoF pattern or one group. Its label names the source, for example `STRATEGY · §3.3 · DS-6`. A frame is not a class. No line starts or ends on a frame. When two classes of different groups depend on each other, the line joins those two classes. A line from one frame to another frame would claim that every class of the first group uses every class of the second group, and that is usually false. The professor asked this about a frame-to-frame arrow in the session of 2026-11-03: «todas esas usan los tres bloques de abajo, a lo mejor la respuesta es no».
-- A stereotype such as `«Strategy»` marks the role of one class in that pattern. `«port»` marks an interface that an outer layer implements.
+- A stereotype such as `«Strategy»` marks the role of one class in that pattern. `«port»` marks an interface that an outer layer implements. `«repository»` marks a repository: the port in layer 2 and its adapter in layer 3. A domain class carries its tactical stereotype: `«entity»`, `«aggregate root»` or `«value object»`.
+- An underlined member is static, as in UML.
 - The dashed box at the top right of a class holds its type parameters. This is the UML template notation that §4.1 asks for.
 - A `«bind»` label on a realization or an inheritance line names the type that each parameter takes, for example `«bind» TSection → FitSection`.
 - The teal class is the focal class of the view.
@@ -32,7 +33,7 @@ The file is generated from the code at `94b912d` plus the views of this page. A 
 - A diamond marks an attribute only where it makes a GoF pattern visible, and only between two classes of one layer: hollow (aggregation) when the value comes from outside, filled (composition) when the class creates it. Example: `LevelValidators` holds its `LevelValidator` strategies (a Strategy registry). The other end names the attribute and its multiplicity, even when it is 1. Any other attribute is a use arrow with the same role and multiplicity, a domain relation included: `PlayerProgress` keeps its `LevelResult` values, and `LevelDefinition` holds its section. The attribute already shows in the class box, so a diamond adds nothing there. In the class of 2026-11-02 the professor kept the diamond for one reason: «Aquí sí porque quiero hacer visible el patrón estratégico».
 - A solid line with an open arrowhead is a use: the class depends on the other class. It points from the class that holds or calls to the class it needs. When the other class is an attribute with no pattern to show, or an attribute across layers, the label names the attribute and its multiplicity. A port counts as across layers: it lives in layer 2, and its adapter lives in layer 3 or 4. When the other class is only a parameter, a return value, a local variable or a `new`, the label is a verb. A link that is none of these, such as a guard that a decorator applies or a class that a module only names in its metadata, gets no line; the box or the note names it. This follows the class of 2026-11-02 (decision 13), which replaces the diamond rule of the board of the class of 2026-10-02.
 - The legend of each view lists only the line kinds that the view draws.
-- Every class is planned, except `Clock`, `SystemClock` and `AppModule`. Today `src/` holds the health endpoint, the `Clock` port and its adapter, and the database connection.
+- The views do not mark which classes are planned. Today `src/` holds the user and progress classes of the domain, the account and progress use cases with their ports, their adapters, `LoggingAspect` and `AppModule`. The level classes, the leaderboard classes and `TimingAspect` are planned.
 
 ## Part 1: the domain
 
@@ -40,11 +41,15 @@ The file is generated from the code at `94b912d` plus the views of this page. A 
 
 ### View 1.1: progress and level results
 
-![Progress: the PlayerProgress aggregate root per userId and gameId, which keeps its LevelResult values, and the LeaderboardEntry read model](classes/views/domain-1-progress.png)
+![Progress: the PlayerProgress aggregate root per userId and gameId, which holds a UserId and keeps its LevelResult values, the User entity, and the LeaderboardEntry read model](classes/views/domain-1-progress.png)
 
 ### View 1.2: the level schema
 
 ![Level schema: the generic LevelDefinition with a common part and a typed section, and the LevelValidator strategies registered by gameId in LevelValidators](classes/views/domain-2-levels.png)
+
+### View 1.3: the user and its credential values
+
+![User: the User entity holds a UserId, a Username and a PasswordHash value object; Password is the plain text that a new user chooses](classes/views/domain-3-user.png)
 
 ## Part 2: the use cases
 
@@ -52,11 +57,11 @@ The file is generated from the code at `94b912d` plus the views of this page. A 
 
 ### View 2.1: the use case contract and its aspects
 
-![The use case contract: every input port binds UseCase, and the aspect decorators in layer 2 wrap it for logging and timing](classes/views/uc-1-contract.png)
+![The use case contract: every input port binds UseCase, the aspect decorators in layer 2 wrap it for logging and timing, and LoggingAspect holds the Logger port](classes/views/uc-1-contract.png)
 
 ### View 2.2: progress and leaderboard
 
-![Progress and leaderboard: SyncProgressUseCase and GetLeaderboardUseCase over the ProgressRepository, Clock and LeaderboardReader ports](classes/views/uc-2-progress.png)
+![Progress and leaderboard: SyncProgressUseCase, GetProgressUseCase and GetLeaderboardUseCase over the ProgressRepository, Clock and LeaderboardReader ports](classes/views/uc-2-progress.png)
 
 ### View 2.3: levels
 
@@ -64,7 +69,7 @@ The file is generated from the code at `94b912d` plus the views of this page. A 
 
 ### View 2.4: account
 
-![Account: RegisterUseCase and LoginUseCase over the UserRepository, PasswordHasher and TokenIssuer ports, and AuthenticateTokenUseCase, which verifies a token through TokenIssuer for the JWT guard](classes/views/uc-4-account.png)
+![Account: RegisterUseCase and LoginUseCase over the UserRepository, PasswordHasher, UserIdGenerator and TokenIssuer ports, and AuthenticateTokenUseCase, which verifies a token through TokenIssuer for the JWT guard](classes/views/uc-4-account.png)
 
 ## Part 3: adapters and drivers
 
@@ -84,7 +89,7 @@ Layer 3, `src/adapters/`, and layer 4, `src/infrastructure/`. Adapters never imp
 
 ### View 3.4: wiring
 
-![Wiring: AppModule binds the Clock, PasswordHasher and TokenIssuer ports to one driver each](classes/views/ad-4-wiring.png)
+![Wiring: AppModule lists every binding, and the view details the drivers of the Clock, PasswordHasher and TokenIssuer ports](classes/views/ad-4-wiring.png)
 
 ### View 3.5: HTTP mappers
 
@@ -173,7 +178,7 @@ Plain classes: `LevelValidators`, the row mappers, the HTTP mappers, `Leaderboar
 9. **Port names in the language of the game.** A port says what the use case asks for, not how the data travels. For example, `LeaderboardReader`, not a name that says SQL or HTTP. A name that says how the data travels couples the use case to that technology, as the class of 2026-10-30 explained.
 10. **Aspects in layer 2, behind a `Logger` port.** In the session of 2026-11-06 the professor answered Q12: the aspects talk to the use case, so they belong in the application layer, built as decorators with one interface common to the use cases, without libraries. `UseCaseAspect` and `LoggingAspect` live in `src/application/aspects/`. `LoggingAspect` writes to the `Logger` port in `src/application/ports/logger.ts`, so `src/application` stays free of Nest. The port takes a typed entry (the use case name, the outcome, and the `kind` of a failure or the name, the string `code` and the stack frames of a thrown error), never a prebuilt `message: string`. `NestLogger` in `src/infrastructure/logging/` implements the port and writes the text. A failure logs only its `kind`, because the rest of a failure can hold values that the client sent. A thrown error never logs its message, for the same reason: the frames leave out the first line of the stack, which repeats the message, and a thrown value that is not an `Error` logs only its type ([#67](https://github.com/Hexablock-Suite/hexablock-api/issues/67)). The class of 2026-11-02 said that the message «no debería estar allí … En la implementación de este señor, en un adaptador secundario».
 11. **Expected failures as values.** A use case never throws a domain error to the HTTP layer. `UpdateLevels` returns `Result<void, LevelProblem[]>`. `LevelsController` turns a failed result into the error body of API-FR-06. `HttpErrorFilter` handles only unexpected errors, with the same body shape.
-12. **HTTP mappers.** `ProgressDtoMapper` and `LevelDtoMapper` in `src/adapters/http` translate between DTOs and entities, as the row mappers do for persistence. A controller holds no translation code. `SyncProgress` returns `PlayerProgress`, and `ProgressDtoMapper` turns it into `ProgressDto`.
+12. **HTTP mappers.** `ProgressDtoMapper` and `LevelDtoMapper` in `src/adapters/http` translate between DTOs and entities, as the row mappers do for persistence. A controller holds no translation code. `SyncProgress` returns a `Result` with the `PlayerProgress`, and `ProgressDtoMapper` turns it into `ProgressDto`.
 13. **Use arrows for attributes, diamonds only for a visible pattern.** In the class of 2026-11-02 the professor asked for explicit dependencies (use, extend, implement) between layers, and for a composition or aggregation diamond only where it is needed, for example an entity that holds a Strategy. He added that the rule is for the relations between layers. So an attribute that crosses layers draws a use arrow with the attribute name and its multiplicity: a controller and its input ports, a use case and its ports (each port has its adapter in layer 3 or 4), `UpdateLevelsUseCase` and `LevelValidators` (layers 2 and 1), and, before Q12, the `UseCaseAspect` decorator and its inner `UseCase`. Q12 put the aspects in layer 2, so that holding now sits inside one layer; view 2.1 keeps its use arrow until the team decides whether the Decorator needs a diamond to be visible. Inside one layer, a diamond appears only where it makes a GoF pattern visible: `LevelValidators` and its `LevelValidator` strategies (a Strategy registry). His reason was «Aquí sí porque quiero hacer visible el patrón estratégico», and on 2026-11-03 he said «vas abusando de la anotación». So a domain relation is a use arrow with the attribute name and its multiplicity, because the attribute already shows in the class box: `PlayerProgress` and its `GameId` and `LevelResult` values (an aggregate and its parts), `LeaderboardEntry` and its `LevelResult`, and `LevelDefinition` and its section (an entity and its value object). The DDD class may ask for a composition between an aggregate and its parts; the team checks this rule again then.
 14. **`AuthenticateToken` input port for the JWT guard (assumption for team review).** `JwtAuthGuard` sits in `src/adapters/http` and holds the `AuthenticateToken` input port, as a controller does. It never calls `TokenIssuer`. `AuthenticateTokenUseCase` verifies the token through `TokenIssuer.verify()`, which returns the `UserId` or `null`, and returns `Result<UserId, TokenProblem>`. The guard turns a failed `Result` into a 401 (API-FR-01). The docs named two options: a separate `TokenVerifier` port or an `AuthenticateToken` input port. This draft takes the input port, because a class on the controller side talks to the application only through input ports. The cost: `TokenIssuer` now issues and verifies tokens, so its name is narrower than its job. The team can rename it or split out a `TokenVerifier` port behind the same use case.
 

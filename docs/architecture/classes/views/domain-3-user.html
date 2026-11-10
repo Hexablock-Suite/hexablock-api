@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API user entity · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 1 · View 3 of 3</p>
+      <h1>User: one entity and its credential values</h1>
+      <svg
+        viewBox="0 0 1040 662"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="domain3user-title domain3user-desc"
+      >
+        <title id="domain3user-title">HexaBlock API user entity · UML class diagram</title>
+        <desc id="domain3user-desc">
+          Class diagram of layer 1 showing the User entity, which holds a UserId, a Username and a
+          PasswordHash value object, and the Password value object, the plain text that a new user
+          chooses and that the API never stores.
+        </desc>
+        <defs>
+          <marker
+            id="domain3user-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="domain3user-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="460"
+          rx="8"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <!-- Relationships (drawn before boxes) -->
+        <!-- User holds id: UserId: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <path
+          d="M400 152 L328 152"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- User holds username: Username: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <path
+          d="M640 152 L712 152"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- User holds passwordHash: PasswordHash: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <path
+          d="M600 224 L600 356 L712 356"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="348" y="134" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="364"
+          y="143"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          id 1
+        </text>
+        <rect x="646" y="134" width="62" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="677"
+          y="143"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          username 1
+        </text>
+        <rect x="610" y="338" width="88" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="654"
+          y="347"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          passwordHash 1
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="44"
+          fill="#b45309"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 1 · ENTITIES · src/domain/
+        </text>
+        <!-- Class: User (focal, «entity») -->
+        <rect
+          x="400"
+          y="96"
+          width="240"
+          height="128"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="400" y="96" width="240" height="48" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="400" y="136" width="240" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="520"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «entity»
+        </text>
+        <text
+          x="520"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          User
+        </text>
+        <line x1="400" y1="144" x2="640" y2="144" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + id: UserId
+        </text>
+        <text x="416" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + username: Username
+        </text>
+        <text x="416" y="192" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + passwordHash: PasswordHash
+        </text>
+        <line x1="400" y1="200" x2="640" y2="200" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: User): boolean
+        </text>
+        <!-- Class: UserId («value object») -->
+        <rect
+          x="64"
+          y="96"
+          width="264"
+          height="112"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="196"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="196"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          UserId
+        </text>
+        <line x1="64" y1="144" x2="328" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: string
+        </text>
+        <line x1="64" y1="168" x2="328" y2="168" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="80"
+          y="184"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + from(value: string): UserId
+        </text>
+        <text x="80" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: UserId): boolean
+        </text>
+        <!-- Class: Username («value object») -->
+        <rect
+          x="712"
+          y="96"
+          width="288"
+          height="144"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="856"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="856"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Username
+        </text>
+        <line x1="712" y1="144" x2="1000" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="728" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: string
+        </text>
+        <text x="728" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + key: string
+        </text>
+        <line x1="712" y1="184" x2="1000" y2="184" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="728"
+          y="200"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + create(raw: string):
+        </text>
+        <text
+          x="750"
+          y="216"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;Username, UsernameProblem&gt;
+        </text>
+        <text x="728" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: Username): boolean
+        </text>
+        <!-- Class: PasswordHash («value object») -->
+        <rect
+          x="712"
+          y="300"
+          width="288"
+          height="112"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="856"
+          y="318"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="856"
+          y="336"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PasswordHash
+        </text>
+        <line x1="712" y1="348" x2="1000" y2="348" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="728" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: string
+        </text>
+        <line x1="712" y1="372" x2="1000" y2="372" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="728"
+          y="388"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + from(value: string): PasswordHash
+        </text>
+        <text x="728" y="404" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: PasswordHash): boolean
+        </text>
+        <!-- Class: Password («value object») -->
+        <rect
+          x="64"
+          y="300"
+          width="264"
+          height="160"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="196"
+          y="318"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="196"
+          y="336"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Password
+        </text>
+        <line x1="64" y1="348" x2="328" y2="348" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: string
+        </text>
+        <line x1="64" y1="372" x2="328" y2="372" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="80"
+          y="388"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + create(raw: string):
+        </text>
+        <text
+          x="102"
+          y="404"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;Password, PasswordProblem&gt;
+        </text>
+        <text
+          x="80"
+          y="420"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + isTooLong(raw: string): boolean
+        </text>
+        <text
+          x="80"
+          y="436"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          - codePoints(raw: string): number
+        </text>
+        <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: Password): boolean
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="508"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          User is an entity: two users are the same user when they have the same UserId. Its three
+          attributes are value objects, equal by value.
+        </text>
+        <text
+          x="24"
+          y="524"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Username.key is the name in lower case; two names with the same key are the same name for
+          uniqueness. Username and Password check their own
+        </text>
+        <text
+          x="24"
+          y="540"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          limits in create(). Password is the plain text that a new user chooses. RegisterUseCase
+          creates it and hashes it through PasswordHasher
+        </text>
+        <text
+          x="24"
+          y="556"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          (Part 2, view 4), and User keeps only the PasswordHash. Sign-in asks Password.isTooLong()
+          before it hashes a text.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="580" x2="1016" y2="580" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="598"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="616"
+          x2="52"
+          y2="616"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <text
+          x="60"
+          y="620"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · attribute, parameter, return, local or new
+        </text>
+        <text
+          x="300"
+          y="620"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Underlined member · static
+        </text>
+        <rect
+          x="24"
+          y="636"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="56"
+          y="645"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zone · Clean layer
+        </text>
+        <rect
+          x="166"
+          y="636"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="202"
+          y="645"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
