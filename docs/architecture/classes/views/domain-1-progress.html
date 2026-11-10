@@ -60,7 +60,7 @@
   </head>
   <body>
     <div class="frame">
-      <p class="eyebrow">Class diagram · Part 1 · View 1 of 3</p>
+      <p class="eyebrow">Class diagram · Part 1 · View 1 of 4</p>
       <h1>Progress: one aggregate per user and gameId, with its level results</h1>
       <svg
         viewBox="0 0 1040 814"
@@ -74,9 +74,9 @@
         <desc id="domain1progress-desc">
           Class diagram of layer 1 showing PlayerProgress, the aggregate root keyed by userId and
           gameId, which refers to User by userId, holds a GameId, keeps its high score as a Score
-          value object and keeps its LevelResult values with levelId, stars, moves and elapsedMs and
-          the isBetterThan order of DS-4, and the LeaderboardEntry read model that holds a
-          LevelResult.
+          value object and keeps its LevelResult values, each one a LevelId, a Stars, a Moves and an
+          ElapsedTime value object with the isBetterThan order of DS-4, and the LeaderboardEntry
+          read model that holds a LevelResult. View 4 details the four value objects.
         </desc>
         <defs>
           <marker
@@ -108,7 +108,7 @@
           x="24"
           y="24"
           width="992"
-          height="612"
+          height="620"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -119,7 +119,7 @@
           x="376"
           y="64"
           width="328"
-          height="564"
+          height="572"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -480,7 +480,7 @@
           x="400"
           y="424"
           width="280"
-          height="196"
+          height="204"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -521,22 +521,21 @@
         </text>
         <line x1="400" y1="484" x2="680" y2="484" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="416" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + levelId: string
+          + levelId: LevelId
         </text>
-        <line x1="400" y1="508" x2="680" y2="508" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="416" y="524" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + stars: number
+        <text x="416" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + stars: Stars
         </text>
-        <text x="416" y="540" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + moves: number
+        <text x="416" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + moves: Moves
         </text>
-        <text x="416" y="556" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + elapsedMs: number
+        <text x="416" y="548" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + elapsedTime: ElapsedTime
         </text>
-        <line x1="400" y1="564" x2="680" y2="564" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="400" y1="556" x2="680" y2="556" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="416"
-          y="580"
+          y="572"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -544,10 +543,13 @@
         >
           + of(values: LevelResultValues): LevelResult
         </text>
-        <text x="416" y="596" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="588" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: LevelResult): boolean
         </text>
-        <text x="416" y="612" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="604" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isForSameLevelAs(other: LevelResult): boolean
+        </text>
+        <text x="416" y="620" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isBetterThan(other: LevelResult): boolean
         </text>
         <!-- Class: GameId («value object») -->
@@ -804,7 +806,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           PlayerProgress refers to User by id: it holds a UserId, not a User. This is an assumption
-          for team review. View 3 details the values of User.
+          for team review. View 3 details the values of User, and view 4 the values of LevelResult.
         </text>
         <!-- Legend -->
         <line x1="24" y1="732" x2="1016" y2="732" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

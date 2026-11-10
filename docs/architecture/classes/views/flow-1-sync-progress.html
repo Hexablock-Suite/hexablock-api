@@ -1015,7 +1015,7 @@
           x="396"
           y="1208"
           width="284"
-          height="188"
+          height="204"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1062,7 +1062,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + levelId: string
+          + levelId: LevelId
         </text>
         <text
           x="412"
@@ -1071,7 +1071,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + stars: number
+          + stars: Stars
         </text>
         <text
           x="412"
@@ -1080,7 +1080,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + moves: number
+          + moves: Moves
         </text>
         <text
           x="412"
@@ -1089,7 +1089,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + elapsedMs: number
+          + elapsedTime: ElapsedTime
         </text>
         <line x1="396" y1="1340" x2="680" y2="1340" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -1114,6 +1114,15 @@
         <text
           x="412"
           y="1388"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + isForSameLevelAs(other: LevelResult): boolean
+        </text>
+        <text
+          x="412"
+          y="1404"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
