@@ -170,8 +170,8 @@ describe('DrizzleProgressRepository', () => {
     const sync = new SyncProgressUseCase(repository, new FixedClock(AT));
     const syncRequest = (score: number) => ({
       userId: ADA,
-      gameId: FIT.value,
-      score,
+      gameId: FIT,
+      score: Score.of(score),
       results: [],
     });
 

@@ -153,7 +153,8 @@ belong there, built as decorators with one interface common to the use cases, wi
 [src/infrastructure/logging](src/infrastructure/logging) implements it and writes the text.
 `AppModule` wraps `SyncProgressUseCase` in `LoggingAspect`. It logs the use case name, the
 outcome and, for a failure, only its `kind`, so a value that the client sent never reaches the
-log. `TimingAspect` is not built yet.
+log. A request value that breaks its rule stops in `ProgressDtoMapper`, before the use case, so
+the aspect writes no entry for that request. `TimingAspect` is not built yet.
 
 ## Getting Started
 

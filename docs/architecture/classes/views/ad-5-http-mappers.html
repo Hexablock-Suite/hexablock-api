@@ -172,7 +172,7 @@
         <!-- ProgressDtoMapper takes PlayerProgress as a parameter: use -->
         <line
           x1="144"
-          y1="296"
+          y1="328"
           x2="144"
           y2="488"
           stroke="#5b6873"
@@ -336,7 +336,7 @@
           x="64"
           y="176"
           width="376"
-          height="120"
+          height="152"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -385,6 +385,12 @@
           Result&lt;SyncProgressRequest, string[]&gt;
         </text>
         <text x="80" y="284" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toGetRequest(gameId: string, userId: UserId):
+        </text>
+        <text x="102" y="300" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Result&lt;GetProgressRequest, string[]&gt;
+        </text>
+        <text x="80" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDto(progress: PlayerProgress): ProgressDto
         </text>
         <!-- Class: LevelDtoMapper («mapper») -->
@@ -549,8 +555,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          SyncProgress returns PlayerProgress, and ProgressDtoMapper turns it into ProgressDto.
-          LevelDtoMapper keeps the section as it arrives; the validator of the gameId
+          ProgressDtoMapper builds the domain values of a request and turns PlayerProgress into
+          ProgressDto. LevelDtoMapper keeps the section as it arrives; the validator of the gameId
         </text>
         <text
           x="24"

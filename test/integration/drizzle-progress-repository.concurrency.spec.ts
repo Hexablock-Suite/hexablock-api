@@ -11,6 +11,9 @@ import {
   SyncProgressUseCase,
   type SyncProgressRequest,
 } from '../../src/application/progress/sync-progress.use-case.js';
+import { GameId } from '../../src/domain/progress/game-id.js';
+import { LevelResult } from '../../src/domain/progress/level-result.js';
+import { Score } from '../../src/domain/progress/score.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
 
@@ -93,9 +96,11 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
   ): SyncProgressRequest {
     return {
       userId: UserId.from(userId),
-      gameId,
-      ...(score === undefined ? {} : { score }),
-      results: levels.map((n) => ({ levelId: `l${n}`, stars: 1, moves: n, elapsedMs: n })),
+      gameId: GameId.of(gameId),
+      ...(score === undefined ? {} : { score: Score.of(score) }),
+      results: levels.map((n) =>
+        LevelResult.of({ levelId: `l${n}`, stars: 1, moves: n, elapsedMs: n }),
+      ),
     };
   }
 
@@ -258,16 +263,13 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     await expect(throwingClock.execute(syncRequest(player, 999, [9]))).rejects.toThrow('boom');
     expect(await snapshot(player)).toBe(before);
 
-    expect((await syncWith().execute(syncRequest(player, -1, [9]))).ok).toBe(false);
-    expect(await snapshot(player)).toBe(before);
-
-    const badLevel = await syncWith().execute({
-      userId: UserId.from(player),
-      gameId: 'fit',
-      score: 5,
-      results: [{ levelId: 'x', stars: -3, moves: 1, elapsedMs: 1 }],
+    // The request types forbid this score. The aggregate rejects it under
+    // the lock, and the use case answers a failed Result.
+    const badScore = await syncWith().execute({
+      ...syncRequest(player, undefined, [9]),
+      score: 999 as unknown as Score,
     });
-    expect(badLevel.ok).toBe(false);
+    expect(badScore.ok).toBe(false);
     expect(await snapshot(player)).toBe(before);
 
     // The foreign key to users.id rejects a user that does not exist.

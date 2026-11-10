@@ -22,7 +22,7 @@ describe('GetProgressUseCase (API-FR-02)', () => {
     const stored = PlayerProgress.start(ADA, GameId.of('hexa-lines'), AT);
     await progress.save(stored);
 
-    const result = await getProgress.execute({ userId: ADA, gameId: 'hexa-lines' });
+    const result = await getProgress.execute({ userId: ADA, gameId: GameId.of('hexa-lines') });
 
     expect(result).toEqual({ ok: true, value: stored });
   });
@@ -30,20 +30,8 @@ describe('GetProgressUseCase (API-FR-02)', () => {
   it('should_fail_with_progress_not_found_when_only_another_user_has_progress_for_game', async () => {
     await progress.save(PlayerProgress.start(GRACE, GameId.of('hexa-lines'), AT));
 
-    const result = await getProgress.execute({ userId: ADA, gameId: 'hexa-lines' });
+    const result = await getProgress.execute({ userId: ADA, gameId: GameId.of('hexa-lines') });
 
     expect(result).toEqual({ ok: false, error: { kind: 'progress-not-found' } });
-  });
-
-  it('should_fail_with_invalid_progress_when_game_id_is_not_a_slug', async () => {
-    const result = await getProgress.execute({ userId: ADA, gameId: 'Hexa Lines' });
-
-    expect(result).toEqual({
-      ok: false,
-      error: {
-        kind: 'invalid-progress',
-        problems: ['gameId must be a lowercase slug, got "Hexa Lines".'],
-      },
-    });
   });
 });

@@ -207,6 +207,77 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
     expect((await storedRows(userId)).map((row) => row.highScore)).toEqual([0]);
   });
 
+  it('should_return_bad_request_error_body_and_save_nothing_when_a_level_result_breaks_its_rule', async () => {
+    const { token, userId } = await signIn('ada');
+
+    const response = await sync(token, {
+      gameId: 'hexa-fit',
+      score: 120,
+      results: [FIT_LEVEL, { ...FIT_LEVEL, levelId: 'fit-02', stars: -2 }],
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['stars must be a non-negative integer, got -2.'],
+      path: '/progress',
+    });
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
+  // The checks run in one order: the game id, then the results, then the
+  // score. The answer names only the first broken rule.
+  it('should_name_only_the_first_broken_rule_when_several_request_values_break_their_rules', async () => {
+    const { token, userId } = await signIn('ada');
+    const badGame = { gameId: 'Hexa Lines' };
+    const badLevel = { results: [{ ...FIT_LEVEL, stars: -2 }] };
+    const badScore = { score: -1 };
+    const gameProblem = 'gameId must be a lowercase slug, got "Hexa Lines".';
+    const levelProblem = 'stars must be a non-negative integer, got -2.';
+
+    for (const [body, problem] of [
+      [{ ...badGame, ...badLevel }, gameProblem],
+      [{ ...badGame, ...badScore }, gameProblem],
+      [{ gameId: 'hexa-fit', ...badLevel, ...badScore }, levelProblem],
+      [{ ...badGame, ...badLevel, ...badScore }, gameProblem],
+    ] as const) {
+      const response = await sync(token, body);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Request validation failed',
+        details: [problem],
+        path: '/progress',
+      });
+    }
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
+  // The mapper of the border builds the domain values. A value that breaks
+  // its rule stops there, so the request reaches no repository method.
+  it('should_call_no_repository_method_when_a_request_value_breaks_its_rule', async () => {
+    const { token } = await signIn('ada');
+    const update = vi.spyOn(DrizzleProgressRepository.prototype, 'update');
+    const find = vi.spyOn(DrizzleProgressRepository.prototype, 'find');
+
+    const responses = [
+      await sync(token, { gameId: 'Hexa Lines', score: 120 }),
+      await sync(token, { gameId: 'hexa-fit', results: [{ ...FIT_LEVEL, stars: -2 }] }),
+      await sync(token, { gameId: 'hexa-lines', score: -1 }),
+      await read(token, 'Hexa%20Lines'),
+    ];
+    const calls = update.mock.calls.length + find.mock.calls.length;
+    update.mockRestore();
+    find.mockRestore();
+
+    expect(responses.map((response) => response.status)).toEqual([400, 400, 400, 400]);
+    expect(calls).toBe(0);
+  });
+
   // The DTO declares score as nullable: null means no score in this sync.
   it('should_save_entry_without_high_score_when_score_is_null', async () => {
     const { token, userId } = await signIn('ada');

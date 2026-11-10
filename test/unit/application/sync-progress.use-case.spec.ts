@@ -4,7 +4,7 @@ import {
   SyncProgressUseCase,
 } from '../../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelResult } from '../../../src/domain/progress/level-result.js';
+import { LevelResult, type LevelResultValues } from '../../../src/domain/progress/level-result.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { FixedClock } from '../../support/fixed-clock.js';
@@ -16,8 +16,19 @@ const AT = new Date('2026-11-06T10:00:00.000Z');
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 const LATER = new Date(AT.getTime() + FIVE_MINUTES_MS);
 
-function syncRequest(overrides: Partial<SyncProgressRequest> = {}): SyncProgressRequest {
-  return { userId: ADA, gameId: 'hexa-lines', score: 120, results: [], ...overrides };
+// Builds the request as the mapper of the border does: the use case gets
+// domain values. A call with no score key sends a score of 120.
+function syncRequest(
+  values: { gameId?: string; score?: number; results?: LevelResultValues[] } = {},
+): SyncProgressRequest {
+  const { gameId = 'hexa-lines', results = [] } = values;
+  const score = 'score' in values ? values.score : 120;
+  return {
+    userId: ADA,
+    gameId: GameId.of(gameId),
+    score: score === undefined ? undefined : Score.of(score),
+    results: results.map((result) => LevelResult.of(result)),
+  };
 }
 
 // Wraps a repository. Each call of a method first awaits `before`, which
@@ -149,36 +160,6 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(stored[1]).toEqual(stored[0]);
   });
 
-  it('should_fail_with_invalid_progress_and_save_nothing_when_game_id_is_not_a_slug', async () => {
-    const result = await sync.execute(syncRequest({ gameId: 'Hexa Lines' }));
-
-    expect(result).toEqual({
-      ok: false,
-      error: {
-        kind: 'invalid-progress',
-        problems: ['gameId must be a lowercase slug, got "Hexa Lines".'],
-      },
-    });
-  });
-
-  it('should_fail_with_invalid_progress_and_keep_stored_progress_when_score_is_negative', async () => {
-    await sync.execute(syncRequest({ score: 120 }));
-    clock.advanceBy(FIVE_MINUTES_MS);
-
-    const result = await sync.execute(syncRequest({ score: -1 }));
-
-    expect(result).toEqual({
-      ok: false,
-      error: {
-        kind: 'invalid-progress',
-        problems: ['score must be a non-negative integer, got -1.'],
-      },
-    });
-    const stored = await progress.find(ADA, GameId.of('hexa-lines'));
-    expect(stored?.highScore?.equals(Score.of(120))).toBe(true);
-    expect(stored?.updatedAt).toEqual(AT);
-  });
-
   // Two overlapping syncs run one after the other. The domain keeps the
   // highest score (API-FR-02, DS-12). The sync that runs last answers the
   // stored progress.
@@ -253,28 +234,6 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(result.ok && result.value).toEqual(stored);
   });
 
-  // The use case checks the gameId and each LevelResult before it calls
-  // the repository.
-  it('should_call_no_repository_method_when_request_breaks_a_value_rule', async () => {
-    const calls: string[] = [];
-    const recorded = new SyncProgressUseCase(
-      intercepted(progress, (method) => {
-        calls.push(method);
-        return Promise.resolve();
-      }),
-      clock,
-    );
-
-    const badGame = await recorded.execute(syncRequest({ gameId: 'Hexa Lines' }));
-    const badLevel = await recorded.execute(
-      syncRequest({ results: [{ levelId: 'fit-01', stars: -2, moves: 12, elapsedMs: 45000 }] }),
-    );
-
-    expect(badGame.ok).toBe(false);
-    expect(badLevel.ok).toBe(false);
-    expect(calls).toEqual([]);
-  });
-
   // A broken Clock is a fault of the server, not of the request (decision 11).
   // The use case throws, so the client gets a 500, not a 400.
   it('should_reject_and_save_nothing_when_clock_returns_an_invalid_date', async () => {
@@ -295,21 +254,23 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(stored?.results).toEqual([]);
   });
 
-  it('should_fail_with_invalid_progress_and_save_nothing_when_level_result_breaks_a_rule', async () => {
-    const result = await sync.execute(
-      syncRequest({
-        gameId: 'hexa-fit',
-        results: [{ levelId: 'fit-01', stars: -2, moves: 12, elapsedMs: 45000 }],
-      }),
-    );
+  // The request types forbid this value. The aggregate still guards its
+  // rule, and the broken rule comes back as a failed Result (decision 11).
+  it('should_fail_with_invalid_progress_and_keep_stored_progress_when_aggregate_rejects_a_request_value', async () => {
+    await sync.execute(syncRequest({ score: 120 }));
+    clock.advanceBy(FIVE_MINUTES_MS);
+
+    const result = await sync.execute({
+      ...syncRequest(),
+      score: 500 as unknown as Score,
+    });
 
     expect(result).toEqual({
       ok: false,
-      error: {
-        kind: 'invalid-progress',
-        problems: ['stars must be a non-negative integer, got -2.'],
-      },
+      error: { kind: 'invalid-progress', problems: ['A high score must be a Score.'] },
     });
-    expect(await progress.find(ADA, GameId.of('hexa-fit'))).toBeNull();
+    const stored = await progress.find(ADA, GameId.of('hexa-lines'));
+    expect(stored?.highScore?.equals(Score.of(120))).toBe(true);
+    expect(stored?.updatedAt).toEqual(AT);
   });
 });
