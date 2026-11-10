@@ -1,4 +1,5 @@
 import type { Result } from '../../../src/domain/shared/result.js';
+import * as passwordModule from '../../../src/domain/user/password.js';
 import { PASSWORD_LENGTH, Password } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
@@ -70,6 +71,20 @@ describe('Password', () => {
 
       expect(result.ok && result.value.value).toBe(raw);
     }
+  });
+
+  // Sign-in checks a text that is not a Password yet, so the operation takes the raw text.
+  it('should_tell_that_text_is_too_long_when_it_has_more_than_128_code_points', () => {
+    for (const raw of ['x'.repeat(129), EMOJI.repeat(129)]) {
+      expect(Password.isTooLong(raw)).toBe(true);
+    }
+    for (const raw of ['', '1234567', 'x'.repeat(128), EMOJI.repeat(128)]) {
+      expect(Password.isTooLong(raw)).toBe(false);
+    }
+  });
+
+  it('should_keep_the_length_count_inside_password_when_module_lists_its_exports', () => {
+    expect(Object.keys(passwordModule).sort()).toEqual(['PASSWORD_LENGTH', 'Password']);
   });
 });
 

@@ -8,21 +8,27 @@ export const PASSWORD_LENGTH = Range.ofNumbers(8, 128);
 
 export type PasswordProblem = 'invalid-password';
 
-// Counts Unicode code points, not UTF-16 units: an emoji is one character
-// (NIST SP 800-63B §5.1.1.2). Array.from gives the same code points as
-// [...raw]. The lint rule no-misused-spread forbids the spread of a string.
-export function passwordLength(raw: string): number {
-  return Array.from(raw).length;
-}
-
 // A plain password that a new user chooses. Only the hash is stored.
 export class Password {
   private constructor(readonly value: string) {}
 
   static create(raw: string): Result<Password, PasswordProblem> {
-    return PASSWORD_LENGTH.contains(passwordLength(raw))
+    return PASSWORD_LENGTH.contains(Password.codePoints(raw))
       ? ok(new Password(raw))
       : err('invalid-password');
+  }
+
+  // Tells if a text is longer than any password. Sign-in asks this before it
+  // hashes. It takes the raw text, because create() rejects a text this long.
+  static isTooLong(raw: string): boolean {
+    return Password.codePoints(raw) > PASSWORD_LENGTH.max;
+  }
+
+  // Counts Unicode code points, not UTF-16 units: an emoji is one character
+  // (NIST SP 800-63B §5.1.1.2). Array.from gives the same code points as
+  // [...raw]. The lint rule no-misused-spread forbids the spread of a string.
+  private static codePoints(raw: string): number {
+    return Array.from(raw).length;
   }
 
   // Two passwords are equal when they hold the same text.

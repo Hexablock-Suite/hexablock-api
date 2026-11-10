@@ -1,5 +1,5 @@
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import { PASSWORD_LENGTH, passwordLength } from '../../domain/user/password.js';
+import { Password } from '../../domain/user/password.js';
 import { Username } from '../../domain/user/username.js';
 import type { PasswordHasher } from '../ports/password-hasher.js';
 import type { SessionToken, TokenIssuer } from '../ports/token-issuer.js';
@@ -40,7 +40,7 @@ export class LoginUseCase implements Login {
   async execute(request: Credentials): Promise<Result<SessionToken, LoginProblem>> {
     // No stored password is longer than the maximum. This check bounds the
     // hash work of one request and gives the same failure as a wrong password.
-    if (passwordLength(request.password) > PASSWORD_LENGTH.max) {
+    if (Password.isTooLong(request.password)) {
       return err('invalid-credentials');
     }
     const username = Username.create(request.username);
