@@ -61,6 +61,12 @@ The table shows the design. Most of these pieces are not code yet; their code st
   repository ports of users and progress; the level repository is planned.
 - **`AppModule` is the composition root.** [src/infrastructure/app.module.ts](src/infrastructure/app.module.ts)
   binds each port to one adapter. `src/main.ts` only starts the app.
+- **The domain hides its state.** `PlayerProgress` has no getter: its mappers read a
+  `snapshot()` (decision 2 of `classes.md`). The value objects still show their value in a
+  public field, and `User` still has public fields and a public constructor. Issues
+  [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90) and
+  [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91) plan that change
+  (decisions 15 and 16 of `classes.md`).
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
   [.dependency-cruiser.cjs](.dependency-cruiser.cjs): `domain-imports-only-domain`,
   `application-imports-only-domain`, `adapters-never-import-infrastructure` and
