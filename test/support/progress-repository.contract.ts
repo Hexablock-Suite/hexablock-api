@@ -2,6 +2,7 @@ import type { ProgressRepository } from '../../src/application/ports/progress-re
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
+import { Score } from '../../src/domain/progress/score.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 
 // UUIDs, because the Drizzle adapter keys progress on users.id (#34). An
@@ -43,7 +44,7 @@ export function describeProgressRepositoryContract(
     it('should_return_the_whole_aggregate_when_saved_progress_is_found', async () => {
       const repository = await createRepository();
       const progress = PlayerProgress.start(USER, FIT, AT);
-      progress.recordScore(120, LATER);
+      progress.recordScore(Score.of(120), LATER);
       progress.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 1 }));
 
       await storeProgress(repository, progress);
@@ -51,7 +52,7 @@ export function describeProgressRepositoryContract(
 
       expect(found?.userId.value).toBe(CONTRACT_USER_IDS[0]);
       expect(found?.gameId.value).toBe('fit');
-      expect(found?.highScore).toBe(120);
+      expect(found?.highScore?.equals(Score.of(120))).toBe(true);
       expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
       expect(found?.results.map((result) => result.levelId)).toEqual(['fit-01']);
     });
@@ -81,11 +82,11 @@ export function describeProgressRepositoryContract(
       const repository = await createRepository();
       await storeProgress(repository, PlayerProgress.start(USER, FIT, AT));
       const second = PlayerProgress.start(USER, FIT, AT);
-      second.recordScore(300, LATER);
+      second.recordScore(Score.of(300), LATER);
 
       await storeProgress(repository, second);
 
-      expect((await repository.find(USER, FIT))?.highScore).toBe(300);
+      expect((await repository.find(USER, FIT))?.highScore?.equals(Score.of(300))).toBe(true);
     });
 
     // The Drizzle adapter writes rows and reads new objects. A repository
@@ -93,17 +94,17 @@ export function describeProgressRepositoryContract(
     it('should_return_the_saved_state_when_an_aggregate_changes_after_save_or_find', async () => {
       const repository = await createRepository();
       const progress = PlayerProgress.start(USER, FIT, AT);
-      progress.recordScore(120, AT);
+      progress.recordScore(Score.of(120), AT);
       progress.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 1, moves: 9, elapsedMs: 1 }));
       await storeProgress(repository, progress);
 
-      progress.recordScore(300, LATER);
+      progress.recordScore(Score.of(300), LATER);
       progress.recordLevel(LevelResult.of({ levelId: 'fit-02', stars: 3, moves: 5, elapsedMs: 2 }));
       const found = await repository.find(USER, FIT);
-      found?.recordScore(500, LATER);
+      found?.recordScore(Score.of(500), LATER);
       const foundAgain = await repository.find(USER, FIT);
 
-      expect(foundAgain?.highScore).toBe(120);
+      expect(foundAgain?.highScore?.equals(Score.of(120))).toBe(true);
       expect(foundAgain?.updatedAt.toISOString()).toBe(AT.toISOString());
       expect(foundAgain?.results.map((result) => result.levelId)).toEqual(['fit-01']);
     });
@@ -114,7 +115,7 @@ export function describeProgressRepositoryContract(
       const repository = await createRepository();
       const seen: (PlayerProgress | null)[] = [];
       const started = PlayerProgress.start(USER, FIT, AT);
-      started.recordScore(120, LATER);
+      started.recordScore(Score.of(120), LATER);
       started.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 1 }));
 
       const saved = await repository.update(USER, FIT, (stored) => {
@@ -125,7 +126,7 @@ export function describeProgressRepositoryContract(
       expect(seen).toEqual([null]);
       expect(saved).toBe(started);
       const found = await repository.find(USER, FIT);
-      expect(found?.highScore).toBe(120);
+      expect(found?.highScore?.equals(Score.of(120))).toBe(true);
       expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
       expect(found?.results.map((result) => result.levelId)).toEqual(['fit-01']);
       await expect(repository.find(USER, LINES)).resolves.toBeNull();
@@ -136,10 +137,10 @@ export function describeProgressRepositoryContract(
     it('should_pass_stored_aggregate_to_change_and_save_its_result_when_progress_is_stored', async () => {
       const repository = await createRepository();
       const first = PlayerProgress.start(USER, FIT, AT);
-      first.recordScore(500, AT);
+      first.recordScore(Score.of(500), AT);
       first.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 1, moves: 9, elapsedMs: 1 }));
       await storeProgress(repository, first);
-      const seen: { copy: boolean; score: number | null; at: string; levels: string[] }[] = [];
+      const seen: { copy: boolean; score: Score | null; at: string; levels: string[] }[] = [];
 
       const saved = await repository.update(USER, FIT, (stored) => {
         if (stored === null) {
@@ -151,29 +152,31 @@ export function describeProgressRepositoryContract(
           at: stored.updatedAt.toISOString(),
           levels: stored.results.map((result) => result.levelId),
         });
-        stored.recordScore(100, LATER);
+        stored.recordScore(Score.of(100), LATER);
         stored.recordLevel(LevelResult.of({ levelId: 'fit-02', stars: 3, moves: 5, elapsedMs: 2 }));
         return stored;
       });
 
-      expect(seen).toEqual([{ copy: true, score: 500, at: AT.toISOString(), levels: ['fit-01'] }]);
+      expect(seen).toHaveLength(1);
+      expect(seen[0]?.score?.equals(Score.of(500))).toBe(true);
+      expect(seen[0]).toMatchObject({ copy: true, at: AT.toISOString(), levels: ['fit-01'] });
       const found = await repository.find(USER, FIT);
-      expect(found?.highScore).toBe(500);
+      expect(found?.highScore?.equals(Score.of(500))).toBe(true);
       expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
       expect(found?.results.map((result) => result.levelId)).toEqual(['fit-01', 'fit-02']);
-      expect(saved?.highScore).toBe(500);
+      expect(saved?.highScore?.equals(Score.of(500))).toBe(true);
       expect(saved?.updatedAt.toISOString()).toBe(LATER.toISOString());
     });
 
     it('should_save_nothing_and_resolve_null_when_change_returns_null', async () => {
       const repository = await createRepository();
       const first = PlayerProgress.start(USER, FIT, AT);
-      first.recordScore(500, AT);
+      first.recordScore(Score.of(500), AT);
       first.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 1, moves: 9, elapsedMs: 1 }));
       await storeProgress(repository, first);
 
       const kept = await repository.update(USER, FIT, (stored) => {
-        stored?.recordScore(900, LATER);
+        stored?.recordScore(Score.of(900), LATER);
         stored?.recordLevel(
           LevelResult.of({ levelId: 'fit-02', stars: 3, moves: 5, elapsedMs: 2 }),
         );
@@ -184,7 +187,7 @@ export function describeProgressRepositoryContract(
       expect(kept).toBeNull();
       expect(empty).toBeNull();
       const found = await repository.find(USER, FIT);
-      expect(found?.highScore).toBe(500);
+      expect(found?.highScore?.equals(Score.of(500))).toBe(true);
       expect(found?.updatedAt.toISOString()).toBe(AT.toISOString());
       expect(found?.results.map((result) => result.levelId)).toEqual(['fit-01']);
       await expect(repository.find(USER, LINES)).resolves.toBeNull();
@@ -193,13 +196,13 @@ export function describeProgressRepositoryContract(
     it('should_save_nothing_and_reject_with_its_error_when_change_throws', async () => {
       const repository = await createRepository();
       const first = PlayerProgress.start(USER, FIT, AT);
-      first.recordScore(500, AT);
+      first.recordScore(Score.of(500), AT);
       first.recordLevel(LevelResult.of({ levelId: 'fit-01', stars: 1, moves: 9, elapsedMs: 1 }));
       await storeProgress(repository, first);
       const failure = new Error('the change failed');
 
       const stored = repository.update(USER, FIT, (found) => {
-        found?.recordScore(900, LATER);
+        found?.recordScore(Score.of(900), LATER);
         found?.recordLevel(LevelResult.of({ levelId: 'fit-02', stars: 3, moves: 5, elapsedMs: 2 }));
         throw failure;
       });
@@ -210,7 +213,7 @@ export function describeProgressRepositoryContract(
       await expect(stored).rejects.toBe(failure);
       await expect(empty).rejects.toBe(failure);
       const found = await repository.find(USER, FIT);
-      expect(found?.highScore).toBe(500);
+      expect(found?.highScore?.equals(Score.of(500))).toBe(true);
       expect(found?.updatedAt.toISOString()).toBe(AT.toISOString());
       expect(found?.results.map((result) => result.levelId)).toEqual(['fit-01']);
       await expect(repository.find(USER, LINES)).resolves.toBeNull();
@@ -242,15 +245,15 @@ export function describeProgressRepositoryContract(
     it('should_keep_two_entries_when_one_user_saves_two_variants', async () => {
       const repository = await createRepository();
       const fit = PlayerProgress.start(USER, FIT, AT);
-      fit.recordScore(10, AT);
+      fit.recordScore(Score.of(10), AT);
       const lines = PlayerProgress.start(USER, LINES, AT);
-      lines.recordScore(20, AT);
+      lines.recordScore(Score.of(20), AT);
 
       await storeProgress(repository, fit);
       await storeProgress(repository, lines);
 
-      expect((await repository.find(USER, FIT))?.highScore).toBe(10);
-      expect((await repository.find(USER, LINES))?.highScore).toBe(20);
+      expect((await repository.find(USER, FIT))?.highScore?.equals(Score.of(10))).toBe(true);
+      expect((await repository.find(USER, LINES))?.highScore?.equals(Score.of(20))).toBe(true);
       await expect(repository.find(OTHER_USER, FIT)).resolves.toBeNull();
     });
   });

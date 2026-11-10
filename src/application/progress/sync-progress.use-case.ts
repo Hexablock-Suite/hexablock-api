@@ -1,6 +1,7 @@
 import { GameId } from '../../domain/progress/game-id.js';
 import { LevelResult, type LevelResultValues } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
+import { Score } from '../../domain/progress/score.js';
 import type { Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import type { UseCase } from '../use-case.js';
@@ -55,7 +56,7 @@ export class SyncProgressUseCase implements SyncProgress {
       outcome = withProgressRules(() => {
         const progress = stored ?? PlayerProgress.start(request.userId, gameId, at);
         if (request.score !== undefined) {
-          progress.recordScore(request.score, at);
+          progress.recordScore(Score.of(request.score), at);
         }
         for (const result of results) {
           progress.recordLevel(result);

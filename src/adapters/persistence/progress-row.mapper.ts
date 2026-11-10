@@ -1,6 +1,7 @@
 import { GameId } from '../../domain/progress/game-id.js';
 import { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
+import { Score } from '../../domain/progress/score.js';
 import { UserId } from '../../domain/user/user-id.js';
 import type { levelResults, progress } from './schema.js';
 
@@ -14,7 +15,7 @@ export const ProgressRowMapper = {
     return PlayerProgress.restore({
       userId: UserId.from(row.userId),
       gameId: GameId.of(row.gameId),
-      highScore: row.highScore,
+      highScore: row.highScore === null ? null : Score.of(row.highScore),
       updatedAt: row.updatedAt,
       results: resultRows.map(({ levelId, stars, moves, elapsedMs }) =>
         LevelResult.of({ levelId, stars, moves, elapsedMs }),
@@ -26,7 +27,8 @@ export const ProgressRowMapper = {
     return {
       userId: aggregate.userId.value,
       gameId: aggregate.gameId.value,
-      highScore: aggregate.highScore,
+      // The high_score column keeps a number.
+      highScore: aggregate.highScore?.value ?? null,
       updatedAt: aggregate.updatedAt,
     };
   },

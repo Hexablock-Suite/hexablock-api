@@ -1,6 +1,7 @@
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
+import { Score } from '../../../src/domain/progress/score.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { testUserId } from '../../support/user-ids.js';
@@ -58,7 +59,7 @@ describe('PlayerProgress', () => {
   it('should_keep_its_user_and_game_key_when_scores_and_levels_are_recorded', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
 
-    progress.recordScore(120, LATER);
+    progress.recordScore(Score.of(120), LATER);
     progress.recordLevel(level('fit-01', 2));
 
     expect(progress.userId.equals(USER)).toBe(true);
@@ -68,54 +69,62 @@ describe('PlayerProgress', () => {
   it('should_record_the_score_and_take_the_given_instant_when_score_is_recorded', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
 
-    progress.recordScore(120, LATER);
+    progress.recordScore(Score.of(120), LATER);
 
-    expect(progress.highScore).toBe(120);
+    expect(progress.highScore?.equals(Score.of(120))).toBe(true);
     expect(progress.updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
   it('should_keep_the_high_score_and_take_the_instant_when_a_lower_score_is_recorded', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
-    progress.recordScore(120, START);
+    progress.recordScore(Score.of(120), START);
 
-    progress.recordScore(80, LATER);
+    progress.recordScore(Score.of(80), LATER);
 
-    expect(progress.highScore).toBe(120);
+    expect(progress.highScore?.equals(Score.of(120))).toBe(true);
     expect(progress.updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
-  it('should_reject_score_and_keep_state_when_score_is_negative_or_not_an_integer', () => {
+  // Score guards the rule of a valid score. The aggregate takes only a Score.
+  it('should_reject_score_and_keep_state_when_score_is_not_a_score_or_instant_is_invalid', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
-    progress.recordScore(50, START);
+    progress.recordScore(Score.of(50), START);
 
-    for (const bad of [-1, 2.5, Number.NaN, Number.POSITIVE_INFINITY]) {
-      expect(() => progress.recordScore(bad, LATER)).toThrow(ProgressError);
+    for (const bad of [60, undefined, null]) {
+      expect(() => progress.recordScore(bad as unknown as Score, LATER)).toThrow(ProgressError);
     }
-    expect(() => progress.recordScore(60, new Date(Number.NaN))).toThrow(ProgressError);
+    expect(() => progress.recordScore(Score.of(60), new Date(Number.NaN))).toThrow(ProgressError);
 
-    expect(progress.highScore).toBe(50);
+    expect(progress.highScore?.equals(Score.of(50))).toBe(true);
     expect(progress.updatedAt.toISOString()).toBe(START.toISOString());
   });
 
-  it('should_reject_score_and_keep_state_when_score_is_negative_infinity_or_an_unsafe_integer', () => {
+  it('should_take_the_higher_score_when_a_higher_score_is_recorded', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
-    progress.recordScore(50, START);
+    progress.recordScore(Score.of(120), START);
 
-    for (const bad of [Number.NEGATIVE_INFINITY, 2 ** 53, -(2 ** 53)]) {
-      expect(() => progress.recordScore(bad, LATER)).toThrow(ProgressError);
-    }
+    progress.recordScore(Score.of(121), LATER);
 
-    expect(progress.highScore).toBe(50);
-    expect(progress.updatedAt.toISOString()).toBe(START.toISOString());
+    expect(progress.highScore?.equals(Score.of(121))).toBe(true);
+  });
+
+  // A score of 0 is a score. Only a progress with no record has no high score.
+  it('should_tell_a_zero_high_score_from_no_score_when_zero_is_recorded', () => {
+    const progress = PlayerProgress.start(USER, FIT, START);
+
+    progress.recordScore(Score.of(0), LATER);
+
+    expect(progress.highScore).not.toBeNull();
+    expect(progress.highScore?.equals(Score.of(0))).toBe(true);
   });
 
   // -0 is a non-negative integer: -0 < 0 is false. It counts as a zero score.
   it('should_record_a_zero_score_when_score_is_negative_zero', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
 
-    progress.recordScore(-0, LATER);
+    progress.recordScore(Score.of(-0), LATER);
 
-    expect(progress.highScore === 0).toBe(true);
+    expect(progress.highScore?.equals(Score.of(0))).toBe(true);
     expect(progress.updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
@@ -230,7 +239,7 @@ describe('PlayerProgress', () => {
   it('should_keep_its_instant_when_caller_mutates_the_date_it_passed', () => {
     const at = new Date(LATER.getTime());
     const progress = PlayerProgress.start(USER, FIT, START);
-    progress.recordScore(10, at);
+    progress.recordScore(Score.of(10), at);
 
     at.setUTCFullYear(1999);
 
@@ -244,14 +253,14 @@ describe('PlayerProgress', () => {
     const progress = PlayerProgress.restore({
       userId: USER,
       gameId: FIT,
-      highScore: 120,
+      highScore: Score.of(120),
       updatedAt: LATER,
       results: [first, second],
     });
 
     expect(progress.userId.equals(USER)).toBe(true);
     expect(progress.gameId.equals(FIT)).toBe(true);
-    expect(progress.highScore).toBe(120);
+    expect(progress.highScore?.equals(Score.of(120))).toBe(true);
     expect(progress.updatedAt.toISOString()).toBe(LATER.toISOString());
     expect(progress.results).toEqual([first, second]);
   });
@@ -270,10 +279,18 @@ describe('PlayerProgress', () => {
   });
 
   it('should_reject_restore_when_stored_state_breaks_a_rule', () => {
-    const valid = { userId: USER, gameId: FIT, highScore: 1, updatedAt: START, results: [] };
+    const valid = {
+      userId: USER,
+      gameId: FIT,
+      highScore: Score.of(1),
+      updatedAt: START,
+      results: [],
+    };
 
-    for (const highScore of [-1, 2.5, Number.NaN]) {
-      expect(() => PlayerProgress.restore({ ...valid, highScore })).toThrow(ProgressError);
+    for (const highScore of [1, undefined]) {
+      expect(() =>
+        PlayerProgress.restore({ ...valid, highScore: highScore as unknown as Score }),
+      ).toThrow(ProgressError);
     }
     expect(() => PlayerProgress.restore({ ...valid, updatedAt: new Date(Number.NaN) })).toThrow(
       ProgressError,
@@ -286,25 +303,17 @@ describe('PlayerProgress', () => {
     ).toThrow(ProgressError);
   });
 
-  it('should_reject_restore_when_stored_high_score_is_infinite_or_an_unsafe_integer', () => {
-    const valid = { userId: USER, gameId: FIT, highScore: 1, updatedAt: START, results: [] };
-
-    for (const highScore of [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, 2 ** 53]) {
-      expect(() => PlayerProgress.restore({ ...valid, highScore })).toThrow(ProgressError);
-    }
-  });
-
-  // restore() checks the rule of recordScore(): -0 counts as a zero score.
+  // Score counts -0 as a zero score, and restore() keeps it.
   it('should_restore_a_zero_high_score_when_stored_high_score_is_negative_zero', () => {
     const progress = PlayerProgress.restore({
       userId: USER,
       gameId: FIT,
-      highScore: -0,
+      highScore: Score.of(-0),
       updatedAt: START,
       results: [],
     });
 
-    expect(progress.highScore === 0).toBe(true);
+    expect(progress.highScore?.equals(Score.of(0))).toBe(true);
   });
 
   // restore() records each stored result with recordLevel(), so the rule of
@@ -330,7 +339,7 @@ describe('PlayerProgress identity', () => {
     const played = PlayerProgress.restore({
       userId: USER,
       gameId: FIT,
-      highScore: 900,
+      highScore: Score.of(900),
       updatedAt: LATER,
       results: [level('fit-01', 3)],
     });

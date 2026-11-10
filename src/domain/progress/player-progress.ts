@@ -1,6 +1,7 @@
 import { GameId } from './game-id.js';
 import { LevelResult } from './level-result.js';
 import { ProgressError } from './progress-error.js';
+import { Score } from './score.js';
 import { UserId } from '../user/user-id.js';
 
 // The stored state of one progress. A repository reads it back with
@@ -8,7 +9,7 @@ import { UserId } from '../user/user-id.js';
 export interface PlayerProgressState {
   userId: UserId;
   gameId: GameId;
-  highScore: number | null;
+  highScore: Score | null;
   updatedAt: Date;
   results: readonly LevelResult[];
 }
@@ -26,7 +27,7 @@ export class PlayerProgress {
   private constructor(
     readonly userId: UserId,
     readonly gameId: GameId,
-    private best: number | null,
+    private best: Score | null,
     private updatedAtMs: number,
   ) {}
 
@@ -45,8 +46,7 @@ export class PlayerProgress {
   static restore(state: PlayerProgressState): PlayerProgress {
     const progress = PlayerProgress.start(state.userId, state.gameId, state.updatedAt);
     if (state.highScore !== null) {
-      checkScore(state.highScore);
-      progress.best = state.highScore;
+      progress.best = checkedScore(state.highScore);
     }
     for (const result of state.results) {
       progress.recordLevel(result);
@@ -60,7 +60,7 @@ export class PlayerProgress {
     return this.userId.equals(other.userId) && this.gameId.equals(other.gameId);
   }
 
-  get highScore(): number | null {
+  get highScore(): Score | null {
     return this.best;
   }
 
@@ -73,10 +73,12 @@ export class PlayerProgress {
   }
 
   // Keeps the highest score. Every record moves updatedAt to the given instant.
-  recordScore(score: number, at: Date): void {
-    checkScore(score);
+  recordScore(score: Score, at: Date): void {
+    const recorded = checkedScore(score);
     const atMs = epochMsOf(at);
-    this.best = this.best === null ? score : Math.max(this.best, score);
+    if (this.best === null || recorded.isHigherThan(this.best)) {
+      this.best = recorded;
+    }
     this.updatedAtMs = atMs;
   }
 
@@ -93,10 +95,12 @@ export class PlayerProgress {
   }
 }
 
-function checkScore(score: number): void {
-  if (!Number.isSafeInteger(score) || score < 0) {
-    throw new ProgressError(`score must be a non-negative integer, got ${score}.`);
+// Score guards the rule of a valid score. The aggregate takes only a Score.
+function checkedScore(score: Score): Score {
+  if (!(score instanceof Score)) {
+    throw new ProgressError('A high score must be a Score.');
   }
+  return score;
 }
 
 function epochMsOf(at: Date): number {
