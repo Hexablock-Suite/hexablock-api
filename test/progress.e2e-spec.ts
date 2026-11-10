@@ -207,6 +207,49 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
     expect((await storedRows(userId)).map((row) => row.highScore)).toEqual([0]);
   });
 
+  // The first score of the progress is -0. The read gives 0, so no -0
+  // leaks out through the stored row.
+  it('should_read_back_a_zero_high_score_when_the_first_score_is_negative_zero', async () => {
+    const { token } = await signIn('ada');
+
+    const response = await request(server())
+      .post('/progress')
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json')
+      .send('{"gameId":"hexa-lines","score":-0}');
+    const readBack = await read(token, 'hexa-lines');
+
+    expect(response.status).toBe(200);
+    expect(readBack.status).toBe(200);
+    expect(readBack.body).toEqual({
+      gameId: 'hexa-lines',
+      highScore: 0,
+      updatedAt: AT.toISOString(),
+      results: [],
+    });
+    expect(Object.is(readBack.body.highScore, 0)).toBe(true);
+  });
+
+  // The mapper of the border checks the score before the use case reads the
+  // Clock. So a broken Clock does not hide the rule of the score.
+  it('should_return_bad_request_error_body_and_save_nothing_when_score_breaks_its_rule_under_a_broken_clock', async () => {
+    const { token, userId } = await signIn('ada');
+    const now = vi.spyOn(clock, 'now').mockReturnValue(new Date(Number.NaN));
+
+    const response = await sync(token, { gameId: 'hexa-lines', score: -1 });
+    now.mockRestore();
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['score must be a non-negative integer, got -1.'],
+      path: '/progress',
+    });
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
   it('should_return_bad_request_error_body_and_save_nothing_when_a_level_result_breaks_its_rule', async () => {
     const { token, userId } = await signIn('ada');
 
