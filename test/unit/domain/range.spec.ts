@@ -56,3 +56,35 @@ describe('Range', () => {
     );
   });
 });
+
+describe('Range equals', () => {
+  it('should_be_equal_when_two_ranges_have_bounds_of_the_same_order', () => {
+    type Bound = { readonly n: number };
+    const byN = (left: Bound, right: Bound): number => left.n - right.n;
+    const range = Range.ofNumbers(1, 5);
+    const twin = Range.ofNumbers(1, 5);
+
+    expect(twin).not.toBe(range);
+    expect(range.equals(twin)).toBe(true);
+    expect(twin.equals(range)).toBe(true);
+    for (const other of [Range.ofNumbers(2, 5), Range.ofNumbers(1, 6)]) {
+      expect(range.equals(other)).toBe(false);
+      expect(other.equals(range)).toBe(false);
+    }
+    expect(Range.of({ n: 1 }, { n: 5 }, byN).equals(Range.of({ n: 1 }, { n: 5 }, byN))).toBe(true);
+  });
+
+  it('should_give_one_answer_in_both_directions_when_two_ranges_use_different_orders', () => {
+    const exact = (left: string, right: string): number => {
+      if (left === right) return 0;
+      return left < right ? -1 : 1;
+    };
+    const anyCase = (left: string, right: string): number =>
+      exact(left.toLowerCase(), right.toLowerCase());
+    const lower = Range.of<string>('a', 'z', exact);
+    const upper = Range.of<string>('A', 'Z', anyCase);
+
+    expect(lower.equals(upper)).toBe(false);
+    expect(upper.equals(lower)).toBe(false);
+  });
+});

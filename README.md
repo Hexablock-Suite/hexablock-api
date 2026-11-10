@@ -57,9 +57,16 @@ The table shows the design. Most of these pieces are not code yet; their code st
   [src/application/ports/clock.ts](src/application/ports/clock.ts). The domain never imports a
   port: a use case reads the instant and passes it to the domain as a parameter.
 - **Adapters live in layers 3 and 4.** [SystemClock](src/infrastructure/clock/system-clock.ts)
-  implements `Clock`. The planned Drizzle repositories implement the repository ports.
+  implements `Clock`. The Drizzle repositories in `src/adapters/persistence` implement the
+  repository ports of users and progress; the level repository is planned.
 - **`AppModule` is the composition root.** [src/infrastructure/app.module.ts](src/infrastructure/app.module.ts)
   binds each port to one adapter. `src/main.ts` only starts the app.
+- **The domain hides its state.** `PlayerProgress` has no getter: its mappers read a
+  `snapshot()` (decision 2 of `classes.md`). The value objects still show their value in a
+  public field, and `User` still has public fields and a public constructor. Issues
+  [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90) and
+  [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91) plan that change
+  (decisions 15 and 16 of `classes.md`).
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
   [.dependency-cruiser.cjs](.dependency-cruiser.cjs): `domain-imports-only-domain`,
   `application-imports-only-domain`, `adapters-never-import-infrastructure` and
@@ -98,8 +105,8 @@ and views 1.2 and 2.3 of [docs/architecture/classes.md](docs/architecture/classe
 
 ## Design Patterns
 
-The patterns come from the backend class diagram. Most classes are not built yet, so each link
-points to the design doc; links move to the source files as code lands.
+The patterns come from the backend class diagram. The level validators and `TimingAspect` are
+not built yet, so each link points to the design doc; links move to the source files as code lands.
 
 | Pattern                            | Classes                                                                           | Quality it protects                                 | Reason                                                                                                 | Link                                                                                                                                                 |
 | ---------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -107,6 +114,7 @@ points to the design doc; links move to the source files as code lands.
 | Decorator                          | `UseCaseAspect`, `LoggingAspect`, `TimingAspect`                                  | Separation: no cross-cutting code inside a use case | The aspects of §3.5 wrap any use case and add no code to it (API-NFR-07, A2). Q12 put them in layer 2. | [classes.md, view 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)                                                   |
 | Adapter                            | The Drizzle repositories; `SystemClock`, `ScryptPasswordHasher`, `JwtTokenIssuer` | Replaceability: a new database engine or driver     | A new database engine means new adapters, and the use cases do not change (§3.3, §3.4, §8).            | [classes.md, views 3.1, 3.2, 3.4](docs/architecture/classes.md#part-3-adapters-and-drivers); [SystemClock](src/infrastructure/clock/system-clock.ts) |
 | Singleton (single-scope injection) | `AppModule` and its providers                                                     | Consistency: one shared instance of each adapter    | One instance of each adapter for the whole API (§3.3).                                                 | [classes.md, view 3.4](docs/architecture/classes.md#view-34-wiring); [AppModule](src/infrastructure/app.module.ts)                                   |
+| Memento                            | `PlayerProgress` and its `PlayerProgressState`                                    | Encapsulation: the aggregate hides its state        | The aggregate has no getter: the mappers read a copy of its state, and `restore()` builds it again.    | [classes.md, view 1.1](docs/architecture/classes.md#view-11-progress-and-level-results); [PlayerProgress](src/domain/progress/player-progress.ts)    |
 
 Abstract Factory is also mandatory in §3.3. The app holds it, one factory per variant. The API
 does not use it: a variant has one product, its level validator (decision 8 of `classes.md`).
@@ -152,7 +160,8 @@ belong there, built as decorators with one interface common to the use cases, wi
 [src/infrastructure/logging](src/infrastructure/logging) implements it and writes the text.
 `AppModule` wraps `SyncProgressUseCase` in `LoggingAspect`. It logs the use case name, the
 outcome and, for a failure, only its `kind`, so a value that the client sent never reaches the
-log. `TimingAspect` is not built yet.
+log. A request value that breaks its rule stops in `ProgressDtoMapper`, before the use case, so
+the aspect writes no entry for that request. `TimingAspect` is not built yet.
 
 ## Getting Started
 

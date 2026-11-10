@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 4 of 5</p>
       <h1>Wiring: the composition root binds each port to one driver</h1>
       <svg
-        viewBox="0 0 1040 710"
+        viewBox="0 0 1040 878"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad4wiring-title ad4wiring-desc"
@@ -131,7 +131,7 @@
           x="24"
           y="24"
           width="992"
-          height="356"
+          height="524"
           rx="8"
           fill="#cfdcf3"
           stroke="rgba(30,58,138,0.50)"
@@ -139,7 +139,7 @@
         />
         <rect
           x="24"
-          y="396"
+          y="564"
           width="992"
           height="120"
           rx="8"
@@ -150,7 +150,7 @@
         <!-- Pattern and group frames -->
         <rect
           x="48"
-          y="208"
+          y="376"
           width="960"
           height="156"
           rx="8"
@@ -161,7 +161,7 @@
         />
         <text
           x="60"
-          y="224"
+          y="392"
           fill="#5b6873"
           font-size="8"
           font-weight="500"
@@ -174,9 +174,9 @@
         <!-- SystemClock implements Clock: realization -->
         <line
           x1="164"
-          y1="312"
+          y1="480"
           x2="164"
-          y2="444"
+          y2="612"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -185,9 +185,9 @@
         <!-- ScryptPasswordHasher implements PasswordHasher: realization -->
         <line
           x1="520"
-          y1="340"
+          y1="508"
           x2="520"
-          y2="444"
+          y2="612"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -196,9 +196,9 @@
         <!-- JwtTokenIssuer implements TokenIssuer: realization -->
         <line
           x1="864"
-          y1="356"
+          y1="524"
           x2="864"
-          y2="444"
+          y2="612"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -217,10 +217,10 @@
         >
           LAYER 4 · FRAMEWORKS AND DRIVERS · src/infrastructure/
         </text>
-        <rect x="36" y="407" width="248" height="12" rx="2" fill="#efe7f8" />
+        <rect x="36" y="575" width="248" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
-          y="416"
+          y="584"
           fill="#7e22ce"
           font-size="8"
           font-weight="500"
@@ -231,17 +231,17 @@
         </text>
         <!-- Class: AppModule (focal, «module» «composition root») -->
         <rect
-          x="376"
+          x="352"
           y="72"
-          width="288"
-          height="116"
+          width="336"
+          height="284"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
           stroke-width="1"
         />
-        <rect x="376" y="72" width="288" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="376" y="124" width="288" height="8" fill="rgba(15,111,116,0.10)" />
+        <rect x="352" y="72" width="336" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="352" y="124" width="336" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="520"
           y="90"
@@ -275,20 +275,54 @@
         >
           single scope
         </text>
-        <line x1="376" y1="132" x2="664" y2="132" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="392" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="352" y1="132" x2="688" y2="132" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="368" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           CLOCK → SystemClock
         </text>
-        <text x="392" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="368" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LOGGER → NestLogger
+        </text>
+
+        <text x="368" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           PASSWORD_HASHER → ScryptPasswordHasher
         </text>
-        <text x="392" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="368" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          USER_ID_GENERATOR → RandomUserIdGenerator
+        </text>
+
+        <text x="368" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           TOKEN_ISSUER → JwtTokenIssuer
         </text>
+        <text x="368" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          USER_REPOSITORY → DrizzleUserRepository
+        </text>
+        <text x="368" y="244" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          PROGRESS_REPOSITORY → DrizzleProgressRepository
+        </text>
+        <line x1="352" y1="252" x2="688" y2="252" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="368" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          REGISTER_USER → RegisterUseCase
+        </text>
+        <text x="368" y="284" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          LOGIN → LoginUseCase
+        </text>
+        <text x="368" y="300" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          AUTHENTICATE_TOKEN → AuthenticateTokenUseCase
+        </text>
+        <text x="368" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          SYNC_PROGRESS → LoggingAspect(SyncProgressUseCase)
+        </text>
+        <text x="368" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          GET_PROGRESS → GetProgressUseCase
+        </text>
+        <text x="368" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          APP_FILTER → HttpErrorFilter
+        </text>
+
         <!-- Class: SystemClock («Adapter») -->
         <rect
           x="64"
-          y="240"
+          y="408"
           width="200"
           height="72"
           rx="6"
@@ -298,7 +332,7 @@
         />
         <text
           x="164"
-          y="258"
+          y="426"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -309,7 +343,7 @@
         </text>
         <text
           x="164"
-          y="276"
+          y="444"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -318,14 +352,14 @@
         >
           SystemClock
         </text>
-        <line x1="64" y1="288" x2="264" y2="288" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="304" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="456" x2="264" y2="456" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="472" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + now(): Date
         </text>
         <!-- Class: ScryptPasswordHasher («Adapter») -->
         <rect
           x="352"
-          y="240"
+          y="408"
           width="336"
           height="100"
           rx="6"
@@ -335,7 +369,7 @@
         />
         <text
           x="520"
-          y="258"
+          y="426"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -346,7 +380,7 @@
         </text>
         <text
           x="520"
-          y="276"
+          y="444"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -357,7 +391,7 @@
         </text>
         <text
           x="520"
-          y="290"
+          y="458"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -366,17 +400,25 @@
         >
           node:crypto
         </text>
-        <line x1="352" y1="300" x2="688" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="368" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="352" y1="468" x2="688" y2="468" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="368" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + hash(plain: string): Promise&lt;string&gt;
         </text>
-        <text x="368" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          textLength="314"
+          lengthAdjust="spacingAndGlyphs"
+          x="368"
+          y="500"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
           + verify(plain: string, hash: string): Promise&lt;boolean&gt;
         </text>
         <!-- Class: JwtTokenIssuer («Adapter») -->
         <rect
           x="712"
-          y="232"
+          y="400"
           width="280"
           height="124"
           rx="6"
@@ -386,7 +428,7 @@
         />
         <text
           x="852"
-          y="250"
+          y="418"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -397,7 +439,7 @@
         </text>
         <text
           x="852"
-          y="268"
+          y="436"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -408,7 +450,7 @@
         </text>
         <text
           x="852"
-          y="282"
+          y="450"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -417,21 +459,29 @@
         >
           API-FR-01
         </text>
-        <line x1="712" y1="292" x2="992" y2="292" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="728" y="308" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - secret: string
+        <line x1="712" y1="460" x2="992" y2="460" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="728" y="476" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - jwt: JwtService
         </text>
-        <line x1="712" y1="316" x2="992" y2="316" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="728" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="712" y1="484" x2="992" y2="484" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="728" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + issue(userId: UserId): SessionToken
         </text>
-        <text x="728" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          textLength="258"
+          lengthAdjust="spacingAndGlyphs"
+          x="728"
+          y="516"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
           + verify(token: SessionToken): UserId | null
         </text>
         <!-- Class: Clock (PART 2 · VIEW 2) -->
         <rect
           x="64"
-          y="444"
+          y="612"
           width="200"
           height="48"
           rx="6"
@@ -442,7 +492,7 @@
         />
         <text
           x="164"
-          y="462"
+          y="630"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -453,7 +503,7 @@
         </text>
         <text
           x="164"
-          y="480"
+          y="648"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -465,7 +515,7 @@
         <!-- Class: PasswordHasher (PART 2 · VIEW 4) -->
         <rect
           x="408"
-          y="444"
+          y="612"
           width="224"
           height="48"
           rx="6"
@@ -476,7 +526,7 @@
         />
         <text
           x="520"
-          y="462"
+          y="630"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -487,7 +537,7 @@
         </text>
         <text
           x="520"
-          y="480"
+          y="648"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -499,7 +549,7 @@
         <!-- Class: TokenIssuer (PART 2 · VIEW 4) -->
         <rect
           x="752"
-          y="444"
+          y="612"
           width="224"
           height="48"
           rx="6"
@@ -510,7 +560,7 @@
         />
         <text
           x="864"
-          y="462"
+          y="630"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -521,7 +571,7 @@
         </text>
         <text
           x="864"
-          y="480"
+          y="648"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -533,7 +583,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="540"
+          y="708"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -543,7 +593,7 @@
         </text>
         <text
           x="24"
-          y="556"
+          y="724"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -553,27 +603,27 @@
         </text>
         <text
           x="24"
-          y="572"
+          y="740"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          and never calls them, so the view draws no use line to them. The feature modules and
-          DatabaseModule bind the repositories the same way.
+          and never calls them, so the view draws no use line to them. AppModule binds the two
+          Drizzle repositories with the DATABASE token of DatabaseModule.
         </text>
         <text
           x="24"
-          y="588"
+          y="756"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          SystemClock and the CLOCK binding exist today. The two security adapters are planned;
-          node:crypto gives scrypt, so no new package is needed.
+          The view details three adapters; the compartment names the other bindings. node:crypto
+          gives scrypt, so the hasher needs no new package.
         </text>
         <text
           x="24"
-          y="604"
+          y="772"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -582,10 +632,10 @@
           HTTP server.
         </text>
         <!-- Legend -->
-        <line x1="24" y1="628" x2="1016" y2="628" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="796" x2="1016" y2="796" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="646"
+          y="814"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -595,9 +645,9 @@
         </text>
         <line
           x1="24"
-          y1="664"
+          y1="832"
           x2="52"
-          y2="664"
+          y2="832"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -605,7 +655,7 @@
         />
         <text
           x="60"
-          y="668"
+          y="836"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -614,7 +664,7 @@
         </text>
         <rect
           x="24"
-          y="684"
+          y="852"
           width="20"
           height="12"
           rx="2"
@@ -624,7 +674,7 @@
         />
         <rect
           x="48"
-          y="684"
+          y="852"
           width="20"
           height="12"
           rx="2"
@@ -634,7 +684,7 @@
         />
         <text
           x="80"
-          y="693"
+          y="861"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -643,7 +693,7 @@
         </text>
         <rect
           x="264"
-          y="684"
+          y="852"
           width="28"
           height="12"
           rx="2"
@@ -654,7 +704,7 @@
         />
         <text
           x="300"
-          y="693"
+          y="861"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -663,7 +713,7 @@
         </text>
         <rect
           x="470"
-          y="684"
+          y="852"
           width="28"
           height="12"
           rx="2"
@@ -673,7 +723,7 @@
         />
         <text
           x="506"
-          y="693"
+          y="861"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -682,7 +732,7 @@
         </text>
         <rect
           x="616"
-          y="684"
+          y="852"
           width="28"
           height="12"
           rx="2"
@@ -693,7 +743,7 @@
         />
         <text
           x="652"
-          y="693"
+          y="861"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

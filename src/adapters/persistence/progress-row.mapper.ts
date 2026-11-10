@@ -1,6 +1,7 @@
 import { GameId } from '../../domain/progress/game-id.js';
 import { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
+import { Score } from '../../domain/progress/score.js';
 import { UserId } from '../../domain/user/user-id.js';
 import type { levelResults, progress } from './schema.js';
 
@@ -14,7 +15,7 @@ export const ProgressRowMapper = {
     return PlayerProgress.restore({
       userId: UserId.from(row.userId),
       gameId: GameId.of(row.gameId),
-      highScore: row.highScore,
+      highScore: row.highScore === null ? null : Score.of(row.highScore),
       updatedAt: row.updatedAt,
       results: resultRows.map(({ levelId, stars, moves, elapsedMs }) =>
         LevelResult.of({ levelId, stars, moves, elapsedMs }),
@@ -22,23 +23,28 @@ export const ProgressRowMapper = {
     });
   },
 
+  // The mapper reads the snapshot of the aggregate, its Memento.
   toProgressRow(aggregate: PlayerProgress): ProgressRow {
+    const { userId, gameId, highScore, updatedAt } = aggregate.snapshot();
     return {
-      userId: aggregate.userId.value,
-      gameId: aggregate.gameId.value,
-      highScore: aggregate.highScore,
-      updatedAt: aggregate.updatedAt,
+      userId: userId.value,
+      gameId: gameId.value,
+      // The high_score column keeps a number.
+      highScore: highScore?.value ?? null,
+      updatedAt,
     };
   },
 
   toLevelResultRows(aggregate: PlayerProgress): LevelResultRow[] {
-    return aggregate.results.map((result) => ({
-      userId: aggregate.userId.value,
-      gameId: aggregate.gameId.value,
-      levelId: result.levelId,
-      stars: result.stars,
-      moves: result.moves,
-      elapsedMs: result.elapsedMs,
+    const { userId, gameId, results } = aggregate.snapshot();
+    // The level_results columns keep a text and three numbers.
+    return results.map((result) => ({
+      userId: userId.value,
+      gameId: gameId.value,
+      levelId: result.levelId.value,
+      stars: result.stars.value,
+      moves: result.moves.value,
+      elapsedMs: result.elapsedTime.value,
     }));
   },
 };

@@ -9,4 +9,10 @@ export class PasswordHash {
     }
     return new PasswordHash(value);
   }
+
+  // Two hashes are equal when they hold the same text.
+  // Sign-in never uses this method: it checks a password through the PasswordHasher port.
+  equals(other: PasswordHash): boolean {
+    return this.value === other.value;
+  }
 }

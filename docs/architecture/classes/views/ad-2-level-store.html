@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 2 of 5</p>
       <h1>Level and user store: Drizzle adapters and their row mappers</h1>
       <svg
-        viewBox="0 0 1040 674"
+        viewBox="0 0 1040 722"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad2levelstore-title ad2levelstore-desc"
@@ -133,7 +133,7 @@
           x="24"
           y="24"
           width="992"
-          height="372"
+          height="420"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -141,7 +141,7 @@
         />
         <rect
           x="24"
-          y="412"
+          y="460"
           width="992"
           height="116"
           rx="8"
@@ -154,7 +154,7 @@
           x="48"
           y="56"
           width="856"
-          height="172"
+          height="220"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -178,7 +178,7 @@
           x1="176"
           y1="212"
           x2="176"
-          y2="272"
+          y2="320"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad2levelstore-open)"
@@ -186,9 +186,9 @@
         <!-- DrizzleUserRepository uses UserRowMapper: use -->
         <line
           x1="672"
-          y1="228"
+          y1="276"
           x2="672"
-          y2="272"
+          y2="320"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad2levelstore-open)"
@@ -198,7 +198,7 @@
           x1="352"
           y1="212"
           x2="352"
-          y2="456"
+          y2="504"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -207,19 +207,19 @@
         <!-- DrizzleUserRepository implements UserRepository: realization -->
         <line
           x1="864"
-          y1="228"
+          y1="276"
           x2="864"
-          y2="456"
+          y2="504"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
           marker-end="url(#ad2levelstore-triangle)"
         />
         <!-- Arrow labels and multiplicities -->
-        <rect x="182" y="236" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="182" y="284" width="32" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="198"
-          y="245"
+          y="293"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -228,10 +228,10 @@
         >
           USES
         </text>
-        <rect x="678" y="236" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="678" y="284" width="32" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="694"
-          y="245"
+          y="293"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -253,10 +253,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/persistence/
         </text>
-        <rect x="36" y="423" width="248" height="12" rx="2" fill="#efe7f8" />
+        <rect x="36" y="471" width="248" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
-          y="432"
+          y="480"
           fill="#7e22ce"
           font-size="8"
           font-weight="500"
@@ -327,7 +327,7 @@
           x="560"
           y="88"
           width="328"
-          height="140"
+          height="188"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -342,7 +342,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter»
+          «Adapter» «repository»
         </text>
         <text
           x="724"
@@ -368,22 +368,34 @@
         </text>
         <line x1="560" y1="148" x2="888" y2="148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="576" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - db: PgDatabase
+          - db: PersistenceDatabase
         </text>
         <line x1="560" y1="172" x2="888" y2="172" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="576" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + findByUsername(username: string): Promise&lt;User | null&gt;
+          + findByUsername(username: Username):
         </text>
-        <text x="576" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + isUsernameTaken(username: string): Promise&lt;boolean&gt;
+        <text x="598" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;User | null&gt;
         </text>
+
         <text x="576" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + add(user: User): Promise&lt;void&gt;
+          + isUsernameTaken(username: Username):
         </text>
+        <text x="598" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;boolean&gt;
+        </text>
+
+        <text x="576" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + add(user: User):
+        </text>
+        <text x="598" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;void, 'username-taken'&gt;&gt;
+        </text>
+
         <!-- Class: LevelRowMapper («mapper») -->
         <rect
           x="64"
-          y="272"
+          y="320"
           width="264"
           height="100"
           rx="6"
@@ -393,7 +405,7 @@
         />
         <text
           x="196"
-          y="290"
+          y="338"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -404,7 +416,7 @@
         </text>
         <text
           x="196"
-          y="308"
+          y="356"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -415,7 +427,7 @@
         </text>
         <text
           x="196"
-          y="322"
+          y="370"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -424,17 +436,17 @@
         >
           DS-6
         </text>
-        <line x1="64" y1="332" x2="328" y2="332" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="380" x2="328" y2="380" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toEntity(row: LevelRow): AnyLevel
         </text>
-        <text x="80" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="412" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toRow(level: AnyLevel): LevelRow
         </text>
         <!-- Class: UserRowMapper («mapper») -->
         <rect
           x="560"
-          y="272"
+          y="320"
           width="264"
           height="88"
           rx="6"
@@ -444,7 +456,7 @@
         />
         <text
           x="692"
-          y="290"
+          y="338"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -455,7 +467,7 @@
         </text>
         <text
           x="692"
-          y="308"
+          y="356"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -464,17 +476,17 @@
         >
           UserRowMapper
         </text>
-        <line x1="560" y1="320" x2="824" y2="320" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="576" y="336" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="560" y1="368" x2="824" y2="368" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="576" y="384" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toEntity(row: UserRow): User
         </text>
-        <text x="576" y="352" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="576" y="400" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toRow(user: User): UserRow
         </text>
         <!-- Class: LevelRepository (PART 2 · VIEW 3) -->
         <rect
           x="240"
-          y="456"
+          y="504"
           width="224"
           height="48"
           rx="6"
@@ -485,7 +497,7 @@
         />
         <text
           x="352"
-          y="474"
+          y="522"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -496,7 +508,7 @@
         </text>
         <text
           x="352"
-          y="492"
+          y="540"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -508,7 +520,7 @@
         <!-- Class: UserRepository (PART 2 · VIEW 4) -->
         <rect
           x="768"
-          y="456"
+          y="504"
           width="224"
           height="48"
           rx="6"
@@ -519,7 +531,7 @@
         />
         <text
           x="880"
-          y="474"
+          y="522"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -530,7 +542,7 @@
         </text>
         <text
           x="880"
-          y="492"
+          y="540"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -542,7 +554,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="552"
+          y="600"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -552,7 +564,7 @@
         </text>
         <text
           x="24"
-          y="568"
+          y="616"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -561,10 +573,10 @@
           gameId (Part 1, view 2) checks it in the use case before save().
         </text>
         <!-- Legend -->
-        <line x1="24" y1="592" x2="1016" y2="592" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="640" x2="1016" y2="640" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="610"
+          y="658"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -574,9 +586,9 @@
         </text>
         <line
           x1="24"
-          y1="628"
+          y1="676"
           x2="52"
-          y2="628"
+          y2="676"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -584,7 +596,7 @@
         />
         <text
           x="60"
-          y="632"
+          y="680"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -593,16 +605,16 @@
         </text>
         <line
           x1="128"
-          y1="628"
+          y1="676"
           x2="156"
-          y2="628"
+          y2="676"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad2levelstore-open)"
         />
         <text
           x="164"
-          y="632"
+          y="680"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -611,7 +623,7 @@
         </text>
         <rect
           x="24"
-          y="648"
+          y="696"
           width="20"
           height="12"
           rx="2"
@@ -621,7 +633,7 @@
         />
         <rect
           x="48"
-          y="648"
+          y="696"
           width="20"
           height="12"
           rx="2"
@@ -631,7 +643,7 @@
         />
         <text
           x="80"
-          y="657"
+          y="705"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -640,7 +652,7 @@
         </text>
         <rect
           x="264"
-          y="648"
+          y="696"
           width="28"
           height="12"
           rx="2"
@@ -651,7 +663,7 @@
         />
         <text
           x="300"
-          y="657"
+          y="705"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -660,7 +672,7 @@
         </text>
         <rect
           x="470"
-          y="648"
+          y="696"
           width="28"
           height="12"
           rx="2"
@@ -670,7 +682,7 @@
         />
         <text
           x="506"
-          y="657"
+          y="705"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -679,7 +691,7 @@
         </text>
         <rect
           x="616"
-          y="648"
+          y="696"
           width="28"
           height="12"
           rx="2"
@@ -690,7 +702,7 @@
         />
         <text
           x="652"
-          y="657"
+          y="705"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

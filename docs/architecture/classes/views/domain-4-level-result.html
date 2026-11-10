@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexaBlock API level result · UML class diagram</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --color-paper: #f3f5f6;
+        --color-ink: #17212a;
+        --color-muted: #5b6873;
+        --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --font-serif: 'Instrument Serif', serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        padding: 3rem 2rem;
+      }
+      .frame {
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+      }
+      h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 900px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <p class="eyebrow">Class diagram · Part 1 · View 4 of 4</p>
+      <h1>Level result: one value object and its four values</h1>
+      <svg
+        viewBox="0 0 1040 662"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby="domain4levelresult-title domain4levelresult-desc"
+      >
+        <title id="domain4levelresult-title">HexaBlock API level result · UML class diagram</title>
+        <desc id="domain4levelresult-desc">
+          Class diagram of layer 1 showing the LevelResult value object, which holds a LevelId, a
+          Stars, a Moves and an ElapsedTime value object. Each one guards its own rule and compares
+          by value, and LevelResult asks them which of two results of one level is better.
+        </desc>
+        <defs>
+          <marker
+            id="domain4levelresult-triangle"
+            markerWidth="16"
+            markerHeight="12"
+            refX="15"
+            refY="6"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <polygon points="0 0, 16 6, 0 12" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          </marker>
+          <marker
+            id="domain4levelresult-open"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M0,0 L9,4 L0,8" fill="none" stroke="#5b6873" stroke-width="1" />
+          </marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f3f5f6" />
+        <!-- Layer zones: outer to inner, top to bottom -->
+        <rect
+          x="24"
+          y="24"
+          width="992"
+          height="460"
+          rx="8"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <!-- Relationships (drawn before boxes) -->
+        <!-- LevelResult holds levelId: LevelId: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <path
+          d="M372 152 L320 152"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain4levelresult-open)"
+        />
+        <!-- LevelResult holds stars: Stars: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <path
+          d="M668 152 L720 152"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain4levelresult-open)"
+        />
+        <!-- LevelResult holds moves: Moves: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <path
+          d="M440 288 L440 388 L320 388"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain4levelresult-open)"
+        />
+        <!-- LevelResult holds elapsedTime: ElapsedTime: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <path
+          d="M600 288 L600 388 L720 388"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain4levelresult-open)"
+        />
+        <!-- Arrow labels and multiplicities -->
+        <rect x="322" y="134" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="346"
+          y="143"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          levelId 1
+        </text>
+        <rect x="672" y="134" width="44" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="694"
+          y="143"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          stars 1
+        </text>
+        <rect x="346" y="370" width="44" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="368"
+          y="379"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          moves 1
+        </text>
+        <rect x="616" y="370" width="84" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="658"
+          y="379"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          elapsedTime 1
+        </text>
+        <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
+        <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="44"
+          fill="#b45309"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 1 · ENTITIES · src/domain/
+        </text>
+        <!-- Class: LevelResult (focal, «value object») -->
+        <rect
+          x="372"
+          y="96"
+          width="296"
+          height="192"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="372" y="96" width="296" height="48" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="372" y="136" width="296" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="520"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="520"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelResult
+        </text>
+        <line x1="372" y1="144" x2="668" y2="144" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="388" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + levelId: LevelId
+        </text>
+        <text x="388" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + stars: Stars
+        </text>
+        <text x="388" y="192" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + moves: Moves
+        </text>
+        <text x="388" y="208" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + elapsedTime: ElapsedTime
+        </text>
+        <line x1="372" y1="216" x2="668" y2="216" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text
+          x="388"
+          y="232"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(values: LevelResultValues): LevelResult
+        </text>
+        <text x="388" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: LevelResult): boolean
+        </text>
+        <text
+          textLength="274"
+          lengthAdjust="spacingAndGlyphs"
+          x="388"
+          y="264"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + isForSameLevelAs(other: LevelResult): boolean
+        </text>
+        <text x="388" y="280" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isBetterThan(other: LevelResult): boolean
+        </text>
+        <!-- Class: LevelId («value object») -->
+        <rect
+          x="64"
+          y="96"
+          width="256"
+          height="112"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="192"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="192"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelId
+        </text>
+        <line x1="64" y1="144" x2="320" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: string
+        </text>
+        <line x1="64" y1="168" x2="320" y2="168" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="80"
+          y="184"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(value: string): LevelId
+        </text>
+        <text x="80" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: LevelId): boolean
+        </text>
+        <!-- Class: Stars («value object») -->
+        <rect
+          x="720"
+          y="96"
+          width="280"
+          height="128"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="860"
+          y="114"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="860"
+          y="132"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Stars
+        </text>
+        <line x1="720" y1="144" x2="1000" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="736" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: number
+        </text>
+        <line x1="720" y1="168" x2="1000" y2="168" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="736"
+          y="184"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(value: number): Stars
+        </text>
+        <text x="736" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: Stars): boolean
+        </text>
+        <text x="736" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isMoreThan(other: Stars): boolean
+        </text>
+        <!-- Class: Moves («value object») -->
+        <rect
+          x="64"
+          y="332"
+          width="256"
+          height="128"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="192"
+          y="350"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="192"
+          y="368"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Moves
+        </text>
+        <line x1="64" y1="380" x2="320" y2="380" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: number
+        </text>
+        <line x1="64" y1="404" x2="320" y2="404" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="80"
+          y="420"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(value: number): Moves
+        </text>
+        <text x="80" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: Moves): boolean
+        </text>
+        <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isFewerThan(other: Moves): boolean
+        </text>
+        <!-- Class: ElapsedTime («value object») -->
+        <rect
+          x="720"
+          y="332"
+          width="280"
+          height="128"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="860"
+          y="350"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="860"
+          y="368"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          ElapsedTime
+        </text>
+        <line x1="720" y1="380" x2="1000" y2="380" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="736" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + value: number
+        </text>
+        <line x1="720" y1="404" x2="1000" y2="404" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="736"
+          y="420"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + ofMs(value: number): ElapsedTime
+        </text>
+        <text x="736" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: ElapsedTime): boolean
+        </text>
+        <text
+          textLength="258"
+          lengthAdjust="spacingAndGlyphs"
+          x="736"
+          y="452"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + isShorterThan(other: ElapsedTime): boolean
+        </text>
+        <!-- Footnote -->
+        <text
+          x="24"
+          y="508"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelResult is the result of one level. Its four attributes are value objects: each one
+          checks its own rule in its factory method and is equal by value.
+        </text>
+        <text
+          x="24"
+          y="524"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelId is a non-blank text. Stars, Moves and ElapsedTime are non-negative whole numbers,
+          and ElapsedTime counts milliseconds. isBetterThan() holds the order of DS-4:
+        </text>
+        <text
+          x="24"
+          y="540"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          it asks Stars.isMoreThan(), then Moves.isFewerThan(), then ElapsedTime.isShorterThan(). A
+          full tie is not better. PlayerProgress finds the stored result of a level with
+        </text>
+        <text
+          x="24"
+          y="556"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          isForSameLevelAs(), which compares the two LevelId values. Only the mappers of layer 3
+          read the value of a value object: the rows and the JSON bodies keep text and numbers.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="580" x2="1016" y2="580" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="598"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LEGEND
+        </text>
+        <line
+          x1="24"
+          y1="616"
+          x2="52"
+          y2="616"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain4levelresult-open)"
+        />
+        <text
+          x="60"
+          y="620"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Use · attribute, parameter, return, local or new
+        </text>
+        <text
+          x="300"
+          y="620"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Underlined member · static
+        </text>
+        <rect
+          x="24"
+          y="636"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#f9f4dc"
+          stroke="rgba(180,83,9,0.45)"
+          stroke-width="1"
+        />
+        <text
+          x="56"
+          y="645"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Zone · Clean layer
+        </text>
+        <rect
+          x="166"
+          y="636"
+          width="28"
+          height="12"
+          rx="2"
+          fill="rgba(15,111,116,0.10)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <text
+          x="202"
+          y="645"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Teal · focal class
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>

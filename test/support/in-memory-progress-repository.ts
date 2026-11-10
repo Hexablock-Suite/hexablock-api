@@ -1,10 +1,13 @@
+import {
+  type LevelResultRow,
+  ProgressRowMapper,
+} from '../../src/adapters/persistence/progress-row.mapper.js';
 import type {
   ProgressChange,
   ProgressRepository,
 } from '../../src/application/ports/progress-repository.js';
 import type { GameId } from '../../src/domain/progress/game-id.js';
-import type { LevelResult } from '../../src/domain/progress/level-result.js';
-import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
+import type { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import type { UserId } from '../../src/domain/user/user-id.js';
 
 // Test double for the ProgressRepository port. It keeps one progress per
@@ -43,7 +46,8 @@ export class InMemoryProgressRepository implements ProgressRepository {
   // Not part of the port. A test seeds a stored progress with it, for
   // example the tests of GetProgress. It runs through update().
   async save(progress: PlayerProgress): Promise<void> {
-    await this.update(progress.userId, progress.gameId, () => progress);
+    const { userId, gameId } = progress.snapshot();
+    await this.update(userId, gameId, () => progress);
   }
 }
 
@@ -52,22 +56,19 @@ function keyOf(userId: UserId, gameId: GameId): string {
   return JSON.stringify([userId.value, gameId.value]);
 }
 
-// A new aggregate with the same state. LevelResult is immutable, so the
-// copy shares the results. The copy holds the results by levelId, as the
-// port promises and the Drizzle adapter reads them.
+// A new aggregate with the same state. The copy goes through the rows of
+// ProgressRowMapper, as the Drizzle adapter keeps and reads the aggregate.
+// The copy holds the results by levelId, as the port promises.
 function copyOf(progress: PlayerProgress): PlayerProgress {
-  return PlayerProgress.restore({
-    userId: progress.userId,
-    gameId: progress.gameId,
-    highScore: progress.highScore,
-    updatedAt: progress.updatedAt,
-    results: progress.results.toSorted(byLevelId),
-  });
+  return ProgressRowMapper.toAggregate(
+    ProgressRowMapper.toProgressRow(progress),
+    ProgressRowMapper.toLevelResultRows(progress).toSorted(byLevelId),
+  );
 }
 
 // Text order by UTF-16 code unit. For ASCII levelId values it is the order
 // of a Postgres text column with the C collation, which PGlite uses.
-function byLevelId(left: LevelResult, right: LevelResult): number {
+function byLevelId(left: LevelResultRow, right: LevelResultRow): number {
   if (left.levelId === right.levelId) {
     return 0;
   }

@@ -40,9 +40,10 @@ const UNAUTHORIZED = {
 };
 
 // Progress sync and read, one entry per user and gameId (API-FR-02). Both
-// routes are behind JwtAuthGuard, and the userId comes from the token. A
-// failed Result becomes an HttpException, and HttpErrorFilter answers it
-// with ErrorDto (API-FR-06).
+// routes are behind JwtAuthGuard, and the userId comes from the token.
+// ProgressDtoMapper builds the request of each use case. A request that the
+// mapper rejects and a failed Result become an HttpException, and
+// HttpErrorFilter answers it with ErrorDto (API-FR-06).
 @ApiTags('progress')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -68,7 +69,7 @@ export class ProgressController {
     }
     const result = await this.syncProgress.execute(syncRequest.value);
     if (!result.ok) {
-      throw httpErrorOf(result.error, syncRequest.value.gameId);
+      throw httpErrorOf(result.error, body.gameId);
     }
     return ProgressDtoMapper.toDto(result.value);
   }
@@ -82,7 +83,11 @@ export class ProgressController {
     @Param('gameId') gameId: string,
     @Req() request: AuthenticatedRequest,
   ): Promise<ProgressDto> {
-    const result = await this.getProgress.execute({ userId: request.userId, gameId });
+    const getRequest = ProgressDtoMapper.toGetRequest(gameId, request.userId);
+    if (!getRequest.ok) {
+      throw new BadRequestException(getRequest.error);
+    }
+    const result = await this.getProgress.execute(getRequest.value);
     if (!result.ok) {
       throw httpErrorOf(result.error, gameId);
     }

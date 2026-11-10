@@ -90,6 +90,32 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
     expect(rows).toHaveLength(1);
   });
 
+  // An equal score is not higher, so the high score stays. The sync still
+  // moves updatedAt to its instant.
+  it('should_keep_high_score_and_move_updated_at_forward_when_an_equal_score_syncs', async () => {
+    const { token, userId } = await signIn('ada');
+    await sync(token, { gameId: 'hexa-lines', score: 120 });
+    clock.advanceBy(FIVE_MINUTES_MS);
+
+    const second = await sync(token, { gameId: 'hexa-lines', score: 120 });
+    const readBack = await read(token, 'hexa-lines');
+
+    const entry = {
+      gameId: 'hexa-lines',
+      highScore: 120,
+      updatedAt: LATER.toISOString(),
+      results: [],
+    };
+    expect(second.status).toBe(200);
+    expect(second.body).toEqual(entry);
+    expect(readBack.body).toEqual(entry);
+    const rows = await testApp.database.db
+      .select()
+      .from(progress)
+      .where(eq(progress.userId, userId));
+    expect(rows.map((row) => [row.highScore, row.updatedAt])).toEqual([[120, LATER]]);
+  });
+
   it('should_save_progress_for_token_user_when_body_names_another_user', async () => {
     const ada = await signIn('ada');
     const grace = await signIn('grace');
@@ -179,6 +205,120 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       results: [],
     });
     expect((await storedRows(userId)).map((row) => row.highScore)).toEqual([0]);
+  });
+
+  // The first score of the progress is -0. The read gives 0, so no -0
+  // leaks out through the stored row.
+  it('should_read_back_a_zero_high_score_when_the_first_score_is_negative_zero', async () => {
+    const { token } = await signIn('ada');
+
+    const response = await request(server())
+      .post('/progress')
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json')
+      .send('{"gameId":"hexa-lines","score":-0}');
+    const readBack = await read(token, 'hexa-lines');
+
+    expect(response.status).toBe(200);
+    expect(readBack.status).toBe(200);
+    expect(readBack.body).toEqual({
+      gameId: 'hexa-lines',
+      highScore: 0,
+      updatedAt: AT.toISOString(),
+      results: [],
+    });
+    expect(Object.is(readBack.body.highScore, 0)).toBe(true);
+  });
+
+  // The mapper of the border checks the score before the use case reads the
+  // Clock. So a broken Clock does not hide the rule of the score.
+  it('should_return_bad_request_error_body_and_save_nothing_when_score_breaks_its_rule_under_a_broken_clock', async () => {
+    const { token, userId } = await signIn('ada');
+    const now = vi.spyOn(clock, 'now').mockReturnValue(new Date(Number.NaN));
+
+    const response = await sync(token, { gameId: 'hexa-lines', score: -1 });
+    now.mockRestore();
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['score must be a non-negative integer, got -1.'],
+      path: '/progress',
+    });
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
+  it('should_return_bad_request_error_body_and_save_nothing_when_a_level_result_breaks_its_rule', async () => {
+    const { token, userId } = await signIn('ada');
+
+    const response = await sync(token, {
+      gameId: 'hexa-fit',
+      score: 120,
+      results: [FIT_LEVEL, { ...FIT_LEVEL, levelId: 'fit-02', stars: -2 }],
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request validation failed',
+      details: ['stars must be a non-negative integer, got -2.'],
+      path: '/progress',
+    });
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
+  // The checks run in one order: the game id, then the results, then the
+  // score. The answer names only the first broken rule.
+  it('should_name_only_the_first_broken_rule_when_several_request_values_break_their_rules', async () => {
+    const { token, userId } = await signIn('ada');
+    const badGame = { gameId: 'Hexa Lines' };
+    const badLevel = { results: [{ ...FIT_LEVEL, stars: -2 }] };
+    const badScore = { score: -1 };
+    const gameProblem = 'gameId must be a lowercase slug, got "Hexa Lines".';
+    const levelProblem = 'stars must be a non-negative integer, got -2.';
+
+    for (const [body, problem] of [
+      [{ ...badGame, ...badLevel }, gameProblem],
+      [{ ...badGame, ...badScore }, gameProblem],
+      [{ gameId: 'hexa-fit', ...badLevel, ...badScore }, levelProblem],
+      [{ ...badGame, ...badLevel, ...badScore }, gameProblem],
+    ] as const) {
+      const response = await sync(token, body);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Request validation failed',
+        details: [problem],
+        path: '/progress',
+      });
+    }
+    expect(await storedRows(userId)).toEqual([]);
+  });
+
+  // The mapper of the border builds the domain values. A value that breaks
+  // its rule stops there, so the request reaches no repository method.
+  it('should_call_no_repository_method_when_a_request_value_breaks_its_rule', async () => {
+    const { token } = await signIn('ada');
+    const update = vi.spyOn(DrizzleProgressRepository.prototype, 'update');
+    const find = vi.spyOn(DrizzleProgressRepository.prototype, 'find');
+
+    const responses = [
+      await sync(token, { gameId: 'Hexa Lines', score: 120 }),
+      await sync(token, { gameId: 'hexa-fit', results: [{ ...FIT_LEVEL, stars: -2 }] }),
+      await sync(token, { gameId: 'hexa-lines', score: -1 }),
+      await read(token, 'Hexa%20Lines'),
+    ];
+    const calls = update.mock.calls.length + find.mock.calls.length;
+    update.mockRestore();
+    find.mockRestore();
+
+    expect(responses.map((response) => response.status)).toEqual([400, 400, 400, 400]);
+    expect(calls).toBe(0);
   });
 
   // The DTO declares score as nullable: null means no score in this sync.

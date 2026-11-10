@@ -6,6 +6,7 @@ import { SyncProgressUseCase } from '../../src/application/progress/sync-progres
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
+import { Score } from '../../src/domain/progress/score.js';
 import { ProgressError } from '../../src/domain/progress/progress-error.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
@@ -149,14 +150,14 @@ describe('DrizzleProgressRepository', () => {
     const repository = new DrizzleProgressRepository(database.db);
     await storeProgress(repository, PlayerProgress.start(ADA, FIT, AT));
     const second = PlayerProgress.start(ADA, FIT, AT);
-    second.recordScore(300, LATER);
+    second.recordScore(Score.of(300), LATER);
 
     await storeProgress(repository, second);
 
     expect(await countRows(database, 'progress')).toBe(1);
     const found = await repository.find(ADA, FIT);
-    expect(found?.highScore).toBe(300);
-    expect(found?.updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(found?.snapshot().highScore?.equals(Score.of(300))).toBe(true);
+    expect(found?.snapshot().updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
   // The advisory lock makes the second sync read what the first one saved,
@@ -169,14 +170,16 @@ describe('DrizzleProgressRepository', () => {
     const sync = new SyncProgressUseCase(repository, new FixedClock(AT));
     const syncRequest = (score: number) => ({
       userId: ADA,
-      gameId: FIT.value,
-      score,
+      gameId: FIT,
+      score: Score.of(score),
       results: [],
     });
 
     await Promise.all([sync.execute(syncRequest(500)), sync.execute(syncRequest(100))]);
 
-    expect((await repository.find(ADA, FIT))?.highScore).toBe(500);
+    expect((await repository.find(ADA, FIT))?.snapshot().highScore?.equals(Score.of(500))).toBe(
+      true,
+    );
     expect(await countRows(database, 'progress')).toBe(1);
   });
 
@@ -192,8 +195,8 @@ describe('DrizzleProgressRepository', () => {
     await storeProgress(repository, progress);
     const found = await repository.find(ADA, FIT);
 
-    expect(found?.results).toEqual([first, second]);
-    expect(found?.highScore).toBeNull();
+    expect(found?.snapshot().results).toEqual([first, second]);
+    expect(found?.snapshot().highScore).toBeNull();
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 
@@ -209,8 +212,10 @@ describe('DrizzleProgressRepository', () => {
     progress.recordLevel(level('fit-02', 2, 12, 45_000));
     await storeProgress(repository, progress);
 
-    expect((await repository.find(ADA, FIT))?.results).toEqual(progress.results);
-    expect((await repository.find(ADA, FIT))?.results[0]).toEqual(retry);
+    expect((await repository.find(ADA, FIT))?.snapshot().results).toEqual(
+      progress.snapshot().results,
+    );
+    expect((await repository.find(ADA, FIT))?.snapshot().results[0]).toEqual(retry);
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 
@@ -239,5 +244,69 @@ describe('DrizzleProgressRepository', () => {
     expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
       'gameId must be a lowercase slug, got "Hexa Lines".',
     );
+  });
+
+  // The check constraint of the column is not the only guard: Score checks
+  // the stored number again.
+  it('should_reject_stored_row_when_high_score_breaks_its_rule', () => {
+    for (const highScore of [-1, 2.5, 2 ** 53]) {
+      const row = { userId: ADA.value, gameId: 'fit', highScore, updatedAt: AT };
+
+      expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(ProgressError);
+    }
+    const row = { userId: ADA.value, gameId: 'fit', highScore: -1, updatedAt: AT };
+    expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
+      'score must be a non-negative integer, got -1.',
+    );
+  });
+
+  // The level_results columns keep text and numbers.
+  it('should_write_level_results_as_text_and_numbers_when_aggregate_becomes_rows', () => {
+    const played = PlayerProgress.start(ADA, FIT, AT);
+    played.recordLevel(level('fit-01', 3, 12, 45_000));
+    const rows = [
+      {
+        userId: ADA.value,
+        gameId: 'fit',
+        levelId: 'fit-01',
+        stars: 3,
+        moves: 12,
+        elapsedMs: 45_000,
+      },
+    ];
+
+    expect(ProgressRowMapper.toLevelResultRows(played)).toEqual(rows);
+    const row = { userId: ADA.value, gameId: 'fit', highScore: null, updatedAt: AT };
+    expect(ProgressRowMapper.toLevelResultRows(ProgressRowMapper.toAggregate(row, rows))).toEqual(
+      rows,
+    );
+  });
+
+  // A stored level result must pass the rules of its value objects.
+  it('should_reject_stored_level_result_when_a_column_breaks_its_rule', () => {
+    const row = { userId: ADA.value, gameId: 'fit', highScore: null, updatedAt: AT };
+    const stored = { userId: ADA.value, gameId: 'fit', levelId: 'fit-01', stars: 3, moves: 12 };
+
+    expect(() => ProgressRowMapper.toAggregate(row, [{ ...stored, elapsedMs: -1 }])).toThrow(
+      'elapsedMs must be a non-negative integer, got -1.',
+    );
+  });
+
+  // The row keeps a number: the high_score column does not change.
+  it('should_write_the_high_score_as_a_number_or_null_when_aggregate_becomes_a_row', () => {
+    const scored = PlayerProgress.start(ADA, FIT, AT);
+    scored.recordScore(Score.of(120), LATER);
+
+    expect(ProgressRowMapper.toProgressRow(scored)).toEqual({
+      userId: ADA.value,
+      gameId: 'fit',
+      highScore: 120,
+      updatedAt: LATER,
+    });
+    expect(
+      ProgressRowMapper.toProgressRow(PlayerProgress.start(ADA, FIT, AT)).highScore,
+    ).toBeNull();
+    const row = { userId: ADA.value, gameId: 'fit', highScore: 120, updatedAt: LATER };
+    expect(ProgressRowMapper.toProgressRow(ProgressRowMapper.toAggregate(row, []))).toEqual(row);
   });
 });

@@ -4,6 +4,8 @@ import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.
 import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { UseCase } from '../../../src/application/use-case.js';
 import { SyncProgressUseCase } from '../../../src/application/progress/sync-progress.use-case.js';
+import { GameId } from '../../../src/domain/progress/game-id.js';
+import { Score } from '../../../src/domain/progress/score.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { NestLogger } from '../../../src/infrastructure/logging/nest-logger.js';
@@ -368,8 +370,8 @@ describe('LoggingAspect', () => {
 
     const result = await aspect.execute({
       userId: UserId.from(testUserId(1)),
-      gameId: 'hexa-lines',
-      score: 120,
+      gameId: GameId.of('hexa-lines'),
+      score: Score.of(120),
       results: [],
     });
 

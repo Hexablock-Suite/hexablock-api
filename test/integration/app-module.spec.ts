@@ -13,6 +13,7 @@ import {
   SYNC_PROGRESS,
   type SyncProgress,
 } from '../../src/application/progress/sync-progress.use-case.js';
+import { GameId } from '../../src/domain/progress/game-id.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { LOGIN, LoginUseCase } from '../../src/application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../../src/application/auth/register.use-case.js';
@@ -26,6 +27,7 @@ import { RandomUserIdGenerator } from '../../src/infrastructure/auth/random-user
 import { ScryptPasswordHasher } from '../../src/infrastructure/auth/scrypt-password-hasher.js';
 import { NestLogger } from '../../src/infrastructure/logging/nest-logger.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
+import { InMemoryProgressRepository } from '../support/in-memory-progress-repository.js';
 import { testUserId } from '../support/user-ids.js';
 
 // AppModule is the composition root: it binds each account port to one adapter.
@@ -59,28 +61,26 @@ describe('AppModule account wiring', () => {
     await moduleRef.close();
   });
 
-  // The invalid gameId fails before any query, so no database is needed.
+  // The in-memory repository takes the place of the Drizzle one, so no
+  // database is needed. The spy starts after the module is built, so it sees
+  // only the line of the aspect.
   it('should_run_sync_progress_inside_logging_aspect_when_sync_progress_port_is_called', async () => {
     stubTestEnvironment();
-    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(PROGRESS_REPOSITORY)
+      .useValue(new InMemoryProgressRepository())
+      .compile();
     const sync = moduleRef.get<SyncProgress>(SYNC_PROGRESS);
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
 
     const result = await sync.execute({
       userId: UserId.from(testUserId(1)),
-      gameId: 'Hexa Lines',
+      gameId: GameId.of('hexa-lines'),
       results: [],
     });
 
-    const error = {
-      kind: 'invalid-progress',
-      problems: ['gameId must be a lowercase slug, got "Hexa Lines".'],
-    };
-    expect(result).toEqual({ ok: false, error });
-    expect(warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=SyncProgress outcome=failure kind=invalid-progress',
-    );
-    expect(JSON.stringify(warn.mock.calls)).not.toContain('Hexa Lines');
+    expect(result.ok).toBe(true);
+    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=SyncProgress outcome=success');
     await moduleRef.close();
   });
 

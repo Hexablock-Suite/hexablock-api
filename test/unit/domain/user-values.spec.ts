@@ -1,3 +1,5 @@
+import type { Result } from '../../../src/domain/shared/result.js';
+import * as passwordModule from '../../../src/domain/user/password.js';
 import { PASSWORD_LENGTH, Password } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
@@ -70,6 +72,20 @@ describe('Password', () => {
       expect(result.ok && result.value.value).toBe(raw);
     }
   });
+
+  // Sign-in checks a text that is not a Password yet, so the operation takes the raw text.
+  it('should_tell_that_text_is_too_long_when_it_has_more_than_128_code_points', () => {
+    for (const raw of ['x'.repeat(129), EMOJI.repeat(129)]) {
+      expect(Password.isTooLong(raw)).toBe(true);
+    }
+    for (const raw of ['', '1234567', 'x'.repeat(128), EMOJI.repeat(128)]) {
+      expect(Password.isTooLong(raw)).toBe(false);
+    }
+  });
+
+  it('should_keep_the_length_count_inside_password_when_module_lists_its_exports', () => {
+    expect(Object.keys(passwordModule).sort()).toEqual(['PASSWORD_LENGTH', 'Password']);
+  });
 });
 
 describe('UserId', () => {
@@ -126,5 +142,51 @@ describe('UserId', () => {
 describe('PasswordHash', () => {
   it('should_reject_password_hash_when_value_is_empty', () => {
     expect(() => PasswordHash.from('')).toThrow('A PasswordHash needs a value.');
+  });
+});
+
+describe('credential values equals', () => {
+  function created<T>(result: Result<T, string>): T {
+    if (!result.ok) throw new Error(result.error);
+    return result.value;
+  }
+
+  it('should_be_equal_when_two_usernames_have_the_same_letters_and_case', () => {
+    const name = created(Username.create('Ada'));
+    const twin = created(Username.create('Ada'));
+    const lowerCase = created(Username.create('ada'));
+    const other = created(Username.create('Grace'));
+
+    expect(twin).not.toBe(name);
+    expect(name.equals(twin)).toBe(true);
+    expect(twin.equals(name)).toBe(true);
+    for (const different of [lowerCase, other]) {
+      expect(name.equals(different)).toBe(false);
+      expect(different.equals(name)).toBe(false);
+    }
+  });
+
+  it('should_be_equal_when_two_passwords_hold_the_same_text', () => {
+    const password = created(Password.create('correct-horse'));
+    const twin = created(Password.create('correct-horse'));
+    const other = created(Password.create('correct-horses'));
+
+    expect(twin).not.toBe(password);
+    expect(password.equals(twin)).toBe(true);
+    expect(twin.equals(password)).toBe(true);
+    expect(password.equals(other)).toBe(false);
+    expect(other.equals(password)).toBe(false);
+  });
+
+  it('should_be_equal_when_two_password_hashes_hold_the_same_text', () => {
+    const hash = PasswordHash.from('$hash-one');
+    const twin = PasswordHash.from('$hash-one');
+    const other = PasswordHash.from('$hash-two');
+
+    expect(twin).not.toBe(hash);
+    expect(hash.equals(twin)).toBe(true);
+    expect(twin.equals(hash)).toBe(true);
+    expect(hash.equals(other)).toBe(false);
+    expect(other.equals(hash)).toBe(false);
   });
 });

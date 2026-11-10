@@ -34,4 +34,10 @@ export class Username {
       ? ok(new Username(raw))
       : err('invalid-username');
   }
+
+  // Two names are equal when they have the same letters in the same case.
+  // `Ada` and `ada` are two names with one key.
+  equals(other: Username): boolean {
+    return this.value === other.value;
+  }
 }
