@@ -1,6 +1,7 @@
 import { ProgressDtoMapper } from '../../../src/adapters/http/progress-dto.mapper.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelResult } from '../../../src/domain/progress/level-result.js';
+import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { testUserId } from '../../support/user-ids.js';
@@ -102,6 +103,23 @@ describe('ProgressDtoMapper.toGetRequest', () => {
     expect(ProgressDtoMapper.toGetRequest(BAD_GAME, ADA)).toEqual({
       ok: false,
       error: [GAME_PROBLEM],
+    });
+  });
+});
+
+// The JSON body keeps numbers and strings: the wire format does not change.
+describe('ProgressDtoMapper.toDto', () => {
+  it('should_write_plain_numbers_and_strings_when_progress_becomes_a_dto', () => {
+    const at = new Date('2026-11-06T10:00:00.000Z');
+    const progress = PlayerProgress.start(ADA, GameId.of('hexa-fit'), at);
+    progress.recordScore(Score.of(120), at);
+    progress.recordLevel(LevelResult.of(LEVEL));
+
+    expect(ProgressDtoMapper.toDto(progress)).toEqual({
+      gameId: 'hexa-fit',
+      highScore: 120,
+      updatedAt: '2026-11-06T10:00:00.000Z',
+      results: [LEVEL],
     });
   });
 });

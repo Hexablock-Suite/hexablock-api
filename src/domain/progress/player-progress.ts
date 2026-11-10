@@ -20,9 +20,10 @@ export interface PlayerProgressState {
 // classes.md decision 3. The instant is a parameter: the use case reads it
 // from the Clock port.
 export class PlayerProgress {
-  // One result per levelId, in the order of the first record. It holds the
-  // best result of each level by the order of DS-4 (DS-12).
-  private readonly resultsByLevel = new Map<string, LevelResult>();
+  // One result per level, in the order of the first record. It holds the
+  // best result of each level by the order of DS-4 (DS-12). A game has few
+  // levels, so recordLevel() finds the result of a level in this list.
+  private readonly levelResults: LevelResult[] = [];
 
   private constructor(
     readonly userId: UserId,
@@ -69,7 +70,7 @@ export class PlayerProgress {
   }
 
   get results(): LevelResult[] {
-    return [...this.resultsByLevel.values()];
+    return [...this.levelResults];
   }
 
   // Keeps the highest score. Every record moves updatedAt to the given instant.
@@ -88,9 +89,11 @@ export class PlayerProgress {
     if (!(result instanceof LevelResult)) {
       throw new ProgressError('recordLevel needs a LevelResult.');
     }
-    const stored = this.resultsByLevel.get(result.levelId);
-    if (stored === undefined || result.isBetterThan(stored)) {
-      this.resultsByLevel.set(result.levelId, result);
+    const index = this.levelResults.findIndex((stored) => stored.isForSameLevelAs(result));
+    if (index === -1) {
+      this.levelResults.push(result);
+    } else if (result.isBetterThan(this.levelResults[index])) {
+      this.levelResults[index] = result;
     }
   }
 }

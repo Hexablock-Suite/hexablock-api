@@ -256,6 +256,38 @@ describe('DrizzleProgressRepository', () => {
     );
   });
 
+  // The level_results columns keep text and numbers.
+  it('should_write_level_results_as_text_and_numbers_when_aggregate_becomes_rows', () => {
+    const played = PlayerProgress.start(ADA, FIT, AT);
+    played.recordLevel(level('fit-01', 3, 12, 45_000));
+    const rows = [
+      {
+        userId: ADA.value,
+        gameId: 'fit',
+        levelId: 'fit-01',
+        stars: 3,
+        moves: 12,
+        elapsedMs: 45_000,
+      },
+    ];
+
+    expect(ProgressRowMapper.toLevelResultRows(played)).toEqual(rows);
+    const row = { userId: ADA.value, gameId: 'fit', highScore: null, updatedAt: AT };
+    expect(ProgressRowMapper.toLevelResultRows(ProgressRowMapper.toAggregate(row, rows))).toEqual(
+      rows,
+    );
+  });
+
+  // A stored level result must pass the rules of its value objects.
+  it('should_reject_stored_level_result_when_a_column_breaks_its_rule', () => {
+    const row = { userId: ADA.value, gameId: 'fit', highScore: null, updatedAt: AT };
+    const stored = { userId: ADA.value, gameId: 'fit', levelId: 'fit-01', stars: 3, moves: 12 };
+
+    expect(() => ProgressRowMapper.toAggregate(row, [{ ...stored, elapsedMs: -1 }])).toThrow(
+      'elapsedMs must be a non-negative integer, got -1.',
+    );
+  });
+
   // The row keeps a number: the high_score column does not change.
   it('should_write_the_high_score_as_a_number_or_null_when_aggregate_becomes_a_row', () => {
     const scored = PlayerProgress.start(ADA, FIT, AT);

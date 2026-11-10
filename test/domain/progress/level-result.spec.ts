@@ -4,15 +4,30 @@ import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 const VALID = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45_000 };
 
 describe('LevelResult', () => {
-  it('should_keep_every_field_when_values_are_valid', () => {
-    const result = LevelResult.of(VALID);
+  // The checks run in the order of the fields: the level id, the stars, the
+  // moves, the time. The first broken rule gives the message.
+  it('should_name_the_first_broken_field_when_several_fields_break_their_rules', () => {
+    const broken = { levelId: ' ', stars: -1, moves: -2, elapsedMs: -3 };
 
-    expect({
-      levelId: result.levelId,
-      stars: result.stars,
-      moves: result.moves,
-      elapsedMs: result.elapsedMs,
-    }).toEqual(VALID);
+    for (const [values, message] of [
+      [broken, 'levelId must be a non-blank string.'],
+      [{ ...broken, levelId: 'fit-01' }, 'stars must be a non-negative integer, got -1.'],
+      [{ ...VALID, moves: -2, elapsedMs: -3 }, 'moves must be a non-negative integer, got -2.'],
+      [{ ...VALID, elapsedMs: -3 }, 'elapsedMs must be a non-negative integer, got -3.'],
+    ] as const) {
+      expect(() => LevelResult.of(values)).toThrow(message);
+    }
+  });
+
+  it('should_tell_if_two_results_are_of_the_same_level_when_their_level_ids_are_compared', () => {
+    const result = LevelResult.of(VALID);
+    const retry = LevelResult.of({ levelId: 'fit-01', stars: 1, moves: 30, elapsedMs: 90_000 });
+    const next = LevelResult.of({ ...VALID, levelId: 'fit-02' });
+
+    expect(result.isForSameLevelAs(retry)).toBe(true);
+    expect(retry.isForSameLevelAs(result)).toBe(true);
+    expect(result.isForSameLevelAs(next)).toBe(false);
+    expect(next.isForSameLevelAs(result)).toBe(false);
   });
 
   it('should_reject_level_result_when_level_id_is_missing_or_blank', () => {

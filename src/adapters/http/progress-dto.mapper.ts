@@ -50,14 +50,14 @@ export const ProgressDtoMapper = {
   toDto(progress: PlayerProgress): ProgressDto {
     return {
       gameId: progress.gameId.value,
-      // The JSON body keeps a number.
+      // The JSON body keeps numbers and strings.
       highScore: progress.highScore?.value ?? null,
       updatedAt: progress.updatedAt.toISOString(),
-      results: progress.results.map(({ levelId, stars, moves, elapsedMs }) => ({
-        levelId,
-        stars,
-        moves,
-        elapsedMs,
+      results: progress.results.map((result) => ({
+        levelId: result.levelId.value,
+        stars: result.stars.value,
+        moves: result.moves.value,
+        elapsedMs: result.elapsedTime.value,
       })),
     };
   },

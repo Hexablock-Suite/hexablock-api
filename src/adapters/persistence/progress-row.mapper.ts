@@ -34,13 +34,14 @@ export const ProgressRowMapper = {
   },
 
   toLevelResultRows(aggregate: PlayerProgress): LevelResultRow[] {
+    // The level_results columns keep a text and three numbers.
     return aggregate.results.map((result) => ({
       userId: aggregate.userId.value,
       gameId: aggregate.gameId.value,
-      levelId: result.levelId,
-      stars: result.stars,
-      moves: result.moves,
-      elapsedMs: result.elapsedMs,
+      levelId: result.levelId.value,
+      stars: result.stars.value,
+      moves: result.moves.value,
+      elapsedMs: result.elapsedTime.value,
     }));
   },
 };

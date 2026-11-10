@@ -205,7 +205,9 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
       const stored = await repository.find(ADA, GameId.of('hexa-fit'));
       // The port gives the results by levelId, whatever the sync order.
       expect(stored?.results).toEqual([first, second].map((level) => LevelResult.of(level)));
-      expect(results[1]?.ok && results[1].value).toEqual(stored);
+      // The answer of the last sync keeps the stored result first, then the new one.
+      const last = results[1]?.ok ? results[1].value : null;
+      expect(last?.results).toEqual(levels.map((level) => LevelResult.of(level)));
     }
   });
 
