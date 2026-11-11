@@ -72,6 +72,22 @@ describe('LoginUseCase', () => {
     );
   });
 
+  // The typed text can be shorter than any Password. The unknown username
+  // still costs one check, against the hash that the constructor started.
+  it('should_verify_the_short_typed_text_once_against_the_started_dummy_hash_when_username_is_unknown', async () => {
+    const hash = vi.spyOn(hasher, 'hash');
+    const built = new LoginUseCase(new InMemoryUserRepository(), hasher, new PrefixTokenIssuer());
+    const dummy: unknown = await hash.mock.results[0].value;
+    const verify = vi.spyOn(hasher, 'verify');
+
+    const result = await built.execute({ username: 'nobody', password: 'short' });
+
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(verify).toHaveBeenCalledOnce();
+    expect(verify.mock.calls[0][0]).toBe('short');
+    expect(verify.mock.calls[0][1]).toBe(dummy);
+  });
+
   it('should_not_hash_during_login_when_first_unknown_username_signs_in', async () => {
     const hash = vi.spyOn(hasher, 'hash');
     const result = await login.execute({ username: 'grace', password: 'correct horse' });

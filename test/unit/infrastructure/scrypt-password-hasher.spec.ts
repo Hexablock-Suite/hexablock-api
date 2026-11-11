@@ -45,6 +45,16 @@ describe('ScryptPasswordHasher', () => {
     expect(await hasher.verify('short', hash)).toBe(false);
   });
 
+  // A hash stored before #90 still verifies.
+  it('should_accept_password_when_hash_was_stored_before_the_delivery_change', async () => {
+    const stored = PasswordHash.from(
+      'scrypt$16384$8$1$bOg4QntoItjjaC_jUW8_nw$GgPWraqoGpxXdvbV1ASiBFnbvyJRR8FoixnyRPQEU_8dKxA_wNuDagDbBFzrMe9uyMAWgO05fLyUPefBUokPTw',
+    );
+
+    expect(await hasher.verify(PLAIN, stored)).toBe(true);
+    expect(await hasher.verify('correct horse batterY', stored)).toBe(false);
+  });
+
   // A PasswordHash is never empty, so the empty text is not a case here.
   it('should_reject_password_when_hash_is_malformed', async () => {
     for (const hash of ['plain text', 'scrypt$1$2$3$salt', 'bcrypt$16384$8$1$c2FsdA$aGFzaA']) {
