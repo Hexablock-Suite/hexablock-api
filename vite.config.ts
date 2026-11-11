@@ -4,8 +4,10 @@ import { defineConfig } from 'vite-plus';
 // describe titles stay free.
 const TEST_TITLE = '^should_[a-z0-9_]+_when_[a-z0-9_]+$';
 
-// The domain and the application stay deterministic (spec S6). The globs
-// start with ** so the wrong examples in test/fixtures/arch match too.
+// The domain and the application stay deterministic (spec S6). They also
+// never call a delivery operation of a value object: only the border
+// receives its value (#90). The globs start with ** so the wrong examples in
+// test/fixtures/arch match too.
 const CORE_FILES = ['**/src/domain/**', '**/src/application/**'];
 const USE_THE_PORT =
   'Take the instant as a parameter in src/domain or from the Clock port in src/application, and inject a seeded random source.';
@@ -45,6 +47,7 @@ export default defineConfig({
             { object: 'Date', property: 'now', message: USE_THE_PORT },
           ],
           'hexablock/no-current-date': 'error',
+          'hexablock/no-delivery-call': 'error',
         },
       },
     ],
