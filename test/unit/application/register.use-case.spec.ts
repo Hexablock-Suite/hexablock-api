@@ -26,9 +26,9 @@ describe('RegisterUseCase', () => {
 
     expect(result).toEqual({ ok: true, value: UserId.from(testUserId(1)) });
     expect(users.users).toHaveLength(1);
-    expect(receiveValueOf(users.users[0].id)).toBe(testUserId(1));
-    expect(receiveValueOf(users.users[0].username)).toBe('ada');
-    expect(receiveValueOf(users.users[0].passwordHash)).toBe('hashed:correct horse');
+    expect(receiveValueOf(users.users[0].snapshot().id)).toBe(testUserId(1));
+    expect(receiveValueOf(users.users[0].snapshot().username)).toBe('ada');
+    expect(receiveValueOf(users.users[0].snapshot().passwordHash)).toBe('hashed:correct horse');
   });
 
   // #90: the port carries domain types, so the use case reads no text.
@@ -43,7 +43,7 @@ describe('RegisterUseCase', () => {
     expect(Password.create('correct horse')).toEqual({ ok: true, value: password });
     const made = await hash.mock.results[0].value;
     expect(made).toBeInstanceOf(PasswordHash);
-    expect(users.users[0].passwordHash).toBe(made);
+    expect(users.users[0].snapshot().passwordHash).toBe(made);
   });
 
   it('should_fail_with_username_taken_when_username_exists', async () => {
@@ -53,7 +53,7 @@ describe('RegisterUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
     expect(users.users).toHaveLength(1);
-    expect(receiveValueOf(users.users[0].passwordHash)).toBe('hashed:correct horse');
+    expect(receiveValueOf(users.users[0].snapshot().passwordHash)).toBe('hashed:correct horse');
   });
 
   // The name is stored as typed, but a name that differs only in letter
@@ -65,15 +65,17 @@ describe('RegisterUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
     expect(users.users).toHaveLength(1);
-    expect(receiveValueOf(users.users[0].username)).toBe('ada');
-    expect(receiveValueOf(users.users[0].passwordHash)).toBe('hashed:correct horse');
+    expect(receiveValueOf(users.users[0].snapshot().username)).toBe('ada');
+    expect(receiveValueOf(users.users[0].snapshot().passwordHash)).toBe('hashed:correct horse');
   });
 
   it('should_store_username_as_typed_when_it_has_capital_letters', async () => {
     const result = await register.execute({ username: 'AdaLovelace', password: 'correct horse' });
 
     expect(result).toEqual({ ok: true, value: UserId.from(testUserId(1)) });
-    expect(users.users.map((user) => receiveValueOf(user.username))).toEqual(['AdaLovelace']);
+    expect(users.users.map((user) => receiveValueOf(user.snapshot().username))).toEqual([
+      'AdaLovelace',
+    ]);
   });
 
   it('should_fail_with_each_invalid_field_when_credentials_break_the_rules', async () => {

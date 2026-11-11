@@ -25,15 +25,15 @@ The code runs the find, the change and the save of this view as one call, `Progr
 
 ## Use case 2: login
 
-The app calls this endpoint when a player signs in. The endpoint is `AuthController.signIn()` (API-FR-01). Its path is new in two ways. First, it has no guard, because the player has no token yet. Second, the use case holds three ports, and two of their adapters live in layer 4: `ScryptPasswordHasher` checks the password and `JwtTokenIssuer` issues the `SessionToken` that every guarded request then carries. The use case answers no in two places, an unknown username and a wrong password, so the sequence diagram has two `alt` fragments.
+The app calls this endpoint when a player signs in. The endpoint is `AuthController.signIn()` (API-FR-01). Its path is new in two ways. First, it has no guard, because the player has no token yet. Second, the use case holds three ports, and two of their adapters live in layer 4: `ScryptPasswordHasher` checks the password and `JwtTokenIssuer` issues the `SessionToken` that every guarded request then carries. The use case answers no in two places, an unknown username and a wrong password, so the sequence diagram has two `alt` fragments. The use case never opens the `User`: it asks `user.passwordMatches()` with the `PasswordHasher` port, the user passes its own hash to `verify()`, and `TokenIssuer.issue()` takes the `User` (decision 16 of [classes.md](classes.md)).
 
 ### Class view
 
-![Login class view: ScryptPasswordHasher and JwtTokenIssuer in layer 4, AuthController and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User entity in layer 1](classes/views/flow-2-login.png)
+![Login class view: ScryptPasswordHasher and JwtTokenIssuer in layer 4, AuthController and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User aggregate root and the PasswordVerifier interface in layer 1](classes/views/flow-2-login.png)
 
 ### Sequence diagram
 
-![Login sequence: the HTTP request enters AuthController with no token, LoginUseCase finds the User, answers a failure when the user is missing or the password does not match, and otherwise asks JwtTokenIssuer for a SessionToken, which the controller answers as a TokenDto](flows/views/seq-2-login.png)
+![Login sequence: the HTTP request enters AuthController with no token, LoginUseCase finds the User through DrizzleUserRepository, asks ScryptPasswordHasher for one check against a dummy hash and answers a failure when the user is missing, otherwise asks the User if the password matches, the User passes its own hash to ScryptPasswordHasher, the use case answers a failure when the password does not match, and otherwise asks JwtTokenIssuer for a SessionToken, which the controller answers as a TokenDto](flows/views/seq-2-login.png)
 
 ## Use case 3: update levels
 

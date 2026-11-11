@@ -18,11 +18,11 @@ function userNamed(id: string, name: string, hash: string): User {
   if (!username.ok) {
     throw new Error(`invalid test username ${name}`);
   }
-  return new User(UserId.from(id), username.value, PasswordHash.from(hash));
+  return User.register(UserId.from(id), username.value, PasswordHash.from(hash));
 }
 
 function username(name: string): Username {
-  return userNamed(ADA_ID, name, 'unused').username;
+  return userNamed(ADA_ID, name, 'unused').snapshot().username;
 }
 
 // API-FR-01: the users table and its repository on PGlite (R-database-harness).
@@ -176,6 +176,18 @@ describe('DrizzleUserRepository', () => {
 
     await expect(added).rejects.toMatchObject({ cause: { code: '22021' } });
     expect(await database.db.select().from(users)).toEqual([]);
+  });
+
+  // #91: the mapper reads the snapshot of the user and restores a user from a row.
+  it('should_map_the_same_row_both_ways_when_the_mapper_reads_the_snapshot', () => {
+    const row = { id: ADA_ID, username: 'Ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' };
+    const ada = userNamed(ADA_ID.toUpperCase(), 'Ada', 'scrypt$hash');
+
+    expect(UserRowMapper.toRow(ada)).toEqual(row);
+    const restored = UserRowMapper.toEntity(row);
+    expect(restored.equals(ada)).toBe(true);
+    expect(restored.snapshot()).toEqual(ada.snapshot());
+    expect(UserRowMapper.toRow(restored)).toEqual(row);
   });
 
   it('should_throw_when_stored_row_holds_an_invalid_username', () => {

@@ -65,10 +65,12 @@ The table shows the design. Most of these pieces are not code yet; their code st
   `snapshot()` (decision 2 of `classes.md`). A value object keeps its value private and
   delivers it to a receiver with `deliverTo()`; no operation returns it, and only the adapters
   of layers 3 and 4 receive it (decision 15 of `classes.md`,
-  [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90)). `User` still has public
-  fields and a public constructor. Issue
-  [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91) plans that change
-  (decision 16 of `classes.md`).
+  [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90)). `User` has no public
+  field and no public constructor: `User.register()` and `User.restore()` build it, its
+  mapper reads a `snapshot()`, and `User.passwordMatches()` checks a typed password through
+  `PasswordVerifier`, an interface of the domain that the `PasswordHasher` port extends
+  (decision 16 of `classes.md`,
+  [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91)).
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
   [.dependency-cruiser.cjs](.dependency-cruiser.cjs): `domain-imports-only-domain`,
   `application-imports-only-domain`, `adapters-never-import-infrastructure` and

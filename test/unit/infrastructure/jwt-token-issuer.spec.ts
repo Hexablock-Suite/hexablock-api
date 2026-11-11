@@ -1,5 +1,8 @@
 import { JwtService } from '@nestjs/jwt';
+import { PasswordHash } from '../../../src/domain/user/password-hash.js';
+import { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { Username } from '../../../src/domain/user/username.js';
 import { createJwtService } from '../../../src/infrastructure/auth/auth-config.js';
 import { JwtTokenIssuer } from '../../../src/infrastructure/auth/jwt-token-issuer.js';
 import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';
@@ -7,6 +10,15 @@ import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';
 // The text that the UserId delivers: the token subject.
 const USER_ID_VALUE = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
 const USER_ID = UserId.from(USER_ID_VALUE);
+
+// The issuer takes the User and reads the id of its snapshot (#91).
+function userWithId(id: UserId): User {
+  const username = Username.create('ada');
+  if (!username.ok) throw new Error(username.error);
+  return User.register(id, username.value, PasswordHash.from('scrypt$hash'));
+}
+
+const USER = userWithId(USER_ID);
 
 // A token with alg "none" and an empty signature, as an attacker can write it.
 function unsignedToken(payload: object): string {
@@ -18,7 +30,7 @@ describe('JwtTokenIssuer', () => {
   const issuer = new JwtTokenIssuer(createJwtService(TEST_JWT_SECRET));
 
   it('should_issue_hs256_token_with_user_id_subject_when_token_is_issued', () => {
-    const token = issuer.issue(USER_ID);
+    const token = issuer.issue(USER);
 
     const decoded = new JwtService().decode<{ sub: string; iat: number; exp: number }>(token, {
       complete: true,
@@ -31,14 +43,26 @@ describe('JwtTokenIssuer', () => {
     });
   });
 
+  // #91: the subject is the text that the UserId delivers, in lower case.
+  it('should_sign_the_lower_case_user_id_as_subject_when_the_user_id_came_in_upper_case', () => {
+    const token = issuer.issue(userWithId(UserId.from(USER_ID_VALUE.toUpperCase())));
+
+    expect(new JwtService().decode<{ sub: string }>(token).sub).toBe(USER_ID_VALUE);
+    expect(Object.keys(new JwtService().decode<object>(token)).sort()).toEqual([
+      'exp',
+      'iat',
+      'sub',
+    ]);
+  });
+
   it('should_return_user_id_when_token_is_valid', () => {
-    expect(issuer.verify(issuer.issue(USER_ID))).toEqual(USER_ID);
+    expect(issuer.verify(issuer.issue(USER))).toEqual(USER_ID);
   });
 
   it('should_return_null_when_token_is_signed_with_another_secret', () => {
     const other = new JwtTokenIssuer(createJwtService('another-secret-with-at-least-32-chars'));
 
-    expect(issuer.verify(other.issue(USER_ID))).toBeNull();
+    expect(issuer.verify(other.issue(USER))).toBeNull();
   });
 
   it('should_return_null_when_token_has_expired', () => {

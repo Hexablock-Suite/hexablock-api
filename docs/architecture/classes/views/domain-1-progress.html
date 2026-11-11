@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 1 of 4</p>
       <h1>Progress: one aggregate per user and gameId, with its level results</h1>
       <svg
-        viewBox="0 0 1040 846"
+        viewBox="0 0 1040 862"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain1progress-title domain1progress-desc"
@@ -73,12 +73,12 @@
         </title>
         <desc id="domain1progress-desc">
           Class diagram of layer 1 showing PlayerProgress, the aggregate root keyed by userId and
-          gameId, which refers to User by userId, holds a GameId, keeps its high score as a Score
-          value object, gives a copy of its state through snapshot() and keeps its LevelResult
-          values, each one a LevelId, a Stars, a Moves and an ElapsedTime value object with the
-          isBetterThan order of DS-4, and the LeaderboardEntry read model that holds a LevelResult.
-          View 4 details the four value objects. GameId, Score and UserId keep their value private
-          and deliver it to a receiver with deliverTo().
+          gameId, which refers to the User aggregate root by userId, holds a GameId, keeps its high
+          score as a Score value object, gives a copy of its state through snapshot() and keeps its
+          LevelResult values, each one a LevelId, a Stars, a Moves and an ElapsedTime value object
+          with the isBetterThan order of DS-4, and the LeaderboardEntry read model that holds a
+          LevelResult. View 4 details the four value objects. GameId, Score and UserId keep their
+          value private and deliver it to a receiver with deliverTo().
         </desc>
         <defs>
           <marker
@@ -172,7 +172,7 @@
         />
         <!-- User holds id: UserId: use with role and multiplicity -->
         <path
-          d="M176 216 L176 264"
+          d="M176 328 L176 376"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -180,7 +180,7 @@
         />
         <!-- PlayerProgress holds userId: UserId: use with role and multiplicity -->
         <path
-          d="M400 320 L288 320"
+          d="M400 348 L356 348 L356 400 L288 400"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -279,10 +279,10 @@
         >
           0..1
         </text>
-        <rect x="182" y="234" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="182" y="346" width="32" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="198"
-          y="243"
+          y="355"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -291,10 +291,10 @@
         >
           id 1
         </text>
-        <rect x="312" y="302" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="294" y="382" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="340"
-          y="311"
+          x="322"
+          y="391"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -316,12 +316,12 @@
         >
           LAYER 1 · ENTITIES · src/domain/
         </text>
-        <!-- Class: User («entity») -->
+        <!-- Class: User («entity» «aggregate root») -->
         <rect
           x="64"
           y="88"
           width="224"
-          height="128"
+          height="240"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -336,7 +336,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «entity»
+          «entity» «aggregate root»
         </text>
         <text
           x="176"
@@ -351,19 +351,62 @@
         </text>
         <line x1="64" y1="136" x2="288" y2="136" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="152" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + id: UserId
+          - id: UserId
         </text>
         <text x="80" y="168" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + username: Username
+          - username: Username
         </text>
         <text x="80" y="184" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + passwordHash: PasswordHash
+          - passwordHash: PasswordHash
         </text>
         <line x1="64" y1="192" x2="288" y2="192" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="208" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          textLength="202"
+          lengthAdjust="spacingAndGlyphs"
+          text-decoration="underline"
+          x="80"
+          y="208"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + register(id: UserId, username: Username,
+        </text>
+        <text
+          text-decoration="underline"
+          x="102"
+          y="224"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          hash: PasswordHash): User
+        </text>
+        <text
+          text-decoration="underline"
+          x="80"
+          y="240"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + restore(state: UserState): User
+        </text>
+        <text x="80" y="256" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: User): boolean
         </text>
-
+        <text x="80" y="272" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + snapshot(): UserState
+        </text>
+        <text x="80" y="288" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + passwordMatches(typed: string,
+        </text>
+        <text x="102" y="304" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          verifier: PasswordVerifier):
+        </text>
+        <text x="102" y="320" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;boolean&gt;
+        </text>
         <!-- Class: PlayerProgress (focal, «entity») -->
         <rect
           x="400"
@@ -754,7 +797,7 @@
         <!-- Class: UserId («value object») -->
         <rect
           x="64"
-          y="264"
+          y="376"
           width="224"
           height="144"
           rx="6"
@@ -764,7 +807,7 @@
         />
         <text
           x="176"
-          y="282"
+          y="394"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -775,7 +818,7 @@
         </text>
         <text
           x="176"
-          y="300"
+          y="412"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -784,14 +827,14 @@
         >
           UserId
         </text>
-        <line x1="64" y1="312" x2="288" y2="312" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="328" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="424" x2="288" y2="424" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="440" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - value: string
         </text>
-        <line x1="64" y1="336" x2="288" y2="336" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="64" y1="448" x2="288" y2="448" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="80"
-          y="352"
+          y="464"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -799,13 +842,13 @@
         >
           + from(value: string): UserId
         </text>
-        <text x="80" y="368" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="480" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: UserId): boolean
         </text>
-        <text x="80" y="384" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="496" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="400" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="512" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Footnote -->
@@ -870,11 +913,21 @@
           GameId, Score and UserId keep their value private (decision 15): deliverTo() delivers it
           to a receiver of layers 3 and 4, and no operation returns it.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="764" x2="1016" y2="764" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="782"
+          y="756"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          User is an aggregate root too (decision 16): it has no public field, snapshot() gives a
+          UserState, and passwordMatches() asks a PasswordVerifier. View 3 draws both.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="780" x2="1016" y2="780" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="798"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -884,16 +937,16 @@
         </text>
         <line
           x1="24"
-          y1="800"
+          y1="816"
           x2="52"
-          y2="800"
+          y2="816"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
         <text
           x="60"
-          y="804"
+          y="820"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -902,7 +955,7 @@
         </text>
         <text
           x="299"
-          y="804"
+          y="820"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -912,7 +965,7 @@
 
         <rect
           x="24"
-          y="820"
+          y="836"
           width="20"
           height="12"
           rx="2"
@@ -922,7 +975,7 @@
         />
         <text
           x="56"
-          y="829"
+          y="845"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -931,7 +984,7 @@
         </text>
         <rect
           x="166"
-          y="820"
+          y="836"
           width="28"
           height="12"
           rx="2"
@@ -942,7 +995,7 @@
         />
         <text
           x="202"
-          y="829"
+          y="845"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -951,7 +1004,7 @@
         </text>
         <rect
           x="372"
-          y="820"
+          y="836"
           width="28"
           height="12"
           rx="2"
@@ -961,7 +1014,7 @@
         />
         <text
           x="408"
-          y="829"
+          y="845"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
