@@ -234,4 +234,41 @@ describe('LoginUseCase', () => {
 
     expect(issue).not.toHaveBeenCalled();
   });
+
+  // The probes of the independent check of #91.
+  // The maximum bounds the hash work for an unknown username too.
+  it('should_skip_the_hash_check_when_an_unknown_username_sends_a_password_above_the_maximum', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+
+    const result = await login.execute({ username: 'grace', password: 'y'.repeat(129) });
+
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(verify).not.toHaveBeenCalled();
+  });
+
+  // A failure of the hasher is not a wrong password. The sign-in rejects with it.
+  it('should_reject_with_the_failure_of_the_hasher_when_the_check_of_a_found_user_fails', async () => {
+    const failure = new Error('boom');
+    vi.spyOn(hasher, 'verify').mockRejectedValue(failure);
+
+    await expect(login.execute({ username: 'ada', password: 'correct horse' })).rejects.toBe(
+      failure,
+    );
+  });
+
+  // A username that breaks the rule is an unknown username. It costs one
+  // check against the dummy hash, never against the hash of a stored user.
+  it('should_check_the_dummy_hash_once_when_the_username_breaks_the_rule', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+
+    const result = await login.execute({ username: 'a!', password: 'correct horse' });
+
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(verify).toHaveBeenCalledOnce();
+    expect(verify.mock.calls[0][0]).toBe('correct horse');
+    expect(verify.mock.calls[0][1]).not.toEqual(PasswordHash.from('hashed:correct horse'));
+    expect(verify.mock.calls[0][1]).toEqual(
+      PasswordHash.from('hashed:unknown-user-dummy-password'),
+    );
+  });
 });
