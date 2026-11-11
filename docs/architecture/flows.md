@@ -33,7 +33,7 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ### Sequence diagram
 
-![Login sequence: the HTTP request enters AuthController with no token, LoginUseCase finds the User, answers a failure when the user is missing or the password does not match, and otherwise asks JwtTokenIssuer for a SessionToken, which the controller answers as a TokenDto](flows/views/seq-2-login.png)
+![Login sequence: the HTTP request enters AuthController with no token, LoginUseCase finds the User through DrizzleUserRepository, asks ScryptPasswordHasher for one check against a dummy hash and answers a failure when the user is missing, otherwise asks the User if the password matches, the User passes its own hash to ScryptPasswordHasher, the use case answers a failure when the password does not match, and otherwise asks JwtTokenIssuer for a SessionToken, which the controller answers as a TokenDto](flows/views/seq-2-login.png)
 
 ## Use case 3: update levels
 
