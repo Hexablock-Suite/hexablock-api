@@ -1,10 +1,10 @@
 # domain
 
-Entities, value objects and domain services. Imports only other files in `src/domain`; no framework, ORM, driver or system clock. The ports live in `src/application`, so domain code never imports them: it takes the current instant as a parameter.
+Entities, value objects and domain services. Imports only other files in `src/domain`; no framework, ORM, driver or system clock. The ports live in `src/application`, so domain code never imports them: it takes the current instant as a parameter. One interface here has its implementation outside the domain: `PasswordVerifier`, which the `PasswordHasher` port extends (decision 16 of `docs/architecture/classes.md`).
 
 `progress/` holds the `PlayerProgress` aggregate root, one per `userId` and `gameId` (API-FR-02), with its value objects `UserId`, `GameId`, `Score` and `LevelResult`. A `LevelResult` holds a `LevelId`, a `Stars`, a `Moves` and an `ElapsedTime` value object. A broken rule throws `ProgressError`.
 
-`user/` holds the `User` entity and its value objects. `Username` and `Password` check their length with the `USERNAME_LENGTH` and `PASSWORD_LENGTH` ranges, which also deliver their bounds to the HTTP adapters. `shared/` holds `Result<T, E>`, the generic `Range<T>` and the receiver interfaces `ValueReceiver<T>` and `BoundsReceiver<T>`.
+`user/` holds the `User` aggregate root, its value objects, its `UserState` snapshot and the `PasswordVerifier` interface. `User` has no public field and no public constructor: `User.register()` creates a user, `User.restore()` builds a stored one again, `snapshot()` gives a copy of its state, and `passwordMatches()` passes its hash to a `PasswordVerifier`. `Username` and `Password` check their length with the `USERNAME_LENGTH` and `PASSWORD_LENGTH` ranges, which also deliver their bounds to the HTTP adapters. `shared/` holds `Result<T, E>`, the generic `Range<T>` and the receiver interfaces `ValueReceiver<T>` and `BoundsReceiver<T>`.
 
 ## The primitive rule and its exceptions
 

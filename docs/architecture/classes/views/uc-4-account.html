@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 4 of 4</p>
       <h1>Account: sign-up, sign-in and token check over three ports</h1>
       <svg
-        viewBox="0 0 1040 846"
+        viewBox="0 0 1040 878"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc4account-title uc4account-desc"
@@ -73,6 +73,7 @@
           Class diagram of layer 2 showing RegisterUseCase, which uses the UserRepository and
           PasswordHasher ports, LoginUseCase, which also uses the TokenIssuer port, and
           AuthenticateTokenUseCase, which verifies a token through TokenIssuer for the JWT guard.
+          PasswordHasher extends PasswordVerifier, an interface of layer 1.
         </desc>
         <defs>
           <marker
@@ -153,7 +154,7 @@
           x1="264"
           y1="472"
           x2="264"
-          y2="400"
+          y2="384"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc4account-open)"
@@ -204,6 +205,14 @@
           stroke-width="1"
           marker-end="url(#uc4account-open)"
         />
+        <!-- PasswordHasher extends PasswordVerifier: inheritance between two interfaces -->
+        <path
+          d="M388 384 L388 408"
+          fill="none"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#uc4account-triangle)"
+        />
         <!-- Arrow labels and multiplicities -->
         <rect x="238" y="288" width="56" height="12" rx="2" fill="#efe7f8" />
         <text
@@ -217,10 +226,10 @@
         >
           hasher 1
         </text>
-        <rect x="270" y="404" width="56" height="12" rx="2" fill="#efe7f8" />
+        <rect x="202" y="422" width="56" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="298"
-          y="413"
+          x="230"
+          y="431"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -370,7 +379,7 @@
           x="64"
           y="312"
           width="344"
-          height="88"
+          height="72"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -402,16 +411,39 @@
         <text x="80" y="376" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + hash(password: Password): Promise&lt;PasswordHash&gt;
         </text>
+        <!-- Class: PasswordVerifier (PART 1 · VIEW 3) -->
+        <rect
+          x="284"
+          y="408"
+          width="208"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
         <text
-          textLength="322"
-          lengthAdjust="spacingAndGlyphs"
-          x="80"
-          y="392"
-          fill="#17212a"
-          font-size="9"
+          x="388"
+          y="426"
+          fill="#5b6873"
+          font-size="8"
           font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
         >
-          + verify(typed: string, hash: PasswordHash): Promise&lt;boolean&gt;
+          PART 1 · VIEW 3
+        </text>
+        <text
+          x="388"
+          y="444"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PasswordVerifier
         </text>
         <!-- Class: LoginUseCase (focal, «use case») -->
         <rect
@@ -575,7 +607,7 @@
         </text>
         <line x1="640" y1="576" x2="992" y2="576" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="656" y="592" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + issue(userId: UserId): SessionToken
+          + issue(user: User): SessionToken
         </text>
         <text x="656" y="608" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + verify(token: SessionToken): UserId | null
@@ -731,14 +763,33 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           PasswordHasher carries domain types (decision 15): hash() takes a Password and gives a
-          PasswordHash. verify() takes the typed text: a wrong password can be shorter than any
-          Password.
+          PasswordHash. It extends PasswordVerifier, an interface of layer 1, which gives it
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="764" x2="1016" y2="764" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="782"
+          y="756"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          verify(typed, hash) (decision 16). LoginUseCase passes the port to User.passwordMatches(),
+          and RegisterUseCase builds the user with User.register(). No use case reads
+        </text>
+        <text
+          x="24"
+          y="772"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          a field of the User: TokenIssuer.issue() takes the User, and its adapter reads the id from
+          the snapshot.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="796" x2="1016" y2="796" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="814"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -748,25 +799,43 @@
         </text>
         <line
           x1="24"
-          y1="800"
+          y1="832"
           x2="52"
-          y2="800"
+          y2="832"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc4account-open)"
         />
         <text
           x="60"
-          y="804"
+          y="836"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Use · attribute across layers, parameter, return, local or new
         </text>
+        <line
+          x1="330"
+          y1="832"
+          x2="358"
+          y2="832"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#uc4account-triangle)"
+        />
+        <text
+          x="366"
+          y="836"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Inheritance
+        </text>
         <rect
           x="24"
-          y="820"
+          y="852"
           width="20"
           height="12"
           rx="2"
@@ -776,7 +845,7 @@
         />
         <text
           x="56"
-          y="829"
+          y="861"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -785,7 +854,7 @@
         </text>
         <rect
           x="166"
-          y="820"
+          y="852"
           width="28"
           height="12"
           rx="2"
@@ -795,18 +864,18 @@
         />
         <text
           x="202"
-          y="829"
+          y="861"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
         </text>
-        <line x1="312" y1="826" x2="328" y2="826" stroke="#17212a" stroke-width="1" />
-        <circle cx="333" cy="826" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="312" y1="858" x2="328" y2="858" stroke="#17212a" stroke-width="1" />
+        <circle cx="333" cy="858" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="348"
-          y="829"
+          y="861"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

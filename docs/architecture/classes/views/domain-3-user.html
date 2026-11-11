@@ -61,19 +61,22 @@
   <body>
     <div class="frame">
       <p class="eyebrow">Class diagram · Part 1 · View 3 of 4</p>
-      <h1>User: one entity and its credential values</h1>
+      <h1>User: one aggregate root and its credential values</h1>
       <svg
-        viewBox="0 0 1040 710"
+        viewBox="0 0 1040 906"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain3user-title domain3user-desc"
       >
         <title id="domain3user-title">HexaBlock API user entity · UML class diagram</title>
         <desc id="domain3user-desc">
-          Class diagram of layer 1 showing the User entity, which holds a UserId, a Username and a
-          PasswordHash value object, and the Password value object, the plain text that a new user
-          chooses and that the API never stores. Each value object keeps its value private and
-          delivers it to a receiver with deliverTo(); Username also delivers its key.
+          Class diagram of layer 1 showing the User aggregate root, which holds a UserId, a Username
+          and a PasswordHash value object in private fields, and the Password value object, the
+          plain text that a new user chooses and that the API never stores. User.register() and
+          User.restore() build a user, snapshot() gives a UserState, a read-only copy of its state,
+          and passwordMatches() asks the PasswordVerifier interface to check a typed password
+          against the hash of the user. Each value object keeps its value private and delivers it to
+          a receiver with deliverTo(); Username also delivers its key.
         </desc>
         <defs>
           <marker
@@ -105,7 +108,7 @@
           x="24"
           y="24"
           width="992"
-          height="492"
+          height="640"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -130,7 +133,31 @@
         />
         <!-- User holds passwordHash: PasswordHash: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <path
-          d="M600 224 L600 356 L712 356"
+          d="M600 336 L600 372 L712 372"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- User.passwordMatches() takes a PasswordVerifier as a parameter: use -->
+        <path
+          d="M520 336 L520 400"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- PasswordVerifier.verify() takes a PasswordHash as a parameter: use -->
+        <path
+          d="M640 416 L712 416"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- User.snapshot() creates a UserState, and User.restore() takes one: use -->
+        <path
+          d="M400 304 L364 304 L364 576 L328 576"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -161,10 +188,10 @@
         >
           username 1
         </text>
-        <rect x="610" y="338" width="88" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="610" y="354" width="88" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="654"
-          y="347"
+          y="363"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -172,6 +199,42 @@
           letter-spacing="0.06em"
         >
           passwordHash 1
+        </text>
+        <rect x="526" y="362" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="542"
+          y="371"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          asks
+        </text>
+        <rect x="658" y="398" width="37" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="676.5"
+          y="407"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          takes
+        </text>
+        <rect x="370" y="530" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="394"
+          y="539"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          creates
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
@@ -186,12 +249,12 @@
         >
           LAYER 1 · ENTITIES · src/domain/
         </text>
-        <!-- Class: User (focal, «entity») -->
+        <!-- Class: User (focal, «entity» «aggregate root») -->
         <rect
           x="400"
           y="96"
           width="240"
-          height="128"
+          height="240"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -208,7 +271,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «entity»
+          «entity» «aggregate root»
         </text>
         <text
           x="520"
@@ -223,17 +286,61 @@
         </text>
         <line x1="400" y1="144" x2="640" y2="144" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="416" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + id: UserId
+          - id: UserId
         </text>
         <text x="416" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + username: Username
+          - username: Username
         </text>
         <text x="416" y="192" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + passwordHash: PasswordHash
+          - passwordHash: PasswordHash
         </text>
         <line x1="400" y1="200" x2="640" y2="200" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="416" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          textLength="218"
+          lengthAdjust="spacingAndGlyphs"
+          text-decoration="underline"
+          x="416"
+          y="216"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + register(id: UserId, username: Username,
+        </text>
+        <text
+          text-decoration="underline"
+          x="438"
+          y="232"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          hash: PasswordHash): User
+        </text>
+        <text
+          text-decoration="underline"
+          x="416"
+          y="248"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + restore(state: UserState): User
+        </text>
+        <text x="416" y="264" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: User): boolean
+        </text>
+        <text x="416" y="280" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + snapshot(): UserState
+        </text>
+        <text x="416" y="296" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + passwordMatches(typed: string,
+        </text>
+        <text x="438" y="312" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          verifier: PasswordVerifier):
+        </text>
+        <text x="438" y="328" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;boolean&gt;
         </text>
         <!-- Class: UserId («value object») -->
         <rect
@@ -527,62 +634,189 @@
         <text x="102" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
+        <!-- Class: PasswordVerifier («interface») -->
+        <rect
+          x="400"
+          y="400"
+          width="240"
+          height="104"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="520"
+          y="418"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface»
+        </text>
+        <text
+          x="520"
+          y="436"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PasswordVerifier
+        </text>
+        <line x1="400" y1="448" x2="640" y2="448" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="464" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + verify(typed: string,
+        </text>
+        <text x="438" y="480" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          hash: PasswordHash):
+        </text>
+        <text x="438" y="496" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;boolean&gt;
+        </text>
+        <!-- Class: UserState (Memento of User, no tactical stereotype) -->
+        <rect
+          x="64"
+          y="524"
+          width="264"
+          height="116"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="196"
+          y="542"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface»
+        </text>
+        <text
+          x="196"
+          y="560"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          UserState
+        </text>
+        <text
+          x="196"
+          y="574"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          role: Memento of User
+        </text>
+        <line x1="64" y1="584" x2="328" y2="584" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="600" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + id: UserId {readOnly}
+        </text>
+        <text x="80" y="616" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + username: Username {readOnly}
+        </text>
+        <text x="80" y="632" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + passwordHash: PasswordHash {readOnly}
+        </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="540"
+          y="688"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          User is an entity: two users are the same user when they have the same UserId. Its three
-          attributes are value objects, equal by value.
+          User is an aggregate root (decision 16): two users are the same user when they have the
+          same UserId. Its repository serves sign-up and sign-in.
         </text>
         <text
           x="24"
-          y="556"
+          y="704"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Username.key is the name in lower case; two names with the same key are the same name for
-          uniqueness. Username and Password check their own
+          Its three fields are private value objects, equal by value. The constructor is private:
+          register() creates a new user, and restore() builds a stored one again.
         </text>
         <text
           x="24"
-          y="572"
+          y="720"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          limits in create(). Password is the plain text that a new user chooses. RegisterUseCase
-          creates it and hashes it through PasswordHasher
+          snapshot() gives a UserState, a read-only copy of the state (Memento). Only the border
+          reads it: UserRowMapper for the row, and JwtTokenIssuer for the token subject.
         </text>
         <text
           x="24"
-          y="588"
+          y="736"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          (Part 2, view 4), and User keeps only the PasswordHash. Sign-in asks Password.isTooLong()
-          before it hashes a text.
+          passwordMatches() passes the hash of the user to a PasswordVerifier, so no use case reads
+          the hash. PasswordVerifier is an interface of the domain. The PasswordHasher
         </text>
         <text
           x="24"
-          y="604"
+          y="752"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Each value is private (decision 15). deliverTo() and deliverKeyTo() deliver it to a
-          receiver of layers 3 and 4: a mapper, a repository or an adapter. No operation returns it.
+          port of layer 2 extends it (Part 2, view 4), and its adapter does the check. Username.key
+          is the name in lower case; two names with the same key are the same name for
+        </text>
+        <text
+          x="24"
+          y="768"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          uniqueness. Username and Password check their own limits in create(). Password is the
+          plain text that a new user chooses. RegisterUseCase creates it and hashes it
+        </text>
+        <text
+          x="24"
+          y="784"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          through PasswordHasher, and User keeps only the PasswordHash. Sign-in asks
+          Password.isTooLong() before it hashes a text. Each value is private (decision 15):
+        </text>
+        <text
+          x="24"
+          y="800"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          deliverTo() and deliverKeyTo() deliver it to a receiver of layers 3 and 4: a mapper, a
+          repository or an adapter. No operation returns it.
         </text>
         <!-- Legend -->
-        <line x1="24" y1="628" x2="1016" y2="628" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="824" x2="1016" y2="824" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="646"
+          y="842"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -592,16 +826,16 @@
         </text>
         <line
           x1="24"
-          y1="664"
+          y1="860"
           x2="52"
-          y2="664"
+          y2="860"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain3user-open)"
         />
         <text
           x="60"
-          y="668"
+          y="864"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -610,7 +844,7 @@
         </text>
         <text
           x="300"
-          y="668"
+          y="864"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -619,7 +853,7 @@
         </text>
         <rect
           x="24"
-          y="684"
+          y="880"
           width="20"
           height="12"
           rx="2"
@@ -629,7 +863,7 @@
         />
         <text
           x="56"
-          y="693"
+          y="889"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -638,7 +872,7 @@
         </text>
         <rect
           x="166"
-          y="684"
+          y="880"
           width="28"
           height="12"
           rx="2"
@@ -648,7 +882,7 @@
         />
         <text
           x="202"
-          y="693"
+          y="889"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
