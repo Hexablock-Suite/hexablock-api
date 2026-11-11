@@ -1,5 +1,6 @@
 import { Stars } from '../../../src/domain/progress/stars.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
+import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The stars that a player earns in one level. More stars is better (DS-4).
 describe('Stars', () => {
@@ -42,5 +43,24 @@ describe('Stars', () => {
     expect(better.isMoreThan(worse)).toBe(true);
     expect(worse.isMoreThan(better)).toBe(false);
     expect(better.isMoreThan(Stars.of(3))).toBe(false);
+  });
+
+  // #90: the value leaves only through a delivery to a receiver.
+  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
+    const receiver = new RecordingReceiver<number>();
+
+    Stars.of(3).deliverTo(receiver);
+
+    expect(receiver.received).toEqual([3]);
+  });
+
+  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
+    const stars = Stars.of(3);
+    const receiver = new RecordingReceiver<number>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void stars.value;
+    // The delivery returns nothing: the receiver holds the value.
+    expect(stars.deliverTo(receiver)).toBeUndefined();
   });
 });

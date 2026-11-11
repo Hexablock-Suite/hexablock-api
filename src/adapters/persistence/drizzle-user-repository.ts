@@ -4,6 +4,7 @@ import type { UserRepository } from '../../application/ports/user-repository.js'
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { User } from '../../domain/user/user.js';
 import type { Username } from '../../domain/user/username.js';
+import { receiveKeyOf, receiveValueOf } from '../received.js';
 import { users } from './schema.js';
 import type * as schema from './schema.js';
 import { UserRowMapper } from './user-row.mapper.js';
@@ -19,7 +20,7 @@ export class DrizzleUserRepository implements UserRepository {
     const [row] = await this.db
       .select()
       .from(users)
-      .where(eq(users.username, username.value))
+      .where(eq(users.username, receiveValueOf(username)))
       .limit(1);
     return row === undefined ? null : UserRowMapper.toEntity(row);
   }
@@ -30,7 +31,7 @@ export class DrizzleUserRepository implements UserRepository {
     const rows = await this.db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.usernameKey, username.key))
+      .where(eq(users.usernameKey, receiveKeyOf(username)))
       .limit(1);
     return rows.length > 0;
   }

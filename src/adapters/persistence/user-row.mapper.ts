@@ -2,13 +2,15 @@ import { PasswordHash } from '../../domain/user/password-hash.js';
 import { User } from '../../domain/user/user.js';
 import { UserId } from '../../domain/user/user-id.js';
 import { Username } from '../../domain/user/username.js';
+import { receiveKeyOf, receiveValueOf } from '../received.js';
 import type { users } from './schema.js';
 
 export type UserRow = typeof users.$inferSelect;
 
-// Turns a users row into the User entity and back. toRow() writes
-// Username.key into username_key. toEntity() reads only the name, and the
-// domain computes the key again.
+// Turns a users row into the User entity and back. toRow() receives each
+// value that a value object delivers, and writes the key of the Username
+// into username_key. toEntity() reads only the name, and the domain computes
+// the key again.
 export const UserRowMapper = {
   toEntity(row: UserRow): User {
     const username = Username.create(row.username);
@@ -20,10 +22,10 @@ export const UserRowMapper = {
 
   toRow(user: User): UserRow {
     return {
-      id: user.id.value,
-      username: user.username.value,
-      usernameKey: user.username.key,
-      passwordHash: user.passwordHash.value,
+      id: receiveValueOf(user.id),
+      username: receiveValueOf(user.username),
+      usernameKey: receiveKeyOf(user.username),
+      passwordHash: receiveValueOf(user.passwordHash),
     };
   },
 };

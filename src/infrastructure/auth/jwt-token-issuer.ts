@@ -1,4 +1,5 @@
 import type { JwtService } from '@nestjs/jwt';
+import { receiveValueOf } from '../../adapters/received.js';
 import type { SessionToken, TokenIssuer } from '../../application/ports/token-issuer.js';
 import { UserId } from '../../domain/user/user-id.js';
 
@@ -9,7 +10,7 @@ export class JwtTokenIssuer implements TokenIssuer {
   constructor(private readonly jwt: JwtService) {}
 
   issue(userId: UserId): SessionToken {
-    return this.jwt.sign({ sub: userId.value });
+    return this.jwt.sign({ sub: receiveValueOf(userId) });
   }
 
   verify(token: SessionToken): UserId | null {

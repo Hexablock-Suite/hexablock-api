@@ -1,5 +1,8 @@
 import { randomBytes, scrypt, type ScryptOptions, timingSafeEqual } from 'node:crypto';
+import { receiveValueOf } from '../../adapters/received.js';
 import type { PasswordHasher } from '../../application/ports/password-hasher.js';
+import type { Password } from '../../domain/user/password.js';
+import { PasswordHash } from '../../domain/user/password-hash.js';
 
 // The scrypt cost of node:crypto's default. The hash keeps its parameters,
 // so a later change of cost still verifies the old hashes.
@@ -16,11 +19,12 @@ function derive(plain: string, salt: Buffer, options: ScryptOptions): Promise<Bu
 
 // Adapter of the PasswordHasher port with scrypt from node:crypto. The
 // stored form is scrypt$N$r$p$<salt>$<key>, with base64url salt and key.
+// It is the one place that receives the text of a Password and of a PasswordHash.
 export class ScryptPasswordHasher implements PasswordHasher {
-  async hash(plain: string): Promise<string> {
+  async hash(password: Password): Promise<PasswordHash> {
     const salt = randomBytes(SALT_BYTES);
-    const key = await derive(plain, salt, COST);
-    return [
+    const key = await derive(receiveValueOf(password), salt, COST);
+    const stored = [
       SCHEME,
       COST.N,
       COST.r,
@@ -28,10 +32,12 @@ export class ScryptPasswordHasher implements PasswordHasher {
       salt.toString('base64url'),
       key.toString('base64url'),
     ].join('$');
+    return PasswordHash.from(stored);
   }
 
-  async verify(plain: string, hash: string): Promise<boolean> {
-    const parts = hash.split('$');
+  // The typed text is a plain string: a wrong password can be shorter than any Password.
+  async verify(typed: string, hash: PasswordHash): Promise<boolean> {
+    const parts = receiveValueOf(hash).split('$');
     if (parts.length !== 6 || parts[0] !== SCHEME) {
       return false;
     }
@@ -45,7 +51,7 @@ export class ScryptPasswordHasher implements PasswordHasher {
     ) {
       return false;
     }
-    const actual = await derive(plain, salt, { N, r, p });
+    const actual = await derive(typed, salt, { N, r, p });
     return timingSafeEqual(actual, expected);
   }
 }

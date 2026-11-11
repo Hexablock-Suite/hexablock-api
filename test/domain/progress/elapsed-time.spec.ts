@@ -1,5 +1,6 @@
 import { ElapsedTime } from '../../../src/domain/progress/elapsed-time.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
+import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The time that a player takes in one level, in whole milliseconds. Less time is better (DS-4).
 describe('ElapsedTime', () => {
@@ -42,5 +43,24 @@ describe('ElapsedTime', () => {
     expect(better.isShorterThan(worse)).toBe(true);
     expect(worse.isShorterThan(better)).toBe(false);
     expect(better.isShorterThan(ElapsedTime.ofMs(44_999))).toBe(false);
+  });
+
+  // #90: the value leaves only through a delivery to a receiver.
+  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
+    const receiver = new RecordingReceiver<number>();
+
+    ElapsedTime.ofMs(1500).deliverTo(receiver);
+
+    expect(receiver.received).toEqual([1500]);
+  });
+
+  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
+    const time = ElapsedTime.ofMs(1500);
+    const receiver = new RecordingReceiver<number>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void time.value;
+    // The delivery returns nothing: the receiver holds the value.
+    expect(time.deliverTo(receiver)).toBeUndefined();
   });
 });

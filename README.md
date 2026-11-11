@@ -62,11 +62,13 @@ The table shows the design. Most of these pieces are not code yet; their code st
 - **`AppModule` is the composition root.** [src/infrastructure/app.module.ts](src/infrastructure/app.module.ts)
   binds each port to one adapter. `src/main.ts` only starts the app.
 - **The domain hides its state.** `PlayerProgress` has no getter: its mappers read a
-  `snapshot()` (decision 2 of `classes.md`). The value objects still show their value in a
-  public field, and `User` still has public fields and a public constructor. Issues
-  [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90) and
-  [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91) plan that change
-  (decisions 15 and 16 of `classes.md`).
+  `snapshot()` (decision 2 of `classes.md`). A value object keeps its value private and
+  delivers it to a receiver with `deliverTo()`; no operation returns it, and only the adapters
+  of layers 3 and 4 receive it (decision 15 of `classes.md`,
+  [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90)). `User` still has public
+  fields and a public constructor. Issue
+  [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91) plans that change
+  (decision 16 of `classes.md`).
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
   [.dependency-cruiser.cjs](.dependency-cruiser.cjs): `domain-imports-only-domain`,
   `application-imports-only-domain`, `adapters-never-import-infrastructure` and
@@ -94,7 +96,7 @@ definitions that the engine plays, with generic types (decision D6):
 - **[`Range<T>`](src/domain/shared/range.ts)** is a closed interval over any ordered type, with
   `contains(value: T): boolean`. The username (3 to 32) and password (8 to 128) length limits are
   the `Range<number>` values `USERNAME_LENGTH` and `PASSWORD_LENGTH` in `src/domain/user`. The value
-  objects, the HTTP error messages and `CredentialsDto` read them. The professor modeled the limits
+  objects ask them, and they deliver their bounds to the HTTP error messages and `CredentialsDto`. The professor modeled the limits
   of the statement as a generic range with a contains method in the session of 2026-11-06.
 
 These types are the design. Their code starts in Sprint 1.

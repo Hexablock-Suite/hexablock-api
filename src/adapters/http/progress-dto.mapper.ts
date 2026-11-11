@@ -7,6 +7,7 @@ import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { Score } from '../../domain/progress/score.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
+import { receiveValueOf } from '../received.js';
 import type { ProgressDto } from './progress.dto.js';
 
 // Translates between the progress DTOs and the progress entities
@@ -47,19 +48,20 @@ export const ProgressDtoMapper = {
     return built.ok ? ok({ userId, gameId: built.value }) : err(built.error.problems);
   },
 
-  // The mapper reads the snapshot of the aggregate, its Memento.
+  // The mapper reads the snapshot of the aggregate, its Memento. It receives
+  // the value that each value object delivers.
   toDto(progress: PlayerProgress): ProgressDto {
     const { gameId, highScore, updatedAt, results } = progress.snapshot();
     return {
-      gameId: gameId.value,
+      gameId: receiveValueOf(gameId),
       // The JSON body keeps numbers and strings.
-      highScore: highScore?.value ?? null,
+      highScore: highScore === null ? null : receiveValueOf(highScore),
       updatedAt: updatedAt.toISOString(),
       results: results.map((result) => ({
-        levelId: result.levelId.value,
-        stars: result.stars.value,
-        moves: result.moves.value,
-        elapsedMs: result.elapsedTime.value,
+        levelId: receiveValueOf(result.levelId),
+        stars: receiveValueOf(result.stars),
+        moves: receiveValueOf(result.moves),
+        elapsedMs: receiveValueOf(result.elapsedTime),
       })),
     };
   },

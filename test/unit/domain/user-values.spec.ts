@@ -3,7 +3,13 @@ import * as passwordModule from '../../../src/domain/user/password.js';
 import { PASSWORD_LENGTH, Password } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { USERNAME_LENGTH, Username } from '../../../src/domain/user/username.js';
+import { USERNAME_LENGTH, USERNAME_PATTERN, Username } from '../../../src/domain/user/username.js';
+import {
+  boundsDeliveredBy,
+  deliveredBy,
+  keyDeliveredBy,
+  RecordingReceiver,
+} from '../../support/recording-receiver.js';
 import { testUserId } from '../../support/user-ids.js';
 
 // One code point, two UTF-16 units.
@@ -12,8 +18,14 @@ const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
 
 describe('credential limits', () => {
   it('should_export_username_and_password_ranges_when_domain_sets_the_limits', () => {
-    expect([USERNAME_LENGTH.min, USERNAME_LENGTH.max]).toEqual([3, 32]);
-    expect([PASSWORD_LENGTH.min, PASSWORD_LENGTH.max]).toEqual([8, 128]);
+    expect(boundsDeliveredBy(USERNAME_LENGTH)).toEqual([[3, 32]]);
+    expect(boundsDeliveredBy(PASSWORD_LENGTH)).toEqual([[8, 128]]);
+  });
+
+  // The pattern and the range come from the same two limits, so the OpenAPI
+  // schema keeps the text that it had before #90.
+  it('should_keep_the_username_pattern_when_the_limits_build_it', () => {
+    expect(USERNAME_PATTERN).toBe('^[A-Za-z0-9._-]{3,32}$');
   });
 });
 
@@ -22,7 +34,7 @@ describe('Username', () => {
     for (const raw of ['ada', 'grace.hopper', 'player_01-x', 'a'.repeat(32)]) {
       const result = Username.create(raw);
 
-      expect(result.ok && result.value.value).toBe(raw);
+      expect(result.ok && deliveredBy(result.value)).toEqual([raw]);
     }
   });
 
@@ -38,8 +50,28 @@ describe('Username', () => {
     for (const raw of ['ada', 'Ada', 'ADA']) {
       const result = Username.create(raw);
 
-      expect(result.ok && [result.value.value, result.value.key]).toEqual([raw, 'ada']);
+      expect(result.ok && [...deliveredBy(result.value), ...keyDeliveredBy(result.value)]).toEqual([
+        raw,
+        'ada',
+      ]);
     }
+  });
+
+  // #90: the name and its key leave only through a delivery to a receiver.
+  it('should_have_no_public_value_or_key_field_when_both_leave_through_a_delivery', () => {
+    const result = Username.create('Ada');
+    if (!result.ok) throw new Error(result.error);
+    const username = result.value;
+    const receiver = new RecordingReceiver<string>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void username.value;
+    // @ts-expect-error -- #90 makes the key private.
+    void username.key;
+    // A delivery returns nothing: the receiver holds the value.
+    expect(username.deliverTo(receiver)).toBeUndefined();
+    expect(username.deliverKeyTo(receiver)).toBeUndefined();
+    expect(receiver.received).toEqual(['Ada', 'ada']);
   });
 });
 
@@ -48,7 +80,7 @@ describe('Password', () => {
     for (const raw of ['12345678', 'correct horse battery', 'x'.repeat(128)]) {
       const result = Password.create(raw);
 
-      expect(result.ok && result.value.value).toBe(raw);
+      expect(result.ok && deliveredBy(result.value)).toEqual([raw]);
     }
   });
 
@@ -69,7 +101,7 @@ describe('Password', () => {
     for (const raw of [EMOJI.repeat(8), EMOJI.repeat(128)]) {
       const result = Password.create(raw);
 
-      expect(result.ok && result.value.value).toBe(raw);
+      expect(result.ok && deliveredBy(result.value)).toEqual([raw]);
     }
   });
 
@@ -81,6 +113,20 @@ describe('Password', () => {
     for (const raw of ['', '1234567', 'x'.repeat(128), EMOJI.repeat(128)]) {
       expect(Password.isTooLong(raw)).toBe(false);
     }
+  });
+
+  // #90: the text leaves only through a delivery to a receiver.
+  it('should_have_no_public_value_field_when_the_password_leaves_through_a_delivery', () => {
+    const result = Password.create('correct horse');
+    if (!result.ok) throw new Error(result.error);
+    const password = result.value;
+    const receiver = new RecordingReceiver<string>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void password.value;
+    // The delivery returns nothing: the receiver holds the text.
+    expect(password.deliverTo(receiver)).toBeUndefined();
+    expect(receiver.received).toEqual(['correct horse']);
   });
 
   it('should_keep_the_length_count_inside_password_when_module_lists_its_exports', () => {
@@ -121,27 +167,54 @@ describe('UserId', () => {
   it('should_accept_user_id_when_value_is_the_nil_uuid', () => {
     const nil = '00000000-0000-0000-0000-000000000000';
 
-    expect(UserId.from(nil).value).toBe(nil);
+    expect(deliveredBy(UserId.from(nil))).toEqual([nil]);
   });
 
   // Postgres returns a uuid in lower case, so equals() matches a stored id.
   it('should_store_lower_case_value_when_uuid_has_upper_case_letters', () => {
     const upper = UserId.from(ADA_ID.toUpperCase());
 
-    expect(upper.value).toBe(ADA_ID);
+    expect(deliveredBy(upper)).toEqual([ADA_ID]);
     expect(upper.equals(UserId.from(ADA_ID))).toBe(true);
   });
 
   it('should_be_equal_when_two_user_ids_hold_the_same_value', () => {
-    expect(UserId.from(testUserId(1)).value).toBe(testUserId(1));
+    expect(deliveredBy(UserId.from(testUserId(1)))).toEqual([testUserId(1)]);
     expect(UserId.from(testUserId(1)).equals(UserId.from(testUserId(1)))).toBe(true);
     expect(UserId.from(testUserId(1)).equals(UserId.from(testUserId(2)))).toBe(false);
+  });
+
+  // #90: the id leaves only through a delivery to a receiver.
+  it('should_have_no_public_value_field_when_the_user_id_leaves_through_a_delivery', () => {
+    const userId = UserId.from(ADA_ID);
+    const receiver = new RecordingReceiver<string>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void userId.value;
+    // The delivery returns nothing: the receiver holds the id.
+    expect(userId.deliverTo(receiver)).toBeUndefined();
+    expect(receiver.received).toEqual([ADA_ID]);
   });
 });
 
 describe('PasswordHash', () => {
   it('should_reject_password_hash_when_value_is_empty', () => {
     expect(() => PasswordHash.from('')).toThrow('A PasswordHash needs a value.');
+  });
+
+  it('should_deliver_the_text_to_the_receiver_when_the_factory_took_it', () => {
+    expect(deliveredBy(PasswordHash.from('$hash-one'))).toEqual(['$hash-one']);
+  });
+
+  // #90: the text leaves only through a delivery to a receiver.
+  it('should_have_no_public_value_field_when_the_hash_leaves_through_a_delivery', () => {
+    const hash = PasswordHash.from('$hash-one');
+    const receiver = new RecordingReceiver<string>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void hash.value;
+    // The delivery returns nothing: the receiver holds the text.
+    expect(hash.deliverTo(receiver)).toBeUndefined();
   });
 });
 

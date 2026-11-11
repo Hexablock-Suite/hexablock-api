@@ -4,4 +4,11 @@ Entities, value objects and domain services. Imports only other files in `src/do
 
 `progress/` holds the `PlayerProgress` aggregate root, one per `userId` and `gameId` (API-FR-02), with its value objects `UserId`, `GameId`, `Score` and `LevelResult`. A `LevelResult` holds a `LevelId`, a `Stars`, a `Moves` and an `ElapsedTime` value object. A broken rule throws `ProgressError`.
 
-`user/` holds the `User` entity and its value objects. `Username` and `Password` check their length with the `USERNAME_LENGTH` and `PASSWORD_LENGTH` ranges, which the HTTP adapters also read. `shared/` holds `Result<T, E>` and the generic `Range<T>`.
+`user/` holds the `User` entity and its value objects. `Username` and `Password` check their length with the `USERNAME_LENGTH` and `PASSWORD_LENGTH` ranges, which also deliver their bounds to the HTTP adapters. `shared/` holds `Result<T, E>`, the generic `Range<T>` and the receiver interfaces `ValueReceiver<T>` and `BoundsReceiver<T>`.
+
+## The primitive rule and its exceptions
+
+No primitive crosses a public signature of the domain model: an operation takes and returns domain types (design decision of 2026-11-09). A factory method is the entry: it takes the plain value of a row or a body and guards the rule. The rule has two exceptions.
+
+- **The boolean.** An operation that answers a question returns `true` or `false`, for example `equals()`, `Range.contains()` and `Score.isHigherThan()`.
+- **The delivery to a receiver.** A value object keeps its datum private. `deliverTo(receiver: ValueReceiver<T>): void` passes the datum to `receiver.receive(value)`, `Username.deliverKeyTo()` passes its key, and `Range.deliverBoundsTo(receiver: BoundsReceiver<T>)` passes both bounds. Reason: a row, a JSON body, an SQL filter and a token keep text and numbers, so the datum must leave the domain at the border. An operation that returns the datum does what a getter does, and the professor's rule of 2026-11-09 forbids getters. So the object delivers the datum and no operation returns it (decision 15 of `docs/architecture/classes.md`). Only `src/adapters` and `src/infrastructure` receive a value. Code in `src/domain` and `src/application` never calls a delivery operation: the domain compares with `equals()` or a business operation such as `Range.isExceededBy()`, and a use case passes the object on. Gate: the lint rule `hexablock/no-delivery-call` and `test/gates/delivery.gate.spec.ts`.

@@ -1,6 +1,5 @@
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import { Password } from '../../domain/user/password.js';
-import { PasswordHash } from '../../domain/user/password-hash.js';
 import { User } from '../../domain/user/user.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import { Username } from '../../domain/user/username.js';
@@ -41,7 +40,7 @@ export class RegisterUseCase implements RegisterUser {
     if (await this.users.isUsernameTaken(username.value)) {
       return err({ kind: 'username-taken' });
     }
-    const hash = PasswordHash.from(await this.hasher.hash(password.value.value));
+    const hash = await this.hasher.hash(password.value);
     const user = new User(this.ids.next(), username.value, hash);
     const added = await this.users.add(user);
     return added.ok ? ok(user.id) : err({ kind: 'username-taken' });

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 4 of 4</p>
       <h1>Account: sign-up, sign-in and token check over three ports</h1>
       <svg
-        viewBox="0 0 1040 830"
+        viewBox="0 0 1040 846"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc4account-title uc4account-desc"
@@ -400,7 +400,7 @@
         </text>
         <line x1="64" y1="360" x2="408" y2="360" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="376" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + hash(plain: string): Promise&lt;string&gt;
+          + hash(password: Password): Promise&lt;PasswordHash&gt;
         </text>
         <text
           textLength="322"
@@ -411,7 +411,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + verify(plain: string, hash: string): Promise&lt;boolean&gt;
+          + verify(typed: string, hash: PasswordHash): Promise&lt;boolean&gt;
         </text>
         <!-- Class: LoginUseCase (focal, «use case») -->
         <rect
@@ -470,7 +470,7 @@
           - tokens: TokenIssuer
         </text>
         <text x="80" y="596" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - dummyHash: Promise&lt;string&gt;
+          - dummyHash: Promise&lt;PasswordHash&gt;
         </text>
 
         <line x1="64" y1="604" x2="400" y2="604" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
@@ -723,11 +723,22 @@
         >
           the guard turns it into a 401. Part 3, view 4, implements the two driver ports.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="748" x2="1016" y2="748" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="766"
+          y="740"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          PasswordHasher carries domain types (decision 15): hash() takes a Password and gives a
+          PasswordHash. verify() takes the typed text: a wrong password can be shorter than any
+          Password.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="764" x2="1016" y2="764" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="782"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -737,16 +748,16 @@
         </text>
         <line
           x1="24"
-          y1="784"
+          y1="800"
           x2="52"
-          y2="784"
+          y2="800"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc4account-open)"
         />
         <text
           x="60"
-          y="788"
+          y="804"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -755,7 +766,7 @@
         </text>
         <rect
           x="24"
-          y="804"
+          y="820"
           width="20"
           height="12"
           rx="2"
@@ -765,7 +776,7 @@
         />
         <text
           x="56"
-          y="813"
+          y="829"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -774,7 +785,7 @@
         </text>
         <rect
           x="166"
-          y="804"
+          y="820"
           width="28"
           height="12"
           rx="2"
@@ -784,18 +795,18 @@
         />
         <text
           x="202"
-          y="813"
+          y="829"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
         </text>
-        <line x1="312" y1="810" x2="328" y2="810" stroke="#17212a" stroke-width="1" />
-        <circle cx="333" cy="810" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="312" y1="826" x2="328" y2="826" stroke="#17212a" stroke-width="1" />
+        <circle cx="333" cy="826" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="348"
-          y="813"
+          y="829"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

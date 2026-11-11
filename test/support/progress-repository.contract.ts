@@ -56,8 +56,8 @@ export function describeProgressRepositoryContract(
       await storeProgress(repository, progress);
       const found = await repository.find(UserId.from(CONTRACT_USER_IDS[0]), GameId.of('fit'));
 
-      expect(found?.snapshot().userId.value).toBe(CONTRACT_USER_IDS[0]);
-      expect(found?.snapshot().gameId.value).toBe('fit');
+      expect(found?.snapshot().userId.equals(UserId.from(CONTRACT_USER_IDS[0]))).toBe(true);
+      expect(found?.snapshot().gameId.equals(GameId.of('fit'))).toBe(true);
       expect(found?.snapshot().highScore?.equals(Score.of(120))).toBe(true);
       expect(found?.snapshot().updatedAt.toISOString()).toBe(LATER.toISOString());
       expect(found?.snapshot().results).toEqual([level('fit-01', 3)]);

@@ -1,5 +1,6 @@
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { Score } from '../../../src/domain/progress/score.js';
+import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 describe('Score', () => {
   it('should_accept_the_score_when_value_is_a_non_negative_safe_integer', () => {
@@ -45,5 +46,24 @@ describe('Score', () => {
     expect(Score.of(121).isHigherThan(Score.of(120))).toBe(true);
     expect(Score.of(120).isHigherThan(Score.of(120))).toBe(false);
     expect(Score.of(80).isHigherThan(Score.of(120))).toBe(false);
+  });
+
+  // #90: the value leaves only through a delivery to a receiver.
+  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
+    const receiver = new RecordingReceiver<number>();
+
+    Score.of(120).deliverTo(receiver);
+
+    expect(receiver.received).toEqual([120]);
+  });
+
+  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
+    const score = Score.of(120);
+    const receiver = new RecordingReceiver<number>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void score.value;
+    // The delivery returns nothing: the receiver holds the value.
+    expect(score.deliverTo(receiver)).toBeUndefined();
   });
 });
