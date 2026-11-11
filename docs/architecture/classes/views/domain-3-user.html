@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 3 of 4</p>
       <h1>User: one entity and its credential values</h1>
       <svg
-        viewBox="0 0 1040 662"
+        viewBox="0 0 1040 710"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain3user-title domain3user-desc"
@@ -72,7 +72,8 @@
         <desc id="domain3user-desc">
           Class diagram of layer 1 showing the User entity, which holds a UserId, a Username and a
           PasswordHash value object, and the Password value object, the plain text that a new user
-          chooses and that the API never stores.
+          chooses and that the API never stores. Each value object keeps its value private and
+          delivers it to a receiver with deliverTo(); Username also delivers its key.
         </desc>
         <defs>
           <marker
@@ -104,7 +105,7 @@
           x="24"
           y="24"
           width="992"
-          height="460"
+          height="492"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -239,7 +240,7 @@
           x="64"
           y="96"
           width="264"
-          height="112"
+          height="144"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -269,7 +270,7 @@
         </text>
         <line x1="64" y1="144" x2="328" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: string
+          - value: string
         </text>
         <line x1="64" y1="168" x2="328" y2="168" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -285,12 +286,18 @@
         <text x="80" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: UserId): boolean
         </text>
+        <text x="80" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="102" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;string&gt;): void
+        </text>
         <!-- Class: Username («value object») -->
         <rect
           x="712"
           y="96"
           width="288"
-          height="144"
+          height="176"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -320,10 +327,10 @@
         </text>
         <line x1="712" y1="144" x2="1000" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="728" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: string
+          - value: string
         </text>
         <text x="728" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + key: string
+          - key: string
         </text>
         <line x1="712" y1="184" x2="1000" y2="184" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -349,12 +356,34 @@
         <text x="728" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Username): boolean
         </text>
+        <text
+          textLength="266"
+          lengthAdjust="spacingAndGlyphs"
+          x="728"
+          y="248"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverTo(receiver: ValueReceiver&lt;string&gt;): void
+        </text>
+        <text
+          textLength="266"
+          lengthAdjust="spacingAndGlyphs"
+          x="728"
+          y="264"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverKeyTo(receiver: ValueReceiver&lt;string&gt;): void
+        </text>
         <!-- Class: PasswordHash («value object») -->
         <rect
           x="712"
           y="300"
           width="288"
-          height="112"
+          height="128"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -384,7 +413,7 @@
         </text>
         <line x1="712" y1="348" x2="1000" y2="348" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="728" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: string
+          - value: string
         </text>
         <line x1="712" y1="372" x2="1000" y2="372" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -400,12 +429,23 @@
         <text x="728" y="404" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: PasswordHash): boolean
         </text>
+        <text
+          textLength="266"
+          lengthAdjust="spacingAndGlyphs"
+          x="728"
+          y="420"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverTo(receiver: ValueReceiver&lt;string&gt;): void
+        </text>
         <!-- Class: Password («value object») -->
         <rect
           x="64"
           y="300"
           width="264"
-          height="160"
+          height="192"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -435,7 +475,7 @@
         </text>
         <line x1="64" y1="348" x2="328" y2="348" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: string
+          - value: string
         </text>
         <line x1="64" y1="372" x2="328" y2="372" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -481,10 +521,16 @@
         <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Password): boolean
         </text>
+        <text x="80" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="102" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;string&gt;): void
+        </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="508"
+          y="540"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -494,7 +540,7 @@
         </text>
         <text
           x="24"
-          y="524"
+          y="556"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -504,7 +550,7 @@
         </text>
         <text
           x="24"
-          y="540"
+          y="572"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -514,7 +560,7 @@
         </text>
         <text
           x="24"
-          y="556"
+          y="588"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -522,11 +568,21 @@
           (Part 2, view 4), and User keeps only the PasswordHash. Sign-in asks Password.isTooLong()
           before it hashes a text.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="580" x2="1016" y2="580" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="598"
+          y="604"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Each value is private (decision 15). deliverTo() and deliverKeyTo() deliver it to a
+          receiver of layers 3 and 4: a mapper, a repository or an adapter. No operation returns it.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="628" x2="1016" y2="628" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="646"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -536,16 +592,16 @@
         </text>
         <line
           x1="24"
-          y1="616"
+          y1="664"
           x2="52"
-          y2="616"
+          y2="664"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain3user-open)"
         />
         <text
           x="60"
-          y="620"
+          y="668"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -554,7 +610,7 @@
         </text>
         <text
           x="300"
-          y="620"
+          y="668"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -563,7 +619,7 @@
         </text>
         <rect
           x="24"
-          y="636"
+          y="684"
           width="20"
           height="12"
           rx="2"
@@ -573,7 +629,7 @@
         />
         <text
           x="56"
-          y="645"
+          y="693"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -582,7 +638,7 @@
         </text>
         <rect
           x="166"
-          y="636"
+          y="684"
           width="28"
           height="12"
           rx="2"
@@ -592,7 +648,7 @@
         />
         <text
           x="202"
-          y="645"
+          y="693"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

@@ -384,10 +384,18 @@
         </text>
         <line x1="540" y1="116" x2="880" y2="116" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="556" y="132" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + hash(plain: string): Promise&lt;string&gt;
+          + hash(password: Password): Promise&lt;PasswordHash&gt;
         </text>
-        <text x="556" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + verify(plain: string, hash: string): Promise&lt;boolean&gt;
+        <text
+          textLength="318"
+          lengthAdjust="spacingAndGlyphs"
+          x="556"
+          y="148"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + verify(typed: string, hash: PasswordHash): Promise&lt;boolean&gt;
         </text>
         <!-- Class: JwtTokenIssuer («Adapter») -->
         <rect
@@ -648,10 +656,18 @@
         </text>
         <line x1="700" y1="548" x2="1040" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="716" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + hash(plain: string): Promise&lt;string&gt;
+          + hash(password: Password): Promise&lt;PasswordHash&gt;
         </text>
-        <text x="716" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + verify(plain: string, hash: string): Promise&lt;boolean&gt;
+        <text
+          textLength="318"
+          lengthAdjust="spacingAndGlyphs"
+          x="716"
+          y="580"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + verify(typed: string, hash: PasswordHash): Promise&lt;boolean&gt;
         </text>
         <!-- Class: LoginUseCase (focal, «use case») -->
         <rect
@@ -710,7 +726,7 @@
           - tokens: TokenIssuer
         </text>
         <text x="316" y="760" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - dummyHash: Promise&lt;string&gt;
+          - dummyHash: Promise&lt;PasswordHash&gt;
         </text>
 
         <line x1="300" y1="768" x2="640" y2="768" stroke="rgba(15,111,116,0.40)" stroke-width="1" />

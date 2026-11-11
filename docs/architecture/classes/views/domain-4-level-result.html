@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 4 of 4</p>
       <h1>Level result: one value object and its four values</h1>
       <svg
-        viewBox="0 0 1040 662"
+        viewBox="0 0 1040 710"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain4levelresult-title domain4levelresult-desc"
@@ -72,7 +72,8 @@
         <desc id="domain4levelresult-desc">
           Class diagram of layer 1 showing the LevelResult value object, which holds a LevelId, a
           Stars, a Moves and an ElapsedTime value object. Each one guards its own rule and compares
-          by value, and LevelResult asks them which of two results of one level is better.
+          by value, and LevelResult asks them which of two results of one level is better. Each one
+          keeps its value private and delivers it to a receiver with deliverTo().
         </desc>
         <defs>
           <marker
@@ -104,7 +105,7 @@
           x="24"
           y="24"
           width="992"
-          height="460"
+          height="492"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -286,7 +287,7 @@
           x="64"
           y="96"
           width="256"
-          height="112"
+          height="144"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -316,7 +317,7 @@
         </text>
         <line x1="64" y1="144" x2="320" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: string
+          - value: string
         </text>
         <line x1="64" y1="168" x2="320" y2="168" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -332,12 +333,18 @@
         <text x="80" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: LevelId): boolean
         </text>
+        <text x="80" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="102" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;string&gt;): void
+        </text>
         <!-- Class: Stars («value object») -->
         <rect
           x="720"
           y="96"
           width="280"
-          height="128"
+          height="144"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -367,7 +374,7 @@
         </text>
         <line x1="720" y1="144" x2="1000" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="736" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: number
+          - value: number
         </text>
         <line x1="720" y1="168" x2="1000" y2="168" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -386,12 +393,23 @@
         <text x="736" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isMoreThan(other: Stars): boolean
         </text>
+        <text
+          textLength="258"
+          lengthAdjust="spacingAndGlyphs"
+          x="736"
+          y="232"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverTo(receiver: ValueReceiver&lt;number&gt;): void
+        </text>
         <!-- Class: Moves («value object») -->
         <rect
           x="64"
           y="332"
           width="256"
-          height="128"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -421,7 +439,7 @@
         </text>
         <line x1="64" y1="380" x2="320" y2="380" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: number
+          - value: number
         </text>
         <line x1="64" y1="404" x2="320" y2="404" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -440,12 +458,18 @@
         <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isFewerThan(other: Moves): boolean
         </text>
+        <text x="80" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="102" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;number&gt;): void
+        </text>
         <!-- Class: ElapsedTime («value object») -->
         <rect
           x="720"
           y="332"
           width="280"
-          height="128"
+          height="144"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -475,7 +499,7 @@
         </text>
         <line x1="720" y1="380" x2="1000" y2="380" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="736" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + value: number
+          - value: number
         </text>
         <line x1="720" y1="404" x2="1000" y2="404" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -502,10 +526,21 @@
         >
           + isShorterThan(other: ElapsedTime): boolean
         </text>
+        <text
+          textLength="258"
+          lengthAdjust="spacingAndGlyphs"
+          x="736"
+          y="468"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverTo(receiver: ValueReceiver&lt;number&gt;): void
+        </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="508"
+          y="540"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -515,7 +550,7 @@
         </text>
         <text
           x="24"
-          y="524"
+          y="556"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -525,7 +560,7 @@
         </text>
         <text
           x="24"
-          y="540"
+          y="572"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -535,19 +570,29 @@
         </text>
         <text
           x="24"
-          y="556"
+          y="588"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          isForSameLevelAs(), which compares the two LevelId values. Only the mappers of layer 3
-          read the value of a value object: the rows and the JSON bodies keep text and numbers.
+          isForSameLevelAs(), which compares the two LevelId values. Each value is private (decision
+          15): deliverTo() delivers it to a receiver, and no operation returns it.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="580" x2="1016" y2="580" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="598"
+          y="604"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Only the mappers of layer 3 receive the value of a value object: the rows and the JSON
+          bodies keep text and numbers.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="628" x2="1016" y2="628" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="646"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -557,16 +602,16 @@
         </text>
         <line
           x1="24"
-          y1="616"
+          y1="664"
           x2="52"
-          y2="616"
+          y2="664"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain4levelresult-open)"
         />
         <text
           x="60"
-          y="620"
+          y="668"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -575,7 +620,7 @@
         </text>
         <text
           x="300"
-          y="620"
+          y="668"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -584,7 +629,7 @@
         </text>
         <rect
           x="24"
-          y="636"
+          y="684"
           width="20"
           height="12"
           rx="2"
@@ -594,7 +639,7 @@
         />
         <text
           x="56"
-          y="645"
+          y="693"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -603,7 +648,7 @@
         </text>
         <rect
           x="166"
-          y="636"
+          y="684"
           width="28"
           height="12"
           rx="2"
@@ -613,7 +658,7 @@
         />
         <text
           x="202"
-          y="645"
+          y="693"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
