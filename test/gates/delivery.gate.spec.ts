@@ -18,6 +18,15 @@ describe('delivery gate', () => {
     expect(codes.filter((code) => code.includes('no-delivery-call'))).toHaveLength(2);
   });
 
+  // A destructuring takes the operation without a member access. The class
+  // in the fixture declares a delivery operation, and the rule accepts it.
+  it('should_report_the_delivery_when_application_destructures_a_delivery_operation', () => {
+    const codes = codesOf(lintFile('test/fixtures/arch/src/application/destructures-delivery.ts'));
+
+    // deliverTo, deliverKeyTo with a new name, and deliverBoundsTo in a parameter.
+    expect(codes.filter((code) => code.includes('no-delivery-call'))).toHaveLength(3);
+  });
+
   it('should_report_the_delivery_when_domain_calls_a_delivery_operation', () => {
     const codes = codesOf(lintFile('test/fixtures/arch/src/domain/calls-delivery.ts'));
 
@@ -26,6 +35,14 @@ describe('delivery gate', () => {
 
   it('should_accept_the_same_deliveries_when_an_adapter_calls_them', () => {
     const codes = codesOf(lintFile('test/fixtures/arch/src/adapters/http/calls-delivery.ts'));
+
+    expect(codes).toEqual([]);
+  });
+
+  it('should_accept_the_same_destructurings_when_an_adapter_takes_them', () => {
+    const codes = codesOf(
+      lintFile('test/fixtures/arch/src/adapters/http/destructures-delivery.ts'),
+    );
 
     expect(codes).toEqual([]);
   });
