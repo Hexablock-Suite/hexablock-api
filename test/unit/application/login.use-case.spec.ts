@@ -16,16 +16,19 @@ const EMOJI = '\u{1F600}';
 
 describe('LoginUseCase', () => {
   let login: LoginUseCase;
+  let users: InMemoryUserRepository;
   let hasher: PrefixPasswordHasher;
+  let tokens: PrefixTokenIssuer;
 
   beforeEach(async () => {
-    const users = new InMemoryUserRepository();
+    users = new InMemoryUserRepository();
     hasher = new PrefixPasswordHasher();
+    tokens = new PrefixTokenIssuer();
     await new RegisterUseCase(users, hasher, new SequenceUserIdGenerator()).execute({
       username: 'ada',
       password: 'correct horse',
     });
-    login = new LoginUseCase(users, hasher, new PrefixTokenIssuer());
+    login = new LoginUseCase(users, hasher, tokens);
   });
 
   it('should_return_token_for_user_when_credentials_are_valid', async () => {
@@ -188,5 +191,47 @@ describe('LoginUseCase', () => {
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
     expect(verify).toHaveBeenCalledWith('short', PasswordHash.from('hashed:correct horse'));
+  });
+
+  // #91: the use case never opens the user. The user checks the typed text
+  // with the hasher, and the token issuer takes the user.
+  it('should_ask_the_found_user_to_check_the_typed_text_with_the_hasher_when_user_signs_in', async () => {
+    const [ada] = users.users;
+    const passwordMatches = vi.spyOn(ada, 'passwordMatches');
+
+    await login.execute({ username: 'ada', password: 'wrong horse' });
+
+    expect(passwordMatches).toHaveBeenCalledOnce();
+    expect(passwordMatches.mock.calls[0][0]).toBe('wrong horse');
+    expect(passwordMatches.mock.calls[0][1]).toBe(hasher);
+  });
+
+  it('should_pass_the_found_user_to_the_token_issuer_when_credentials_are_valid', async () => {
+    const issue = vi.spyOn(tokens, 'issue');
+
+    const result = await login.execute({ username: 'ada', password: 'correct horse' });
+
+    expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
+    expect(issue).toHaveBeenCalledOnce();
+    expect(issue.mock.calls[0][0]).toBe(users.users[0]);
+  });
+
+  it('should_verify_password_once_when_credentials_are_valid', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+
+    const result = await login.execute({ username: 'ada', password: 'correct horse' });
+
+    expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
+    expect(verify).toHaveBeenCalledOnce();
+    expect(verify).toHaveBeenCalledWith('correct horse', PasswordHash.from('hashed:correct horse'));
+  });
+
+  it('should_issue_no_token_when_the_password_is_wrong_or_the_username_is_unknown', async () => {
+    const issue = vi.spyOn(tokens, 'issue');
+
+    await login.execute({ username: 'ada', password: 'wrong horse' });
+    await login.execute({ username: 'grace', password: 'correct horse' });
+
+    expect(issue).not.toHaveBeenCalled();
   });
 });

@@ -41,8 +41,9 @@ export class RegisterUseCase implements RegisterUser {
       return err({ kind: 'username-taken' });
     }
     const hash = await this.hasher.hash(password.value);
-    const user = new User(this.ids.next(), username.value, hash);
-    const added = await this.users.add(user);
-    return added.ok ? ok(user.id) : err({ kind: 'username-taken' });
+    // The use case keeps the id that it made, so it reads no field of the user.
+    const id = this.ids.next();
+    const added = await this.users.add(User.register(id, username.value, hash));
+    return added.ok ? ok(id) : err({ kind: 'username-taken' });
   }
 }

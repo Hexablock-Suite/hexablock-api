@@ -7,25 +7,31 @@ import type { users } from './schema.js';
 
 export type UserRow = typeof users.$inferSelect;
 
-// Turns a users row into the User entity and back. toRow() receives each
-// value that a value object delivers, and writes the key of the Username
-// into username_key. toEntity() reads only the name, and the domain computes
-// the key again.
+// Turns a users row into the User aggregate and back. toRow() reads the
+// snapshot of the user, receives each value that a value object delivers,
+// and writes the key of the Username into username_key. toEntity() restores
+// the user from the row. It reads only the name, and the domain computes the
+// key again.
 export const UserRowMapper = {
   toEntity(row: UserRow): User {
     const username = Username.create(row.username);
     if (!username.ok) {
       throw new Error(`The users row ${row.id} holds an invalid username.`);
     }
-    return new User(UserId.from(row.id), username.value, PasswordHash.from(row.passwordHash));
+    return User.restore({
+      id: UserId.from(row.id),
+      username: username.value,
+      passwordHash: PasswordHash.from(row.passwordHash),
+    });
   },
 
   toRow(user: User): UserRow {
+    const state = user.snapshot();
     return {
-      id: receiveValueOf(user.id),
-      username: receiveValueOf(user.username),
-      usernameKey: receiveKeyOf(user.username),
-      passwordHash: receiveValueOf(user.passwordHash),
+      id: receiveValueOf(state.id),
+      username: receiveValueOf(state.username),
+      usernameKey: receiveKeyOf(state.username),
+      passwordHash: receiveValueOf(state.passwordHash),
     };
   },
 };
