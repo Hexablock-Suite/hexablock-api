@@ -1,8 +1,11 @@
+import { receiveKeyOf, receiveValueOf } from '../../../src/adapters/received.js';
 import type { PasswordHasher } from '../../../src/application/ports/password-hasher.js';
 import type { SessionToken, TokenIssuer } from '../../../src/application/ports/token-issuer.js';
 import type { UserIdGenerator } from '../../../src/application/ports/user-id-generator.js';
 import type { UserRepository } from '../../../src/application/ports/user-repository.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
+import type { Password } from '../../../src/domain/user/password.js';
+import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import type { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import type { Username } from '../../../src/domain/user/username.js';
@@ -15,12 +18,13 @@ export class InMemoryUserRepository implements UserRepository {
   readonly users: User[] = [];
 
   async findByUsername(username: Username): Promise<User | null> {
-    return this.users.find((user) => user.username.value === username.value) ?? null;
+    return this.users.find((user) => user.username.equals(username)) ?? null;
   }
 
-  // Compares Username.key, as the Drizzle adapter does.
+  // Compares the key of the Username, as the Drizzle adapter does.
   async isUsernameTaken(username: Username): Promise<boolean> {
-    return this.users.some((user) => user.username.key === username.key);
+    const key = receiveKeyOf(username);
+    return this.users.some((user) => receiveKeyOf(user.username) === key);
   }
 
   async add(user: User): Promise<Result<void, 'username-taken'>> {
@@ -33,14 +37,15 @@ export class InMemoryUserRepository implements UserRepository {
 }
 
 // The hash is the plain password with a prefix. Tests can see that the
-// use case stores the hasher output, not the plain password.
+// use case stores the hasher output, not the plain password. As the scrypt
+// adapter does, this double receives the text of the Password.
 export class PrefixPasswordHasher implements PasswordHasher {
-  async hash(plain: string): Promise<string> {
-    return `hashed:${plain}`;
+  async hash(password: Password): Promise<PasswordHash> {
+    return PasswordHash.from(`hashed:${receiveValueOf(password)}`);
   }
 
-  async verify(plain: string, hash: string): Promise<boolean> {
-    return hash === `hashed:${plain}`;
+  async verify(typed: string, hash: PasswordHash): Promise<boolean> {
+    return hash.equals(PasswordHash.from(`hashed:${typed}`));
   }
 }
 
@@ -48,7 +53,7 @@ const TOKEN_PREFIX = 'token-for:';
 
 export class PrefixTokenIssuer implements TokenIssuer {
   issue(userId: UserId): SessionToken {
-    return `${TOKEN_PREFIX}${userId.value}`;
+    return `${TOKEN_PREFIX}${receiveValueOf(userId)}`;
   }
 
   // Like JwtTokenIssuer, it returns null for a subject that is not a UUID.

@@ -6,6 +6,7 @@ import type {
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import type { UserId } from '../../domain/user/user-id.js';
+import { receiveValueOf } from '../received.js';
 import type { PersistenceDatabase } from './drizzle-user-repository.js';
 import { ProgressRowMapper } from './progress-row.mapper.js';
 import { levelResults, progress } from './schema.js';
@@ -35,7 +36,7 @@ export class DrizzleProgressRepository implements ProgressRepository {
     return this.db.transaction(async (tx) => {
       // A gameId is a lowercase slug and holds no colon, so the text names
       // one key. Two keys with the same 64-bit hash only wait for each other.
-      const lockKey = `${userId.value}:${gameId.value}`;
+      const lockKey = `${receiveValueOf(userId)}:${receiveValueOf(gameId)}`;
       await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`);
       const changed = change(await readAggregate(tx, userId, gameId));
       if (changed !== null) {
@@ -54,7 +55,9 @@ async function readAggregate(
   const [row] = await db
     .select()
     .from(progress)
-    .where(and(eq(progress.userId, userId.value), eq(progress.gameId, gameId.value)))
+    .where(
+      and(eq(progress.userId, receiveValueOf(userId)), eq(progress.gameId, receiveValueOf(gameId))),
+    )
     .limit(1);
   if (row === undefined) {
     return null;

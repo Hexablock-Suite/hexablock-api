@@ -4,7 +4,9 @@ import { createJwtService } from '../../../src/infrastructure/auth/auth-config.j
 import { JwtTokenIssuer } from '../../../src/infrastructure/auth/jwt-token-issuer.js';
 import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';
 
-const USER_ID = UserId.from('6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01');
+// The text that the UserId delivers: the token subject.
+const USER_ID_VALUE = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
+const USER_ID = UserId.from(USER_ID_VALUE);
 
 // A token with alg "none" and an empty signature, as an attacker can write it.
 function unsignedToken(payload: object): string {
@@ -22,10 +24,10 @@ describe('JwtTokenIssuer', () => {
       complete: true,
     });
     expect(decoded.header.alg).toBe('HS256');
-    expect(decoded.payload.sub).toBe(USER_ID.value);
+    expect(decoded.payload.sub).toBe(USER_ID_VALUE);
     expect(decoded.payload.exp - decoded.payload.iat).toBe(24 * 60 * 60);
     expect(new JwtService({ secret: TEST_JWT_SECRET }).verify(token)).toMatchObject({
-      sub: USER_ID.value,
+      sub: USER_ID_VALUE,
     });
   });
 
@@ -41,7 +43,7 @@ describe('JwtTokenIssuer', () => {
 
   it('should_return_null_when_token_has_expired', () => {
     const expired = new JwtService({ secret: TEST_JWT_SECRET }).sign(
-      { sub: USER_ID.value },
+      { sub: USER_ID_VALUE },
       { expiresIn: -10 },
     );
 
@@ -64,12 +66,12 @@ describe('JwtTokenIssuer', () => {
   });
 
   it('should_return_null_when_token_has_alg_none_and_no_signature', () => {
-    expect(issuer.verify(unsignedToken({ sub: USER_ID.value }))).toBeNull();
+    expect(issuer.verify(unsignedToken({ sub: USER_ID_VALUE }))).toBeNull();
   });
 
   it('should_return_null_when_token_is_signed_with_hs512_and_the_right_secret', () => {
     const hs512 = new JwtService({ secret: TEST_JWT_SECRET }).sign(
-      { sub: USER_ID.value },
+      { sub: USER_ID_VALUE },
       { algorithm: 'HS512' },
     );
 

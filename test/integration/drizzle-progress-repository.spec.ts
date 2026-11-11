@@ -17,7 +17,9 @@ import {
 } from '../support/progress-repository.contract.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 
-const ADA = UserId.from(CONTRACT_USER_IDS[0]);
+// The text that the UserId delivers: the user_id of the rows.
+const ADA_VALUE = CONTRACT_USER_IDS[0];
+const ADA = UserId.from(ADA_VALUE);
 const UNKNOWN = UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d');
 const FIT = GameId.of('fit');
 const AT = new Date('2026-11-06T10:00:00.000Z');
@@ -238,7 +240,7 @@ describe('DrizzleProgressRepository', () => {
   // game_id. The test calls the mapper of the adapter directly: a stored
   // row must pass the domain rules, as PlayerProgress.restore() says.
   it('should_reject_stored_row_when_game_id_is_not_a_slug', () => {
-    const row = { userId: ADA.value, gameId: 'Hexa Lines', highScore: null, updatedAt: AT };
+    const row = { userId: ADA_VALUE, gameId: 'Hexa Lines', highScore: null, updatedAt: AT };
 
     expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(ProgressError);
     expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
@@ -250,11 +252,11 @@ describe('DrizzleProgressRepository', () => {
   // the stored number again.
   it('should_reject_stored_row_when_high_score_breaks_its_rule', () => {
     for (const highScore of [-1, 2.5, 2 ** 53]) {
-      const row = { userId: ADA.value, gameId: 'fit', highScore, updatedAt: AT };
+      const row = { userId: ADA_VALUE, gameId: 'fit', highScore, updatedAt: AT };
 
       expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(ProgressError);
     }
-    const row = { userId: ADA.value, gameId: 'fit', highScore: -1, updatedAt: AT };
+    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: -1, updatedAt: AT };
     expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
       'score must be a non-negative integer, got -1.',
     );
@@ -266,7 +268,7 @@ describe('DrizzleProgressRepository', () => {
     played.recordLevel(level('fit-01', 3, 12, 45_000));
     const rows = [
       {
-        userId: ADA.value,
+        userId: ADA_VALUE,
         gameId: 'fit',
         levelId: 'fit-01',
         stars: 3,
@@ -276,7 +278,7 @@ describe('DrizzleProgressRepository', () => {
     ];
 
     expect(ProgressRowMapper.toLevelResultRows(played)).toEqual(rows);
-    const row = { userId: ADA.value, gameId: 'fit', highScore: null, updatedAt: AT };
+    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT };
     expect(ProgressRowMapper.toLevelResultRows(ProgressRowMapper.toAggregate(row, rows))).toEqual(
       rows,
     );
@@ -284,8 +286,8 @@ describe('DrizzleProgressRepository', () => {
 
   // A stored level result must pass the rules of its value objects.
   it('should_reject_stored_level_result_when_a_column_breaks_its_rule', () => {
-    const row = { userId: ADA.value, gameId: 'fit', highScore: null, updatedAt: AT };
-    const stored = { userId: ADA.value, gameId: 'fit', levelId: 'fit-01', stars: 3, moves: 12 };
+    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT };
+    const stored = { userId: ADA_VALUE, gameId: 'fit', levelId: 'fit-01', stars: 3, moves: 12 };
 
     expect(() => ProgressRowMapper.toAggregate(row, [{ ...stored, elapsedMs: -1 }])).toThrow(
       'elapsedMs must be a non-negative integer, got -1.',
@@ -298,7 +300,7 @@ describe('DrizzleProgressRepository', () => {
     scored.recordScore(Score.of(120), LATER);
 
     expect(ProgressRowMapper.toProgressRow(scored)).toEqual({
-      userId: ADA.value,
+      userId: ADA_VALUE,
       gameId: 'fit',
       highScore: 120,
       updatedAt: LATER,
@@ -306,7 +308,7 @@ describe('DrizzleProgressRepository', () => {
     expect(
       ProgressRowMapper.toProgressRow(PlayerProgress.start(ADA, FIT, AT)).highScore,
     ).toBeNull();
-    const row = { userId: ADA.value, gameId: 'fit', highScore: 120, updatedAt: LATER };
+    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: 120, updatedAt: LATER };
     expect(ProgressRowMapper.toProgressRow(ProgressRowMapper.toAggregate(row, []))).toEqual(row);
   });
 });

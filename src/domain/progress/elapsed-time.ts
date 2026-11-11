@@ -1,15 +1,21 @@
+import type { ValueReceiver } from '../shared/value-receiver.js';
 import { ProgressError } from './progress-error.js';
 
 // Value object for the time that a player takes in one level, in milliseconds. It is a non-negative
 // safe integer.
 export class ElapsedTime {
-  private constructor(readonly value: number) {}
+  private constructor(private readonly value: number) {}
 
   static ofMs(value: number): ElapsedTime {
     if (!Number.isSafeInteger(value) || value < 0) {
       throw new ProgressError(`elapsedMs must be a non-negative integer, got ${value}.`);
     }
     return new ElapsedTime(value);
+  }
+
+  // Delivers the value to a receiver of the border. No operation returns it.
+  deliverTo(receiver: ValueReceiver<number>): void {
+    receiver.receive(this.value);
   }
 
   equals(other: ElapsedTime): boolean {

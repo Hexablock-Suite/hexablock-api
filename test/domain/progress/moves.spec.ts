@@ -1,5 +1,6 @@
 import { Moves } from '../../../src/domain/progress/moves.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
+import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The moves that a player uses in one level. Fewer moves is better (DS-4).
 describe('Moves', () => {
@@ -42,5 +43,24 @@ describe('Moves', () => {
     expect(better.isFewerThan(worse)).toBe(true);
     expect(worse.isFewerThan(better)).toBe(false);
     expect(better.isFewerThan(Moves.of(12))).toBe(false);
+  });
+
+  // #90: the value leaves only through a delivery to a receiver.
+  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
+    const receiver = new RecordingReceiver<number>();
+
+    Moves.of(12).deliverTo(receiver);
+
+    expect(receiver.received).toEqual([12]);
+  });
+
+  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
+    const moves = Moves.of(12);
+    const receiver = new RecordingReceiver<number>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void moves.value;
+    // The delivery returns nothing: the receiver holds the value.
+    expect(moves.deliverTo(receiver)).toBeUndefined();
   });
 });

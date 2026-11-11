@@ -1,4 +1,5 @@
 import { Range } from '../../../src/domain/shared/range.js';
+import { boundsDeliveredBy, RecordingBoundsReceiver } from '../../support/recording-receiver.js';
 
 describe('Range', () => {
   it('should_contain_value_when_it_lies_between_the_bounds_inclusive', () => {
@@ -22,11 +23,46 @@ describe('Range', () => {
     expect(range.contains(-1)).toBe(false);
   });
 
-  it('should_expose_bounds_when_range_is_created', () => {
+  // #90: the bounds leave only through a delivery to a receiver.
+  it('should_deliver_both_bounds_to_the_receiver_when_range_is_created', () => {
     const range = Range.ofNumbers(8, 128);
 
-    expect(range.min).toBe(8);
-    expect(range.max).toBe(128);
+    expect(boundsDeliveredBy(range)).toEqual([[8, 128]]);
+  });
+
+  it('should_have_no_public_bound_field_when_the_bounds_leave_through_a_delivery', () => {
+    const range = Range.ofNumbers(8, 128);
+
+    // @ts-expect-error -- #90 makes the lower bound private.
+    void range.min;
+    // @ts-expect-error -- #90 makes the upper bound private.
+    void range.max;
+    // The delivery returns nothing: the receiver holds the bounds.
+    expect(range.deliverBoundsTo(new RecordingBoundsReceiver<number>())).toBeUndefined();
+  });
+
+  // Password.isTooLong() asks this, so it reads no bound.
+  it('should_be_exceeded_only_when_value_is_above_the_upper_bound', () => {
+    const range = Range.ofNumbers(8, 128);
+
+    expect(range.isExceededBy(129)).toBe(true);
+    expect(range.isExceededBy(Infinity)).toBe(true);
+    for (const value of [128, 8, 7, -Infinity]) {
+      expect(range.isExceededBy(value)).toBe(false);
+    }
+  });
+
+  // A value without an order, such as NaN, is not above the range.
+  it('should_not_be_exceeded_when_value_has_no_order', () => {
+    expect(Range.ofNumbers(8, 128).isExceededBy(Number.NaN)).toBe(false);
+  });
+
+  it('should_ask_the_compare_function_when_bounds_are_not_numbers', () => {
+    const byTime = (left: Date, right: Date) => left.getTime() - right.getTime();
+    const range = Range.of(new Date('2026-11-01'), new Date('2026-11-30'), byTime);
+
+    expect(range.isExceededBy(new Date('2026-12-01'))).toBe(true);
+    expect(range.isExceededBy(new Date('2026-11-30'))).toBe(false);
   });
 
   it('should_contain_only_the_bound_when_min_equals_max', () => {

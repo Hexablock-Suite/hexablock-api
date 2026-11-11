@@ -1,3 +1,4 @@
+import { receiveValueOf } from '../../src/adapters/received.js';
 import {
   type LevelResultRow,
   ProgressRowMapper,
@@ -53,7 +54,7 @@ export class InMemoryProgressRepository implements ProgressRepository {
 
 // JSON keeps the two values apart, whatever characters they hold.
 function keyOf(userId: UserId, gameId: GameId): string {
-  return JSON.stringify([userId.value, gameId.value]);
+  return JSON.stringify([receiveValueOf(userId), receiveValueOf(gameId)]);
 }
 
 // A new aggregate with the same state. The copy goes through the rows of

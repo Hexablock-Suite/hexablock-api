@@ -26,6 +26,7 @@ import { LOGIN, type Login } from '../../application/auth/login.use-case.js';
 import { REGISTER_USER, type RegisterUser } from '../../application/auth/register.use-case.js';
 import { PASSWORD_LENGTH } from '../../domain/user/password.js';
 import { USERNAME_LENGTH } from '../../domain/user/username.js';
+import { receiveBoundsOf, receiveValueOf } from '../received.js';
 import { CredentialsDto } from './credentials.dto.js';
 import { CurrentUserDto } from './current-user.dto.js';
 import { ErrorDto } from './error.dto.js';
@@ -33,9 +34,13 @@ import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
 import { LoginDto } from './login.dto.js';
 import { TokenDto } from './token.dto.js';
 
+// The messages name the limits that the domain ranges deliver.
+const USERNAME_BOUNDS = receiveBoundsOf(USERNAME_LENGTH);
+const PASSWORD_BOUNDS = receiveBoundsOf(PASSWORD_LENGTH);
+
 const RULES: Record<CredentialField, string> = {
-  username: `username must have ${USERNAME_LENGTH.min} to ${USERNAME_LENGTH.max} characters: letters, digits, dots, hyphens or underscores`,
-  password: `password must have ${PASSWORD_LENGTH.min} to ${PASSWORD_LENGTH.max} characters`,
+  username: `username must have ${USERNAME_BOUNDS.min} to ${USERNAME_BOUNDS.max} characters: letters, digits, dots, hyphens or underscores`,
+  password: `password must have ${PASSWORD_BOUNDS.min} to ${PASSWORD_BOUNDS.max} characters`,
 };
 
 // Sign-up, sign-in and the signed-in user (API-FR-01). Sign-up and sign-in
@@ -93,7 +98,7 @@ export class AuthController {
     description: 'The bearer token is missing, malformed, expired or signed with another key.',
   })
   me(@Req() request: AuthenticatedRequest): CurrentUserDto {
-    return { userId: request.userId.value };
+    return { userId: receiveValueOf(request.userId) };
   }
 }
 

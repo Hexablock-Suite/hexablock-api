@@ -1,13 +1,17 @@
+import type { BoundsReceiver } from './bounds-receiver.js';
+
 // Orders two values as Array.prototype.sort does: a negative number, zero or
 // a positive number. NaN means that the two values have no order.
 export type Compare<T> = (left: T, right: T) => number;
 
 // A closed interval [min, max] over any ordered type. The bounds are
-// read-only. contains() tells if a value lies inside the bounds.
+// private and never change. contains() tells if a value lies inside the
+// bounds, and isExceededBy() tells if it lies above them. The bounds leave
+// only through deliverBoundsTo().
 export class Range<T> {
   private constructor(
-    readonly min: T,
-    readonly max: T,
+    private readonly min: T,
+    private readonly max: T,
     private readonly compare: Compare<T>,
   ) {}
 
@@ -26,6 +30,18 @@ export class Range<T> {
   // A value without an order, such as NaN, is never inside the range.
   contains(value: T): boolean {
     return this.compare(this.min, value) <= 0 && this.compare(value, this.max) <= 0;
+  }
+
+  // Tells if a value lies above the upper bound. A value without an order,
+  // such as NaN, is not above the range.
+  isExceededBy(value: T): boolean {
+    return this.compare(value, this.max) > 0;
+  }
+
+  // Delivers both bounds to a receiver of the border, for the OpenAPI limits
+  // and the messages of the HTTP adapter. No operation returns a bound.
+  deliverBoundsTo(receiver: BoundsReceiver<T>): void {
+    receiver.receive(this.min, this.max);
   }
 
   // Two ranges are equal when each one reads the bounds of both as the same bounds.

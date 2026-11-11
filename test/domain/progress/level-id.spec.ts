@@ -1,5 +1,6 @@
 import { LevelId } from '../../../src/domain/progress/level-id.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
+import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The id of one level of a game, such as fit-01.
 describe('LevelId', () => {
@@ -24,5 +25,24 @@ describe('LevelId', () => {
       expect(id.equals(LevelId.of(other))).toBe(false);
       expect(LevelId.of(other).equals(id)).toBe(false);
     }
+  });
+
+  // #90: the value leaves only through a delivery to a receiver.
+  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
+    const receiver = new RecordingReceiver<string>();
+
+    LevelId.of('fit-01').deliverTo(receiver);
+
+    expect(receiver.received).toEqual(['fit-01']);
+  });
+
+  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
+    const levelId = LevelId.of('fit-01');
+    const receiver = new RecordingReceiver<string>();
+
+    // @ts-expect-error -- #90 makes the value private.
+    void levelId.value;
+    // The delivery returns nothing: the receiver holds the value.
+    expect(levelId.deliverTo(receiver)).toBeUndefined();
   });
 });

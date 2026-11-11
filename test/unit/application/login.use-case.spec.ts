@@ -1,6 +1,8 @@
 import { LoginUseCase } from '../../../src/application/auth/login.use-case.js';
 import { RegisterUseCase } from '../../../src/application/auth/register.use-case.js';
 import type { PasswordHasher } from '../../../src/application/ports/password-hasher.js';
+import { Password } from '../../../src/domain/user/password.js';
+import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import {
   InMemoryUserRepository,
   PrefixPasswordHasher,
@@ -64,7 +66,10 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith('correct horse', 'hashed:unknown-user-dummy-password');
+    expect(verify).toHaveBeenCalledWith(
+      'correct horse',
+      PasswordHash.from('hashed:unknown-user-dummy-password'),
+    );
   });
 
   it('should_not_hash_during_login_when_first_unknown_username_signs_in', async () => {
@@ -134,6 +139,38 @@ describe('LoginUseCase', () => {
     await login.execute({ username: 'ada', password: 'wrong horse' });
 
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith('wrong horse', 'hashed:correct horse');
+    expect(verify).toHaveBeenCalledWith('wrong horse', PasswordHash.from('hashed:correct horse'));
+  });
+
+  // #90: the port carries domain types, so the use case reads no text.
+  it('should_pass_the_typed_text_and_the_stored_password_hash_to_the_hasher_when_user_signs_in', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+
+    await login.execute({ username: 'ada', password: 'correct horse' });
+
+    const [typed, hash] = verify.mock.calls[0];
+    expect(typed).toBe('correct horse');
+    expect(hash).toBeInstanceOf(PasswordHash);
+  });
+
+  it('should_hash_the_dummy_password_as_a_password_when_the_use_case_is_built', () => {
+    const hash = vi.spyOn(hasher, 'hash');
+
+    void new LoginUseCase(new InMemoryUserRepository(), hasher, new PrefixTokenIssuer());
+
+    expect(hash).toHaveBeenCalledOnce();
+    expect(hash.mock.calls[0][0]).toBeInstanceOf(Password);
+  });
+
+  // The trap of #90: a wrong password can be shorter than any Password, and
+  // it still costs one hash check. So verify() takes the typed text.
+  it('should_verify_the_typed_text_once_when_it_is_shorter_than_any_password', async () => {
+    const verify = vi.spyOn(hasher, 'verify');
+
+    const result = await login.execute({ username: 'ada', password: 'short' });
+
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(verify).toHaveBeenCalledOnce();
+    expect(verify).toHaveBeenCalledWith('short', PasswordHash.from('hashed:correct horse'));
   });
 });
