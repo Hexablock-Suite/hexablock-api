@@ -22,7 +22,7 @@ The file is generated from the code at `3a3b45a` plus the views of this page. A 
 - The colored zone is the Clean layer, with the colors of [layers.md](layers.md): yellow for layer 1, purple for layer 2, light blue for layer 3 and dark blue for layer 4.
 - One view can show several layers. The zones are bands, with the outer layer at the top and the inner layer at the bottom, so every dependency between layers points down.
 - A dashed frame groups the classes of one GoF pattern or one group. Its label names the source, for example `STRATEGY · §3.3 · DS-6`. A frame is not a class. No line starts or ends on a frame. When two classes of different groups depend on each other, the line joins those two classes. A line from one frame to another frame would claim that every class of the first group uses every class of the second group, and that is usually false. The professor asked this about a frame-to-frame arrow in the session of 2026-11-03: «todas esas usan los tres bloques de abajo, a lo mejor la respuesta es no».
-- A stereotype such as `«Strategy»` marks the role of one class in that pattern. `«port»` marks an interface that an outer layer implements. `«repository»` marks a repository: the port in layer 2 and its adapter in layer 3. A domain class carries its tactical stereotype: `«entity»`, `«aggregate root»` or `«value object»`.
+- A stereotype such as `«Strategy»` marks the role of one class in that pattern. `«port»` marks an interface that an outer layer implements. `«repository»` marks a repository: the port in layer 2 and its adapter in layer 3. A domain class carries its tactical stereotype: `«entity»`, `«aggregate root»`, `«value object»` or `«domain service»`. A class that is only a piece of a GoF pattern, such as a strategy, carries its role in the pattern and no tactical stereotype (class of 2026-11-14).
 - An underlined member is static, as in UML.
 - The dashed box at the top right of a class holds its type parameters. This is the UML template notation that §4.1 asks for.
 - A `«bind»` label on a realization or an inheritance line names the type that each parameter takes, for example `«bind» TSection → FitSection`.
@@ -169,6 +169,37 @@ Every abstraction cites a requirement, a declared variation or a layer boundary.
 | `Range<T>`                                     | Credential limits (#60): `Username`, `Password`, the HTTP messages and `CredentialsDto` use one range (D6).             |
 
 Plain classes: `LevelValidators`, the row mappers, the HTTP mappers, `LeaderboardEntry`, the controllers, `LevelDto`, the guard and the filter. `PlayerProgressState` is a plain data type with no tactical stereotype: it is the Memento of `PlayerProgress` (decision 2). `LevelValidators` is a registry: the composition root fills it, so it needs no interface of its own.
+
+## Domain design rules
+
+These rules say how the domain model must be. They apply to every class of `src/domain/`, built or planned, and to the class views that draw it. They come from the classes of 2026-11-13 and 2026-11-14 and from the design decisions of the team of 2026-11-15. When the code does not follow a rule yet, an open issue changes the code. Rule R-domain-design of `AGENTS.md` points to this section.
+
+### Aggregates
+
+- **The root is the only door.** Code outside an aggregate sends every message to its root. No public method of the root returns an internal entity or another aggregate. Only data in domain types leaves the aggregate, never a part that the caller can change (classes of 2026-11-13 and 2026-11-14).
+- **Invariants hold after each operation.** When an operation on the aggregate ends, every invariant of the aggregate holds. The boundary of the aggregate encloses the true invariants of the business (class of 2026-11-13).
+- **Global identity only in the root.** The system identifies the root of an aggregate in one universal way. An internal entity has a local identity: it has a meaning only inside its aggregate (class of 2026-11-13). The factory of the aggregate builds that local id from the identity of the root, and it asks no id generator for it (design decision of 2026-11-15).
+- **One repository per aggregate.** Each aggregate has its repository in the design, also when its adapter keeps the data in memory. The port carries the name of the aggregate, and it saves and finds the whole root with its parts. No repository exists for an internal entity or for another part of an aggregate (classes of 2026-11-13 and 2026-11-14).
+- **One aggregate per transaction.** A transaction changes one aggregate. A use case can read many aggregates, but each transaction changes only one of them. Outside the boundary of an aggregate, the system accepts eventual consistency. If one operation must change two aggregates at the same time, the boundary is wrong (classes of 2026-11-13 and 2026-11-14). When one request changes several aggregates, the use case checks all of them first. Then it saves each aggregate in its own transaction (design decision of 2026-11-15).
+- **Reference by identity.** An aggregate refers to another aggregate only by the identity that the system gives to the other root. It never holds the other aggregate, and it never refers to it by a business key that can change, such as a username. If an aggregate needs data of another aggregate, it keeps a local view with only that data. That view can be out of date for a short time (class of 2026-11-13).
+- **Events, not questions.** An aggregate never asks another aggregate for data. It tells its changes through domain events, and each listener reacts. The root only records its events. A use case delivers them after the change (class of 2026-11-13; design decision of 2026-11-15).
+- **Small aggregates.** An aggregate holds the true invariants of the business and no more, so it stays small. A value object is never the root of an aggregate. Two concepts that the business defines separately never share one aggregate (class of 2026-11-13).
+
+### Domain services
+
+- A domain service is a business operation of the domain layer that does not belong to an entity, a value object or an aggregate (class of 2026-11-13).
+- First, try to put the operation in an aggregate. The operation does not go there if it must load other aggregates or create objects of another aggregate. It is a domain service only when no aggregate can hold it (class of 2026-11-13).
+- A domain service has no state. It has one public method, which takes and returns domain objects. Private methods can help it (class of 2026-11-13).
+- Its name and the name of its method use verbs of the language of the game. A name such as `ProgressHelper` or `LevelManager` is wrong (class of 2026-11-13).
+- It receives entities and value objects that are already loaded, applies the rule and returns a result. It never calls a repository, it opens no transaction, and it never touches the infrastructure (classes of 2026-11-13 and 2026-11-14).
+- The rules of each aggregate stay inside the aggregate. A domain service only coordinates what no aggregate can do alone (class of 2026-11-13).
+- A use case is an application service, not a domain service. It loads the aggregates through their repositories, asks the domain, and saves the one aggregate that changed (classes of 2026-11-13 and 2026-11-14).
+
+### Time, orders and names
+
+- **Time is a value object.** The domain model holds no `Date`: no field, parameter or return value in `src/domain/` is a `Date` (class of 2026-11-14). The value object of a time takes its name from the language of the game, for example the instant of a sync. Each time concept with a different meaning has its own value object. A general name, such as `Instant`, is correct only when the domain has one meaning of time (design decision of 2026-11-15).
+- **Each ranking order lives in the domain.** An order that ranks domain objects, such as the order of a leaderboard, lives in one value object of the domain, which compares two of them. A reader port only filters and sums. The use case orders with the comparisons of the domain, and the adapter adds no order (design decision of 2026-11-15). This applies the rule of decision 2 to every ranking: the rules stay in the domain, and the adapter adds none.
+- **Names from the language of the game.** A domain class and its public operations take their names from the language of the game, not from a technique or a pattern. A technical name is correct only for a technical device, such as the receiver interface of decision 15 (classes of 2026-11-09 and 2026-11-13).
 
 ## Decisions to check with the team
 
