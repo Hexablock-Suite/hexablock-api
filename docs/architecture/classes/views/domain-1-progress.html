@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 1 of 5</p>
       <h1>Progress: one aggregate per user and gameId, and the values that rank a leaderboard</h1>
       <svg
-        viewBox="0 0 1040 1182"
+        viewBox="0 0 1040 1290"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain1progress-title domain1progress-desc"
@@ -74,15 +74,16 @@
         <desc id="domain1progress-desc">
           Class diagram of layers 2 and 1. In layer 1, PlayerProgress, the aggregate root keyed by
           userId and gameId, holds a UserId and a GameId, keeps its high score as a Score value
-          object, delivers its parts to a PlayerProgressReceiver with deliverTo(), is built again by
-          restore() on a progress that start() made and keeps its LevelResult values, each one with
-          the isBetterThan order of DS-4. The Standing value object holds the totals of a player in
-          one game, a Stars, a LevelsCompleted, a Moves and an ElapsedTime, and the isBetterThan
-          order of S3-03. In layer 2, the LeaderboardEntry response type names the player by UserId
-          and holds the value that ranks the player: a LevelResult, a Score or a Standing. GameId,
-          Score and UserId keep their value private and deliver it to a receiver with deliverTo().
-          Each of their factories returns a Result with the code of a broken rule. LevelResult keeps
-          its four value objects private, takes them built in of(), and delivers all four to a
+          object and the instant of its last sync as a SyncInstant value object, delivers its parts
+          to a PlayerProgressReceiver with deliverTo(), is built again by restore() from those parts
+          and keeps its LevelResult values, each one with the isBetterThan order of DS-4. The
+          Standing value object holds the totals of a player in one game, a Stars, a
+          LevelsCompleted, a Moves and an ElapsedTime, and the isBetterThan order of S3-03. In layer
+          2, the LeaderboardEntry response type names the player by UserId and holds the value that
+          ranks the player: a LevelResult, a Score or a Standing. GameId, Score, SyncInstant and
+          UserId keep their value private and deliver it to a receiver with deliverTo(). Each of
+          their factories returns a Result with the code of a broken rule. LevelResult keeps its
+          four value objects private, takes them built in of(), and delivers all four to a
           LevelResultReceiver with deliverTo().
         </desc>
         <defs>
@@ -125,7 +126,7 @@
           x="24"
           y="200"
           width="992"
-          height="708"
+          height="800"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -136,7 +137,7 @@
           x="376"
           y="236"
           width="328"
-          height="656"
+          height="704"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -186,6 +187,14 @@
         <!-- PlayerProgress holds best: Score | null: use with role and multiplicity -->
         <path
           d="M680 716 L744 716"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain1progress-open)"
+        />
+        <!-- PlayerProgress holds lastSync: SyncInstant: use with role and multiplicity (#97) -->
+        <path
+          d="M680 900 L744 900"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -345,6 +354,30 @@
           letter-spacing="0.06em"
         >
           result 1
+        </text>
+        <rect x="686" y="882" width="52" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="712"
+          y="891"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          lastSync
+        </text>
+        <rect x="704" y="906" width="16" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="712"
+          y="915"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="296" height="12" rx="2" fill="#efe7f8" />
@@ -728,7 +761,7 @@
           x="400"
           y="552"
           width="280"
-          height="324"
+          height="372"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -781,7 +814,7 @@
           - best: Score | null
         </text>
         <text x="416" y="684" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - updatedAtMs: number
+          - lastSync: SyncInstant
         </text>
         <text x="416" y="700" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - levelResults: LevelResult[]
@@ -805,7 +838,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          at: Date): PlayerProgress
+          at: SyncInstant): PlayerProgress
         </text>
         <text
           x="416"
@@ -815,7 +848,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + restore(started: PlayerProgress,
+          + restore(userId: UserId, gameId: GameId,
         </text>
         <text
           x="438"
@@ -835,22 +868,38 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
+          updatedAt: SyncInstant,
+        </text>
+        <text
+          x="438"
+          y="804"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
           results: LevelResult[]): PlayerProgress
         </text>
-        <text x="416" y="804" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="820" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: PlayerProgress): boolean
         </text>
-        <text x="416" y="820" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="836" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="438" y="836" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          PlayerProgressReceiver&lt;Date&gt;): void
-        </text>
-        <text x="416" y="852" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + recordScore(score: Score, at: Date): void
+        <text x="438" y="852" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          PlayerProgressReceiver): void
         </text>
         <text x="416" y="868" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + recordLevel(result: LevelResult): void
+          + recordScore(score: Score,
+        </text>
+        <text x="438" y="884" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          at: SyncInstant): void
+        </text>
+        <text x="416" y="900" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + recordLevel(result: LevelResult,
+        </text>
+        <text x="438" y="916" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          at: SyncInstant): void
         </text>
         <!-- Class: Score («value object») -->
         <rect
@@ -928,6 +977,86 @@
           + deliverTo(receiver:
         </text>
         <text x="782" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;number&gt;): void
+        </text>
+        <!-- Class: SyncInstant («value object», #97) -->
+        <rect
+          x="744"
+          y="800"
+          width="248"
+          height="176"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="868"
+          y="818"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="868"
+          y="836"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SyncInstant
+        </text>
+        <line x1="744" y1="848" x2="992" y2="848" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="760" y="864" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - epochMs: number
+        </text>
+        <line x1="744" y1="872" x2="992" y2="872" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="760"
+          y="888"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(epochMs: number):
+        </text>
+        <text
+          textLength="202"
+          lengthAdjust="spacingAndGlyphs"
+          x="782"
+          y="904"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;SyncInstant, SyncInstantProblem&gt;
+        </text>
+        <text x="760" y="920" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: SyncInstant): boolean
+        </text>
+        <text
+          textLength="222"
+          lengthAdjust="spacingAndGlyphs"
+          x="760"
+          y="936"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + isLaterThan(other: SyncInstant): boolean
+        </text>
+        <text x="760" y="952" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="782" y="968" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;number&gt;): void
         </text>
         <!-- Class: GameId («value object») -->
@@ -1022,7 +1151,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="932"
+          y="1024"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1032,7 +1161,7 @@
         </text>
         <text
           x="24"
-          y="948"
+          y="1040"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1042,18 +1171,27 @@
         </text>
         <text
           x="24"
-          y="964"
+          y="1056"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          recordScore() keeps the highest Score, as Score.isHigherThan() tells; the use case passes
-          the instant from the Clock port. GameId is an open value: hexa-lines, hexa-fit, hexa-sort
-          and hexa-merge.
+          recordScore() keeps the highest Score, as Score.isHigherThan() tells. GameId is an open
+          value: hexa-lines, hexa-fit, hexa-sort and hexa-merge.
         </text>
         <text
           x="24"
-          y="980"
+          y="1072"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          updatedAt is the SyncInstant of the last sync: the use case passes it from the Clock port,
+          each record takes it, and isLaterThan() keeps updatedAt from moving back (decision 3).
+        </text>
+        <text
+          x="24"
+          y="1088"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1063,28 +1201,29 @@
         </text>
         <text
           x="24"
-          y="996"
+          y="1104"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
           PlayerProgress has no getter: deliverTo() gives its parts to a PlayerProgressReceiver
-          (Memento), and restore() builds it again on a progress that start() made. Part 3, view 1,
-          draws the receiver.
+          (Memento), and restore() builds it again from those parts. Part 3, view 1, draws the
+          receiver.
         </text>
         <text
           x="24"
-          y="1012"
+          y="1120"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          GameId, Score and UserId keep their value private (decision 15): deliverTo() delivers it
-          to layers 3 and 4. Each factory returns a Result with the code of a broken rule.
+          GameId, Score, SyncInstant and UserId keep their value private (decision 15): deliverTo()
+          delivers it to layers 3 and 4. Each factory returns a Result with the code of a broken
+          rule.
         </text>
         <text
           x="24"
-          y="1028"
+          y="1136"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1094,7 +1233,7 @@
         </text>
         <text
           x="24"
-          y="1044"
+          y="1152"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1104,7 +1243,7 @@
         </text>
         <text
           x="24"
-          y="1060"
+          y="1168"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1114,7 +1253,7 @@
         </text>
         <text
           x="24"
-          y="1076"
+          y="1184"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1125,15 +1264,15 @@
         <!-- Legend -->
         <line
           x1="24"
-          y1="1100"
+          y1="1208"
           x2="1016"
-          y2="1100"
+          y2="1208"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1118"
+          y="1226"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1143,16 +1282,16 @@
         </text>
         <line
           x1="24"
-          y1="1136"
+          y1="1244"
           x2="52"
-          y2="1136"
+          y2="1244"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
         <text
           x="60"
-          y="1140"
+          y="1248"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1161,7 +1300,7 @@
         </text>
         <text
           x="299"
-          y="1140"
+          y="1248"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1170,7 +1309,7 @@
         </text>
         <rect
           x="24"
-          y="1156"
+          y="1264"
           width="20"
           height="12"
           rx="2"
@@ -1180,7 +1319,7 @@
         />
         <rect
           x="48"
-          y="1156"
+          y="1264"
           width="20"
           height="12"
           rx="2"
@@ -1190,7 +1329,7 @@
         />
         <text
           x="80"
-          y="1165"
+          y="1273"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1199,7 +1338,7 @@
         </text>
         <rect
           x="240"
-          y="1156"
+          y="1264"
           width="28"
           height="12"
           rx="2"
@@ -1210,7 +1349,7 @@
         />
         <text
           x="276"
-          y="1165"
+          y="1273"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1219,7 +1358,7 @@
         </text>
         <rect
           x="446"
-          y="1156"
+          y="1264"
           width="28"
           height="12"
           rx="2"
@@ -1229,7 +1368,7 @@
         />
         <text
           x="482"
-          y="1165"
+          y="1273"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1238,7 +1377,7 @@
         </text>
         <rect
           x="592"
-          y="1156"
+          y="1264"
           width="28"
           height="12"
           rx="2"
@@ -1249,7 +1388,7 @@
         />
         <text
           x="628"
-          y="1165"
+          y="1273"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

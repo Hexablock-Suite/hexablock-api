@@ -5,6 +5,7 @@ import { progress } from '../src/adapters/persistence/schema.js';
 import { FixedClock } from './support/fixed-clock.js';
 import { signIn as signInTo } from './support/http/sign-in.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { syncInstantOf } from './support/sync-instants.js';
 
 // API-FR-02: one progress entry per user and per gameId. The userId comes
 // from the bearer token, never from the body. API-FR-06: every error has the
@@ -19,7 +20,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
   let clock: FixedClock;
 
   beforeEach(async () => {
-    clock = new FixedClock(AT);
+    clock = new FixedClock(syncInstantOf(AT));
     testApp = await createTestApp([], { clock });
   });
 
@@ -114,6 +115,34 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       .from(progress)
       .where(eq(progress.userId, userId));
     expect(rows.map((row) => [row.highScore, row.updatedAt])).toEqual([[120, LATER]]);
+  });
+
+  // #97: updatedAt is the instant of the last sync. A sync of level results
+  // moves it, as a sync of a score does.
+  it('should_answer_the_instant_of_the_last_sync_when_a_level_result_syncs_again_later', async () => {
+    const { token, userId } = await signIn('ada');
+    const next = { levelId: 'fit-02', stars: 1, moves: 30, elapsedMs: 90000 };
+    await sync(token, { gameId: 'hexa-fit', results: [FIT_LEVEL] });
+    clock.advanceBy(FIVE_MINUTES_MS);
+
+    const second = await sync(token, { gameId: 'hexa-fit', results: [next] });
+    const readBack = await read(token, 'hexa-fit');
+
+    const entry = {
+      gameId: 'hexa-fit',
+      highScore: null,
+      updatedAt: LATER.toISOString(),
+      results: [FIT_LEVEL, next],
+    };
+    expect(second.status).toBe(200);
+    expect(second.body).toEqual(entry);
+    expect(readBack.status).toBe(200);
+    expect(readBack.body).toEqual(entry);
+    const rows = await testApp.database.db
+      .select()
+      .from(progress)
+      .where(eq(progress.userId, userId));
+    expect(rows.map((row) => row.updatedAt)).toEqual([LATER]);
   });
 
   it('should_save_progress_for_token_user_when_body_names_another_user', async () => {
@@ -231,10 +260,13 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
   });
 
   // The mapper of the border checks the score before the use case reads the
-  // Clock. So a broken Clock does not hide the rule of the score.
+  // Clock. So a broken Clock does not hide the rule of the score. The Clock
+  // gives a SyncInstant, so a broken Clock throws.
   it('should_return_bad_request_error_body_and_save_nothing_when_score_breaks_its_rule_under_a_broken_clock', async () => {
     const { token, userId } = await signIn('ada');
-    const now = vi.spyOn(clock, 'now').mockReturnValue(new Date(Number.NaN));
+    const now = vi.spyOn(clock, 'now').mockImplementation(() => {
+      throw new Error('The clock is broken.');
+    });
 
     const response = await sync(token, { gameId: 'hexa-lines', score: -1 });
     now.mockRestore();

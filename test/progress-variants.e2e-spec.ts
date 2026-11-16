@@ -2,6 +2,7 @@ import request from 'supertest';
 import { FixedClock } from './support/fixed-clock.js';
 import { signIn } from './support/http/sign-in.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { syncInstantOf } from './support/sync-instants.js';
 
 // API-NFR-03: one save-and-load test per variant. Fit and Sort save level
 // results. Lines and Merge save a high score. Each test saves its own gameId
@@ -61,7 +62,7 @@ describe('progress save and load per variant (API-NFR-03)', () => {
   let testApp: TestApp;
 
   beforeEach(async () => {
-    testApp = await createTestApp([], { clock: new FixedClock(AT) });
+    testApp = await createTestApp([], { clock: new FixedClock(syncInstantOf(AT)) });
   });
 
   afterEach(async () => {

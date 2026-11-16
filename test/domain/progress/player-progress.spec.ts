@@ -2,16 +2,22 @@ import { GameId } from '../../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { Score } from '../../../src/domain/progress/score.js';
+import { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { type ProgressParts, progressPartsOf } from '../../support/recording-receiver.js';
+import { syncInstantOf } from '../../support/sync-instants.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
 const USER = valueOf(UserId.from(testUserId(1)));
 const FIT = valueOf(GameId.of('fit'));
-const START = new Date('2026-11-06T10:00:00.000Z');
-const LATER = new Date('2026-11-06T10:05:00.000Z');
+const START = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
+const LATER = syncInstantOf(new Date('2026-11-06T10:05:00.000Z'));
+const LATEST = syncInstantOf(new Date('2026-11-06T10:10:00.000Z'));
+// A value that is not a SyncInstant. The types forbid it, so it is a defect
+// of the caller.
+const NOT_AN_INSTANT = new Date('2026-11-06T10:05:00.000Z') as unknown as SyncInstant;
 
 function level(levelId: string, stars: number): LevelResult {
   return levelResultOf({ levelId, stars, moves: 10, elapsedMs: 30_000 });
@@ -21,8 +27,8 @@ function attempt(stars: number, moves: number, elapsedMs: number): LevelResult {
   return levelResultOf({ levelId: 'fit-01', stars, moves, elapsedMs });
 }
 
-// Restores a progress from its parts, as ProgressRowMapper does: start()
-// takes the key and the instant, and restore() records the rest.
+// Restores a progress from its parts, as ProgressRowMapper does. restore()
+// takes the parts in the order of the delivery.
 function restoreFrom({
   userId,
   gameId,
@@ -30,20 +36,16 @@ function restoreFrom({
   updatedAt,
   results,
 }: ProgressParts): PlayerProgress {
-  return PlayerProgress.restore(
-    PlayerProgress.start(userId, gameId, updatedAt),
-    highScore,
-    results,
-  );
+  return PlayerProgress.restore(userId, gameId, highScore, updatedAt, results);
 }
 
 // Records the two results of one level in the given order, after a result of
 // another level. It returns the results that the progress keeps.
 function keptAfter(first: LevelResult, second: LevelResult): readonly LevelResult[] {
   const progress = PlayerProgress.start(USER, FIT, START);
-  progress.recordLevel(level('fit-02', 1));
-  progress.recordLevel(first);
-  progress.recordLevel(second);
+  progress.recordLevel(level('fit-02', 1), START);
+  progress.recordLevel(first, START);
+  progress.recordLevel(second, START);
   return progressPartsOf(progress).results;
 }
 
@@ -54,7 +56,7 @@ describe('PlayerProgress', () => {
     expect(progressPartsOf(progress).userId.equals(USER)).toBe(true);
     expect(progressPartsOf(progress).gameId.equals(FIT)).toBe(true);
     expect(progressPartsOf(progress).highScore).toBeNull();
-    expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(START.toISOString());
+    expect(progressPartsOf(progress).updatedAt).toEqual(START);
     expect(progressPartsOf(progress).results).toEqual([]);
   });
 
@@ -69,12 +71,17 @@ describe('PlayerProgress', () => {
     );
   });
 
+  // SyncInstant guards the rule of a valid instant. The aggregate takes only
+  // a SyncInstant, so a Date or a missing instant is a defect of the caller.
   it('should_throw_when_user_id_or_instant_is_missing', () => {
     expect(() => PlayerProgress.start(undefined as unknown as UserId, FIT, START)).toThrow(
       new TypeError('A progress needs a userId.'),
     );
-    expect(() => PlayerProgress.start(USER, FIT, new Date(Number.NaN))).toThrow(
-      new RangeError('The instant must be a valid Date.'),
+    expect(() => PlayerProgress.start(USER, FIT, NOT_AN_INSTANT)).toThrow(
+      new TypeError('The instant must be a SyncInstant.'),
+    );
+    expect(() => PlayerProgress.start(USER, FIT, undefined as unknown as SyncInstant)).toThrow(
+      new TypeError('The instant must be a SyncInstant.'),
     );
   });
 
@@ -82,7 +89,7 @@ describe('PlayerProgress', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
 
     progress.recordScore(valueOf(Score.of(120)), LATER);
-    progress.recordLevel(level('fit-01', 2));
+    progress.recordLevel(level('fit-01', 2), LATER);
 
     expect(progressPartsOf(progress).userId.equals(USER)).toBe(true);
     expect(progressPartsOf(progress).gameId.equals(FIT)).toBe(true);
@@ -94,7 +101,7 @@ describe('PlayerProgress', () => {
     progress.recordScore(valueOf(Score.of(120)), LATER);
 
     expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(120)))).toBe(true);
-    expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
   });
 
   it('should_keep_the_high_score_and_take_the_instant_when_a_lower_score_is_recorded', () => {
@@ -104,26 +111,60 @@ describe('PlayerProgress', () => {
     progress.recordScore(valueOf(Score.of(80)), LATER);
 
     expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(120)))).toBe(true);
-    expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
   });
 
-  // Score guards the rule of a valid score. The aggregate takes only a Score,
-  // so another argument is a defect of the caller, and the guard throws.
+  // #97: updatedAt is the instant of the last sync. A level result moves it,
+  // as a score does.
+  it('should_move_updated_at_to_the_given_instant_when_a_level_is_recorded', () => {
+    const progress = PlayerProgress.start(USER, FIT, START);
+
+    progress.recordLevel(level('fit-01', 2), LATER);
+
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
+    expect(progressPartsOf(progress).results).toEqual([level('fit-01', 2)]);
+  });
+
+  // The aggregate keeps updatedAt from moving back, whatever the caller
+  // passes. A record at an earlier instant still keeps the higher score.
+  it('should_keep_updated_at_and_keep_the_higher_score_when_a_score_is_recorded_at_an_earlier_instant', () => {
+    const progress = PlayerProgress.start(USER, FIT, START);
+    progress.recordScore(valueOf(Score.of(80)), LATEST);
+
+    progress.recordScore(valueOf(Score.of(120)), LATER);
+
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATEST);
+    expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(120)))).toBe(true);
+  });
+
+  it('should_keep_updated_at_and_keep_the_better_result_when_a_level_is_recorded_at_an_earlier_instant', () => {
+    const progress = PlayerProgress.start(USER, FIT, START);
+    progress.recordLevel(level('fit-01', 1), LATEST);
+
+    progress.recordLevel(level('fit-01', 3), LATER);
+
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATEST);
+    expect(progressPartsOf(progress).results).toEqual([level('fit-01', 3)]);
+  });
+
+  // Score guards the rule of a valid score, and SyncInstant guards the rule
+  // of a valid instant. The aggregate takes only these value objects, so
+  // another argument is a defect of the caller, and the guard throws.
   it.each([
-    [60 as unknown as Score, LATER, TypeError],
-    [undefined as unknown as Score, LATER, TypeError],
-    [null as unknown as Score, LATER, TypeError],
-    [valueOf(Score.of(60)), new Date(Number.NaN), RangeError],
+    [60 as unknown as Score, LATER],
+    [undefined as unknown as Score, LATER],
+    [null as unknown as Score, LATER],
+    [valueOf(Score.of(60)), NOT_AN_INSTANT],
   ])(
-    'should_throw_and_keep_state_when_score_is_not_a_score_or_instant_is_invalid',
-    (score, at, guard) => {
+    'should_throw_and_keep_state_when_score_is_not_a_score_or_instant_is_not_a_sync_instant',
+    (score, at) => {
       const progress = PlayerProgress.start(USER, FIT, START);
       progress.recordScore(valueOf(Score.of(50)), START);
 
-      expect(() => progress.recordScore(score, at)).toThrow(guard);
+      expect(() => progress.recordScore(score, at)).toThrow(TypeError);
 
       expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(50)))).toBe(true);
-      expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(START.toISOString());
+      expect(progressPartsOf(progress).updatedAt).toEqual(START);
     },
   );
 
@@ -153,7 +194,7 @@ describe('PlayerProgress', () => {
     progress.recordScore(valueOf(Score.of(-0)), LATER);
 
     expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(0)))).toBe(true);
-    expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
   });
 
   it('should_add_the_level_result_when_level_is_recorded', () => {
@@ -161,8 +202,8 @@ describe('PlayerProgress', () => {
     const first = level('fit-01', 2);
     const second = level('fit-02', 3);
 
-    progress.recordLevel(first);
-    progress.recordLevel(second);
+    progress.recordLevel(first, START);
+    progress.recordLevel(second, START);
 
     expect(progressPartsOf(progress).results).toEqual([first, second]);
   });
@@ -173,10 +214,10 @@ describe('PlayerProgress', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
     const second = level('fit-02', 1);
     const retry = level('fit-01', 3);
-    progress.recordLevel(level('fit-01', 2));
-    progress.recordLevel(second);
+    progress.recordLevel(level('fit-01', 2), START);
+    progress.recordLevel(second, START);
 
-    progress.recordLevel(retry);
+    progress.recordLevel(retry, LATER);
 
     expect(progressPartsOf(progress).results).toEqual([retry, second]);
   });
@@ -221,38 +262,33 @@ describe('PlayerProgress', () => {
     expect(kept[1]).not.toBe(tie);
   });
 
-  it('should_keep_the_better_result_when_a_worse_result_of_the_level_is_recorded_after_it', () => {
+  // A worse result changes no result, but the record still moves updatedAt
+  // to its instant, as a lower score does.
+  it('should_keep_the_better_result_and_take_the_instant_when_a_worse_result_of_the_level_is_recorded_after_it', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
     const best = attempt(3, 9, 30_000);
     const other = level('fit-02', 1);
-    progress.recordLevel(best);
-    progress.recordLevel(other);
+    progress.recordLevel(best, START);
+    progress.recordLevel(other, START);
 
-    progress.recordLevel(attempt(1, 30, 120_000));
-    progress.recordLevel(attempt(3, 9, 30_001));
+    progress.recordLevel(attempt(1, 30, 120_000), LATER);
+    progress.recordLevel(attempt(3, 9, 30_001), LATER);
 
     expect(progressPartsOf(progress).results).toEqual([best, other]);
     expect(progressPartsOf(progress).results[0]).toBe(best);
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
   });
 
-  it('should_throw_and_keep_results_when_result_is_missing', () => {
+  it.each([
+    [undefined as unknown as LevelResult, LATER, 'recordLevel needs a LevelResult.'],
+    [level('fit-01', 2), NOT_AN_INSTANT, 'The instant must be a SyncInstant.'],
+  ])('should_throw_and_keep_state_when_result_or_instant_is_missing', (result, at, message) => {
     const progress = PlayerProgress.start(USER, FIT, START);
 
-    expect(() => progress.recordLevel(undefined as unknown as LevelResult)).toThrow(
-      new TypeError('recordLevel needs a LevelResult.'),
-    );
+    expect(() => progress.recordLevel(result, at)).toThrow(new TypeError(message));
 
     expect(progressPartsOf(progress).results).toEqual([]);
-  });
-
-  it('should_keep_its_instant_when_caller_mutates_the_date_it_passed', () => {
-    const at = new Date(LATER.getTime());
-    const progress = PlayerProgress.start(USER, FIT, START);
-    progress.recordScore(valueOf(Score.of(10)), at);
-
-    at.setUTCFullYear(1999);
-
-    expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progressPartsOf(progress).updatedAt).toEqual(START);
   });
 
   it('should_return_the_stored_state_when_progress_is_restored', () => {
@@ -270,7 +306,7 @@ describe('PlayerProgress', () => {
     expect(progressPartsOf(progress).userId.equals(USER)).toBe(true);
     expect(progressPartsOf(progress).gameId.equals(FIT)).toBe(true);
     expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(120)))).toBe(true);
-    expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
     expect(progressPartsOf(progress).results).toEqual([first, second]);
   });
 
@@ -287,15 +323,16 @@ describe('PlayerProgress', () => {
     expect(progressPartsOf(progress).results).toEqual([]);
   });
 
-  // start() checks the key and the instant, and restore() checks the score
-  // and each result: the same rules as start(), recordScore() and recordLevel().
-  it.each<[Partial<ProgressParts>, typeof TypeError]>([
-    [{ highScore: 1 as unknown as Score }, TypeError],
-    [{ highScore: undefined as unknown as Score }, TypeError],
-    [{ updatedAt: new Date(Number.NaN) }, RangeError],
-    [{ gameId: 'fit' as unknown as GameId }, TypeError],
-    [{ results: [undefined as unknown as LevelResult] }, TypeError],
-  ])('should_throw_when_stored_state_breaks_a_rule', (broken, guard) => {
+  // restore() checks each part with the same rules as start(), recordScore()
+  // and recordLevel(). A part of another type is a defect of the caller.
+  it.each<[Partial<ProgressParts>]>([
+    [{ userId: 'user' as unknown as UserId }],
+    [{ gameId: 'fit' as unknown as GameId }],
+    [{ highScore: 1 as unknown as Score }],
+    [{ highScore: undefined as unknown as Score }],
+    [{ updatedAt: NOT_AN_INSTANT }],
+    [{ results: [undefined as unknown as LevelResult] }],
+  ])('should_throw_when_stored_state_breaks_a_rule', (broken) => {
     const valid = {
       userId: USER,
       gameId: FIT,
@@ -304,47 +341,7 @@ describe('PlayerProgress', () => {
       results: [],
     };
 
-    expect(() => restoreFrom({ ...valid, ...broken })).toThrow(guard);
-  });
-
-  // restore() builds on a progress that start() made, so it needs one.
-  it.each([undefined, null, {}])(
-    'should_throw_a_type_error_when_restore_gets_no_started_progress',
-    (started) => {
-      expect(() =>
-        PlayerProgress.restore(started as unknown as PlayerProgress, valueOf(Score.of(1)), []),
-      ).toThrow(new TypeError('restore needs a progress that start() made.'));
-    },
-  );
-
-  it('should_keep_started_unchanged_and_reject_a_non_progress_when_restore_runs', () => {
-    const started = PlayerProgress.start(USER, valueOf(GameId.of('hexa-lines')), new Date(0));
-    const before = JSON.stringify(progressPartsOf(started));
-    PlayerProgress.restore(started, valueOf(Score.of(9)), []);
-    expect(JSON.stringify(progressPartsOf(started))).toBe(before);
-    expect(() => PlayerProgress.restore({} as PlayerProgress, null, [])).toThrow(
-      'restore needs a progress that start() made.',
-    );
-  });
-
-  // restore() takes the key and the instant of the started progress, and
-  // records the stored values. The records of the started progress do not count.
-  it('should_keep_the_key_and_the_instant_and_the_stored_values_when_restore_builds_on_a_started_progress', () => {
-    const started = PlayerProgress.start(USER, FIT, LATER);
-    started.recordScore(valueOf(Score.of(900)), LATER);
-    started.recordLevel(level('fit-02', 3));
-    const stored = level('fit-01', 1);
-
-    const progress = PlayerProgress.restore(started, valueOf(Score.of(10)), [stored]);
-
-    expect(progress).not.toBe(started);
-    expect(progressPartsOf(progress).userId.equals(USER)).toBe(true);
-    expect(progressPartsOf(progress).gameId.equals(FIT)).toBe(true);
-    expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(10)))).toBe(true);
-    expect(progressPartsOf(progress).updatedAt.toISOString()).toBe(LATER.toISOString());
-    expect(progressPartsOf(progress).results).toEqual([stored]);
-    expect(progressPartsOf(started).highScore?.equals(valueOf(Score.of(900)))).toBe(true);
-    expect(progressPartsOf(started).results).toEqual([level('fit-02', 3)]);
+    expect(() => restoreFrom({ ...valid, ...broken })).toThrow(TypeError);
   });
 
   // Score counts -0 as a zero score, and restore() keeps it.
@@ -362,7 +359,8 @@ describe('PlayerProgress', () => {
 
   // restore() records each stored result with recordLevel(), so the rule of
   // one result per levelId holds: the best result of a levelId stays (DS-4).
-  it('should_keep_the_best_result_per_level_when_stored_results_repeat_a_level_id', () => {
+  // Each result takes the stored instant, so updatedAt stays.
+  it('should_keep_the_best_result_per_level_and_the_stored_instant_when_stored_results_repeat_a_level_id', () => {
     const best = level('fit-01', 3);
     const second = level('fit-02', 1);
 
@@ -370,11 +368,12 @@ describe('PlayerProgress', () => {
       userId: USER,
       gameId: FIT,
       highScore: null,
-      updatedAt: START,
+      updatedAt: LATER,
       results: [best, second, level('fit-01', 2)],
     });
 
     expect(progressPartsOf(progress).results).toEqual([best, second]);
+    expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
   });
 });
 
@@ -398,8 +397,8 @@ describe('PlayerProgress delivery', () => {
     const second = level('fit-02', 3);
     const progress = PlayerProgress.start(USER, FIT, START);
     progress.recordScore(valueOf(Score.of(120)), LATER);
-    progress.recordLevel(first);
-    progress.recordLevel(second);
+    progress.recordLevel(first, LATER);
+    progress.recordLevel(second, LATER);
 
     const calls = deliveriesOf(progress);
 
@@ -412,8 +411,8 @@ describe('PlayerProgress delivery', () => {
     expect((gameId as GameId).equals(FIT)).toBe(true);
     expect(highScore).toBeInstanceOf(Score);
     expect((highScore as Score).equals(valueOf(Score.of(120)))).toBe(true);
-    expect(updatedAt).toBeInstanceOf(Date);
-    expect((updatedAt as Date).toISOString()).toBe(LATER.toISOString());
+    expect(updatedAt).toBeInstanceOf(SyncInstant);
+    expect((updatedAt as SyncInstant).equals(LATER)).toBe(true);
     expect(results).toEqual([first, second]);
     expect((results as LevelResult[])[0]).toBe(first);
   });
@@ -422,25 +421,23 @@ describe('PlayerProgress delivery', () => {
     const parts = progressPartsOf(PlayerProgress.start(USER, FIT, START));
 
     expect(parts.highScore).toBeNull();
-    expect(parts.updatedAt.toISOString()).toBe(START.toISOString());
+    expect(parts.updatedAt).toEqual(START);
     expect(parts.results).toEqual([]);
   });
 
-  // Each delivery gives a new Date and a new list, and the values are
-  // immutable. So nothing that the receiver gets is a part of the aggregate.
-  it('should_keep_its_state_when_the_receiver_changes_the_date_and_the_list_it_received', () => {
+  // Each delivery gives a new list, and the values are immutable. So nothing
+  // that the receiver gets is a part of the aggregate that it can change.
+  it('should_keep_its_state_when_the_receiver_changes_the_list_it_received', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
     progress.recordScore(valueOf(Score.of(50)), START);
-    progress.recordLevel(level('fit-01', 2));
+    progress.recordLevel(level('fit-01', 2), START);
     const received = progressPartsOf(progress);
 
-    received.updatedAt.setUTCFullYear(1999);
     (received.results as LevelResult[]).pop();
 
     const after = progressPartsOf(progress);
-    expect(after.updatedAt).not.toBe(received.updatedAt);
     expect(after.results).not.toBe(received.results);
-    expect(after.updatedAt.toISOString()).toBe(START.toISOString());
+    expect(after.updatedAt).toEqual(START);
     expect(after.results).toEqual([level('fit-01', 2)]);
     expect(after.highScore?.equals(valueOf(Score.of(50)))).toBe(true);
     expect(after.userId.equals(USER)).toBe(true);
@@ -450,8 +447,8 @@ describe('PlayerProgress delivery', () => {
   it('should_hold_the_same_data_when_restored_from_the_values_that_it_delivered', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
     progress.recordScore(valueOf(Score.of(120)), LATER);
-    progress.recordLevel(level('fit-01', 2));
-    progress.recordLevel(level('fit-02', 3));
+    progress.recordLevel(level('fit-01', 2), LATER);
+    progress.recordLevel(level('fit-02', 3), LATER);
 
     const restored = restoreFrom(progressPartsOf(progress));
 

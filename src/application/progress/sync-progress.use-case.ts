@@ -30,10 +30,11 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // read, change and save runs under the lock of ProgressRepository.update(),
 // so two overlapping syncs of one key run one after the other and lose no
 // data (DEF-01, DEF-02). The mapper of the border builds every value, so a
-// sync has no broken value to report. A guard of the aggregate that throws is
-// a defect of the caller, and a Clock that gives an invalid Date is a fault
-// of the server. In both cases the use case throws and saves nothing
-// (decision 11).
+// sync has no broken value to report. The Clock gives a SyncInstant, which
+// guards the rule of a valid instant, so the use case checks no instant. A
+// guard of the aggregate that throws is a defect of the caller, and a Clock
+// that throws is a fault of the server. In both cases the use case throws
+// and saves nothing (decision 11).
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
@@ -44,18 +45,16 @@ export class SyncProgressUseCase implements SyncProgress {
     const { userId, gameId, score, results } = request;
     let outcome: Result<PlayerProgress, ProgressProblem> | undefined;
     await this.progress.update(userId, gameId, (stored) => {
-      // The use case reads the Clock under the lock. So updatedAt follows
-      // the order of the saves and never moves back.
+      // The use case reads the Clock under the lock, so the instants follow
+      // the order of the saves. The aggregate keeps updatedAt from moving
+      // back in any case.
       const at = this.clock.now();
-      if (!(at instanceof Date) || Number.isNaN(at.getTime())) {
-        throw new Error('The Clock must return a valid Date.');
-      }
       const progress = stored ?? PlayerProgress.start(userId, gameId, at);
       if (score !== undefined) {
         progress.recordScore(score, at);
       }
       for (const result of results) {
-        progress.recordLevel(result);
+        progress.recordLevel(result, at);
       }
       outcome = ok(progress);
       return progress;

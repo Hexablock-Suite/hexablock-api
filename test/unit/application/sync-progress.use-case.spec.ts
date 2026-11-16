@@ -6,18 +6,21 @@ import {
 } from '../../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { Score } from '../../../src/domain/progress/score.js';
+import type { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { progressPartsOf } from '../../support/recording-receiver.js';
+import { syncInstantOf } from '../../support/sync-instants.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
 const ADA = valueOf(UserId.from(testUserId(1)));
-const AT = new Date('2026-11-06T10:00:00.000Z');
+const AT_TIME = new Date('2026-11-06T10:00:00.000Z');
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
-const LATER = new Date(AT.getTime() + FIVE_MINUTES_MS);
+const AT = syncInstantOf(AT_TIME);
+const LATER = syncInstantOf(new Date(AT_TIME.getTime() + FIVE_MINUTES_MS));
 
 // Builds the request as the mapper of the border does: the use case gets
 // domain values. A call with no score key sends a score of 120.
@@ -240,19 +243,24 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(result.ok && result.value).toEqual(stored);
   });
 
-  // A broken Clock is a fault of the server, not of the request (decision 11).
-  // The use case throws, so the client gets a 500, not a 400.
-  it('should_reject_and_save_nothing_when_clock_returns_an_invalid_date', async () => {
-    const broken = new SyncProgressUseCase(progress, new FixedClock(new Date(Number.NaN)));
+  // #97: the use case checks no instant. The Clock gives a SyncInstant, which
+  // guards the rule of a valid instant. The types forbid a Clock that gives
+  // another value, so it is a fault of the server, not of the request
+  // (decision 11). The guard of the aggregate throws, so the client gets a
+  // 500, not a 400.
+  it('should_reject_and_save_nothing_when_clock_gives_no_sync_instant', async () => {
+    const broken = new SyncProgressUseCase(progress, {
+      now: () => new Date(Number.NaN) as unknown as SyncInstant,
+    });
     const level = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
     await sync.execute(syncRequest({ gameId: 'hexa-fit', score: 120 }));
 
     await expect(broken.execute(syncRequest())).rejects.toThrow(
-      'The Clock must return a valid Date.',
+      new TypeError('The instant must be a SyncInstant.'),
     );
     await expect(
       broken.execute(syncRequest({ gameId: 'hexa-fit', score: 900, results: [level] })),
-    ).rejects.toThrow('The Clock must return a valid Date.');
+    ).rejects.toThrow(new TypeError('The instant must be a SyncInstant.'));
     expect(await progress.find(ADA, valueOf(GameId.of('hexa-lines')))).toBeNull();
     const stored = await progress.find(ADA, valueOf(GameId.of('hexa-fit')));
     expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(120)))).toBe(true);

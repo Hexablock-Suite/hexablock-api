@@ -13,10 +13,12 @@ import {
 } from '../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { Score } from '../../src/domain/progress/score.js';
+import type { SyncInstant } from '../../src/domain/progress/sync-instant.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
 import { levelResultOf } from '../support/level-results.js';
 import { valueOf } from '../support/result.js';
+import { syncInstantOf } from '../support/sync-instants.js';
 
 // Concurrency tests of the advisory lock in DrizzleProgressRepository.update()
 // (DEF-01, DEF-02). They need a real Postgres server. PGlite runs one
@@ -75,7 +77,7 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
   // Each reading is 1 ms after the previous one. The order of the readings
   // shows the order in which the syncs ran under the lock.
   function tickingClock(): Clock {
-    const clock = new FixedClock(START);
+    const clock = new FixedClock(syncInstantOf(START));
     return {
       now: () => {
         const reading = clock.now();
@@ -253,9 +255,11 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     await syncWith().execute(syncRequest(player, 50, [1, 2]));
     const before = await snapshot(player);
 
-    const invalidClock = syncWith({ now: () => new Date(Number.NaN) });
+    // The types forbid a Clock that gives no SyncInstant. The guard of the
+    // aggregate throws under the lock (#97).
+    const invalidClock = syncWith({ now: () => new Date(Number.NaN) as unknown as SyncInstant });
     await expect(invalidClock.execute(syncRequest(player, 999, [9]))).rejects.toThrow(
-      'The Clock must return a valid Date.',
+      new TypeError('The instant must be a SyncInstant.'),
     );
     expect(await snapshot(player)).toBe(before);
 

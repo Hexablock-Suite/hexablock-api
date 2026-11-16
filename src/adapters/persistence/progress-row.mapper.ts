@@ -1,6 +1,7 @@
 import { GameId } from '../../domain/progress/game-id.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { Score } from '../../domain/progress/score.js';
+import { SyncInstant } from '../../domain/progress/sync-instant.js';
 import { UserId } from '../../domain/user/user-id.js';
 import { buildLevelResult } from '../built.js';
 import { receiveProgressOf } from '../received.js';
@@ -13,20 +14,20 @@ export type LevelResultRow = typeof levelResults.$inferSelect;
 // Splits the PlayerProgress aggregate into its progress row and its
 // level_results rows, and joins them back (classes.md decision 2).
 export const ProgressRowMapper = {
-  // The mapper builds the value objects of the row and of each stored result.
-  // start() takes the key and the instant, and restore() records the rest. A
-  // stored value that breaks its rule is a server fault, so the mapper throws.
+  // The mapper builds the value objects of the row and of each stored result,
+  // and restore() takes them in the order of PlayerProgressReceiver. The
+  // updated_at column gives a Date, and its milliseconds build the
+  // SyncInstant. A stored value that breaks its rule is a server fault, so
+  // the mapper throws. Postgres keeps 'infinity', for example: it reads as an
+  // invalid Date, and SyncInstant.of() rejects it.
   toAggregate(row: ProgressRow, resultRows: readonly LevelResultRow[]): PlayerProgress {
     const rows = `The progress rows of user ${row.userId} and game ${row.gameId}`;
     const userId = storedValue(UserId.from(row.userId), rows);
     const gameId = storedValue(GameId.of(row.gameId), rows);
     const highScore = row.highScore === null ? null : storedValue(Score.of(row.highScore), rows);
+    const updatedAt = storedValue(SyncInstant.of(row.updatedAt.getTime()), rows);
     const results = resultRows.map((result) => storedValue(buildLevelResult(result), rows));
-    return PlayerProgress.restore(
-      PlayerProgress.start(userId, gameId, row.updatedAt),
-      highScore,
-      results,
-    );
+    return PlayerProgress.restore(userId, gameId, highScore, updatedAt, results);
   },
 
   // The aggregate delivers its parts to the mapper. The mapper receives the
