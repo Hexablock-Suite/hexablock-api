@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 2 of 3</p>
       <h1>Login: one sign-in request through the four layers</h1>
       <svg
-        viewBox="0 0 1240 1634"
+        viewBox="0 0 1240 1686"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow2login-title flow2login-desc"
@@ -79,7 +79,8 @@
           1, the use case asks the PasswordAttempt if it is longer than any password, and it asks
           the User aggregate root that the repository returns to check the attempt.
           User.passwordMatches() asks the PasswordVerifier interface of the domain, which the
-          PasswordHasher port extends.
+          PasswordHasher port extends. A dashed frame labelled AGGREGATE marks the boundary of User;
+          view 3 of Part 1 draws its members.
         </desc>
         <defs>
           <marker
@@ -141,12 +142,35 @@
           x="24"
           y="1004"
           width="1192"
-          height="320"
+          height="356"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
           stroke-width="1"
         />
+        <!-- Group frame: the AGGREGATE frame of User. This view draws the root alone; Part 1, view 3 draws its members. -->
+        <rect
+          x="544"
+          y="1040"
+          width="272"
+          height="304"
+          rx="8"
+          fill="none"
+          stroke="rgba(23,33,42,0.65)"
+          stroke-width="1.25"
+          stroke-dasharray="9,4"
+        />
+        <text
+          x="612"
+          y="1056"
+          fill="#17212a"
+          font-size="8"
+          font-weight="600"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          AGGREGATE · User · decision 16
+        </text>
         <!-- Relationships (drawn before boxes) -->
         <!-- AuthController uses AuthDtoMapper: use (#105) -->
         <path
@@ -217,7 +241,7 @@
         />
         <!-- LoginUseCase asks the User that findByUsername() returns to check the password: use -->
         <path
-          d="M600 808 L600 1044"
+          d="M600 808 L600 1072"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -225,7 +249,7 @@
         />
         <!-- LoginUseCase asks the PasswordAttempt of the request if it is longer than any password: use (#105) -->
         <path
-          d="M420 808 L420 1044"
+          d="M420 808 L420 1072"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -266,7 +290,7 @@
         />
         <!-- PasswordHasher extends PasswordVerifier: inheritance between two interfaces -->
         <path
-          d="M880 572 L880 1044"
+          d="M880 572 L880 1072"
           fill="none"
           stroke="#17212a"
           stroke-width="1"
@@ -274,7 +298,7 @@
         />
         <!-- User.passwordMatches() takes a PasswordVerifier as a parameter: use -->
         <path
-          d="M800 1080 L852 1080"
+          d="M800 1108 L864 1108"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -377,10 +401,10 @@
         >
           asks
         </text>
-        <rect x="810" y="1062" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="824" y="1090" width="32" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="826"
-          y="1071"
+          x="840"
+          y="1099"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -450,7 +474,7 @@
         >
           LAYER 1 · ENTITIES · src/domain/
         </text>
-        <!-- Class: ScryptPasswordHasher («Adapter») -->
+        <!-- Class: ScryptPasswordHasher (no role label) -->
         <rect
           x="540"
           y="56"
@@ -463,18 +487,7 @@
         />
         <text
           x="710"
-          y="74"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «Adapter»
-        </text>
-        <text
-          x="710"
-          y="92"
+          y="83"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -485,7 +498,7 @@
         </text>
         <text
           x="710"
-          y="106"
+          y="97"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -504,7 +517,7 @@
         <text x="578" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           hash: PasswordHash): Promise&lt;boolean&gt;
         </text>
-        <!-- Class: JwtTokenIssuer («Adapter») -->
+        <!-- Class: JwtTokenIssuer (no role label) -->
         <rect
           x="900"
           y="56"
@@ -517,18 +530,7 @@
         />
         <text
           x="1046"
-          y="74"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «Adapter»
-        </text>
-        <text
-          x="1046"
-          y="92"
+          y="83"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -539,7 +541,7 @@
         </text>
         <text
           x="1046"
-          y="106"
+          y="97"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -559,7 +561,7 @@
         <text x="916" y="172" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + verify(token: SessionToken): UserId | null
         </text>
-        <!-- Class: DrizzleUserRepository («Adapter») -->
+        <!-- Class: DrizzleUserRepository (no role label) -->
         <rect
           x="48"
           y="240"
@@ -579,7 +581,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter» «repository»
+          «repository»
         </text>
         <text
           x="218"
@@ -1031,7 +1033,7 @@
         <!-- Class: User («entity» «aggregate root») -->
         <rect
           x="560"
-          y="1044"
+          y="1072"
           width="240"
           height="256"
           rx="6"
@@ -1041,7 +1043,7 @@
         />
         <text
           x="680"
-          y="1062"
+          y="1090"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1052,7 +1054,7 @@
         </text>
         <text
           x="680"
-          y="1080"
+          y="1108"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1061,10 +1063,10 @@
         >
           User
         </text>
-        <line x1="560" y1="1092" x2="800" y2="1092" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="560" y1="1120" x2="800" y2="1120" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="576"
-          y="1108"
+          y="1136"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1073,7 +1075,7 @@
         </text>
         <text
           x="576"
-          y="1124"
+          y="1152"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1082,20 +1084,20 @@
         </text>
         <text
           x="576"
-          y="1140"
+          y="1168"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           - passwordHash: PasswordHash
         </text>
-        <line x1="560" y1="1148" x2="800" y2="1148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="560" y1="1176" x2="800" y2="1176" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           textLength="218"
           lengthAdjust="spacingAndGlyphs"
           text-decoration="underline"
           x="576"
-          y="1164"
+          y="1192"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1105,7 +1107,7 @@
         <text
           text-decoration="underline"
           x="598"
-          y="1180"
+          y="1208"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1117,7 +1119,7 @@
           lengthAdjust="spacingAndGlyphs"
           text-decoration="underline"
           x="576"
-          y="1196"
+          y="1224"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1127,7 +1129,7 @@
         <text
           text-decoration="underline"
           x="598"
-          y="1212"
+          y="1240"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1136,7 +1138,7 @@
         </text>
         <text
           x="576"
-          y="1228"
+          y="1256"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1147,7 +1149,7 @@
           textLength="218"
           lengthAdjust="spacingAndGlyphs"
           x="576"
-          y="1244"
+          y="1272"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1158,7 +1160,7 @@
           textLength="218"
           lengthAdjust="spacingAndGlyphs"
           x="576"
-          y="1260"
+          y="1288"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1167,7 +1169,7 @@
         </text>
         <text
           x="598"
-          y="1276"
+          y="1304"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1176,7 +1178,7 @@
         </text>
         <text
           x="598"
-          y="1292"
+          y="1320"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1185,8 +1187,8 @@
         </text>
         <!-- Class: PasswordVerifier («interface») -->
         <rect
-          x="852"
-          y="1044"
+          x="864"
+          y="1072"
           width="340"
           height="88"
           rx="6"
@@ -1195,8 +1197,8 @@
           stroke-width="1"
         />
         <text
-          x="1022"
-          y="1062"
+          x="1034"
+          y="1090"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1206,8 +1208,8 @@
           «interface»
         </text>
         <text
-          x="1022"
-          y="1080"
+          x="1034"
+          y="1108"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1217,16 +1219,16 @@
           PasswordVerifier
         </text>
         <line
-          x1="852"
-          y1="1092"
-          x2="1192"
-          y2="1092"
+          x1="864"
+          y1="1120"
+          x2="1204"
+          y2="1120"
           stroke="rgba(23,33,42,0.22)"
           stroke-width="1"
         />
         <text
-          x="868"
-          y="1108"
+          x="880"
+          y="1136"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1234,8 +1236,8 @@
           + verify(attempt: PasswordAttempt,
         </text>
         <text
-          x="890"
-          y="1124"
+          x="902"
+          y="1152"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1244,8 +1246,8 @@
         </text>
         <!-- Class: PasswordAttempt («value object», #98) -->
         <rect
-          x="300"
-          y="1044"
+          x="284"
+          y="1072"
           width="240"
           height="144"
           rx="6"
@@ -1254,8 +1256,8 @@
           stroke-width="1"
         />
         <text
-          x="420"
-          y="1062"
+          x="404"
+          y="1090"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1265,8 +1267,8 @@
           «value object»
         </text>
         <text
-          x="420"
-          y="1080"
+          x="404"
+          y="1108"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1275,20 +1277,20 @@
         >
           PasswordAttempt
         </text>
-        <line x1="300" y1="1092" x2="540" y2="1092" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="284" y1="1120" x2="524" y2="1120" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
-          x="316"
-          y="1108"
+          x="300"
+          y="1136"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           - typed: string
         </text>
-        <line x1="300" y1="1116" x2="540" y2="1116" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="284" y1="1144" x2="524" y2="1144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
-          x="316"
-          y="1132"
+          x="300"
+          y="1160"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1297,8 +1299,8 @@
           + of(typed: string): PasswordAttempt
         </text>
         <text
-          x="316"
-          y="1148"
+          x="300"
+          y="1176"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1306,8 +1308,8 @@
           + isLongerThanAnyPassword(): boolean
         </text>
         <text
-          x="316"
-          y="1164"
+          x="300"
+          y="1192"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1315,8 +1317,8 @@
           + deliverTo(receiver:
         </text>
         <text
-          x="338"
-          y="1180"
+          x="322"
+          y="1208"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1326,7 +1328,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="1348"
+          y="1384"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1336,7 +1338,7 @@
         </text>
         <text
           x="24"
-          y="1364"
+          y="1400"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1346,7 +1348,7 @@
         </text>
         <text
           x="24"
-          y="1380"
+          y="1416"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1356,7 +1358,7 @@
         </text>
         <text
           x="24"
-          y="1396"
+          y="1432"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1366,7 +1368,7 @@
         </text>
         <text
           x="24"
-          y="1412"
+          y="1448"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1376,7 +1378,7 @@
         </text>
         <text
           x="24"
-          y="1428"
+          y="1464"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1386,7 +1388,7 @@
         </text>
         <text
           x="24"
-          y="1444"
+          y="1480"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1396,7 +1398,7 @@
         </text>
         <text
           x="24"
-          y="1460"
+          y="1496"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1406,17 +1408,17 @@
         </text>
         <text
           x="24"
-          y="1476"
+          y="1512"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          attribute serves RegisterUseCase, which flows.md names in «Other use cases». The result of
-          a wrong password is a proposal for team review in flows.md.
+          attribute serves RegisterUseCase, which flows.md names in «Other use cases». A wrong
+          password gives the failed Result of LoginProblem.
         </text>
         <text
           x="24"
-          y="1492"
+          y="1528"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1426,7 +1428,7 @@
         </text>
         <text
           x="24"
-          y="1508"
+          y="1544"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1436,7 +1438,7 @@
         </text>
         <text
           x="24"
-          y="1524"
+          y="1560"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1445,18 +1447,27 @@
           (decision 7), and LoginProblem is { kind: 'invalid-credentials' } for an unknown username
           and a wrong password (#104).
         </text>
+        <text
+          x="24"
+          y="1576"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The dashed AGGREGATE frame marks the boundary of User. View 3 of Part 1 draws its members.
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1552"
+          y1="1604"
           x2="1216"
-          y2="1552"
+          y2="1604"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1570"
+          y="1622"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1466,9 +1477,9 @@
         </text>
         <line
           x1="24"
-          y1="1588"
+          y1="1640"
           x2="52"
-          y2="1588"
+          y2="1640"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1476,7 +1487,7 @@
         />
         <text
           x="60"
-          y="1592"
+          y="1644"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1485,16 +1496,16 @@
         </text>
         <line
           x1="128"
-          y1="1588"
+          y1="1640"
           x2="156"
-          y2="1588"
+          y2="1640"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#flow2login-open)"
         />
         <text
           x="164"
-          y="1592"
+          y="1644"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1503,16 +1514,16 @@
         </text>
         <line
           x1="400"
-          y1="1588"
+          y1="1640"
           x2="428"
-          y2="1588"
+          y2="1640"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#flow2login-triangle)"
         />
         <text
           x="436"
-          y="1592"
+          y="1644"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1521,7 +1532,7 @@
         </text>
         <rect
           x="24"
-          y="1608"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1531,7 +1542,7 @@
         />
         <rect
           x="48"
-          y="1608"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1541,7 +1552,7 @@
         />
         <rect
           x="72"
-          y="1608"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1551,7 +1562,7 @@
         />
         <rect
           x="96"
-          y="1608"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1561,7 +1572,7 @@
         />
         <text
           x="128"
-          y="1617"
+          y="1669"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1570,7 +1581,7 @@
         </text>
         <rect
           x="352"
-          y="1608"
+          y="1660"
           width="28"
           height="12"
           rx="2"
@@ -1580,12 +1591,32 @@
         />
         <text
           x="388"
-          y="1617"
+          y="1669"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
+        </text>
+        <rect
+          x="520"
+          y="1660"
+          width="28"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="rgba(23,33,42,0.65)"
+          stroke-width="1.25"
+          stroke-dasharray="9,4"
+        />
+        <text
+          x="556"
+          y="1669"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          AGGREGATE frame · root and its members
         </text>
       </svg>
     </div>

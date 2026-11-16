@@ -308,6 +308,14 @@
           stroke="#5b6873"
           marker-end="url(#ext3database-open)"
         />
+        <!-- GetProgressUseCase holds ProgressRepository: use -->
+        <path
+          d="M298 528 L298 408"
+          fill="none"
+          stroke-width="1"
+          stroke="#5b6873"
+          marker-end="url(#ext3database-open)"
+        />
         <!-- LoginUseCase holds UserRepository: use -->
         <path
           d="M970 528 L970 408"
@@ -364,6 +372,18 @@
           letter-spacing="0.06em"
         >
           users 1
+        </text>
+        <rect x="233" y="506" width="55" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="260.5"
+          y="515"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          progress 1
         </text>
         <rect x="689" y="506" width="51" height="12" rx="2" fill="#efe7f8" />
         <text
@@ -434,7 +454,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter» · VIEWS 3.1, 3.2
+          VIEWS 3.1, 3.2
         </text>
         <text
           x="184"
@@ -467,7 +487,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter» · VIEWS 3.1, 3.2
+          VIEWS 3.1, 3.2
         </text>
         <text
           x="432"
@@ -500,7 +520,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter» · VIEWS 3.1, 3.2
+          VIEWS 3.1, 3.2
         </text>
         <text
           x="656"
@@ -533,7 +553,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter» · VIEWS 3.1, 3.2
+          VIEWS 3.1, 3.2
         </text>
         <text
           x="880"
@@ -977,6 +997,40 @@
         >
           RegisterUseCase
         </text>
+        <!-- GetProgressUseCase -->
+        <rect
+          x="142"
+          y="528"
+          width="170"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="227"
+          y="543"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          PART 2 · VIEW 2
+        </text>
+        <text
+          x="227"
+          y="559"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          GetProgressUseCase
+        </text>
         <!-- UpdateLevelsUseCase -->
         <rect
           x="590"
@@ -1073,8 +1127,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The Mongo names are placeholders: no class exists yet. The Nest feature modules and
-          DatabaseModule bind each port to one adapter, so a switch changes those
+          The Mongo names are placeholders: no class exists yet. AppModule binds each output port to
+          one adapter over the connection of DatabaseModule, so a switch changes those
         </text>
         <text
           x="24"
@@ -1083,7 +1137,7 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          bindings in layer 4, the way AppModule binds the drivers (view 3.4). The row mappers, the
+          bindings in layer 4, as AppModule binds the drivers (view 3.4). The row mappers, the
           Drizzle schema and the drizzle/ migrations stay with the Drizzle adapters.
         </text>
         <!-- Legend -->
