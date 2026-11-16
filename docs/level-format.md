@@ -23,9 +23,9 @@ The level object holds exactly these six fields. The `gameId` and the `levelId` 
 
 A coordinate is a JSON list of whole numbers, such as `[2, 1]`. The `topology` of the level says how to read it, so a square, triangular or 3D level needs no new format (decision 6 of [`architecture/classes.md`](architecture/classes.md)).
 
-- `hex`: the list is `[q, r]`, in axial coordinates. The third cube value is `s = -q - r`.
+- `hex`: the list is `[q, r]`, in axial coordinates. The third cube value is `s = -q - r`. A list of another length is not a hex cell, so its field is wrong: `invalid-figure`, `invalid-pieces` or `invalid-witness`.
 - One rotation step of `hex` is a sixth of a turn around the origin: the cell `[q, r]` turns to `[-r, q + r]`. Six steps make a full turn.
-- Another topology gives the length of its list and its own rotation step. The API never rejects a level only because its topology is not `hex` (DS-6).
+- Another topology gives the length of its list and its own rotation step. The API never rejects a level only because its topology is not `hex` (DS-6). The Fit check needs the rotation step, so the API rejects a Fit level of a topology that it does not know with `unknown-topology`. It knows `hex`.
 
 ## The Fit section
 
@@ -37,7 +37,7 @@ A coordinate is a JSON list of whole numbers, such as `[2, 1]`. The `topology` o
 | `stars`   | list of objects | The star thresholds, from the first star up. Each one is `{ "maxMoves": number, "maxElapsedMs": number }`, two whole numbers of 0 or more. |
 
 - A witness entry places one piece. The piece turns `rotation` steps around its origin, and then it moves by `at`: each turned cell plus `at` is a covered cell. `rotation` is a whole number of steps of the topology, never degrees, and a negative count turns the other way. A piece only rotates; it is never mirrored (A5, C7).
-- A5: the pieces cover the figure exactly. The areas of the pieces add up to the area of the figure, and the witness covers each cell of the figure once, with no cell outside it. Equal areas are not enough.
+- A5: the pieces cover the figure exactly. The witness places each piece once. The areas of the pieces add up to the area of the figure, and the witness covers each cell of the figure once, with no cell outside it. Equal areas are not enough. A cell that the figure lists twice counts twice, so no witness covers that figure exactly. A level that fails A5 gives `unequal-area` when the areas differ, and `inexact-witness` otherwise.
 - A Fit star needs both of its limits: the moves of the play are at most `maxMoves`, and its time is at most `maxElapsedMs` milliseconds (hexablock-app#60). The stars are cumulative: star N needs star N-1, so a play gets one star for each leading threshold that it meets (DS-6).
 
 ## The Sort section
