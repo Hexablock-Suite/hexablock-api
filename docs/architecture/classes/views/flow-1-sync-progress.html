@@ -78,7 +78,8 @@
           layer 4, SystemClock implements Clock. In layer 2, SyncProgressUseCase implements
           SyncProgress, takes a SyncProgressRequest and holds the ProgressRepository and Clock
           ports. In layer 1, the use case updates the PlayerProgress aggregate, which keeps its
-          LevelResult values.
+          LevelResult values. LevelResult keeps its four value objects private, takes them built in
+          of(), and delivers all four to a LevelResultReceiver with deliverTo().
         </desc>
         <defs>
           <marker
@@ -1027,7 +1028,7 @@
           x="396"
           y="1208"
           width="284"
-          height="204"
+          height="252"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1074,7 +1075,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + levelId: LevelId
+          - levelId: LevelId
         </text>
         <text
           x="412"
@@ -1083,7 +1084,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + stars: Stars
+          - stars: Stars
         </text>
         <text
           x="412"
@@ -1092,7 +1093,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + moves: Moves
+          - moves: Moves
         </text>
         <text
           x="412"
@@ -1101,7 +1102,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + elapsedTime: ElapsedTime
+          - elapsedTime: ElapsedTime
         </text>
         <line x1="396" y1="1340" x2="680" y2="1340" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -1112,11 +1113,42 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + of(values: LevelResultValues): LevelResult
+          + of(levelId: LevelId, stars: Stars,
+        </text>
+        <text
+          x="434"
+          y="1372"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          moves: Moves, elapsedTime:
+        </text>
+        <text
+          x="434"
+          y="1388"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          ElapsedTime): LevelResult
+        </text>
+        <text
+          textLength="262"
+          lengthAdjust="spacingAndGlyphs"
+          x="412"
+          y="1404"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverTo(receiver: LevelResultReceiver): void
         </text>
         <text
           x="412"
-          y="1372"
+          y="1420"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1125,7 +1157,7 @@
         </text>
         <text
           x="412"
-          y="1388"
+          y="1436"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1134,7 +1166,7 @@
         </text>
         <text
           x="412"
-          y="1404"
+          y="1452"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1361,8 +1393,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          ProgressDtoMapper builds the GameId, the Score and each LevelResult of the request, and
-          sync() reads the userId that JwtAuthGuard puts on it. The sequence diagram
+          ProgressDtoMapper builds the GameId, the Score and each LevelResult of the request from
+          its four values, and sync() reads the userId that JwtAuthGuard puts on it. The sequence
+          diagram
         </text>
         <text
           x="24"
