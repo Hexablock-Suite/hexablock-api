@@ -118,14 +118,15 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
 
   // The version rule runs again inside each update(), so an update that
   // races a newer one cannot save an older level (S3-10).
-  it('should_keep_the_highest_version_when_updates_of_one_level_overlap_in_any_order', async () => {
-    for (const order of [
-      [3, 1, 2],
-      [1, 2, 3],
-      [2, 3, 1],
-    ]) {
+  it.each([
+    [3, 1, 2],
+    [1, 2, 3],
+    [2, 3, 1],
+  ])(
+    'should_keep_the_highest_version_when_updates_of_one_level_overlap_in_any_order',
+    async (firstVersion, secondVersion, thirdVersion) => {
       const levelId = newLevelId();
-      const updates = order.map((version) => {
+      const updates = [firstVersion, secondVersion, thirdVersion].map((version) => {
         const incoming = checkedLevel(levelJson('hexa-sort', levelId, version));
         return repository().update(SORT, LevelId.of(levelId), (stored) =>
           stored === null ? ok(incoming) : stored.accepts(incoming),
@@ -135,8 +136,8 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
       await Promise.all(updates);
 
       expect(await storedVersion(levelId)).toBe('3');
-    }
-  });
+    },
+  );
 
   it('should_wait_without_running_the_change_when_another_session_holds_the_lock', async () => {
     const levelId = newLevelId();

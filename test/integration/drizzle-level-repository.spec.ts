@@ -161,37 +161,35 @@ describe('DrizzleLevelRepository', () => {
   });
 
   // A stored row that no strategy accepts is a server fault, not a level
-  // problem of a client. The strategy is the one of the row's gameId.
-  it('should_reject_the_read_when_no_strategy_accepts_a_stored_row', async () => {
-    const cases: [ReturnType<typeof rowOf>, string][] = [
-      [
-        { ...rowOf(levelExample('hexa-sort')), gameId: 'hexa-lines', levelId: 'lines-01' },
-        'The levels row hexa-lines/lines-01 breaks the level rule game-without-levels.',
-      ],
-      [
-        { ...rowOf(levelExample('hexa-fit')), gameId: 'hexa-sort', levelId: 'sort-01' },
-        'The levels row hexa-sort/sort-01 breaks the level rule invalid-section.',
-      ],
-      [
-        { ...rowOf(levelExample('hexa-fit')), version: 0 },
-        'The levels row hexa-fit/fit-01 breaks the level rule invalid-version.',
-      ],
-    ];
-    for (const [row, message] of cases) {
-      await emptyLevels();
-      await database.db.insert(levels).values(row);
+  // problem of a client. The strategy is the one of the row's gameId. Each
+  // case starts with an empty levels table (beforeEach).
+  it.each<[ReturnType<typeof rowOf>, string]>([
+    [
+      { ...rowOf(levelExample('hexa-sort')), gameId: 'hexa-lines', levelId: 'lines-01' },
+      'The levels row hexa-lines/lines-01 breaks the level rule game-without-levels.',
+    ],
+    [
+      { ...rowOf(levelExample('hexa-fit')), gameId: 'hexa-sort', levelId: 'sort-01' },
+      'The levels row hexa-sort/sort-01 breaks the level rule invalid-section.',
+    ],
+    [
+      { ...rowOf(levelExample('hexa-fit')), version: 0 },
+      'The levels row hexa-fit/fit-01 breaks the level rule invalid-version.',
+    ],
+  ])('should_reject_the_read_when_no_strategy_accepts_a_stored_row', async (row, message) => {
+    await database.db.insert(levels).values(row);
 
-      await expect(
-        new DrizzleLevelRepository(database.db, levelValidators()).list(),
-      ).rejects.toThrow(message);
-    }
+    await expect(new DrizzleLevelRepository(database.db, levelValidators()).list()).rejects.toThrow(
+      message,
+    );
   });
 
   // The row keeps the common part as text and numbers and the section as
   // the JSON of the shared level format.
-  it('should_write_the_common_part_and_the_section_of_the_format_when_a_level_becomes_a_row', () => {
-    for (const example of [levelExample('hexa-fit'), levelExample('hexa-sort')]) {
+  it.each([levelExample('hexa-fit'), levelExample('hexa-sort')])(
+    'should_write_the_common_part_and_the_section_of_the_format_when_a_level_becomes_a_row',
+    (example) => {
       expect(LevelRowMapper.toRow(checkedLevel(example))).toEqual(rowOf(example));
-    }
-  });
+    },
+  );
 });

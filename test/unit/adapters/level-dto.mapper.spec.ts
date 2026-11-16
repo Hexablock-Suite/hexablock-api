@@ -22,13 +22,14 @@ function withoutSection(json: LevelJson): Record<string, unknown> {
 // 12). It builds the values of the common part and keeps the section as it
 // arrives: only the strategy of the gameId knows the section type (#77).
 describe('LevelDtoMapper', () => {
-  it('should_give_the_json_of_the_format_document_when_a_level_becomes_a_dto', () => {
-    for (const gameId of ['hexa-fit', 'hexa-sort'] as const) {
+  it.each(['hexa-fit', 'hexa-sort'] as const)(
+    'should_give_the_json_of_the_format_document_when_a_level_becomes_a_dto',
+    (gameId) => {
       const dto = LevelDtoMapper.toDto(checkedLevel(levelExample(gameId)));
 
       expect(dto).toEqual(levelExample(gameId));
-    }
-  });
+    },
+  );
 
   it('should_build_the_common_values_and_keep_the_section_when_the_body_holds_levels_of_the_format', () => {
     const fit = levelJson('hexa-fit');
@@ -43,22 +44,20 @@ describe('LevelDtoMapper', () => {
   });
 
   // The app has no validation pipe, so the mapper checks the body shape.
-  it('should_report_the_shape_problem_when_the_body_holds_no_array_of_level_objects', () => {
-    const bodies: unknown[] = [
-      undefined,
-      null,
-      'levels',
-      [levelJson('hexa-fit')],
-      {},
-      { levels: levelJson('hexa-fit') },
-      { levels: [levelJson('hexa-fit'), null] },
-      { levels: [[levelJson('hexa-fit')]] },
-      { levels: ['fit-01'] },
-    ];
-
-    for (const body of bodies) {
-      expect(LevelDtoMapper.toRequest(body)).toEqual({ ok: false, error: [SHAPE_PROBLEM] });
-    }
+  // Each row holds its body in a one-item tuple. it.each spreads a row that
+  // is an array, and one body is an array.
+  it.each<[unknown]>([
+    [undefined],
+    [null],
+    ['levels'],
+    [[levelJson('hexa-fit')]],
+    [{}],
+    [{ levels: levelJson('hexa-fit') }],
+    [{ levels: [levelJson('hexa-fit'), null] }],
+    [{ levels: [[levelJson('hexa-fit')]] }],
+    [{ levels: ['fit-01'] }],
+  ])('should_report_the_shape_problem_when_the_body_holds_no_array_of_level_objects', (body) => {
+    expect(LevelDtoMapper.toRequest(body)).toEqual({ ok: false, error: [SHAPE_PROBLEM] });
   });
 
   // Each problem names its level by its gameId and levelId, so a client can

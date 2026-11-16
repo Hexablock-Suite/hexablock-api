@@ -67,14 +67,14 @@ describe('received values', () => {
   // A level and its section deliver their parts, and each part delivers its
   // own value. The helper walks them and gives the shared level format (#80).
   describe('the JSON of a domain value', () => {
-    it('should_give_the_level_of_the_format_document_when_each_example_level_is_received', () => {
-      const fixedSort = levelExample('hexa-sort');
-      fixedSort.section.source = { stacks: [['red', 'red', 'blue'], ['green'], ['blue', 'green']] };
-
-      for (const example of [levelExample('hexa-fit'), levelExample('hexa-sort'), fixedSort]) {
+    const fixedSort = levelExample('hexa-sort');
+    fixedSort.section.source = { stacks: [['red', 'red', 'blue'], ['green'], ['blue', 'green']] };
+    it.each([levelExample('hexa-fit'), levelExample('hexa-sort'), fixedSort])(
+      'should_give_the_level_of_the_format_document_when_each_example_level_is_received',
+      (example) => {
         expect(receiveJsonOf(checkedLevel(example))).toEqual(example);
-      }
-    });
+      },
+    );
 
     it('should_give_each_item_when_lists_and_plain_objects_hold_values', () => {
       expect(

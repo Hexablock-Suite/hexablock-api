@@ -81,22 +81,22 @@ describe('SortLevelValidator', () => {
 
   // Moves.of throws ProgressError until #103, and returns a Result after it.
   // The test asserts only what sectionOf() returns, so it holds in both
-  // cases: a bad level file never gives a server error.
-  it('should_return_invalid_stars_without_a_throw_when_a_star_threshold_is_negative', () => {
-    const example = levelExample('hexa-sort');
-    const negative = [[{ maxMoves: -1 }], [{ maxMoves: 40 }, { maxMoves: -5 }]];
-    const reads = negative.map(
-      (stars) => () => new SortLevelValidator().sectionOf({ ...example.section, stars }, HEX),
-    );
+  // cases: a bad level file never gives a server error. No level exists for
+  // the rejected section.
+  it.each([{ stars: [{ maxMoves: -1 }] }, { stars: [{ maxMoves: 40 }, { maxMoves: -5 }] }])(
+    'should_return_invalid_stars_without_a_throw_when_a_star_threshold_is_negative',
+    ({ stars }) => {
+      const example = levelExample('hexa-sort');
+      const read = () => new SortLevelValidator().sectionOf({ ...example.section, stars }, HEX);
 
-    for (const read of reads) {
       expect(read).not.toThrow();
       expect(read()).toEqual({ ok: false, error: 'invalid-stars' });
-    }
-    expect(
-      sortLevelFrom({ ...example, section: { ...example.section, stars: negative[1] } }),
-    ).toEqual({ ok: false, error: 'invalid-stars' });
-  });
+      expect(sortLevelFrom({ ...example, section: { ...example.section, stars } })).toEqual({
+        ok: false,
+        error: 'invalid-stars',
+      });
+    },
+  );
 
   // No rule of the Sort section needs the topology (decision 6). The API
   // never rejects a level only because its topology is not hex.
