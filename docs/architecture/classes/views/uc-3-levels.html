@@ -73,8 +73,10 @@
           Class diagram of layers 2 and 1 showing GetLevelsUseCase and UpdateLevelsUseCase over the
           LevelRepository port, which lists the levels and updates one level per call under a lock
           of its gameId and levelId; UpdateLevelsUseCase also holds the LevelValidators domain
-          service and returns a Result that carries the level problems, so a level that fails its
-          check is never saved and no exception reaches the HTTP layer.
+          service and returns a Result whose InvalidLevels failure holds one problem per broken
+          level with its gameId and levelId, so a level that fails its check is never saved and no
+          exception reaches the HTTP layer. GetLevelsUseCase takes no request and has no expected
+          failure.
         </desc>
         <defs>
           <marker
@@ -175,7 +177,7 @@
         <!-- Relationships (drawn before boxes) -->
         <!-- GetLevelsUseCase holds LevelRepository: use -->
         <line
-          x1="368"
+          x1="440"
           y1="200"
           x2="536"
           y2="200"
@@ -191,7 +193,7 @@
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
-        <!-- UpdateLevelsUseCase returns Result&lt;void, LevelProblem[]&gt;: use -->
+        <!-- UpdateLevelsUseCase returns Result&lt;void, InvalidLevels&gt;: use -->
         <line
           x1="528"
           y1="400"
@@ -309,7 +311,7 @@
         <rect
           x="64"
           y="120"
-          width="304"
+          width="376"
           height="124"
           rx="6"
           fill="#ffffff"
@@ -317,7 +319,7 @@
           stroke-width="1"
         />
         <text
-          x="216"
+          x="252"
           y="138"
           fill="#5b6873"
           font-size="8"
@@ -328,7 +330,7 @@
           «use case»
         </text>
         <text
-          x="216"
+          x="252"
           y="156"
           fill="#17212a"
           font-size="12"
@@ -339,7 +341,7 @@
           GetLevelsUseCase
         </text>
         <text
-          x="216"
+          x="252"
           y="170"
           fill="#5b6873"
           font-size="8"
@@ -349,16 +351,24 @@
         >
           API-FR-04
         </text>
-        <line x1="64" y1="180" x2="368" y2="180" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="64" y1="180" x2="440" y2="180" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - levels: LevelRepository
         </text>
-        <line x1="64" y1="204" x2="368" y2="204" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="64" y1="204" x2="440" y2="204" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute(gameId: GameId):
+          + execute():
         </text>
-        <text x="102" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;LevelDefinition&lt;unknown&gt;[]&gt;
+        <text
+          textLength="330"
+          lengthAdjust="spacingAndGlyphs"
+          x="102"
+          y="236"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Promise&lt;Result&lt;readonly LevelDefinition&lt;unknown&gt;[], never&gt;&gt;
         </text>
         <!-- Class: UpdateLevelsUseCase (focal, «use case») -->
         <rect
@@ -423,7 +433,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + execute(request: UpdateLevelsRequest): Promise&lt;Result&lt;void, LevelProblem[]&gt;&gt;
+          + execute(request: UpdateLevelsRequest): Promise&lt;Result&lt;void, InvalidLevels&gt;&gt;
         </text>
         <!-- Class: LevelRepository («interface» «port» «repository») -->
         <rect
@@ -665,8 +675,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          It returns the problems in a failed Result, never as an exception. The controller turns
-          that Result into the error body of API-FR-06.
+          It returns InvalidLevels in a failed Result, never as an exception: one problem per broken
+          level, with its gameId and levelId. LevelsController turns it into a 400 (API-FR-06).
         </text>
         <text
           x="24"
