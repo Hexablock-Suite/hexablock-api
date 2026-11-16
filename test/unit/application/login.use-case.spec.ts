@@ -11,6 +11,7 @@ import {
   PrefixTokenIssuer,
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
+import { loginRequest, registerRequest } from '../../support/auth/requests.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
@@ -36,40 +37,33 @@ describe('LoginUseCase', () => {
     users = new InMemoryUserRepository();
     hasher = new PrefixPasswordHasher();
     tokens = new PrefixTokenIssuer();
-    await new RegisterUseCase(users, hasher, new SequenceUserIdGenerator()).execute({
-      username: 'ada',
-      password: 'correct horse',
-    });
+    await new RegisterUseCase(users, hasher, new SequenceUserIdGenerator()).execute(
+      registerRequest('ada', 'correct horse'),
+    );
     login = new LoginUseCase(users, hasher, tokens);
   });
 
   it('should_return_token_for_user_when_credentials_are_valid', async () => {
-    const result = await login.execute({ username: 'ada', password: 'correct horse' });
+    const result = await login.execute(loginRequest('ada', 'correct horse'));
 
     expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
   });
 
   it('should_fail_with_invalid_credentials_when_password_is_wrong', async () => {
-    const result = await login.execute({ username: 'ada', password: 'wrong horse' });
+    const result = await login.execute(loginRequest('ada', 'wrong horse'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
   it('should_fail_with_invalid_credentials_when_username_is_unknown', async () => {
-    const result = await login.execute({ username: 'grace', password: 'correct horse' });
+    const result = await login.execute(loginRequest('grace', 'correct horse'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
   // Login finds the user by the name as typed (#62).
   it('should_fail_with_invalid_credentials_when_username_differs_only_in_case', async () => {
-    const result = await login.execute({ username: 'ADA', password: 'correct horse' });
-
-    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
-  });
-
-  it('should_fail_with_invalid_credentials_when_username_breaks_the_rules', async () => {
-    const result = await login.execute({ username: 'a!', password: 'correct horse' });
+    const result = await login.execute(loginRequest('ADA', 'correct horse'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
@@ -77,7 +71,7 @@ describe('LoginUseCase', () => {
   it('should_verify_password_once_against_dummy_hash_when_username_is_unknown', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
-    const result = await login.execute({ username: 'grace', password: 'correct horse' });
+    const result = await login.execute(loginRequest('grace', 'correct horse'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
@@ -94,7 +88,7 @@ describe('LoginUseCase', () => {
     const dummy: unknown = await hash.mock.results[0].value;
     const verify = vi.spyOn(hasher, 'verify');
 
-    const result = await built.execute({ username: 'nobody', password: 'short' });
+    const result = await built.execute(loginRequest('nobody', 'short'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
@@ -104,7 +98,7 @@ describe('LoginUseCase', () => {
 
   it('should_not_hash_during_login_when_first_unknown_username_signs_in', async () => {
     const hash = vi.spyOn(hasher, 'hash');
-    const result = await login.execute({ username: 'grace', password: 'correct horse' });
+    const result = await login.execute(loginRequest('grace', 'correct horse'));
     // An unknown username costs one hash check, as a wrong password does.
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(hash).not.toHaveBeenCalled();
@@ -131,9 +125,7 @@ describe('LoginUseCase', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(unhandled).toEqual([]);
-      await expect(early.execute({ username: 'grace', password: 'correct horse' })).rejects.toBe(
-        failure,
-      );
+      await expect(early.execute(loginRequest('grace', 'correct horse'))).rejects.toBe(failure);
     } finally {
       process.off('unhandledRejection', record);
     }
@@ -146,7 +138,7 @@ describe('LoginUseCase', () => {
       const verify = vi.spyOn(hasher, 'verify');
       const hash = vi.spyOn(hasher, 'hash');
 
-      const result = await login.execute({ username: 'ada', password });
+      const result = await login.execute(loginRequest('ada', password));
 
       expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
       expect(verify).not.toHaveBeenCalled();
@@ -159,7 +151,7 @@ describe('LoginUseCase', () => {
     async (password) => {
       const verify = vi.spyOn(hasher, 'verify');
 
-      await login.execute({ username: 'ada', password });
+      await login.execute(loginRequest('ada', password));
 
       expect(verify).toHaveBeenCalledOnce();
     },
@@ -168,7 +160,7 @@ describe('LoginUseCase', () => {
   it('should_verify_password_once_when_password_is_wrong', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
-    const result = await login.execute({ username: 'ada', password: 'wrong horse' });
+    const result = await login.execute(loginRequest('ada', 'wrong horse'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
@@ -182,7 +174,7 @@ describe('LoginUseCase', () => {
   it('should_pass_the_typed_text_and_the_stored_password_hash_to_the_hasher_when_user_signs_in', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
-    await login.execute({ username: 'ada', password: 'correct horse' });
+    await login.execute(loginRequest('ada', 'correct horse'));
 
     const [attempt, hash] = verify.mock.calls[0];
     expect(attempt).toBeInstanceOf(PasswordAttempt);
@@ -205,7 +197,7 @@ describe('LoginUseCase', () => {
   it('should_verify_the_typed_text_once_when_it_is_shorter_than_any_password', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
-    const result = await login.execute({ username: 'ada', password: 'short' });
+    const result = await login.execute(loginRequest('ada', 'short'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
@@ -220,7 +212,7 @@ describe('LoginUseCase', () => {
   it('should_pass_the_found_user_to_the_token_issuer_when_credentials_are_valid', async () => {
     const issue = vi.spyOn(tokens, 'issue');
 
-    const result = await login.execute({ username: 'ada', password: 'correct horse' });
+    const result = await login.execute(loginRequest('ada', 'correct horse'));
 
     expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
     expect(issue).toHaveBeenCalledOnce();
@@ -230,7 +222,7 @@ describe('LoginUseCase', () => {
   it('should_verify_password_once_when_credentials_are_valid', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
-    const result = await login.execute({ username: 'ada', password: 'correct horse' });
+    const result = await login.execute(loginRequest('ada', 'correct horse'));
 
     expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
     expect(verify).toHaveBeenCalledOnce();
@@ -242,8 +234,8 @@ describe('LoginUseCase', () => {
   it('should_issue_no_token_when_the_password_is_wrong_or_the_username_is_unknown', async () => {
     const issue = vi.spyOn(tokens, 'issue');
 
-    await login.execute({ username: 'ada', password: 'wrong horse' });
-    await login.execute({ username: 'grace', password: 'correct horse' });
+    await login.execute(loginRequest('ada', 'wrong horse'));
+    await login.execute(loginRequest('grace', 'correct horse'));
 
     expect(issue).not.toHaveBeenCalled();
   });
@@ -253,7 +245,7 @@ describe('LoginUseCase', () => {
   it('should_skip_the_hash_check_when_an_unknown_username_sends_a_password_above_the_maximum', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
-    const result = await login.execute({ username: 'grace', password: 'y'.repeat(129) });
+    const result = await login.execute(loginRequest('grace', 'y'.repeat(129)));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).not.toHaveBeenCalled();
@@ -264,23 +256,39 @@ describe('LoginUseCase', () => {
     const failure = new Error('boom');
     vi.spyOn(hasher, 'verify').mockRejectedValue(failure);
 
-    await expect(login.execute({ username: 'ada', password: 'correct horse' })).rejects.toBe(
-      failure,
-    );
+    await expect(login.execute(loginRequest('ada', 'correct horse'))).rejects.toBe(failure);
   });
 
-  // A username that breaks the rule is an unknown username. It costs one
-  // check against the dummy hash, never against the hash of a stored user.
-  it('should_check_the_dummy_hash_once_when_the_username_breaks_the_rule', async () => {
+  // #105: AuthDtoMapper builds the Username and the PasswordAttempt. The use
+  // case passes the values of the request to its ports and builds no value
+  // from a request field. A username that breaks its rule stops in the
+  // mapper, so it never reaches the use case.
+  it('should_pass_the_username_and_the_attempt_of_the_request_to_the_ports_when_user_signs_in', async () => {
+    const find = vi.spyOn(users, 'findByUsername');
     const verify = vi.spyOn(hasher, 'verify');
+    const request = loginRequest('ada', 'correct horse');
 
-    const result = await login.execute({ username: 'a!', password: 'correct horse' });
+    const result = await login.execute(request);
+
+    expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
+    expect(find).toHaveBeenCalledOnce();
+    expect(find.mock.calls[0][0]).toBe(request.username);
+    expect(verify).toHaveBeenCalledOnce();
+    expect(verify.mock.calls[0][0]).toBe(request.attempt);
+  });
+
+  // The use case asks the attempt of the request before any port call. So a
+  // text longer than any password costs no lookup and no hash work.
+  it('should_call_no_port_when_the_attempt_of_the_request_is_longer_than_any_password', async () => {
+    const find = vi.spyOn(users, 'findByUsername');
+    const verify = vi.spyOn(hasher, 'verify');
+    const issue = vi.spyOn(tokens, 'issue');
+
+    const result = await login.execute(loginRequest('ada', 'x'.repeat(129)));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
-    expect(verify).toHaveBeenCalledOnce();
-    expect(verify.mock.calls[0][1]).not.toEqual(valueOf(PasswordHash.from('hashed:correct horse')));
-    expect(checksOf(verify.mock.calls)).toEqual([
-      ['correct horse', valueOf(PasswordHash.from('hashed:unknown-user-dummy-password'))],
-    ]);
+    expect(find).not.toHaveBeenCalled();
+    expect(verify).not.toHaveBeenCalled();
+    expect(issue).not.toHaveBeenCalled();
   });
 });

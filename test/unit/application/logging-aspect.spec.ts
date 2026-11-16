@@ -29,6 +29,7 @@ import {
   PrefixTokenIssuer,
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
+import { loginRequest, registerRequest } from '../../support/auth/requests.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
@@ -453,7 +454,8 @@ describe('LoggingAspect', () => {
 
   // The three account ports bind UseCase, and each problem carries a kind
   // (#104). So the aspect wraps each port, logs the kind of a failure and
-  // never logs a password or a token.
+  // never logs a password or a token. Since #105 a request carries a
+  // Password or a PasswordAttempt, and the aspect logs no part of a request.
   it('should_log_username_taken_kind_and_no_password_when_aspect_wraps_register_user_and_the_username_is_taken', async () => {
     const logger = recordingLogger();
     const register: RegisterUser = new RegisterUseCase(
@@ -461,10 +463,10 @@ describe('LoggingAspect', () => {
       new PrefixPasswordHasher(),
       new SequenceUserIdGenerator(),
     );
-    await register.execute({ username: 'ada', password: 'correct horse' });
+    await register.execute(registerRequest('ada', 'correct horse'));
     const aspect = new LoggingAspect(register, 'RegisterUser', logger);
 
-    const result = await aspect.execute({ username: 'ada', password: 'typed-secret-07' });
+    const result = await aspect.execute(registerRequest('ada', 'typed-secret-07'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -479,14 +481,13 @@ describe('LoggingAspect', () => {
     const logger = recordingLogger();
     const users = new InMemoryUserRepository();
     const hasher = new PrefixPasswordHasher();
-    await new RegisterUseCase(users, hasher, new SequenceUserIdGenerator()).execute({
-      username: 'ada',
-      password: 'correct horse',
-    });
+    await new RegisterUseCase(users, hasher, new SequenceUserIdGenerator()).execute(
+      registerRequest('ada', 'correct horse'),
+    );
     const login: Login = new LoginUseCase(users, hasher, new PrefixTokenIssuer());
     const aspect = new LoggingAspect(login, 'Login', logger);
 
-    const result = await aspect.execute({ username: 'ada', password: 'typed-secret-07' });
+    const result = await aspect.execute(loginRequest('ada', 'typed-secret-07'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
