@@ -76,8 +76,8 @@
           DrizzleLeaderboardReader, which implement the two progress ports of layer 2, and
           ProgressRowMapper, which turns the rows of both progress tables into the PlayerProgress
           aggregate and back. The mapper receives the parts of the aggregate through
-          PlayerProgressReceiver, an interface of layer 1, and builds the aggregate again with
-          start() and restore(). DrizzleLeaderboardReader filters by gameId and level, sums the
+          PlayerProgressReceiver, an interface of layer 1, and builds the aggregate again from those
+          parts with restore(). DrizzleLeaderboardReader filters by gameId and level, sums the
           totals of each Standing and adds no order.
         </desc>
         <defs>
@@ -609,32 +609,10 @@
           highScore: Score | null,
         </text>
         <text x="102" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          updatedAt: TInstant,
+          updatedAt: SyncInstant,
         </text>
         <text x="102" y="812" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           results: LevelResult[]): void
-        </text>
-        <!-- UML template box: the type parameter on the top-right corner -->
-        <rect
-          x="288"
-          y="679"
-          width="72"
-          height="18"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="0.8"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="324"
-          y="691"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-        >
-          TInstant
         </text>
         <!-- Footnote -->
         <text
@@ -685,7 +663,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           The aggregate has no getter: the mapper receives its parts through PlayerProgressReceiver
-          (Memento), and builds it again with PlayerProgress.start() and restore().
+          (Memento), and builds it again from those parts with PlayerProgress.restore().
         </text>
         <!-- Legend -->
         <line x1="24" y1="956" x2="1016" y2="956" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
@@ -833,26 +811,6 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           Dashed class · detailed in another view
-        </text>
-        <rect
-          x="840"
-          y="1012"
-          width="28"
-          height="12"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="0.8"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="876"
-          y="1021"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Corner box · type parameters
         </text>
       </svg>
     </div>
