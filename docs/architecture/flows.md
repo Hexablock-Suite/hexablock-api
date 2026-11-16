@@ -15,13 +15,13 @@ The app calls this endpoint when it syncs its progress and its leaderboard: `Sav
 
 ### Class view
 
-![Sync progress class view: JwtAuthGuard, ProgressController, ProgressDtoMapper and DrizzleProgressRepository in layer 3, SystemClock in layer 4, SyncProgressUseCase with the SyncProgress and AuthenticateToken input ports, SyncProgressRequest and the ProgressRepository and Clock ports in layer 2, PlayerProgress, ProgressKey, LevelResult and SyncInstant in layer 1](classes/views/flow-1-sync-progress.png)
+![Sync progress class view: JwtAuthGuard, ProgressController, ProgressDtoMapper and DrizzleProgressRepository in layer 3, SystemClock in layer 4, SyncProgressUseCase with the SyncProgress and AuthenticateToken input ports, SyncProgressRequest and the ProgressRepository and Clock ports in layer 2, and PlayerProgress, ProgressKey, LevelResult and SyncInstant in one dashed AGGREGATE frame in layer 1](classes/views/flow-1-sync-progress.png)
 
 ### Sequence diagram
 
-![Sync progress sequence: the HTTP request enters JwtAuthGuard, ProgressController builds a SyncProgressRequest and calls SyncProgress, SyncProgressUseCase creates the ProgressKey of the request, then finds, updates at the SyncInstant of SystemClock and saves the PlayerProgress of that key through its ports, and the controller answers with a ProgressDto](flows/views/seq-1-sync-progress.png)
+![Sync progress sequence: the HTTP request enters JwtAuthGuard, ProgressController builds a SyncProgressRequest and calls SyncProgress, SyncProgressUseCase creates the ProgressKey of the request and calls ProgressRepository.update(key, change) once; DrizzleProgressRepository locks the key, reads the stored PlayerProgress and calls the change back, which reads the SyncInstant of SystemClock, starts the PlayerProgress when none is stored, records the score and each LevelResult and returns it; the adapter saves it in the same transaction, and the controller answers with a ProgressDto](flows/views/seq-1-sync-progress.png)
 
-The code runs the find, the change and the save of this view as one call, `ProgressRepository.update(key, change)`. The key is the `ProgressKey` that the use case builds from the `userId` and the `gameId` of the request ([#107](https://github.com/Hexablock-Suite/hexablock-api/issues/107)). `DrizzleProgressRepository` opens one transaction, takes a Postgres advisory lock for the key, on the text `<userId>:<gameId>` that it receives from the key, reads the aggregate and passes it, or `null`, to the change. The change reads the `SyncInstant` of `Clock.now()` first, then starts or changes the `PlayerProgress` at that instant. The adapter saves what the change returns in the same transaction. So two overlapping syncs of one key run one after the other, and no level result is lost. `updatedAt` never moves back: each record of a score or a level result moves it to the instant of its sync, and the aggregate keeps the latest instant (decision 3 of [classes.md](classes.md)). A row lock is not enough, because the first sync of a game has no row yet. The view still draws `find()` and `save()`; it needs a new layout to draw the change as a call back into the use case.
+The code runs the find, the change and the save of this view as one call, `ProgressRepository.update(key, change)`. The key is the `ProgressKey` that the use case builds from the `userId` and the `gameId` of the request ([#107](https://github.com/Hexablock-Suite/hexablock-api/issues/107)). `DrizzleProgressRepository` opens one transaction, takes a Postgres advisory lock for the key, on the text `<userId>:<gameId>` that it receives from the key, reads the aggregate and passes it, or `null`, to the change. The change reads the `SyncInstant` of `Clock.now()` first, then starts or changes the `PlayerProgress` at that instant. The adapter saves what the change returns in the same transaction. So two overlapping syncs of one key run one after the other, and no level result is lost. `updatedAt` never moves back: each record of a score or a level result moves it to the instant of its sync, and the aggregate keeps the latest instant (decision 3 of [classes.md](classes.md)). A row lock is not enough, because the first sync of a game has no row yet. The sequence diagram draws the change as a call back from the adapter into the use case, with an activation of its own.
 
 ## Use case 2: login
 
@@ -29,7 +29,7 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ### Class view
 
-![Login class view: ScryptPasswordHasher and JwtTokenIssuer in layer 4, AuthController, AuthDtoMapper and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port, the LoginRequest that AuthDtoMapper builds and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User aggregate root, the PasswordAttempt value object of the request and the PasswordVerifier interface in layer 1](classes/views/flow-2-login.png)
+![Login class view: ScryptPasswordHasher and JwtTokenIssuer in layer 4, AuthController, AuthDtoMapper and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port, the LoginRequest that AuthDtoMapper builds and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User aggregate root in a dashed AGGREGATE frame, the PasswordAttempt value object of the request and the PasswordVerifier interface in layer 1](classes/views/flow-2-login.png)
 
 ### Sequence diagram
 
@@ -41,7 +41,7 @@ A signed-in client calls this endpoint to publish new levels without an app upda
 
 ### Class view
 
-![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and the LevelValidators domain service with its LevelValidator strategies FitLevelValidator, which holds Topologies, and SortLevelValidator and the LevelDefinition aggregate root in layer 1](classes/views/flow-3-update-levels.png)
+![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and the LevelValidators domain service with its LevelValidator strategies FitLevelValidator, which holds Topologies, and SortLevelValidator and the LevelDefinition aggregate root in a dashed AGGREGATE frame in layer 1](classes/views/flow-3-update-levels.png)
 
 ### Sequence diagram
 
@@ -104,14 +104,15 @@ Example request of `PUT /levels`, with the Sort example of the format:
 
 ## Other use cases
 
-The other four use cases follow a path that one of the three flows already draws. Each row names that flow and the only differences.
+The other five use cases follow a path that one of the three flows already draws. Each row names that flow and the only differences.
 
-| Use case                   | Endpoint                      | Path                                                                                                                                                                                                                                                                    |
-| -------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `RegisterUseCase`          | `AuthController.signUp()`     | Same path as flow 2, except: the controller calls `RegisterUser` with the `RegisterUserRequest` of `AuthDtoMapper`; the use case hashes the `Password` with `PasswordHasher.hash()` and adds the `User` through `UserRepository.add()`. It returns a `UserId`.          |
-| `AuthenticateTokenUseCase` | none: `JwtAuthGuard` calls it | The `ref AuthenticateToken` box of flows 1 and 3. Same path as flow 2, except: `JwtAuthGuard` calls the `AuthenticateToken` input port, and the use case only asks `TokenIssuer.verify()`. A `null` becomes a failed `Result`, and the guard answers 401 (decision 14). |
-| `GetLeaderboardUseCase`    | `LeaderboardController.top()` | Same path as flow 1 with `JwtAuthGuard` (S3-09), except: the use case holds only the `LeaderboardReader` port, which `DrizzleLeaderboardReader` implements, and ranks the entries by the comparisons of the domain. It saves nothing. [Routes](#leaderboard-routes).    |
-| `GetLevelsUseCase`         | `LevelsController.list()`     | Same path as flow 3, except: no guard, because only the update is guarded; the use case only calls `LevelRepository.list()`, so no validator runs; `LevelDtoMapper.toDto()` builds each `LevelDto`.                                                                     |
+| Use case                   | Endpoint                      | Path                                                                                                                                                                                                                                                                                               |
+| -------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RegisterUseCase`          | `AuthController.signUp()`     | Same path as flow 2, except: the controller calls `RegisterUser` with the `RegisterUserRequest` of `AuthDtoMapper`; the use case hashes the `Password` with `PasswordHasher.hash()` and adds the `User` through `UserRepository.add()`. It returns a `UserId`.                                     |
+| `AuthenticateTokenUseCase` | none: `JwtAuthGuard` calls it | The `ref AuthenticateToken` box of flows 1 and 3. Same path as flow 2, except: `JwtAuthGuard` calls the `AuthenticateToken` input port, and the use case only asks `TokenIssuer.verify()`. A `null` becomes a failed `Result`, and the guard answers 401 (decision 14).                            |
+| `GetProgressUseCase`       | `ProgressController.read()`   | Same path as flow 1, except: `ProgressDtoMapper.toGetRequest()` builds the `GameId`; the use case only calls `ProgressRepository.find()` with the `ProgressKey` of the request, so it reads no `Clock` and saves nothing; a missing progress is a failed `Result`, and the controller answers 404. |
+| `GetLeaderboardUseCase`    | `LeaderboardController.top()` | Same path as flow 1 with `JwtAuthGuard` (S3-09), except: the use case holds only the `LeaderboardReader` port, which `DrizzleLeaderboardReader` implements, and ranks the entries by the comparisons of the domain. It saves nothing. [Routes](#leaderboard-routes).                               |
+| `GetLevelsUseCase`         | `LevelsController.list()`     | Same path as flow 3, except: no guard, because only the update is guarded; the use case only calls `LevelRepository.list()`, so no validator runs; `LevelDtoMapper.toDto()` builds each `LevelDto`.                                                                                                |
 
 ## Leaderboard routes
 
@@ -170,7 +171,8 @@ Example answer of `GET /leaderboard/hexa-fit/levels/fit-01`:
 ## How to read the class view
 
 - The zones are the Clean layers, with the colors of [layers.md](layers.md): dark blue for layer 4, light blue for layer 3, purple for layer 2 and yellow for layer 1. The outer layer is at the top, so every dependency between layers points down.
-- The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A filled diamond joins the root of an aggregate to each internal entity, and every other attribute, a GoF pattern included, is a use arrow (decision 13 of [classes.md](classes.md)). The flows draw no internal entity, so they draw no diamond: `PlayerProgress` keeps its `LevelResult` values through a use arrow labelled `results 0..*`. Flow 3 draws a use arrow `entries 0..*` from `LevelValidators` to `LevelValidator`.
+- The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A filled diamond joins the root of an aggregate to each internal entity, and every other attribute, a GoF pattern included, is a use arrow (decision 13 of [classes.md](classes.md)). The flows draw no internal entity, so they draw no diamond: `PlayerProgress` keeps its `LevelResult` values through a use arrow labelled `levelResults 0..*`. Flow 3 draws a use arrow `entries 0..*` from `LevelValidators` to `LevelValidator`.
+- A dashed frame labelled `AGGREGATE` marks the boundary of an aggregate, as in [classes.md](classes.md). Flow 1 frames `PlayerProgress` with `ProgressKey`, `LevelResult` and `SyncInstant`. Flows 2 and 3 draw the root of their aggregate, `User` or `LevelDefinition`, as a full class with no member, so the frame encloses the root alone. Views 1.3, 1.2 and 1.5 of [classes.md](classes.md) draw the members.
 - The views draw the input ports, such as `SyncProgress`, `Login`, `UpdateLevels` and `AuthenticateToken`, as interface boxes, not as lollipops. A box lets the controller and the guard point at the port they hold. The `execute()` member of each input port is the one of its use case: every input port binds `UseCase` (decision 7).
 - The teal class is the focal class: the use case.
 - A flow view shows more than the seven classes of the other views, because it follows one request through every layer.
@@ -182,24 +184,25 @@ Example answer of `GET /leaderboard/hexa-fit/levels/fit-01`:
 - The frame `sd SyncProgress`, `sd Login` or `sd UpdateLevels` holds the interaction. A message on its left edge enters or leaves the API: the HTTP request at the top and the HTTP response at the bottom.
 - A solid line with a filled arrowhead is a call. A dashed line with an open arrowhead is a reply, or a `«create»` message that makes a new object.
 - A white bar on a lifeline is an activation: the object runs.
-- A call through a port names the port, for example `ProgressRepository.find()`. The caller holds only the port. `AppModule` binds the port to the adapter, so the lifeline is the adapter that runs.
-- An `alt` or `loop` fragment shows a choice or a repetition. Its guard, in square brackets, says when it runs. Fragments can nest: in flow 2 the wrong-password `alt` sits inside the `[else]` of the unknown-user `alt`. A `ref` box stands for a flow that another view details: in flows 1 and 3, the token check of Part 2, view 4.
+- A call through a port names the port, for example `ProgressRepository.update()`. The caller holds only the port. `AppModule` binds the port to the adapter, so the lifeline is the adapter that runs.
+- An `alt`, `opt` or `loop` fragment shows a choice, an optional step or a repetition. Its guard, in square brackets, says when it runs. Fragments can nest: in flow 2 the wrong-password `alt` sits inside the `[else]` of the unknown-user `alt`. A `ref` box stands for a flow that another view details: in flows 1 and 3, the token check of Part 2, view 4.
+- In flow 1, `change(stored)` is a call back from `DrizzleProgressRepository` into `SyncProgressUseCase`. The use case passes the change to `update()`, and the adapter runs it under the lock of the key. The second activation bar on the use case lifeline is that change. A grey note next to the adapter names what it does before and after the change.
 - In flow 3, the `LevelValidator` lifeline is the strategy that `LevelValidators` finds for the `gameId` of the level: `FitLevelValidator` or `SortLevelValidator`. A lifeline of the interface shows that the domain service knows only the Strategy interface. `LevelValidators` then builds the level with `LevelDefinition.of()`; the diagram writes that step as an action on its lifeline. A note, a box with a folded corner, gives the Fit path of the strategy: `FitLevelValidator` finds the `Topology` of the level in `Topologies`, and `FitSection` checks A5 on it. A topology with no entry gives `unknown-topology`.
 
-## Proposals in these views
+## Details of these views
 
-The flows need some members that the small views of [classes.md](classes.md) do not show yet. The team reviews them before the views of Parts 2 and 3 take them.
+The flows show some members that the small views of [classes.md](classes.md) do not show. Each detail below is in the code, unless it says that it is a proposal for the team.
 
 ### Flow 1: sync progress
 
-- `SyncProgressRequest` holds `userId`, `gameId`, `score` and `results`. The team has not fixed these fields yet.
-- `ProgressController.sync()` takes the `userId` that `JwtAuthGuard` puts on the request, and `ProgressDtoMapper.toRequest()` builds the request. Views 3.3 and 3.5 of [classes.md](classes.md) do not show these two members yet.
-- The route path and the success status wait on the OpenAPI export of the endpoint.
+- `SyncProgressRequest` holds `userId`, `gameId`, an optional `score` and `results`, each one a domain value that `ProgressDtoMapper` builds.
+- `ProgressController.sync()` takes the `userId` that `JwtAuthGuard` puts on the request, and `ProgressDtoMapper.toRequest()` builds the request. Views 3.3 and 3.5 of [classes.md](classes.md) show both members.
+- The route is `POST /progress`, and a success answers 200 with `ProgressDto`, as `openapi/openapi.json` records.
 
 ### Flow 2: login
 
 - `LoginRequest` holds a `Username` and a `PasswordAttempt`, and `RegisterUserRequest` holds a `Username` and a `Password` ([#105](https://github.com/Hexablock-Suite/hexablock-api/issues/105)). View 2.4 names both types, and the class view of this flow draws `LoginRequest` with its fields.
-- Decision 11 says that a use case returns an expected failure as a value. So `Login` binds `UseCase<LoginRequest, Result<SessionToken, LoginProblem>>`, as `AuthenticateToken` binds `UseCase<SessionToken, Result<UserId, TokenProblem>>` (decision 7). `LoginProblem` is `{ kind: 'invalid-credentials' }`, one value for an unknown username and for a wrong password ([#104](https://github.com/Hexablock-Suite/hexablock-api/issues/104)). The sequence diagram labels that reply `failure (proposal)`.
+- Decision 11 says that a use case returns an expected failure as a value. So `Login` binds `UseCase<LoginRequest, Result<SessionToken, LoginProblem>>`, as `AuthenticateToken` binds `UseCase<SessionToken, Result<UserId, TokenProblem>>` (decision 7). `LoginProblem` is `{ kind: 'invalid-credentials' }`, one value for an unknown username and for a wrong password ([#104](https://github.com/Hexablock-Suite/hexablock-api/issues/104)). The sequence diagram labels that reply `failure`.
 - `AuthController` answers a failed login with 401 and the error body of API-FR-06. API-FR-01 fixes 401 only for a call without a token.
 - `AuthDtoMapper` builds the `LoginRequest` from `LoginDto`, which has no length rules, and `TokenDto` from `SessionToken`. The choice is a mapper, not code in the controller ([#105](https://github.com/Hexablock-Suite/hexablock-api/issues/105)): decision 12 of [classes.md](classes.md) says that a controller holds no translation code, and that the border builds the domain values for every use case. View 3.5 draws `AuthDtoMapper`. A username that breaks its rule gets the 401 of a wrong password from the mapper, before the use case, so it costs no hash check. No stored user has such a name, so the answer time tells nothing about the stored names.
 - `LoginUseCase` first rejects a password longer than the maximum of `PASSWORD_LENGTH`, before it calls a port, with the same failure as a wrong password (#60). This check bounds the hash work of one request. The sequence diagram does not draw it.
