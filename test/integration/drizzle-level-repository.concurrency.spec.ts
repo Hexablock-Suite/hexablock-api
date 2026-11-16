@@ -207,4 +207,33 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     expect((await repository().update(SORT, LevelId.of(levelId), raise(levelId))).ok).toBe(true);
     expect(await storedVersion(levelId)).toBe('3');
   });
+
+  // Fifty changes of one level each read what the change before saved, so
+  // no update is lost and the last one saves version 50.
+  it('should_keep_every_update_when_fifty_updates_of_one_level_overlap', async () => {
+    const levelId = newLevelId();
+    await Promise.all(
+      Array.from({ length: 50 }, () =>
+        repository().update(SORT, LevelId.of(levelId), raise(levelId)),
+      ),
+    );
+    expect(await storedVersion(levelId)).toBe('50');
+  });
+
+  // The levels: prefix keeps the lock key of a level apart from other keys
+  // with the same text, so a lock on "<gameId>:<levelId>" does not block it.
+  it('should_not_wait_when_the_same_text_without_the_levels_prefix_is_locked', async () => {
+    const levelId = newLevelId();
+    const holder = await pool.connect();
+    await holder.query('begin');
+    await holder.query('select pg_advisory_xact_lock(hashtextextended($1, 0))', [
+      `sort:${levelId}`,
+    ]);
+    try {
+      expect((await repository().update(SORT, LevelId.of(levelId), raise(levelId))).ok).toBe(true);
+    } finally {
+      await holder.query('commit');
+      holder.release();
+    }
+  });
 });
