@@ -47,7 +47,7 @@ flowchart TB
   end
 
   subgraph DOMAIN["1. Domain (entities): src/domain"]
-    ENT["User, GameId, PlayerProgress aggregate per user<br/>and gameId with its LevelResults, LeaderboardEntry,<br/>LevelDefinition: common part plus a typed section<br/>per gameId, LevelValidators: one registered<br/>LevelValidator per gameId with levels (planned)"]
+    ENT["User, GameId, PlayerProgress aggregate per user<br/>and gameId with its LevelResults, Standing,<br/>LevelDefinition: common part plus a typed section<br/>per gameId, LevelValidators: one registered<br/>LevelValidator per gameId with levels (planned)"]
   end
 
   MAIN --> INFRA
@@ -133,10 +133,10 @@ How to read it:
 
 ## Where each piece lives
 
-- **Entities and value objects:** `src/domain`. Examples: `User`, `GameId`, `PlayerProgress`, `LeaderboardEntry`, `LevelDefinition`. They carry no table IDs and no framework types.
+- **Entities and value objects:** `src/domain`. Examples: `User`, `GameId`, `PlayerProgress`, `Standing`, `LevelDefinition`. They carry no table IDs and no framework types.
 - **Use cases:** `src/application`. There is one use case per action, parameterized by `gameId`, never one per game. A use case returns an expected failure as a `Result<T, E>` value, never as an exception, so no domain error crosses the input port.
 - **Input ports:** `src/application`, one interface per use case: `RegisterUser`, `Login`, `AuthenticateToken`, `SyncProgress`, `GetLeaderboard`, `GetLevels` and `UpdateLevels`. The controllers depend on the interface, not on the class. Each use case implements its interface, and each AOP aspect implements the same interface to wrap it (§3.5). Tests call the same interfaces.
-- **Ports:** `src/application`, next to the use cases that use them (Q10). The persistence adapters and the system adapters implement these ports. `src/application/ports/clock.ts` holds the `Clock` port.
+- **Ports:** `src/application`, next to the use cases that use them (Q10). The persistence adapters and the system adapters implement these ports. `src/application/ports/clock.ts` holds the `Clock` port. `src/application/ports/leaderboard-entry.ts` holds `LeaderboardEntry`, the response type that the `LeaderboardReader` port returns.
 - **Composition root:** `AppModule` in `src/infrastructure`. It binds each port to one adapter, and the feature modules do the same for their repositories. `src/main.ts` only starts the app.
 - **Controllers:** `src/adapters/http`. They translate HTTP requests into use case calls.
 - **HTTP mappers:** `src/adapters/http`, next to the controllers. `ProgressDtoMapper` and `LevelDtoMapper` translate between DTOs and entities, as the row mappers do for persistence. A controller also turns a failed `Result` into the error body of API-FR-06.
