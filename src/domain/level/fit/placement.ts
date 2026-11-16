@@ -3,6 +3,7 @@ import { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
 import { readFields } from '../parts.js';
 import type { Topology } from '../topology.js';
+import type { ValueReceiver } from '../../shared/value-receiver.js';
 import type { FitPiece } from './fit-piece.js';
 import { PieceId } from './piece-id.js';
 import { Rotation } from './rotation.js';
@@ -31,6 +32,18 @@ export class Placement {
     return placement.ok
       ? ok(new Placement(placement.value.piece, placement.value.rotation, placement.value.at))
       : placement;
+  }
+
+  // Delivers the piece, the rotation and the offset to a receiver of the
+  // border, the mirror of of(). No operation returns them.
+  deliverTo(
+    receiver: ValueReceiver<{
+      readonly piece: PieceId;
+      readonly rotation: Rotation;
+      readonly at: Coordinate;
+    }>,
+  ): void {
+    receiver.receive({ piece: this.piece, rotation: this.rotation, at: this.at });
   }
 
   // Two placements are equal when they have the same piece, rotation and offset.

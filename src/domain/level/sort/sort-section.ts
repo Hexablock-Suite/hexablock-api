@@ -1,6 +1,7 @@
 import type { Moves } from '../../progress/moves.js';
 import { ok, type Result } from '../../shared/result.js';
 import type { LevelProblem } from '../level-problem.js';
+import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { readFields, readList, sameItems } from '../parts.js';
 import { maxMovesIn } from '../star-limits.js';
 import { BoardRadius } from './board-radius.js';
@@ -39,6 +40,24 @@ export class SortSection {
     }
     const { radius, goals, source, stars } = section.value;
     return ok(new SortSection(radius, goals, source, stars));
+  }
+
+  // Delivers the four fields to a receiver of the border, the mirror of of().
+  // No operation returns them. Each star is { maxMoves }, as of() reads it.
+  deliverTo(
+    receiver: ValueReceiver<{
+      readonly radius: BoardRadius;
+      readonly goals: GoalCount;
+      readonly source: StackSource;
+      readonly stars: readonly { readonly maxMoves: Moves }[];
+    }>,
+  ): void {
+    receiver.receive({
+      radius: this.radius,
+      goals: this.goals,
+      source: this.source,
+      stars: this.stars.map((maxMoves) => ({ maxMoves })),
+    });
   }
 
   // Two sections are equal when every field is equal. The stars compare in order.

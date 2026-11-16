@@ -1,9 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { FitLevelValidator } from '../../src/domain/level/fit/fit-level-validator.js';
+import { HexTopology } from '../../src/domain/level/hex-topology.js';
 import { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../src/domain/level/level-order.js';
 import type { LevelProblem } from '../../src/domain/level/level-problem.js';
+import { LevelValidators } from '../../src/domain/level/level-validators.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';
+import { SortLevelValidator } from '../../src/domain/level/sort/sort-level-validator.js';
+import { Topologies } from '../../src/domain/level/topologies.js';
 import { TopologyId } from '../../src/domain/level/topology-id.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
@@ -68,6 +73,44 @@ export function levelFrom<TSection>(
     version.value,
     topology.value,
     sectionOf(json.section),
+  );
+}
+
+// The strategies as the composition root registers them: Fit on the hex
+// topology, and Sort.
+export function levelValidators(): LevelValidators {
+  const hex = Topologies.of([[valueOf(TopologyId.of('hex')), new HexTopology()]]);
+  return LevelValidators.of([
+    [GameId.of('fit'), new FitLevelValidator(hex)],
+    [GameId.of('sort'), new SortLevelValidator()],
+  ]);
+}
+
+// A level of the format document with its own levelId and version, so a
+// test names only the values that it needs.
+export function levelJson(
+  gameId: 'fit' | 'sort',
+  levelId = `${gameId}-01`,
+  version = 1,
+): LevelJson {
+  return { ...levelExample(gameId), levelId, version };
+}
+
+// Builds a level as the border does: the common part as domain values and
+// the section through the strategy of its game. A broken value throws.
+export function checkedLevel(
+  json: LevelJson,
+  validators: LevelValidators = levelValidators(),
+): LevelDefinition<unknown> {
+  return valueOf(
+    validators.check(
+      GameId.of(json.gameId),
+      LevelId.of(json.levelId),
+      valueOf(LevelOrder.of(json.order)),
+      valueOf(LevelVersion.of(json.version)),
+      valueOf(TopologyId.of(json.topology)),
+      json.section,
+    ),
   );
 }
 

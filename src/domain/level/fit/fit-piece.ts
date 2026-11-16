@@ -3,6 +3,7 @@ import { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
 import { readFields, readList, sameItems } from '../parts.js';
 import type { Topology } from '../topology.js';
+import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { PieceId } from './piece-id.js';
 import type { Rotation } from './rotation.js';
 
@@ -26,6 +27,14 @@ export class FitPiece {
       'invalid-piece',
     );
     return piece.ok ? ok(new FitPiece(piece.value.id, piece.value.cells)) : piece;
+  }
+
+  // Delivers the id and the cells to a receiver of the border, the mirror of
+  // of(). No operation returns them.
+  deliverTo(
+    receiver: ValueReceiver<{ readonly id: PieceId; readonly cells: readonly Coordinate[] }>,
+  ): void {
+    receiver.receive({ id: this.id, cells: [...this.cells] });
   }
 
   // Two pieces are equal when they have the same id and the same cells in the same order.

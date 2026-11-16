@@ -2,6 +2,7 @@
 // the message, so the code carries no text that a client sent.
 // - game-without-levels: no strategy serves the gameId, as for Lines and Merge.
 // - invalid-order, invalid-version, invalid-topology: a value of the common part.
+// - older-version: the incoming copy of a level has a lower version than the stored copy (S3-10).
 // - invalid-section: the section is not an object with exactly its fields.
 // - invalid-figure, invalid-pieces, invalid-witness, invalid-stars: a field of the Fit section.
 // - invalid-radius, invalid-goals, invalid-source, invalid-stars: a field of the Sort section.
@@ -14,6 +15,7 @@ export type LevelProblem =
   | 'invalid-order'
   | 'invalid-version'
   | 'invalid-topology'
+  | 'older-version'
   | 'unknown-topology'
   | 'invalid-coordinate'
   | 'invalid-section'

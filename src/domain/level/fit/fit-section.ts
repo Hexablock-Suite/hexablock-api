@@ -1,6 +1,7 @@
 import { err, ok, type Result } from '../../shared/result.js';
 import { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
+import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { readFields, readList, sameItems } from '../parts.js';
 import type { Topology } from '../topology.js';
 import { FitPiece } from './fit-piece.js';
@@ -105,6 +106,24 @@ export class FitSection {
       placed.push([entry, named[0]]);
     }
     return placed;
+  }
+
+  // Delivers the four fields to a receiver of the border, the mirror of of().
+  // No operation returns them. Each part delivers its own value in turn.
+  deliverTo(
+    receiver: ValueReceiver<{
+      readonly figure: readonly Coordinate[];
+      readonly pieces: readonly FitPiece[];
+      readonly witness: readonly Placement[];
+      readonly stars: readonly FitStarThreshold[];
+    }>,
+  ): void {
+    receiver.receive({
+      figure: [...this.figure],
+      pieces: [...this.pieces],
+      witness: [...this.witness],
+      stars: [...this.stars],
+    });
   }
 
   // Two sections are equal when each field holds equal items in the same order.
