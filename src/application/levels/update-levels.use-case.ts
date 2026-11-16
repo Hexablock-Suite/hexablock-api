@@ -1,0 +1,100 @@
+import type { LevelDefinition } from '../../domain/level/level-definition.js';
+import type { LevelOrder } from '../../domain/level/level-order.js';
+import type { LevelValidators } from '../../domain/level/level-validators.js';
+import type { LevelVersion } from '../../domain/level/level-version.js';
+import type { TopologyId } from '../../domain/level/topology-id.js';
+import type { GameId } from '../../domain/progress/game-id.js';
+import type { LevelId } from '../../domain/progress/level-id.js';
+import { err, ok, type Result } from '../../domain/shared/result.js';
+import type { LevelRepository } from '../ports/level-repository.js';
+import type { UseCase } from '../use-case.js';
+import type { InvalidLevels, LevelProblemReport } from './invalid-levels.js';
+
+// One level of an update. The mapper of the border builds the values of
+// the common part (decision 12). The section stays as it arrives, because
+// only the strategy of the gameId knows its section type (#77).
+export interface IncomingLevel {
+  readonly gameId: GameId;
+  readonly levelId: LevelId;
+  readonly order: LevelOrder;
+  readonly version: LevelVersion;
+  readonly topology: TopologyId;
+  readonly section: unknown;
+}
+
+// The input of UpdateLevels: a batch of levels, in the order of the body.
+export interface UpdateLevelsRequest {
+  readonly levels: readonly IncomingLevel[];
+}
+
+// Input port of the level update (API-FR-04). It binds UseCase, so one
+// aspect can wrap it (decision 7).
+export type UpdateLevels = UseCase<UpdateLevelsRequest, Result<void, InvalidLevels>>;
+
+export const UPDATE_LEVELS = Symbol('UpdateLevels');
+
+// A level that passed its check, with the key that its update locks. The
+// use case keeps the key of the request, because it never opens a level.
+interface CheckedLevel {
+  readonly gameId: GameId;
+  readonly levelId: LevelId;
+  readonly level: LevelDefinition<unknown>;
+}
+
+// Checks every level of the batch through LevelValidators before it saves
+// any level. A broken level gives one problem, and no level is saved. Then
+// it saves level by level, each in its own transaction, through
+// LevelRepository.update(). Each level is the root of its own aggregate, so
+// one transaction changes one level (section «Domain design rules»).
+// The change of each update runs the version rule of S3-10 under the lock
+// of the level. A lower version saves nothing for that level, and the use
+// case reports it as a level problem. This also covers a race: another
+// update can save a newer copy between the check and the save. The other
+// levels of the batch are still saved. An equal version passes, so a retry
+// of the same batch is safe. A save that throws stops the batch: the levels
+// saved before it stay saved, and the error reaches the caller.
+export class UpdateLevelsUseCase implements UpdateLevels {
+  constructor(
+    private readonly levels: LevelRepository,
+    private readonly rules: LevelValidators,
+  ) {}
+
+  async execute(request: UpdateLevelsRequest): Promise<Result<void, InvalidLevels>> {
+    const checked = this.check(request.levels);
+    if (!checked.ok) {
+      return checked;
+    }
+    const problems: LevelProblemReport[] = [];
+    for (const { gameId, levelId, level } of checked.value) {
+      // The saves run one after the other, in the order of the batch, so a
+      // failed save keeps exactly the levels before it.
+      const saved = await this.levels.update(gameId, levelId, (stored) =>
+        stored === null ? ok(level) : stored.accepts(level),
+      );
+      if (!saved.ok) {
+        problems.push({ gameId, levelId, problem: saved.error });
+      }
+    }
+    return problems.length === 0 ? ok(undefined) : err(invalidLevels(problems));
+  }
+
+  // Builds each level through the strategy of its gameId. No level exists
+  // before its strategy builds the section (#77).
+  private check(incoming: readonly IncomingLevel[]): Result<CheckedLevel[], InvalidLevels> {
+    const checked: CheckedLevel[] = [];
+    const problems: LevelProblemReport[] = [];
+    for (const { gameId, levelId, order, version, topology, section } of incoming) {
+      const level = this.rules.check(gameId, levelId, order, version, topology, section);
+      if (level.ok) {
+        checked.push({ gameId, levelId, level: level.value });
+      } else {
+        problems.push({ gameId, levelId, problem: level.error });
+      }
+    }
+    return problems.length === 0 ? ok(checked) : err(invalidLevels(problems));
+  }
+}
+
+function invalidLevels(problems: readonly LevelProblemReport[]): InvalidLevels {
+  return { kind: 'invalid-levels', problems };
+}

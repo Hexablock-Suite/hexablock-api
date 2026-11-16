@@ -3,6 +3,11 @@ import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.j
 import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.js';
 import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { UseCase } from '../../../src/application/use-case.js';
+import {
+  type GetLevels,
+  GetLevelsUseCase,
+} from '../../../src/application/levels/get-levels.use-case.js';
+import { UpdateLevelsUseCase } from '../../../src/application/levels/update-levels.use-case.js';
 import { SyncProgressUseCase } from '../../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { Score } from '../../../src/domain/progress/score.js';
@@ -10,7 +15,10 @@ import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { NestLogger } from '../../../src/infrastructure/logging/nest-logger.js';
 import { FixedClock } from '../../support/fixed-clock.js';
+import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
+import { levelValidators } from '../../support/level-format.js';
+import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
 import { testUserId } from '../../support/user-ids.js';
 
 type EchoResult = Result<string, { kind: string }>;
@@ -379,6 +387,48 @@ describe('LoggingAspect', () => {
     expect(aspect).toBeInstanceOf(UseCaseAspect);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'SyncProgress',
+      outcome: 'success',
+    });
+  });
+
+  // UpdateLevels holds no logging code, and its failure carries a kind. So
+  // the aspect logs the kind of a failed update and no value of a level.
+  it('should_log_invalid_levels_kind_and_no_level_value_when_aspect_wraps_update_levels_and_a_level_breaks_a_rule', async () => {
+    const logger = recordingLogger();
+    const levels = new InMemoryLevelRepository(levelValidators());
+    const aspect = new LoggingAspect(
+      new UpdateLevelsUseCase(levels, levelValidators()),
+      'UpdateLevels',
+      logger,
+    );
+
+    const result = await aspect.execute({
+      levels: [incomingLevel(a5FailingFitJson('fit-secret-07'))],
+    });
+
+    expect(result.ok).toBe(false);
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'UpdateLevels',
+      outcome: 'failure',
+      kind: 'invalid-levels',
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain('fit-secret-07');
+  });
+
+  // GetLevels has no expected failure: its error type is never, which meets
+  // the kind bound of the aspect. So the aspect can wrap it too.
+  it('should_log_get_levels_success_when_aspect_wraps_get_levels', async () => {
+    const logger = recordingLogger();
+    const getLevels: GetLevels = new GetLevelsUseCase(
+      new InMemoryLevelRepository(levelValidators()),
+    );
+    const aspect = new LoggingAspect(getLevels, 'GetLevels', logger);
+
+    const result = await aspect.execute();
+
+    expect(result).toEqual({ ok: true, value: [] });
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'GetLevels',
       outcome: 'success',
     });
   });
