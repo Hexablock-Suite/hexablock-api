@@ -1,4 +1,4 @@
-import { receiveKeyOf, receiveValueOf } from '../../../src/adapters/received.js';
+import { receiveValueOf } from '../../../src/adapters/received.js';
 import type { PasswordHasher } from '../../../src/application/ports/password-hasher.js';
 import type { SessionToken, TokenIssuer } from '../../../src/application/ports/token-issuer.js';
 import type { UserIdGenerator } from '../../../src/application/ports/user-id-generator.js';
@@ -25,10 +25,10 @@ export class InMemoryUserRepository implements UserRepository {
     return this.users.find((user) => userPartsOf(user).username.equals(username)) ?? null;
   }
 
-  // Compares the key of the Username, as the Drizzle adapter does.
+  // Asks the rule by its business name (#100). The UserRepository contract
+  // checks that the Drizzle adapter gives the same answer.
   async isUsernameTaken(username: Username): Promise<boolean> {
-    const key = receiveKeyOf(username);
-    return this.users.some((user) => receiveKeyOf(userPartsOf(user).username) === key);
+    return this.users.some((user) => userPartsOf(user).username.collidesWith(username));
   }
 
   async add(user: User): Promise<Result<void, 'username-taken'>> {
