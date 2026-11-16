@@ -8,6 +8,7 @@ import { User } from '../../src/domain/user/user.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { Username } from '../../src/domain/user/username.js';
 import { PrefixPasswordHasher } from '../support/auth/fakes.js';
+import { registerRequest } from '../support/auth/requests.js';
 import { userPartsOf } from '../support/recording-receiver.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 import { describeUserRepositoryContract } from '../support/user-repository.contract.js';
@@ -117,7 +118,7 @@ describe('DrizzleUserRepository', () => {
         next: () => valueOf(UserId.from(OTHER_ID)),
       });
 
-      const result = await register.execute({ username: name, password: 'other password' });
+      const result = await register.execute(registerRequest(name, 'other password'));
 
       expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
       const rows = await database.db.select().from(users);
