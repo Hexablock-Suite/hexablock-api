@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 3 of 3</p>
       <h1>A new database engine: new adapters, same ports</h1>
       <svg
-        viewBox="0 0 1040 796"
+        viewBox="0 0 1040 828"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext3database-title ext3database-desc"
@@ -75,7 +75,8 @@
           Extensibility diagram showing the four output ports of layer 2, each held by the use cases
           that need it and implemented today by one Drizzle repository over Postgres, and the
           declared MongoDB repositories that would implement the same ports with no change to the
-          use cases.
+          use cases. The footnote names update(gameId, levelId, change) of LevelRepository and the
+          LeaderboardEntry rows of LeaderboardReader, with their Standing.
         </desc>
         <defs>
           <marker
@@ -1140,11 +1141,31 @@
           bindings in layer 4, as AppModule binds the drivers (view 3.4). The row mappers, the
           Drizzle schema and the drizzle/ migrations stay with the Drizzle adapters.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="692" x2="1016" y2="692" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="710"
+          y="684"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Each port box names its operations only. LevelRepository.update(gameId, levelId, change)
+          changes one level under a lock of its key (view 2.3).
+        </text>
+        <text
+          x="24"
+          y="700"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LeaderboardReader gives LeaderboardEntry rows of layer 2, each with a LevelResult, a Score
+          or a Standing of layer 1 (views 1.1 and 2.2).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="724" x2="1016" y2="724" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="742"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1154,9 +1175,9 @@
         </text>
         <line
           x1="24"
-          y1="728"
+          y1="760"
           x2="52"
-          y2="728"
+          y2="760"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1164,7 +1185,7 @@
         />
         <text
           x="60"
-          y="732"
+          y="764"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1173,16 +1194,16 @@
         </text>
         <line
           x1="128"
-          y1="728"
+          y1="760"
           x2="156"
-          y2="728"
+          y2="760"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext3database-open)"
         />
         <text
           x="164"
-          y="732"
+          y="764"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1191,7 +1212,7 @@
         </text>
         <rect
           x="24"
-          y="744"
+          y="776"
           width="12"
           height="12"
           rx="2"
@@ -1201,7 +1222,7 @@
         />
         <rect
           x="40"
-          y="744"
+          y="776"
           width="12"
           height="12"
           rx="2"
@@ -1211,7 +1232,7 @@
         />
         <text
           x="60"
-          y="754"
+          y="786"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1220,7 +1241,7 @@
         </text>
         <rect
           x="272"
-          y="744"
+          y="776"
           width="28"
           height="12"
           rx="2"
@@ -1231,7 +1252,7 @@
         />
         <text
           x="308"
-          y="754"
+          y="786"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1240,7 +1261,7 @@
         </text>
         <rect
           x="520"
-          y="744"
+          y="776"
           width="28"
           height="12"
           rx="2"
@@ -1250,7 +1271,7 @@
         />
         <text
           x="556"
-          y="754"
+          y="786"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1259,7 +1280,7 @@
         </text>
         <rect
           x="768"
-          y="744"
+          y="776"
           width="28"
           height="12"
           rx="2"
@@ -1270,7 +1291,7 @@
         />
         <text
           x="804"
-          y="754"
+          y="786"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1279,7 +1300,7 @@
         </text>
         <rect
           x="24"
-          y="766"
+          y="798"
           width="28"
           height="12"
           rx="2"
@@ -1290,7 +1311,7 @@
         />
         <text
           x="60"
-          y="776"
+          y="808"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 3 of 5</p>
       <h1>HTTP: controllers call input ports, never use case classes</h1>
       <svg
-        viewBox="0 0 1040 878"
+        viewBox="0 0 1040 894"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad3http-title ad3http-desc"
@@ -72,10 +72,12 @@
         <desc id="ad3http-desc">
           Class diagram of layer 3 showing the Auth, Progress, Leaderboard and Levels controllers,
           each holding the input ports it calls, the AuthDtoMapper that AuthController uses to build
-          each request and each answer, the JwtAuthGuard that the controller decorators apply to
-          progress, leaderboard reads and level updates and that holds the AuthenticateToken input
-          port, the LevelDto that carries the section for the validator of its gameId, and the
-          HttpErrorFilter for unexpected errors.
+          each request and each answer, among them the RegisterUserRequest and the LoginRequest, the
+          LeaderboardDtoMapper that LeaderboardController uses to build each board query and each
+          answer, the JwtAuthGuard that the controller decorators apply to progress, leaderboard
+          reads and level updates and that holds the AuthenticateToken input port, the LevelDto that
+          carries the section for the validator of its gameId, and the HttpErrorFilter for
+          unexpected errors.
         </desc>
         <defs>
           <marker
@@ -151,6 +153,16 @@
           stroke-width="1"
           marker-end="url(#ad3http-open)"
         />
+        <!-- LeaderboardController uses LeaderboardDtoMapper: use (#83) -->
+        <line
+          x1="120"
+          y1="544"
+          x2="120"
+          y2="592"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad3http-open)"
+        />
         <!-- LevelsController takes LevelDto as a parameter: use -->
         <line
           x1="868"
@@ -166,6 +178,18 @@
         <text
           x="142"
           y="271"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          USES
+        </text>
+        <rect x="126" y="562" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="142"
+          y="571"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -492,6 +516,40 @@
         <text x="78" y="536" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;LeaderboardDto&gt;
         </text>
+        <!-- Class: LeaderboardDtoMapper (PART 3 · VIEW 5) -->
+        <rect
+          x="40"
+          y="592"
+          width="340"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="210"
+          y="610"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 3 · VIEW 5
+        </text>
+        <text
+          x="210"
+          y="628"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LeaderboardDtoMapper
+        </text>
         <!-- Class: JwtAuthGuard («guard») -->
         <rect
           x="400"
@@ -747,11 +805,21 @@
         >
           HttpErrorFilter handles only unexpected errors, with the same body shape.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="796" x2="1016" y2="796" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="814"
+          y="788"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          AuthDtoMapper builds the RegisterUserRequest and the LoginRequest that RegisterUser and
+          Login take (Part 2, view 4, and the login slice).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="812" x2="1016" y2="812" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="830"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -761,16 +829,16 @@
         </text>
         <line
           x1="24"
-          y1="832"
+          y1="848"
           x2="52"
-          y2="832"
+          y2="848"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad3http-open)"
         />
         <text
           x="60"
-          y="836"
+          y="852"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -779,7 +847,7 @@
         </text>
         <rect
           x="24"
-          y="852"
+          y="868"
           width="20"
           height="12"
           rx="2"
@@ -789,7 +857,7 @@
         />
         <text
           x="56"
-          y="861"
+          y="877"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -798,7 +866,7 @@
         </text>
         <rect
           x="166"
-          y="852"
+          y="868"
           width="28"
           height="12"
           rx="2"
@@ -808,7 +876,7 @@
         />
         <text
           x="202"
-          y="861"
+          y="877"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -817,7 +885,7 @@
         </text>
         <rect
           x="312"
-          y="852"
+          y="868"
           width="28"
           height="12"
           rx="2"
@@ -828,7 +896,7 @@
         />
         <text
           x="348"
-          y="861"
+          y="877"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

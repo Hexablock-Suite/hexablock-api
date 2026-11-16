@@ -63,7 +63,7 @@
       <p class="eyebrow">Sequence diagram · Use case 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1322"
+        viewBox="0 0 1240 1354"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="seq3updatelevels-title seq3updatelevels-desc"
@@ -84,7 +84,11 @@
           on the stored copy (S3-10). Otherwise the use case returns a failed Result, and the
           controller answers a 400 whose details LevelDtoMapper writes. A note on the strategy gives
           the Fit path: FitLevelValidator finds the Topology of the level in Topologies, and
-          FitSection checks A5 on it; a topology with no entry gives unknown-topology.
+          FitSection checks A5 on it; a topology with no entry gives unknown-topology. The same note
+          gives the Sort path: SortLevelValidator asks SortSection.of(raw) to check the radius, the
+          goals, the source and the stars. The footnote names the LevelOrder, LevelVersion and
+          Coordinate values that the request carries, and GetLevels, which only calls
+          LevelRepository.list().
         </desc>
         <defs>
           <marker
@@ -1054,7 +1058,7 @@
         >
           Result&lt;TSection, …&gt;
         </text>
-        <!-- Note: the Fit path of the strategy, anchored to its activation -->
+        <!-- Note: the Fit and the Sort paths of the strategy, anchored to its activation -->
         <line
           x1="987"
           y1="580"
@@ -1065,7 +1069,7 @@
           stroke-dasharray="2,3"
         />
         <path
-          d="M1076 542 L1200 542 L1210 552 L1210 610 L1076 610 Z"
+          d="M1076 542 L1200 542 L1210 552 L1210 669 L1076 669 Z"
           fill="#ffffff"
           stroke="#5b6873"
           stroke-width="1"
@@ -1115,6 +1119,51 @@
           font-family="'IBM Plex Mono', monospace"
         >
           no entry: unknown-topology
+        </text>
+        <text
+          x="1082"
+          y="615"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          SortLevelValidator:
+        </text>
+        <text
+          x="1082"
+          y="626"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          SortSection.of(raw) checks
+        </text>
+        <text
+          x="1082"
+          y="637"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          radius, goals, source and
+        </text>
+        <text
+          x="1082"
+          y="648"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          stars, each by its rule.
+        </text>
+        <text
+          x="1082"
+          y="659"
+          fill="#5b6873"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          bad radius: invalid-radius
         </text>
         <!-- Action: LevelValidators builds the level with the section that the strategy gave -->
         <text x="842" y="626" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
@@ -1433,18 +1482,38 @@
           A lower version fails in update() with older-version, and the 400 lists it. flows.md holds
           the class view with the same names and the routes.
         </text>
+        <text
+          x="24"
+          y="1230"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelDtoMapper builds the LevelOrder and the LevelVersion of each level, and
+          FitSection.of() builds one Coordinate per cell. Part 1, view 5 draws these value objects.
+        </text>
+        <text
+          x="24"
+          y="1246"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          GetLevels has no sequence of its own: GetLevelsUseCase only calls LevelRepository.list()
+          («Other use cases» in flows.md).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1242"
+          y1="1274"
           x2="1216"
-          y2="1242"
+          y2="1274"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1260"
+          y="1292"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1454,16 +1523,16 @@
         </text>
         <line
           x1="24"
-          y1="1278"
+          y1="1310"
           x2="52"
-          y2="1278"
+          y2="1310"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
         <text
           x="60"
-          y="1282"
+          y="1314"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1472,9 +1541,9 @@
         </text>
         <line
           x1="196"
-          y1="1278"
+          y1="1310"
           x2="224"
-          y2="1278"
+          y2="1310"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1482,7 +1551,7 @@
         />
         <text
           x="232"
-          y="1282"
+          y="1314"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1491,7 +1560,7 @@
         </text>
         <rect
           x="392"
-          y="1270"
+          y="1302"
           width="10"
           height="16"
           fill="#ffffff"
@@ -1500,7 +1569,7 @@
         />
         <text
           x="410"
-          y="1282"
+          y="1314"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1509,7 +1578,7 @@
         </text>
         <rect
           x="548"
-          y="1272"
+          y="1304"
           width="28"
           height="12"
           rx="2"
@@ -1519,7 +1588,7 @@
         />
         <text
           x="584"
-          y="1282"
+          y="1314"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1528,7 +1597,7 @@
         </text>
         <rect
           x="24"
-          y="1298"
+          y="1330"
           width="20"
           height="12"
           rx="2"
@@ -1538,7 +1607,7 @@
         />
         <rect
           x="48"
-          y="1298"
+          y="1330"
           width="20"
           height="12"
           rx="2"
@@ -1548,7 +1617,7 @@
         />
         <rect
           x="72"
-          y="1298"
+          y="1330"
           width="20"
           height="12"
           rx="2"
@@ -1558,7 +1627,7 @@
         />
         <text
           x="104"
-          y="1307"
+          y="1339"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1567,7 +1636,7 @@
         </text>
         <rect
           x="352"
-          y="1298"
+          y="1330"
           width="28"
           height="12"
           rx="1"
@@ -1577,7 +1646,7 @@
         />
         <text
           x="388"
-          y="1307"
+          y="1339"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1585,14 +1654,14 @@
           Frame · sd names the interaction; a message on its left edge enters or leaves the API
         </text>
         <path
-          d="M788 1298 L804 1298 L808 1302 L808 1310 L788 1310 Z"
+          d="M788 1330 L804 1330 L808 1334 L808 1342 L788 1342 Z"
           fill="#ffffff"
           stroke="#5b6873"
           stroke-width="1"
         />
         <text
           x="816"
-          y="1307"
+          y="1339"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 5 of 5</p>
       <h1>HTTP mappers: the controllers translate between DTOs and entities</h1>
       <svg
-        viewBox="0 0 1040 954"
+        viewBox="0 0 1040 1158"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad5httpmappers-title ad5httpmappers-desc"
@@ -75,9 +75,10 @@
           RegisterUserRequest and the LoginRequest from the body and to build the token and user
           answers, ProgressController uses ProgressDtoMapper to turn PlayerProgress into the
           response DTO through the parts that the aggregate delivers to a PlayerProgressReceiver,
-          and LevelsController uses LevelDtoMapper to build the update request from the body, to
-          turn each LevelDefinition into a LevelDto and to write the error details of a failed
-          Result.
+          LevelsController uses LevelDtoMapper to build the update request from the body, to turn
+          each LevelDefinition into a LevelDto and to write the error details of a failed Result,
+          and LeaderboardController uses LeaderboardDtoMapper to build the LeaderboardQuery from the
+          path and to turn the Leaderboard into the LeaderboardDto.
         </desc>
         <defs>
           <marker
@@ -136,7 +137,7 @@
           x="24"
           y="24"
           width="992"
-          height="604"
+          height="792"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -144,7 +145,7 @@
         />
         <rect
           x="24"
-          y="644"
+          y="832"
           width="992"
           height="116"
           rx="8"
@@ -183,12 +184,22 @@
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
+        <!-- LeaderboardController uses LeaderboardDtoMapper: use (#83) -->
+        <line
+          x1="828"
+          y1="592"
+          x2="828"
+          y2="640"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
         <!-- ProgressDtoMapper takes PlayerProgress as a parameter: use -->
         <line
           x1="144"
           y1="528"
           x2="144"
-          y2="688"
+          y2="876"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -198,7 +209,7 @@
           x1="424"
           y1="528"
           x2="424"
-          y2="688"
+          y2="876"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -208,7 +219,7 @@
           x1="640"
           y1="512"
           x2="640"
-          y2="688"
+          y2="876"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -274,9 +285,9 @@
         >
           TAKES
         </text>
-        <rect x="646" y="592" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="594" y="592" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
-          x="666"
+          x="614"
           y="601"
           fill="#7d8a94"
           font-size="8"
@@ -285,6 +296,18 @@
           letter-spacing="0.06em"
         >
           TAKES
+        </text>
+        <rect x="834" y="610" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="850"
+          y="619"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          USES
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="316" height="12" rx="2" fill="#e2ebf8" />
@@ -299,10 +322,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/http/
         </text>
-        <rect x="36" y="655" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="843" width="208" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="664"
+          y="852"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -603,10 +626,104 @@
         <text x="576" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDetails(problems: readonly LevelProblemReport[]): string[]
         </text>
+        <!-- Class: LeaderboardController (PART 3 · VIEW 3) -->
+        <rect
+          x="672"
+          y="544"
+          width="312"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="828"
+          y="562"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 3 · VIEW 3
+        </text>
+        <text
+          x="828"
+          y="580"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LeaderboardController
+        </text>
+        <!-- Class: LeaderboardDtoMapper («mapper», #83) -->
+        <rect
+          x="672"
+          y="640"
+          width="312"
+          height="152"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="828"
+          y="658"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «mapper»
+        </text>
+        <text
+          x="828"
+          y="676"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LeaderboardDtoMapper
+        </text>
+        <text
+          x="828"
+          y="690"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · API-FR-06
+        </text>
+        <line x1="672" y1="700" x2="984" y2="700" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="688" y="716" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toGlobalQuery(gameId: string):
+        </text>
+        <text x="710" y="732" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Result&lt;LeaderboardQuery, string[]&gt;
+        </text>
+        <text x="688" y="748" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toLevelQuery(gameId: string, levelId: string):
+        </text>
+        <text x="710" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Result&lt;LeaderboardQuery, string[]&gt;
+        </text>
+        <text x="688" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toDto(board: Leaderboard): LeaderboardDto
+        </text>
         <!-- Class: PlayerProgress (PART 1 · VIEW 1) -->
         <rect
           x="64"
-          y="688"
+          y="876"
           width="304"
           height="48"
           rx="6"
@@ -617,7 +734,7 @@
         />
         <text
           x="216"
-          y="706"
+          y="894"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -628,7 +745,7 @@
         </text>
         <text
           x="216"
-          y="724"
+          y="912"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -640,7 +757,7 @@
         <!-- Class: PlayerProgressReceiver (PART 3 · VIEW 1) -->
         <rect
           x="380"
-          y="688"
+          y="876"
           width="168"
           height="48"
           rx="6"
@@ -651,7 +768,7 @@
         />
         <text
           x="464"
-          y="706"
+          y="894"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -662,7 +779,7 @@
         </text>
         <text
           x="464"
-          y="724"
+          y="912"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -674,7 +791,7 @@
         <!-- Class: LevelDefinition (PART 1 · VIEW 2) -->
         <rect
           x="560"
-          y="688"
+          y="876"
           width="304"
           height="48"
           rx="6"
@@ -685,7 +802,7 @@
         />
         <text
           x="712"
-          y="706"
+          y="894"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -696,7 +813,7 @@
         </text>
         <text
           x="712"
-          y="724"
+          y="912"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -708,7 +825,7 @@
         <!-- UML template box: the type parameter on the top-right corner -->
         <rect
           x="816"
-          y="678"
+          y="866"
           width="56"
           height="18"
           rx="2"
@@ -719,7 +836,7 @@
         />
         <text
           x="844"
-          y="690"
+          y="878"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -730,7 +847,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="784"
+          y="972"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -740,7 +857,7 @@
         </text>
         <text
           x="24"
-          y="800"
+          y="988"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -750,7 +867,7 @@
         </text>
         <text
           x="24"
-          y="816"
+          y="1004"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -761,17 +878,17 @@
         </text>
         <text
           x="24"
-          y="832"
+          y="1020"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
           LevelDtoMapper keeps the section as it arrives; the validator of the gameId checks it in
-          the use case.
+          the use case. toLevelsDto() turns the levels of GetLevels into the LevelsDto.
         </text>
         <text
           x="24"
-          y="848"
+          y="1036"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -779,11 +896,28 @@
           A failed Result of UpdateLevels becomes the details of the 400 body of API-FR-06 through
           toDetails(). The mappers hold no state.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="872" x2="1016" y2="872" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="890"
+          y="1052"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LeaderboardDtoMapper builds the GameId and the LevelId of a board query, and receives the
+          Score, the LevelResult or the four totals of a Standing to build each row (#83).
+        </text>
+        <!-- Legend -->
+        <line
+          x1="24"
+          y1="1076"
+          x2="1016"
+          y2="1076"
+          stroke="rgba(23,33,42,0.10)"
+          stroke-width="0.8"
+        />
+        <text
+          x="24"
+          y="1094"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -793,16 +927,16 @@
         </text>
         <line
           x1="24"
-          y1="908"
+          y1="1112"
           x2="52"
-          y2="908"
+          y2="1112"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
         <text
           x="60"
-          y="912"
+          y="1116"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -811,7 +945,7 @@
         </text>
         <rect
           x="24"
-          y="928"
+          y="1132"
           width="20"
           height="12"
           rx="2"
@@ -821,7 +955,7 @@
         />
         <rect
           x="48"
-          y="928"
+          y="1132"
           width="20"
           height="12"
           rx="2"
@@ -831,7 +965,7 @@
         />
         <text
           x="80"
-          y="937"
+          y="1141"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -840,7 +974,7 @@
         </text>
         <rect
           x="470"
-          y="928"
+          y="1132"
           width="28"
           height="12"
           rx="2"
@@ -850,7 +984,7 @@
         />
         <text
           x="506"
-          y="937"
+          y="1141"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -859,7 +993,7 @@
         </text>
         <rect
           x="616"
-          y="928"
+          y="1132"
           width="28"
           height="12"
           rx="2"
@@ -870,7 +1004,7 @@
         />
         <text
           x="652"
-          y="937"
+          y="1141"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
