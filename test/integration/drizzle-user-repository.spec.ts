@@ -111,24 +111,25 @@ describe('DrizzleUserRepository', () => {
     expect(count.rows).toEqual([{ count: 1 }]);
   });
 
-  it('should_fail_with_username_taken_when_registration_loses_the_race', async () => {
-    await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
-    // The lookup misses, as when two sign-ups run at the same time.
-    vi.spyOn(repository, 'isUsernameTaken').mockResolvedValue(false);
-    const register = new RegisterUseCase(repository, new PrefixPasswordHasher(), {
-      next: () => UserId.from(OTHER_ID),
-    });
+  it.each(['ada', 'Ada'])(
+    'should_fail_with_username_taken_when_registration_loses_the_race',
+    async (name) => {
+      await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
+      // The lookup misses, as when two sign-ups run at the same time.
+      vi.spyOn(repository, 'isUsernameTaken').mockResolvedValue(false);
+      const register = new RegisterUseCase(repository, new PrefixPasswordHasher(), {
+        next: () => UserId.from(OTHER_ID),
+      });
 
-    for (const name of ['ada', 'Ada']) {
       const result = await register.execute({ username: name, password: 'other password' });
 
       expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
-    }
-    const rows = await database.db.select().from(users);
-    expect(rows).toEqual([
-      { id: ADA_ID, username: 'ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' },
-    ]);
-  });
+      const rows = await database.db.select().from(users);
+      expect(rows).toEqual([
+        { id: ADA_ID, username: 'ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' },
+      ]);
+    },
+  );
 
   // The unique index on username_key guards the case rule of #62, also
   // against a writer that skips the repository and gives the domain key
@@ -151,13 +152,16 @@ describe('DrizzleUserRepository', () => {
     ]);
   });
 
-  it('should_report_username_taken_when_stored_name_differs_only_in_case', async () => {
+  // A row gives the name that the lookup asks for and the answer.
+  it.each([
+    ['Ada', true],
+    ['ada', true],
+    ['ADA', true],
+    ['grace', false],
+  ])('should_report_username_taken_when_stored_name_differs_only_in_case', async (name, taken) => {
     await repository.add(userNamed(ADA_ID, 'Ada', 'scrypt$hash'));
 
-    for (const name of ['Ada', 'ada', 'ADA']) {
-      expect(await repository.isUsernameTaken(username(name))).toBe(true);
-    }
-    expect(await repository.isUsernameTaken(username('grace'))).toBe(false);
+    expect(await repository.isUsernameTaken(username(name))).toBe(taken);
   });
 
   it('should_return_null_when_username_differs_only_in_case', async () => {

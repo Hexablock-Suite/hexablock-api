@@ -154,21 +154,24 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     );
   });
 
-  it('should_keep_highest_score_when_syncs_of_500_and_100_overlap_in_either_order', async () => {
-    for (const order of [
-      [500, 100],
-      [100, 500],
-    ]) {
+  it.each([
+    [500, 100],
+    [100, 500],
+  ])(
+    'should_keep_highest_score_when_syncs_of_500_and_100_overlap_in_either_order',
+    async (firstScore, secondScore) => {
       const player = await newPlayer();
       const sync = syncWith();
 
-      await Promise.all(order.map((score) => sync.execute(syncRequest(player, score, []))));
+      await Promise.all(
+        [firstScore, secondScore].map((score) => sync.execute(syncRequest(player, score, []))),
+      );
 
       const rows = await progressRows(player);
       expect(rows).toHaveLength(1);
       expect(Number(rows[0]?.high_score)).toBe(500);
-    }
-  });
+    },
+  );
 
   it('should_store_both_games_when_syncs_of_two_games_overlap', async () => {
     const player = await newPlayer();
