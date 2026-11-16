@@ -16,6 +16,6 @@ describe('AuthenticateTokenUseCase', () => {
   it('should_fail_with_invalid_token_when_token_issuer_rejects_token', async () => {
     const result = await authenticate.execute('forged-token');
 
-    expect(result).toEqual({ ok: false, error: 'invalid-token' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-token' } });
   });
 });

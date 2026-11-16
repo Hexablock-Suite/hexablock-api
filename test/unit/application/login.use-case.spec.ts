@@ -52,26 +52,26 @@ describe('LoginUseCase', () => {
   it('should_fail_with_invalid_credentials_when_password_is_wrong', async () => {
     const result = await login.execute({ username: 'ada', password: 'wrong horse' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
   it('should_fail_with_invalid_credentials_when_username_is_unknown', async () => {
     const result = await login.execute({ username: 'grace', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
   // Login finds the user by the name as typed (#62).
   it('should_fail_with_invalid_credentials_when_username_differs_only_in_case', async () => {
     const result = await login.execute({ username: 'ADA', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
   it('should_fail_with_invalid_credentials_when_username_breaks_the_rules', async () => {
     const result = await login.execute({ username: 'a!', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
   it('should_verify_password_once_against_dummy_hash_when_username_is_unknown', async () => {
@@ -79,7 +79,7 @@ describe('LoginUseCase', () => {
 
     const result = await login.execute({ username: 'grace', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
     expect(checksOf(verify.mock.calls)).toEqual([
       ['correct horse', valueOf(PasswordHash.from('hashed:unknown-user-dummy-password'))],
@@ -96,7 +96,7 @@ describe('LoginUseCase', () => {
 
     const result = await built.execute({ username: 'nobody', password: 'short' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
     expect(receiveValueOf(verify.mock.calls[0][0])).toBe('short');
     expect(verify.mock.calls[0][1]).toBe(dummy);
@@ -106,7 +106,7 @@ describe('LoginUseCase', () => {
     const hash = vi.spyOn(hasher, 'hash');
     const result = await login.execute({ username: 'grace', password: 'correct horse' });
     // An unknown username costs one hash check, as a wrong password does.
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(hash).not.toHaveBeenCalled();
   });
 
@@ -148,7 +148,7 @@ describe('LoginUseCase', () => {
 
       const result = await login.execute({ username: 'ada', password });
 
-      expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+      expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
       expect(verify).not.toHaveBeenCalled();
       expect(hash).not.toHaveBeenCalled();
     },
@@ -170,7 +170,7 @@ describe('LoginUseCase', () => {
 
     const result = await login.execute({ username: 'ada', password: 'wrong horse' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
     expect(checksOf(verify.mock.calls)).toEqual([
       ['wrong horse', valueOf(PasswordHash.from('hashed:correct horse'))],
@@ -207,7 +207,7 @@ describe('LoginUseCase', () => {
 
     const result = await login.execute({ username: 'ada', password: 'short' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
     expect(checksOf(verify.mock.calls)).toEqual([
       ['short', valueOf(PasswordHash.from('hashed:correct horse'))],
@@ -255,7 +255,7 @@ describe('LoginUseCase', () => {
 
     const result = await login.execute({ username: 'grace', password: 'y'.repeat(129) });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).not.toHaveBeenCalled();
   });
 
@@ -276,7 +276,7 @@ describe('LoginUseCase', () => {
 
     const result = await login.execute({ username: 'a!', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
     expect(verify.mock.calls[0][1]).not.toEqual(valueOf(PasswordHash.from('hashed:correct horse')));
     expect(checksOf(verify.mock.calls)).toEqual([

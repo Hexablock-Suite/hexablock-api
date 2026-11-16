@@ -7,16 +7,17 @@ import { Username } from '../../domain/user/username.js';
 import type { PasswordHasher } from '../ports/password-hasher.js';
 import type { SessionToken, TokenIssuer } from '../ports/token-issuer.js';
 import type { UserRepository } from '../ports/user-repository.js';
+import type { UseCase } from '../use-case.js';
 import type { Credentials } from './credentials.js';
 
 // One problem for an unknown username and for a wrong password, so the
-// answer does not tell which usernames exist.
-export type LoginProblem = 'invalid-credentials';
+// answer does not tell which usernames exist. It carries a kind, so
+// LoggingAspect logs it and no typed text.
+export type LoginProblem = { readonly kind: 'invalid-credentials' };
 
-// Input port of sign-in (API-FR-01).
-export interface Login {
-  execute(request: Credentials): Promise<Result<SessionToken, LoginProblem>>;
-}
+// Input port of sign-in (API-FR-01). It binds UseCase, so one aspect can
+// wrap it (decision 7).
+export type Login = UseCase<Credentials, Result<SessionToken, LoginProblem>>;
 
 export const LOGIN = Symbol('Login');
 
@@ -55,14 +56,14 @@ export class LoginUseCase implements Login {
     // No stored password is longer than the maximum. This check bounds the
     // hash work of one request and gives the same failure as a wrong password.
     if (attempt.isLongerThanAnyPassword()) {
-      return err('invalid-credentials');
+      return err({ kind: 'invalid-credentials' });
     }
     const username = Username.create(request.username);
     const user = username.ok ? await this.users.findByUsername(username.value) : null;
     // The check runs before the test of the user, so an unknown username costs it too.
     const matches = await this.passwordMatches(user, attempt);
     if (user === null || !matches) {
-      return err('invalid-credentials');
+      return err({ kind: 'invalid-credentials' });
     }
     return ok(this.tokens.issue(user));
   }
