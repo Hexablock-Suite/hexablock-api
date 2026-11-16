@@ -79,6 +79,166 @@
         ],
         "type": "object"
       },
+      "FitPieceDto": {
+        "properties": {
+          "cells": {
+            "example": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ],
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "A non-blank text, unique in the level.",
+            "example": "a",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "cells"
+        ],
+        "type": "object"
+      },
+      "FitPlacementDto": {
+        "properties": {
+          "at": {
+            "example": [
+              2,
+              0
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "piece": {
+            "description": "The id of a piece of the level.",
+            "example": "b",
+            "type": "string"
+          },
+          "rotation": {
+            "description": "Rotation steps of the topology. A negative count turns the other way.",
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "piece",
+          "rotation",
+          "at"
+        ],
+        "type": "object"
+      },
+      "FitSectionDto": {
+        "properties": {
+          "figure": {
+            "description": "The cells that the player covers.",
+            "example": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ],
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "pieces": {
+            "items": {
+              "$ref": "#/components/schemas/FitPieceDto"
+            },
+            "type": "array"
+          },
+          "stars": {
+            "description": "The star thresholds, from the first star up.",
+            "items": {
+              "$ref": "#/components/schemas/FitStarDto"
+            },
+            "type": "array"
+          },
+          "witness": {
+            "description": "The solution of the designer. It covers the figure exactly (A5).",
+            "items": {
+              "$ref": "#/components/schemas/FitPlacementDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "figure",
+          "pieces",
+          "witness",
+          "stars"
+        ],
+        "type": "object"
+      },
+      "FitStarDto": {
+        "properties": {
+          "maxElapsedMs": {
+            "example": 120000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxMoves": {
+            "example": 12,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "maxMoves",
+          "maxElapsedMs"
+        ],
+        "type": "object"
+      },
+      "FixedSourceDto": {
+        "properties": {
+          "stacks": {
+            "example": [
+              [
+                "red",
+                "red",
+                "blue"
+              ],
+              [
+                "green"
+              ]
+            ],
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "stacks"
+        ],
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -91,6 +251,59 @@
         },
         "required": [
           "status"
+        ],
+        "type": "object"
+      },
+      "LevelDto": {
+        "properties": {
+          "gameId": {
+            "description": "The game variant: hexa-fit or hexa-sort. Another game has no level files.",
+            "example": "hexa-fit",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "type": "string"
+          },
+          "levelId": {
+            "description": "A non-blank text, unique in its game.",
+            "example": "fit-01",
+            "type": "string"
+          },
+          "order": {
+            "description": "The place of the level in the list of its game.",
+            "example": 1,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "section": {
+            "description": "The section of the game: the Fit section or the Sort section.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FitSectionDto"
+              },
+              {
+                "$ref": "#/components/schemas/SortSectionDto"
+              }
+            ]
+          },
+          "topology": {
+            "description": "How to read the coordinates, such as hex.",
+            "example": "hex",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "type": "string"
+          },
+          "version": {
+            "description": "The copy of the level. The update rejects a version lower than the stored one, and accepts an equal or a higher one (S3-10).",
+            "example": 1,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "gameId",
+          "levelId",
+          "order",
+          "version",
+          "topology",
+          "section"
         ],
         "type": "object"
       },
@@ -124,6 +337,21 @@
           "stars",
           "moves",
           "elapsedMs"
+        ],
+        "type": "object"
+      },
+      "LevelsDto": {
+        "properties": {
+          "levels": {
+            "description": "The levels, by gameId and then by levelId in an answer.",
+            "items": {
+              "$ref": "#/components/schemas/LevelDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "levels"
         ],
         "type": "object"
       },
@@ -173,6 +401,84 @@
           "highScore",
           "updatedAt",
           "results"
+        ],
+        "type": "object"
+      },
+      "SeededSourceDto": {
+        "properties": {
+          "colors": {
+            "example": [
+              "red",
+              "green",
+              "blue"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "seed": {
+            "example": 20261115,
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seed",
+          "colors"
+        ],
+        "type": "object"
+      },
+      "SortSectionDto": {
+        "properties": {
+          "goals": {
+            "description": "The count of stacks to clear.",
+            "example": 3,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "radius": {
+            "example": 2,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "source": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SeededSourceDto"
+              },
+              {
+                "$ref": "#/components/schemas/FixedSourceDto"
+              }
+            ]
+          },
+          "stars": {
+            "description": "The star thresholds, from the first star up.",
+            "items": {
+              "$ref": "#/components/schemas/SortStarDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "radius",
+          "goals",
+          "source",
+          "stars"
+        ],
+        "type": "object"
+      },
+      "SortStarDto": {
+        "properties": {
+          "maxMoves": {
+            "example": 40,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "maxMoves"
         ],
         "type": "object"
       },
@@ -383,6 +689,74 @@
         },
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/levels": {
+      "get": {
+        "operationId": "LevelsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelsDto"
+                }
+              }
+            },
+            "description": "Every stored level, by gameId and levelId."
+          }
+        },
+        "tags": [
+          "levels"
+        ]
+      },
+      "put": {
+        "operationId": "LevelsController_update",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LevelsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Every level of the batch is saved. The body is empty."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The body has the wrong shape, or a level breaks a rule: a value of the common part, its section, A5, a lower version than the stored one, or a gameId with no level files. Each detail names one level by its gameId and levelId. A level problem saves no level of the batch, except a lower version, which saves the other levels."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "levels"
         ]
       }
     },

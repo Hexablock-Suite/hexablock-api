@@ -63,7 +63,7 @@
       <p class="eyebrow">Sequence diagram · Use case 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1218"
+        viewBox="0 0 1240 1322"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="seq3updatelevels-title seq3updatelevels-desc"
@@ -74,11 +74,17 @@
         <desc id="seq3updatelevels-desc">
           Sequence diagram of one level update request. JwtAuthGuard verifies the token through the
           AuthenticateToken input port and answers 401 on a failed Result. LevelsController turns
-          each LevelDto into a level with LevelDtoMapper and calls UpdateLevelsUseCase through the
-          UpdateLevels input port. For each level, LevelValidators finds the LevelValidator strategy
-          of its gameId, which checks the section shape and the rules. With no problem, the use case
-          saves the levels through DrizzleLevelRepository; otherwise it returns a failed Result, and
-          the controller answers with the error body that LevelDtoMapper builds.
+          the body into an UpdateLevelsRequest with LevelDtoMapper and calls UpdateLevelsUseCase
+          through the UpdateLevels input port. For each level, the LevelValidators domain service
+          finds the LevelValidator strategy of its gameId with GameId.equals(); the strategy picks
+          the section type, the section checks its own shape and rules, and LevelValidators builds
+          the level. With no problem, the use case saves each level with
+          LevelRepository.update(gameId, levelId, change): DrizzleLevelRepository opens one
+          transaction, locks the gameId and the levelId, and the change runs stored.accepts(level)
+          on the stored copy (S3-10). Otherwise the use case returns a failed Result, and the
+          controller answers a 400 whose details LevelDtoMapper writes. A note on the strategy gives
+          the Fit path: FitLevelValidator finds the Topology of the level in Topologies, and
+          FitSection checks A5 on it; a topology with no entry gives unknown-topology.
         </desc>
         <defs>
           <marker
@@ -110,7 +116,7 @@
           x="24"
           y="24"
           width="1192"
-          height="998"
+          height="1086"
           rx="4"
           fill="none"
           stroke="#17212a"
@@ -133,7 +139,7 @@
           x1="232"
           y1="116"
           x2="232"
-          y2="1010"
+          y2="1098"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,4"
@@ -187,7 +193,7 @@
           x1="382"
           y1="116"
           x2="382"
-          y2="1010"
+          y2="1098"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,4"
@@ -241,7 +247,7 @@
           x1="532"
           y1="116"
           x2="532"
-          y2="1010"
+          y2="1098"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,4"
@@ -295,7 +301,7 @@
           x1="682"
           y1="116"
           x2="682"
-          y2="1010"
+          y2="1098"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,4"
@@ -349,7 +355,7 @@
           x1="832"
           y1="116"
           x2="832"
-          y2="1010"
+          y2="1098"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,4"
@@ -396,14 +402,14 @@
           text-anchor="middle"
           letter-spacing="0.04em"
         >
-          Strategy registry
+          domain service
         </text>
         <!-- Lifeline: LevelValidator (layer 1) -->
         <line
           x1="982"
           y1="116"
           x2="982"
-          y2="1010"
+          y2="1098"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,4"
@@ -457,7 +463,7 @@
           x1="1132"
           y1="116"
           x2="1132"
-          y2="1010"
+          y2="1098"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,4"
@@ -547,33 +553,6 @@
         <text x="44" y="303" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           [else]
         </text>
-        <!-- Combined fragment: loop [for each dto in body] -->
-        <rect
-          x="300"
-          y="380"
-          width="300"
-          height="60"
-          rx="2"
-          fill="none"
-          stroke="#5b6873"
-          stroke-width="1"
-        />
-        <path
-          d="M300 394 L332 394 L338 388 L338 380"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="1"
-        />
-        <text
-          x="306"
-          y="390"
-          fill="#17212a"
-          font-size="8"
-          font-weight="600"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          loop
-        </text>
         <!-- Combined fragment: loop [for each level in request.levels] -->
         <rect
           x="598"
@@ -601,7 +580,7 @@
         >
           loop
         </text>
-        <!-- Combined fragment: alt [validators has level.gameId] -->
+        <!-- Combined fragment: alt [an entry has an equal gameId] -->
         <rect
           x="746"
           y="540"
@@ -646,7 +625,7 @@
           x="36"
           y="734"
           width="1168"
-          height="254"
+          height="342"
           rx="2"
           fill="none"
           stroke="#5b6873"
@@ -670,16 +649,43 @@
         </text>
         <line
           x1="36"
-          y1="840"
+          y1="928"
           x2="1204"
-          y2="840"
+          y2="928"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="4,3"
         />
-        <rect x="41" y="843" width="36" height="11" fill="#f3f5f6" />
-        <text x="44" y="851" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
+        <rect x="41" y="931" width="36" height="11" fill="#f3f5f6" />
+        <text x="44" y="939" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           [else]
+        </text>
+        <!-- Combined fragment: loop [for each level in request.levels], one update() per level -->
+        <rect
+          x="598"
+          y="758"
+          width="598"
+          height="122"
+          rx="2"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+        />
+        <path
+          d="M598 772 L630 772 L636 766 L636 758"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+        />
+        <text
+          x="604"
+          y="768"
+          fill="#17212a"
+          font-size="8"
+          font-weight="600"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          loop
         </text>
         <!-- Activation bars -->
         <rect
@@ -695,7 +701,7 @@
           x="377"
           y="360"
           width="10"
-          height="606"
+          height="694"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
@@ -713,7 +719,7 @@
           x="677"
           y="470"
           width="10"
-          height="398"
+          height="486"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
@@ -737,26 +743,17 @@
           stroke-width="1"
         />
         <rect
-          x="977"
-          y="616"
-          width="10"
-          height="20"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <rect
           x="1127"
-          y="770"
+          y="790"
           width="10"
-          height="20"
+          height="76"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <rect
           x="527"
-          y="900"
+          y="988"
           width="10"
           height="20"
           fill="#ffffff"
@@ -769,24 +766,24 @@
           [failed Result]
         </text>
         <!-- Guard of the loop fragment, drawn over the activation bars -->
-        <rect x="343" y="383" width="115" height="11" fill="#f3f5f6" />
-        <text x="346" y="391" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
-          [for each dto in body]
-        </text>
-        <!-- Guard of the loop fragment, drawn over the activation bars -->
         <rect x="641" y="501" width="174" height="11" fill="#f3f5f6" />
         <text x="644" y="509" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           [for each level in request.levels]
         </text>
         <!-- Guard of the alt fragment, drawn over the activation bars -->
-        <rect x="783" y="543" width="149" height="11" fill="#f3f5f6" />
+        <rect x="783" y="543" width="158" height="11" fill="#f3f5f6" />
         <text x="786" y="551" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
-          [validators has level.gameId]
+          [an entry has an equal gameId]
         </text>
         <!-- Guard of the alt fragment, drawn over the activation bars -->
         <rect x="73" y="737" width="90" height="11" fill="#f3f5f6" />
         <text x="76" y="745" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           [no LevelProblem]
+        </text>
+        <!-- Guard of the loop fragment, drawn over the activation bars -->
+        <rect x="641" y="761" width="174" height="11" fill="#f3f5f6" />
+        <text x="644" y="769" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
+          [for each level in request.levels]
         </text>
         <!-- Interaction use: the AuthenticateToken flow of Part 2, view 4 -->
         <rect
@@ -837,7 +834,7 @@
           execute(token) · Part 2, view 4
         </text>
         <!-- Messages, top to bottom -->
-        <!-- Message: HTTP request · LevelDto[], Bearer token -->
+        <!-- Message: HTTP request · PUT /levels, Bearer token -->
         <line
           x1="24"
           y1="160"
@@ -847,7 +844,7 @@
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="36" y="145" width="201" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="33.5" y="145" width="206" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="136.5"
           y="154"
@@ -856,7 +853,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          HTTP request · LevelDto[], Bearer token
+          HTTP request · PUT /levels, Bearer token
         </text>
         <text x="36" y="176" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           Nest calls canActivate(ctx)
@@ -929,7 +926,7 @@
         <text x="36" y="376" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           Nest routes the request
         </text>
-        <!-- Message: toLevel(dto) -->
+        <!-- Message: toRequest(body) -->
         <line
           x1="377"
           y1="410"
@@ -939,7 +936,7 @@
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="422.5" y="395" width="69" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="413" y="395" width="88" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="457"
           y="404"
@@ -948,9 +945,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          toLevel(dto)
+          toRequest(body)
         </text>
-        <!-- Reply: AnyLevel -->
+        <!-- Reply: UpdateLevelsRequest -->
         <line
           x1="537"
           y1="430"
@@ -961,7 +958,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="432.5" y="415" width="49" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="403" y="415" width="108" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="457"
           y="424"
@@ -970,7 +967,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          AnyLevel
+          UpdateLevelsRequest
         </text>
         <!-- Message: UpdateLevels.execute(request) -->
         <line
@@ -993,7 +990,7 @@
         >
           UpdateLevels.execute(request)
         </text>
-        <!-- Message: check(level) -->
+        <!-- Message: check(gameId, …, section) -->
         <line
           x1="677"
           y1="528"
@@ -1003,7 +1000,7 @@
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="722.5" y="513" width="69" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="691" y="513" width="132" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="757"
           y="522"
@@ -1012,9 +1009,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          check(level)
+          check(gameId, …, section)
         </text>
-        <!-- Message: isSection(level.section) -->
+        <!-- Message: sectionOf(section, topology) -->
         <line
           x1="827"
           y1="570"
@@ -1024,7 +1021,7 @@
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="843" y="555" width="128" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="837" y="555" width="140" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="907"
           y="564"
@@ -1033,9 +1030,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          isSection(level.section)
+          sectionOf(section, topology)
         </text>
-        <!-- Reply: boolean -->
+        <!-- Reply: Result&lt;TSection, LevelProblem&gt; -->
         <line
           x1="987"
           y1="590"
@@ -1046,7 +1043,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="885" y="575" width="44" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="853" y="575" width="108" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="907"
           y="584"
@@ -1055,55 +1052,78 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          boolean
+          Result&lt;TSection, …&gt;
         </text>
-        <!-- Message: check(level) -->
-        <line
-          x1="827"
-          y1="616"
-          x2="987"
-          y2="616"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-end="url(#seq3updatelevels-filled)"
-        />
-        <rect x="872.5" y="601" width="69" height="12" rx="2" fill="#f3f5f6" />
-        <text
-          x="907"
-          y="610"
-          fill="#17212a"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-        >
-          check(level)
-        </text>
-        <!-- Reply: LevelProblem[] -->
+        <!-- Note: the Fit path of the strategy, anchored to its activation -->
         <line
           x1="987"
-          y1="636"
-          x2="827"
-          y2="636"
+          y1="580"
+          x2="1076"
+          y2="580"
           stroke="#5b6873"
           stroke-width="1"
-          stroke-dasharray="5,4"
-          marker-end="url(#seq3updatelevels-open)"
+          stroke-dasharray="2,3"
         />
-        <rect x="867.5" y="621" width="79" height="12" rx="2" fill="#f3f5f6" />
+        <path
+          d="M1076 542 L1200 542 L1210 552 L1210 610 L1076 610 Z"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+        />
+        <path d="M1200 542 L1200 552 L1210 552" fill="none" stroke="#5b6873" stroke-width="1" />
         <text
-          x="907"
-          y="630"
+          x="1082"
+          y="556"
           fill="#17212a"
-          font-size="8"
+          font-size="7.5"
           font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
         >
-          LevelProblem[]
+          FitLevelValidator:
+        </text>
+        <text
+          x="1082"
+          y="567"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Topologies.find(topology),
+        </text>
+        <text
+          x="1082"
+          y="578"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          then FitSection.of(raw,
+        </text>
+        <text
+          x="1082"
+          y="589"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          topology) checks A5.
+        </text>
+        <text
+          x="1082"
+          y="600"
+          fill="#5b6873"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          no entry: unknown-topology
+        </text>
+        <!-- Action: LevelValidators builds the level with the section that the strategy gave -->
+        <text x="842" y="626" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
+          LevelDefinition.of(…, section)
         </text>
         <text x="842" y="674" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
-          no validator: a problem
+          no entry: game-without-levels
         </text>
-        <!-- Reply: LevelProblem[] -->
+        <!-- Reply: Result&lt;LevelDefinition, LevelProblem&gt; -->
         <line
           x1="837"
           y1="704"
@@ -1114,7 +1134,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="717.5" y="689" width="79" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="689" y="689" width="136" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="757"
           y="698"
@@ -1123,41 +1143,19 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          LevelProblem[]
+          Result&lt;LevelDefinition, …&gt;
         </text>
-        <!-- Message: LevelRepository.save(levels) -->
+        <!-- Message: LevelRepository.update(gameId, levelId, change) -->
         <line
           x1="677"
-          y1="770"
+          y1="790"
           x2="1137"
-          y2="770"
+          y2="790"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="833.5" y="755" width="147" height="12" rx="2" fill="#f3f5f6" />
-        <text
-          x="907"
-          y="764"
-          fill="#17212a"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-        >
-          LevelRepository.save(levels)
-        </text>
-        <!-- Reply: void -->
-        <line
-          x1="1137"
-          y1="790"
-          x2="677"
-          y2="790"
-          stroke="#5b6873"
-          stroke-width="1"
-          stroke-dasharray="5,4"
-          marker-end="url(#seq3updatelevels-open)"
-        />
-        <rect x="892" y="775" width="30" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="789.5" y="775" width="235" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="907"
           y="784"
@@ -1166,23 +1164,98 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          void
+          LevelRepository.update(gameId, levelId, change)
         </text>
-        <!-- Reply: ok Result -->
+        <!-- Note: one transaction per level under a lock of its key, anchored to its activation -->
         <line
-          x1="687"
-          y1="812"
-          x2="377"
-          y2="812"
+          x1="1116"
+          y1="826"
+          x2="1127"
+          y2="826"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="2,3"
+        />
+        <path
+          d="M996 800 L1106 800 L1116 810 L1116 852 L996 852 Z"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+        />
+        <path d="M1106 800 L1106 810 L1116 810" fill="none" stroke="#5b6873" stroke-width="1" />
+        <text
+          x="1002"
+          y="813"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          one transaction locks
+        </text>
+        <text
+          x="1002"
+          y="824"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          gameId and levelId,
+        </text>
+        <text
+          x="1002"
+          y="835"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          then change(stored):
+        </text>
+        <text
+          x="1002"
+          y="846"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          stored.accepts(level)
+        </text>
+        <!-- Reply: Result&lt;LevelDefinition, LevelProblem&gt; -->
+        <line
+          x1="1137"
+          y1="866"
+          x2="677"
+          y2="866"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="505" y="797" width="54" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="839" y="851" width="136" height="12" rx="2" fill="#f3f5f6" />
+        <text
+          x="907"
+          y="860"
+          fill="#17212a"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+        >
+          Result&lt;LevelDefinition, …&gt;
+        </text>
+        <!-- Reply: ok Result -->
+        <line
+          x1="687"
+          y1="900"
+          x2="377"
+          y2="900"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#seq3updatelevels-open)"
+        />
+        <rect x="505" y="885" width="54" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="532"
-          y="806"
+          y="894"
           fill="#17212a"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1190,119 +1263,119 @@
         >
           ok Result
         </text>
-        <!-- Reply: HTTP response · no body -->
+        <!-- Reply: HTTP 204 · no body -->
         <line
           x1="387"
-          y1="830"
+          y1="918"
           x2="24"
-          y2="830"
+          y2="918"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="36" y="815" width="123" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="48.5" y="903" width="98" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="97.5"
-          y="824"
+          y="912"
           fill="#17212a"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          HTTP response · no body
+          HTTP 204 · no body
         </text>
-        <!-- Reply: failed Result · LevelProblem[] -->
+        <!-- Reply: failed Result · InvalidLevels -->
         <line
           x1="687"
-          y1="868"
+          y1="956"
           x2="377"
-          y2="868"
+          y2="956"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="453.5" y="853" width="157" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="456" y="941" width="152" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="532"
-          y="862"
+          y="950"
           fill="#17212a"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          failed Result · LevelProblem[]
+          failed Result · InvalidLevels
         </text>
-        <!-- Message: toErrorBody(problems) -->
+        <!-- Message: toDetails(problems) -->
         <line
           x1="377"
-          y1="900"
+          y1="988"
           x2="537"
-          y2="900"
+          y2="988"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="400.5" y="885" width="113" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="405.5" y="973" width="103" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="457"
-          y="894"
+          y="982"
           fill="#17212a"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          toErrorBody(problems)
+          toDetails(problems)
         </text>
-        <!-- Reply: ErrorDto -->
+        <!-- Reply: string[] -->
         <line
           x1="537"
-          y1="920"
+          y1="1008"
           x2="377"
-          y2="920"
+          y2="1008"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="432.5" y="905" width="49" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="432.5" y="993" width="49" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="457"
-          y="914"
+          y="1002"
           fill="#17212a"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          ErrorDto
+          string[]
         </text>
-        <!-- Reply: HTTP error · ErrorDto (API-FR-06) -->
+        <!-- Reply: HTTP 400 · ErrorDto (API-FR-06) -->
         <line
           x1="387"
-          y1="966"
+          y1="1054"
           x2="24"
-          y2="966"
+          y2="1054"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="36" y="951" width="172" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="41" y="1039" width="162" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="122"
-          y="960"
+          y="1048"
           fill="#17212a"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          HTTP error · ErrorDto (API-FR-06)
+          HTTP 400 · ErrorDto (API-FR-06)
         </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="1046"
+          y="1134"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1312,56 +1385,66 @@
         </text>
         <text
           x="24"
-          y="1062"
+          y="1150"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelRepository.save(): UpdateLevelsUseCase holds only the port, and AppModule binds it to
-          DrizzleLevelRepository. The LevelValidator lifeline
+          LevelRepository.update(): UpdateLevelsUseCase holds only the port, and AppModule binds it
+          to DrizzleLevelRepository. The LevelValidator lifeline is
         </text>
         <text
           x="24"
-          y="1078"
+          y="1166"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          is the strategy that LevelValidators finds for the gameId of the level: FitLevelValidator
-          or SortLevelValidator. A section of the wrong shape
+          the strategy that LevelValidators finds with GameId.equals() for the gameId of the level:
+          FitLevelValidator or SortLevelValidator. It picks the section
         </text>
         <text
           x="24"
-          y="1094"
+          y="1182"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          fails isSection() and gives a LevelProblem before check() runs. The use case saves nothing
-          while any level has a problem (API-FR-04).
+          type, the section checks its own shape and holds its rules, and LevelValidators builds the
+          level with LevelDefinition.of(), so no unchecked level exists.
         </text>
         <text
           x="24"
-          y="1110"
+          y="1198"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          flows.md holds the class view of this use case with the same names. The route path and the
-          success status wait on the OpenAPI export.
+          The use case saves nothing while any level has a problem (API-FR-04). Then it calls
+          update() once per level, and each level is saved in its own transaction (#80).
+        </text>
+        <text
+          x="24"
+          y="1214"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          A lower version fails in update() with older-version, and the 400 lists it. flows.md holds
+          the class view with the same names and the routes.
         </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1138"
+          y1="1242"
           x2="1216"
-          y2="1138"
+          y2="1242"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1156"
+          y="1260"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1371,16 +1454,16 @@
         </text>
         <line
           x1="24"
-          y1="1174"
+          y1="1278"
           x2="52"
-          y2="1174"
+          y2="1278"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
         <text
           x="60"
-          y="1178"
+          y="1282"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1389,9 +1472,9 @@
         </text>
         <line
           x1="196"
-          y1="1174"
+          y1="1278"
           x2="224"
-          y2="1174"
+          y2="1278"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1399,7 +1482,7 @@
         />
         <text
           x="232"
-          y="1178"
+          y="1282"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1408,7 +1491,7 @@
         </text>
         <rect
           x="392"
-          y="1166"
+          y="1270"
           width="10"
           height="16"
           fill="#ffffff"
@@ -1417,7 +1500,7 @@
         />
         <text
           x="410"
-          y="1178"
+          y="1282"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1426,7 +1509,7 @@
         </text>
         <rect
           x="548"
-          y="1168"
+          y="1272"
           width="28"
           height="12"
           rx="2"
@@ -1436,7 +1519,7 @@
         />
         <text
           x="584"
-          y="1178"
+          y="1282"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1445,7 +1528,7 @@
         </text>
         <rect
           x="24"
-          y="1194"
+          y="1298"
           width="20"
           height="12"
           rx="2"
@@ -1455,7 +1538,7 @@
         />
         <rect
           x="48"
-          y="1194"
+          y="1298"
           width="20"
           height="12"
           rx="2"
@@ -1465,7 +1548,7 @@
         />
         <rect
           x="72"
-          y="1194"
+          y="1298"
           width="20"
           height="12"
           rx="2"
@@ -1475,7 +1558,7 @@
         />
         <text
           x="104"
-          y="1203"
+          y="1307"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1484,7 +1567,7 @@
         </text>
         <rect
           x="352"
-          y="1194"
+          y="1298"
           width="28"
           height="12"
           rx="1"
@@ -1494,12 +1577,27 @@
         />
         <text
           x="388"
-          y="1203"
+          y="1307"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Frame · sd names the interaction; a message on its left edge enters or leaves the API
+        </text>
+        <path
+          d="M788 1298 L804 1298 L808 1302 L808 1310 L788 1310 Z"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+        />
+        <text
+          x="816"
+          y="1307"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Note · a comment on a lifeline
         </text>
       </svg>
     </div>
