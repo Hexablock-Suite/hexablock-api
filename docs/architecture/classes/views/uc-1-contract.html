@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 1 of 4</p>
       <h1>The use case contract and the aspects that wrap it</h1>
       <svg
-        viewBox="0 0 1040 988"
+        viewBox="0 0 1040 1004"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc1contract-title uc1contract-desc"
@@ -73,7 +73,8 @@
           Class diagram of layer 2 showing the generic UseCase input port, the SyncProgress input
           port that binds it, the use case that implements it, and the UseCaseAspect decorator with
           LoggingAspect and TimingAspect. Since Q12 the aspects live in layer 2, and LoggingAspect
-          writes to the Logger port.
+          writes to the Logger port. Its TError type parameter extends { readonly kind: string },
+          and every problem type of an input port has a kind.
         </desc>
         <defs>
           <marker
@@ -610,9 +611,9 @@
         </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
-          x="236"
+          x="212"
           y="78"
-          width="132"
+          width="316"
           height="18"
           rx="2"
           fill="#ffffff"
@@ -621,14 +622,14 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="302"
+          x="370"
           y="90"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          TRequest, TValue, TError
+          TRequest, TValue, TError extends { readonly kind: string }
         </text>
         <rect
           x="304"
@@ -754,11 +755,21 @@
           GetLeaderboard binds UseCase with TRequest → LeaderboardQuery and TResponse →
           Result&lt;Leaderboard, never&gt;, and AppModule wraps it in LoggingAspect too (#83).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="884" x2="1016" y2="884" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="902"
+          y="876"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LoggingAspect asks TError for a kind, and every problem type has one: LoginProblem is {
+          kind: 'invalid-credentials' } and TokenProblem { kind: 'invalid-token' } (#104).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="900" x2="1016" y2="900" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="918"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -768,16 +779,16 @@
         </text>
         <line
           x1="24"
-          y1="920"
+          y1="936"
           x2="52"
-          y2="920"
+          y2="936"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#uc1contract-triangle)"
         />
         <text
           x="60"
-          y="924"
+          y="940"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -786,9 +797,9 @@
         </text>
         <line
           x1="128"
-          y1="920"
+          y1="936"
           x2="156"
-          y2="920"
+          y2="936"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -796,7 +807,7 @@
         />
         <text
           x="164"
-          y="924"
+          y="940"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -805,16 +816,16 @@
         </text>
         <line
           x1="232"
-          y1="920"
+          y1="936"
           x2="260"
-          y2="920"
+          y2="936"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc1contract-open)"
         />
         <text
           x="268"
-          y="924"
+          y="940"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -823,7 +834,7 @@
         </text>
         <rect
           x="24"
-          y="940"
+          y="956"
           width="20"
           height="12"
           rx="2"
@@ -833,7 +844,7 @@
         />
         <text
           x="56"
-          y="949"
+          y="965"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -842,7 +853,7 @@
         </text>
         <rect
           x="264"
-          y="940"
+          y="956"
           width="28"
           height="12"
           rx="2"
@@ -853,7 +864,7 @@
         />
         <text
           x="300"
-          y="949"
+          y="965"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -862,7 +873,7 @@
         </text>
         <rect
           x="470"
-          y="940"
+          y="956"
           width="28"
           height="12"
           rx="2"
@@ -872,7 +883,7 @@
         />
         <text
           x="506"
-          y="949"
+          y="965"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -881,7 +892,7 @@
         </text>
         <rect
           x="616"
-          y="940"
+          y="956"
           width="28"
           height="12"
           rx="2"
@@ -892,7 +903,7 @@
         />
         <text
           x="652"
-          y="949"
+          y="965"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -901,7 +912,7 @@
         </text>
         <rect
           x="24"
-          y="962"
+          y="978"
           width="28"
           height="12"
           rx="2"
@@ -912,7 +923,7 @@
         />
         <text
           x="60"
-          y="971"
+          y="987"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

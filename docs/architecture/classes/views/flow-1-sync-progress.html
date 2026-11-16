@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 1 of 3</p>
       <h1>Sync progress: one request through the four layers</h1>
       <svg
-        viewBox="0 0 1240 1686"
+        viewBox="0 0 1240 1702"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow1syncprogress-title flow1syncprogress-desc"
@@ -1520,18 +1520,29 @@
           PlayerProgress through deliverTo(), and the levelResults field uses LevelResult; the view
           draws no extra line for them.
         </text>
+        <text
+          x="24"
+          y="1592"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          AuthenticateToken binds UseCase&lt;SessionToken, Result&lt;UserId, TokenProblem&gt;&gt;,
+          as SyncProgress binds UseCase (decision 7), and TokenProblem is { kind: 'invalid-token' }
+          (#104).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1604"
+          y1="1620"
           x2="1216"
-          y2="1604"
+          y2="1620"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1622"
+          y="1638"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1541,9 +1552,9 @@
         </text>
         <line
           x1="24"
-          y1="1640"
+          y1="1656"
           x2="52"
-          y2="1640"
+          y2="1656"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1551,7 +1562,7 @@
         />
         <text
           x="60"
-          y="1644"
+          y="1660"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1560,16 +1571,16 @@
         </text>
         <line
           x1="128"
-          y1="1640"
+          y1="1656"
           x2="156"
-          y2="1640"
+          y2="1656"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#flow1syncprogress-open)"
         />
         <text
           x="164"
-          y="1644"
+          y="1660"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1578,7 +1589,7 @@
         </text>
         <text
           x="403"
-          y="1644"
+          y="1660"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1588,7 +1599,7 @@
 
         <rect
           x="24"
-          y="1660"
+          y="1676"
           width="20"
           height="12"
           rx="2"
@@ -1598,7 +1609,7 @@
         />
         <rect
           x="48"
-          y="1660"
+          y="1676"
           width="20"
           height="12"
           rx="2"
@@ -1608,7 +1619,7 @@
         />
         <rect
           x="72"
-          y="1660"
+          y="1676"
           width="20"
           height="12"
           rx="2"
@@ -1618,7 +1629,7 @@
         />
         <rect
           x="96"
-          y="1660"
+          y="1676"
           width="20"
           height="12"
           rx="2"
@@ -1628,7 +1639,7 @@
         />
         <text
           x="128"
-          y="1669"
+          y="1685"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1637,7 +1648,7 @@
         </text>
         <rect
           x="352"
-          y="1660"
+          y="1676"
           width="28"
           height="12"
           rx="2"
@@ -1647,7 +1658,7 @@
         />
         <text
           x="388"
-          y="1669"
+          y="1685"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
