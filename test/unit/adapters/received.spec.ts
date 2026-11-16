@@ -1,5 +1,6 @@
 import {
   receiveBoundsOf,
+  receiveJsonOf,
   receiveKeyOf,
   receiveLevelResultOf,
   receiveValueOf,
@@ -11,6 +12,7 @@ import { Range } from '../../../src/domain/shared/range.js';
 import type { ValueReceiver } from '../../../src/domain/shared/value-receiver.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
+import { checkedLevel, levelExample } from '../../support/level-format.js';
 import { levelResultOf } from '../../support/level-results.js';
 
 // The helpers of the border (#90). An adapter needs the value as an
@@ -60,5 +62,39 @@ describe('received values', () => {
     const silent = { deliverTo(_receiver: LevelResultReceiver): void {} };
 
     expect(() => receiveLevelResultOf(silent)).toThrow('The source delivered no value.');
+  });
+
+  // A level and its section deliver their parts, and each part delivers its
+  // own value. The helper walks them and gives the shared level format (#80).
+  describe('the JSON of a domain value', () => {
+    it('should_give_the_level_of_the_format_document_when_each_example_level_is_received', () => {
+      const fixedSort = levelExample('hexa-sort');
+      fixedSort.section.source = { stacks: [['red', 'red', 'blue'], ['green'], ['blue', 'green']] };
+
+      for (const example of [levelExample('hexa-fit'), levelExample('hexa-sort'), fixedSort]) {
+        expect(receiveJsonOf(checkedLevel(example))).toEqual(example);
+      }
+    });
+
+    it('should_give_each_item_when_lists_and_plain_objects_hold_values', () => {
+      expect(
+        receiveJsonOf({ id: GameId.of('fit'), scores: [Score.of(1), 2], name: 'a', on: true }),
+      ).toEqual({ id: 'fit', scores: [1, 2], name: 'a', on: true });
+      expect(receiveJsonOf(null)).toBeNull();
+    });
+
+    // A class instance that delivers nothing would show its private fields.
+    it('should_throw_when_an_object_is_neither_plain_nor_a_delivering_value', () => {
+      class Secret {
+        private readonly hidden = 'hidden';
+      }
+
+      expect(() => receiveJsonOf({ part: new Secret() })).toThrow(
+        'The value is not JSON and delivers no value.',
+      );
+      expect(() => receiveJsonOf(new Date(0))).toThrow(
+        'The value is not JSON and delivers no value.',
+      );
+    });
   });
 });

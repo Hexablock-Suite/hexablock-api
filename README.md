@@ -35,7 +35,10 @@ connection, the `HttpErrorFilter` that gives every HTTP error the `ErrorDto` bod
 `PlayerProgress` aggregate in `src/domain/progress` with its `ProgressRepository` port and its
 Drizzle repository. It also holds sign-up, sign-in and `GET /auth/me`, the first route behind
 `JwtAuthGuard`, and the progress sync `POST /progress` with its read `GET /progress/{gameId}`,
-both behind the guard. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
+both behind the guard. It holds the level schema of DS-6 with the Fit and Sort level validators,
+the level store, the level read `GET /levels` with no guard and the level update `PUT /levels`
+behind the guard. It holds the leaderboard reads `GET /leaderboard/{gameId}` and
+`GET /leaderboard/{gameId}/levels/{levelId}`, both behind the guard. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
 
 ## Architecture
 
@@ -58,7 +61,7 @@ The table shows the design. Most of these pieces are not code yet; their code st
   port: a use case reads the instant and passes it to the domain as a parameter.
 - **Adapters live in layers 3 and 4.** [SystemClock](src/infrastructure/clock/system-clock.ts)
   implements `Clock`. The Drizzle repositories in `src/adapters/persistence` implement the
-  repository ports of users and progress; the level repository is planned.
+  repository ports of users, progress and levels.
 - **`AppModule` is the composition root.** [src/infrastructure/app.module.ts](src/infrastructure/app.module.ts)
   binds each port to one adapter. `src/main.ts` only starts the app.
 - **The domain hides its state.** `PlayerProgress` has no getter: its mappers read a
@@ -109,8 +112,8 @@ and views 1.2 and 2.3 of [docs/architecture/classes.md](docs/architecture/classe
 
 ## Design Patterns
 
-The patterns come from the backend class diagram. The level validators and `TimingAspect` are
-not built yet, so each link points to the design doc; links move to the source files as code lands.
+The patterns come from the backend class diagram. `TimingAspect` is not built yet. Each link
+points to the design doc; links move to the source files as code lands.
 
 | Pattern                            | Classes                                                                           | Quality it protects                                 | Reason                                                                                                 | Link                                                                                                                                                 |
 | ---------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |

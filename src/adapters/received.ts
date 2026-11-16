@@ -97,3 +97,59 @@ export function receiveLevelResultOf(source: DeliversLevelResult): LevelResultVa
   });
   return slot.take();
 }
+
+// A JSON value: what a JSON column or a JSON body keeps.
+export type Json =
+  | null
+  | boolean
+  | number
+  | string
+  | readonly Json[]
+  | { readonly [field: string]: Json };
+
+// Gives the JSON of a domain value. A level and its section deliver a record
+// of their parts, and each part delivers its own value or its own record.
+// The helper runs each delivery and walks what it gets, so it knows no
+// section type: a new section that delivers its parts needs no new code
+// here. A list and a plain object give the JSON of each item. A text, a
+// number, a boolean and null stay as they are. Any other object is a defect
+// of the code: a class instance that delivers nothing would show its
+// private fields, so the helper throws.
+export function receiveJsonOf(value: unknown): Json {
+  if (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  ) {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item: unknown) => receiveJsonOf(item));
+  }
+  if (deliversValue(value)) {
+    return receiveJsonOf(receiveValueOf(value));
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([field, item]) => [field, receiveJsonOf(item)]),
+    );
+  }
+  throw new TypeError('The value is not JSON and delivers no value.');
+}
+
+function deliversValue(value: unknown): value is DeliversValue<unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as Partial<DeliversValue<unknown>>).deliverTo === 'function'
+  );
+}
+
+function isPlainObject(value: unknown): value is Readonly<Record<string, unknown>> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const prototype: unknown = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}

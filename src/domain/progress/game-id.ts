@@ -1,7 +1,7 @@
 import type { ValueReceiver } from '../shared/value-receiver.js';
 import { ProgressError } from './progress-error.js';
 
-// A lowercase slug, such as lines, fit, sort or merge.
+// A lowercase slug, such as hexa-lines, hexa-fit, hexa-sort or hexa-merge.
 const GAME_ID_PATTERN = /^[a-z][a-z0-9-]*$/;
 
 // Value object for a game variant. It is an open value, not a closed list
