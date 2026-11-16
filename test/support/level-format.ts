@@ -13,6 +13,10 @@ import { TopologyId } from '../../src/domain/level/topology-id.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import type { Result } from '../../src/domain/shared/result.js';
+import { valueOf } from './result.js';
+
+// The level tests import valueOf from here since #77.
+export { valueOf };
 
 // The shared level format of S3-02. Its complete examples are the fixtures
 // of the level tests (#77, #78, #79), so the document and the code cannot drift.
@@ -67,8 +71,8 @@ export function levelFrom<TSection>(
   const topology = TopologyId.of(json.topology);
   if (!topology.ok) return topology;
   return LevelDefinition.of(
-    GameId.of(json.gameId),
-    LevelId.of(json.levelId),
+    valueOf(GameId.of(json.gameId)),
+    valueOf(LevelId.of(json.levelId)),
     order.value,
     version.value,
     topology.value,
@@ -81,8 +85,8 @@ export function levelFrom<TSection>(
 export function levelValidators(): LevelValidators {
   const hex = Topologies.of([[valueOf(TopologyId.of('hex')), new HexTopology()]]);
   return LevelValidators.of([
-    [GameId.of('hexa-fit'), new FitLevelValidator(hex)],
-    [GameId.of('hexa-sort'), new SortLevelValidator()],
+    [valueOf(GameId.of('hexa-fit')), new FitLevelValidator(hex)],
+    [valueOf(GameId.of('hexa-sort')), new SortLevelValidator()],
   ]);
 }
 
@@ -106,21 +110,12 @@ export function checkedLevel(
 ): LevelDefinition<unknown> {
   return valueOf(
     validators.check(
-      GameId.of(json.gameId),
-      LevelId.of(json.levelId),
+      valueOf(GameId.of(json.gameId)),
+      valueOf(LevelId.of(json.levelId)),
       valueOf(LevelOrder.of(json.order)),
       valueOf(LevelVersion.of(json.version)),
       valueOf(TopologyId.of(json.topology)),
       json.section,
     ),
   );
-}
-
-// The value of a successful Result. A failed Result throws, so the test
-// that expects a value fails with the problem in its message.
-export function valueOf<T>(result: Result<T, unknown>): T {
-  if (!result.ok) {
-    throw new Error(`Expected a value, got the problem ${String(result.error)}.`);
-  }
-  return result.value;
 }
