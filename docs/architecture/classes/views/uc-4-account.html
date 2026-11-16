@@ -772,8 +772,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          verify(typed, hash) (decision 16). LoginUseCase passes the port to User.passwordMatches(),
-          and RegisterUseCase builds the user with User.register(). No use case reads
+          verify(attempt, hash) (decision 16). LoginUseCase passes the port to
+          User.passwordMatches(), and RegisterUseCase builds the user with User.register(). No use
+          case reads
         </text>
         <text
           x="24"
@@ -783,7 +784,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           a part of the User: TokenIssuer.issue() takes the User, and its adapter receives the id
-          that the User delivers.
+          that the User delivers. The typed password is a PasswordAttempt (Part 1, view 3).
         </text>
         <!-- Legend -->
         <line x1="24" y1="796" x2="1016" y2="796" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

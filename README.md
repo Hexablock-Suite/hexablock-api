@@ -70,7 +70,7 @@ The table shows the design. Most of these pieces are not code yet; their code st
   of layers 3 and 4 receive it (decision 15 of `classes.md`,
   [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90)). `User` has no public
   field and no public constructor: `User.register()` and `User.restore()` build it, it delivers
-  its parts to the border with `deliverTo()`, and `User.passwordMatches()` checks a typed password
+  its parts to the border with `deliverTo()`, and `User.passwordMatches()` checks a `PasswordAttempt`
   through `PasswordVerifier`, an interface of the domain that the `PasswordHasher` port extends
   (decision 16 of `classes.md`,
   [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91)).
