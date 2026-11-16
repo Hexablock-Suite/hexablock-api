@@ -2,15 +2,18 @@ import {
   receiveBoundsOf,
   receiveJsonOf,
   receiveKeyOf,
+  receiveLevelResultOf,
   receiveValueOf,
 } from '../../../src/adapters/received.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
+import type { LevelResultReceiver } from '../../../src/domain/progress/level-result.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { Range } from '../../../src/domain/shared/range.js';
 import type { ValueReceiver } from '../../../src/domain/shared/value-receiver.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
 import { checkedLevel, levelExample } from '../../support/level-format.js';
+import { levelResultOf } from '../../support/level-results.js';
 
 // The helpers of the border (#90). An adapter needs the value as an
 // expression: a row field, an SQL filter, a lock key or a token claim.
@@ -40,6 +43,25 @@ describe('received values', () => {
     const silent = { deliverTo(_receiver: ValueReceiver<string>): void {} };
 
     expect(() => receiveValueOf(silent)).toThrow('The source delivered no value.');
+  });
+
+  // #95: a LevelResult delivers its four value objects in one call. The
+  // helper gives the text and the three numbers of a row or a JSON body.
+  it('should_give_the_four_plain_values_when_a_level_result_delivers_them', () => {
+    const result = levelResultOf({ levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45_000 });
+
+    expect(receiveLevelResultOf(result)).toEqual({
+      levelId: 'fit-01',
+      stars: 3,
+      moves: 12,
+      elapsedMs: 45_000,
+    });
+  });
+
+  it('should_throw_when_the_level_result_delivers_no_values', () => {
+    const silent = { deliverTo(_receiver: LevelResultReceiver): void {} };
+
+    expect(() => receiveLevelResultOf(silent)).toThrow('The source delivered no value.');
   });
 
   // A level and its section deliver their parts, and each part delivers its

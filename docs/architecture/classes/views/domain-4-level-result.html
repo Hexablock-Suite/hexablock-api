@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 4 of 5</p>
       <h1>Level result: one value object and its four values</h1>
       <svg
-        viewBox="0 0 1040 710"
+        viewBox="0 0 1040 726"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain4levelresult-title domain4levelresult-desc"
@@ -73,7 +73,9 @@
           Class diagram of layer 1 showing the LevelResult value object, which holds a LevelId, a
           Stars, a Moves and an ElapsedTime value object. Each one guards its own rule and compares
           by value, and LevelResult asks them which of two results of one level is better. Each one
-          keeps its value private and delivers it to a receiver with deliverTo().
+          keeps its value private and delivers it to a receiver with deliverTo(). LevelResult keeps
+          the four value objects private, takes them built in of(), and delivers all four to a
+          LevelResultReceiver with deliverTo().
         </desc>
         <defs>
           <marker
@@ -130,7 +132,7 @@
         />
         <!-- LevelResult holds moves: Moves: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <path
-          d="M440 288 L440 388 L320 388"
+          d="M440 336 L440 388 L320 388"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -138,7 +140,7 @@
         />
         <!-- LevelResult holds elapsedTime: ElapsedTime: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <path
-          d="M600 288 L600 388 L720 388"
+          d="M600 336 L600 388 L720 388"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -211,7 +213,7 @@
           x="372"
           y="96"
           width="296"
-          height="192"
+          height="240"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -243,16 +245,16 @@
         </text>
         <line x1="372" y1="144" x2="668" y2="144" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="388" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + levelId: LevelId
+          - levelId: LevelId
         </text>
         <text x="388" y="176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + stars: Stars
+          - stars: Stars
         </text>
         <text x="388" y="192" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + moves: Moves
+          - moves: Moves
         </text>
         <text x="388" y="208" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + elapsedTime: ElapsedTime
+          - elapsedTime: ElapsedTime
         </text>
         <line x1="372" y1="216" x2="668" y2="216" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text
@@ -263,23 +265,54 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + of(values: LevelResultValues): LevelResult
+          + of(levelId: LevelId, stars: Stars,
         </text>
-        <text x="388" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          x="410"
+          y="248"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          moves: Moves, elapsedTime:
+        </text>
+        <text
+          x="410"
+          y="264"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          ElapsedTime): LevelResult
+        </text>
+        <text
+          textLength="274"
+          lengthAdjust="spacingAndGlyphs"
+          x="388"
+          y="280"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverTo(receiver: LevelResultReceiver): void
+        </text>
+        <text x="388" y="296" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: LevelResult): boolean
         </text>
         <text
           textLength="274"
           lengthAdjust="spacingAndGlyphs"
           x="388"
-          y="264"
+          y="312"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           + isForSameLevelAs(other: LevelResult): boolean
         </text>
-        <text x="388" y="280" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="388" y="328" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isBetterThan(other: LevelResult): boolean
         </text>
         <!-- Class: LevelId («value object») -->
@@ -545,8 +578,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelResult is the result of one level. Its four attributes are value objects: each one
-          checks its own rule in its factory method and is equal by value.
+          LevelResult is the result of one level. Its four attributes are private value objects:
+          each one checks its own rule in its factory method and is equal by value.
         </text>
         <text
           x="24"
@@ -555,8 +588,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelId is a non-blank text. Stars, Moves and ElapsedTime are non-negative whole numbers,
-          and ElapsedTime counts milliseconds. isBetterThan() holds the order of DS-4:
+          An adapter of layer 3 builds the four values, so a broken rule stops there, and
+          LevelResult.of() takes them built. LevelId is a non-blank text.
         </text>
         <text
           x="24"
@@ -565,8 +598,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          it asks Stars.isMoreThan(), then Moves.isFewerThan(), then ElapsedTime.isShorterThan(). A
-          full tie is not better. PlayerProgress finds the stored result of a level with
+          Stars, Moves and ElapsedTime are non-negative whole numbers, and ElapsedTime counts
+          milliseconds. isBetterThan() holds the order of DS-4: it asks Stars.isMoreThan(), then
         </text>
         <text
           x="24"
@@ -575,8 +608,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          isForSameLevelAs(), which compares the two LevelId values. Each value is private (decision
-          15): deliverTo() delivers it to a receiver, and no operation returns it.
+          Moves.isFewerThan(), then ElapsedTime.isShorterThan(). A full tie is not better.
+          PlayerProgress finds the stored result of a level with isForSameLevelAs(), which
         </text>
         <text
           x="24"
@@ -585,14 +618,24 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Only the mappers of layer 3 receive the value of a value object: the rows and the JSON
-          bodies keep text and numbers.
+          compares the two LevelId values. Each value is private (decision 15): deliverTo() delivers
+          it to a receiver, and no operation returns it. LevelResult.deliverTo() gives its
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="628" x2="1016" y2="628" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="646"
+          y="620"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          four values to a LevelResultReceiver in one call. Only the adapters of layer 3 receive a
+          value: the rows and the JSON bodies keep text and numbers.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="644" x2="1016" y2="644" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="662"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -602,16 +645,16 @@
         </text>
         <line
           x1="24"
-          y1="664"
+          y1="680"
           x2="52"
-          y2="664"
+          y2="680"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain4levelresult-open)"
         />
         <text
           x="60"
-          y="668"
+          y="684"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -620,7 +663,7 @@
         </text>
         <text
           x="300"
-          y="668"
+          y="684"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -629,7 +672,7 @@
         </text>
         <rect
           x="24"
-          y="684"
+          y="700"
           width="20"
           height="12"
           rx="2"
@@ -639,7 +682,7 @@
         />
         <text
           x="56"
-          y="693"
+          y="709"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -648,7 +691,7 @@
         </text>
         <rect
           x="166"
-          y="684"
+          y="700"
           width="28"
           height="12"
           rx="2"
@@ -658,7 +701,7 @@
         />
         <text
           x="202"
-          y="693"
+          y="709"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

@@ -1,14 +1,15 @@
+import type { LevelResultValues } from '../../../src/adapters/received.js';
 import type { ProgressRepository } from '../../../src/application/ports/progress-repository.js';
 import {
   type SyncProgressRequest,
   SyncProgressUseCase,
 } from '../../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelResult, type LevelResultValues } from '../../../src/domain/progress/level-result.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
+import { levelResultOf } from '../../support/level-results.js';
 import { testUserId } from '../../support/user-ids.js';
 
 const ADA = UserId.from(testUserId(1));
@@ -27,7 +28,7 @@ function syncRequest(
     userId: ADA,
     gameId: GameId.of(gameId),
     score: score === undefined ? undefined : Score.of(score),
-    results: results.map((result) => LevelResult.of(result)),
+    results: results.map((result) => levelResultOf(result)),
   };
 }
 
@@ -113,7 +114,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     const stored = await progress.find(ADA, GameId.of('hexa-fit'));
     expect(stored?.snapshot().highScore).toBeNull();
     expect(stored?.snapshot().updatedAt).toEqual(AT);
-    expect(stored?.snapshot().results).toEqual([LevelResult.of(level)]);
+    expect(stored?.snapshot().results).toEqual([levelResultOf(level)]);
   });
 
   // A better result for a stored levelId takes its place (DS-4, DS-12).
@@ -130,7 +131,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     const stored = await progress.find(ADA, GameId.of('hexa-fit'));
     expect(result.ok && result.value).toEqual(stored);
     expect(stored?.snapshot().highScore).toBeNull();
-    expect(stored?.snapshot().results).toEqual([LevelResult.of(retry), LevelResult.of(next)]);
+    expect(stored?.snapshot().results).toEqual([levelResultOf(retry), levelResultOf(next)]);
   });
 
   // DS-12 check: a better result and then a worse one for the same level
@@ -157,7 +158,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
       }
 
       const found = await repository.find(ADA, GameId.of('hexa-fit'));
-      expect(found?.snapshot().results).toEqual([LevelResult.of(better)]);
+      expect(found?.snapshot().results).toEqual([levelResultOf(better)]);
       expect(results[1]?.ok && results[1].value).toEqual(found);
       stored.push(found);
     }
@@ -209,11 +210,11 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
       const stored = await repository.find(ADA, GameId.of('hexa-fit'));
       // The port gives the results by levelId, whatever the sync order.
       expect(stored?.snapshot().results).toEqual(
-        [first, second].map((level) => LevelResult.of(level)),
+        [first, second].map((level) => levelResultOf(level)),
       );
       // The answer of the last sync keeps the stored result first, then the new one.
       const last = results[1]?.ok ? results[1].value : null;
-      expect(last?.snapshot().results).toEqual(levels.map((level) => LevelResult.of(level)));
+      expect(last?.snapshot().results).toEqual(levels.map((level) => levelResultOf(level)));
     }
   });
 

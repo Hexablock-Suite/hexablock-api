@@ -4,12 +4,13 @@ import { ProgressRowMapper } from '../../src/adapters/persistence/progress-row.m
 import { users } from '../../src/adapters/persistence/schema.js';
 import { SyncProgressUseCase } from '../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelResult } from '../../src/domain/progress/level-result.js';
+import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { ProgressError } from '../../src/domain/progress/progress-error.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
+import { levelResultOf } from '../support/level-results.js';
 import {
   CONTRACT_USER_IDS,
   describeProgressRepositoryContract,
@@ -60,7 +61,7 @@ async function countRows(database: TestDatabase, table: 'progress' | 'level_resu
 }
 
 function level(levelId: string, stars: number, moves: number, elapsedMs: number): LevelResult {
-  return LevelResult.of({ levelId, stars, moves, elapsedMs });
+  return levelResultOf({ levelId, stars, moves, elapsedMs });
 }
 
 // API-FR-02 and DS-5: one progress aggregate over two tables.

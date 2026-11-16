@@ -1,9 +1,9 @@
 import { ProgressDtoMapper } from '../../../src/adapters/http/progress-dto.mapper.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { levelResultOf } from '../../support/level-results.js';
 import { testUserId } from '../../support/user-ids.js';
 
 const ADA = UserId.from(testUserId(1));
@@ -30,7 +30,7 @@ describe('ProgressDtoMapper.toRequest', () => {
     expect(request.value.gameId.equals(GameId.of('hexa-fit'))).toBe(true);
     expect(request.value.score?.equals(Score.of(120))).toBe(true);
     expect(request.value.results).toHaveLength(1);
-    expect(request.value.results[0]?.equals(LevelResult.of(LEVEL))).toBe(true);
+    expect(request.value.results[0]?.equals(levelResultOf(LEVEL))).toBe(true);
   });
 
   it('should_build_no_score_and_no_results_when_body_has_only_a_game_id', () => {
@@ -66,6 +66,27 @@ describe('ProgressDtoMapper.toRequest', () => {
       [{ gameId: BAD_GAME, score: -1, results: [BAD_LEVEL] }, GAME_PROBLEM],
     ] as const) {
       expect(ProgressDtoMapper.toRequest(body, ADA)).toEqual({ ok: false, error: [problem] });
+    }
+  });
+
+  // The mapper builds the values of one result in the order of the fields:
+  // the level id, the stars, the moves, the time. The first broken rule
+  // gives the one problem. A missing field breaks the rule of its value.
+  it('should_fail_with_the_first_broken_field_when_several_fields_of_a_result_break_their_rules', () => {
+    const broken = { levelId: ' ', stars: -1, moves: -2, elapsedMs: -3 };
+
+    for (const [result, problem] of [
+      [broken, 'levelId must be a non-blank string.'],
+      [{ ...broken, levelId: 'fit-01' }, 'stars must be a non-negative integer, got -1.'],
+      [{ ...LEVEL, moves: -2, elapsedMs: -3 }, 'moves must be a non-negative integer, got -2.'],
+      [{ ...LEVEL, elapsedMs: -3 }, 'elapsedMs must be a non-negative integer, got -3.'],
+      [{}, 'levelId must be a non-blank string.'],
+      [{ levelId: 'fit-01' }, 'stars must be a non-negative integer, got undefined.'],
+    ] as const) {
+      expect(ProgressDtoMapper.toRequest({ gameId: 'hexa-fit', results: [result] }, ADA)).toEqual({
+        ok: false,
+        error: [problem],
+      });
     }
   });
 
@@ -113,7 +134,7 @@ describe('ProgressDtoMapper.toDto', () => {
     const at = new Date('2026-11-06T10:00:00.000Z');
     const progress = PlayerProgress.start(ADA, GameId.of('hexa-fit'), at);
     progress.recordScore(Score.of(120), at);
-    progress.recordLevel(LevelResult.of(LEVEL));
+    progress.recordLevel(levelResultOf(LEVEL));
 
     expect(ProgressDtoMapper.toDto(progress)).toEqual({
       gameId: 'hexa-fit',
