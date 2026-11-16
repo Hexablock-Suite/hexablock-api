@@ -4,14 +4,16 @@ import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The id of one level of a game, such as fit-01.
 describe('LevelId', () => {
-  it('should_reject_the_id_when_it_is_blank_or_not_a_string', () => {
-    for (const bad of [undefined, null, '', '  ', 5, ['fit-01']]) {
+  // Each row is an array of one value, so the array case reaches the factory whole.
+  it.each([[undefined], [null], [''], ['  '], [5], [['fit-01']]])(
+    'should_reject_the_id_when_it_is_blank_or_not_a_string',
+    (bad) => {
       expect(() => LevelId.of(bad as unknown as string)).toThrow(ProgressError);
       expect(() => LevelId.of(bad as unknown as string)).toThrow(
         'levelId must be a non-blank string.',
       );
-    }
-  });
+    },
+  );
 
   // The id is kept as it arrives: letter case and spaces count.
   it('should_be_equal_when_two_ids_hold_the_same_text', () => {
@@ -21,11 +23,17 @@ describe('LevelId', () => {
     expect(twin).not.toBe(id);
     expect(id.equals(twin)).toBe(true);
     expect(twin.equals(id)).toBe(true);
-    for (const other of ['fit-02', 'FIT-01', ' fit-01']) {
+  });
+
+  it.each(['fit-02', 'FIT-01', ' fit-01'])(
+    'should_not_be_equal_when_the_text_differs_in_a_letter_its_case_or_a_space',
+    (other) => {
+      const id = LevelId.of('fit-01');
+
       expect(id.equals(LevelId.of(other))).toBe(false);
       expect(LevelId.of(other).equals(id)).toBe(false);
-    }
-  });
+    },
+  );
 
   // #90: the value leaves only through a delivery to a receiver.
   it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {

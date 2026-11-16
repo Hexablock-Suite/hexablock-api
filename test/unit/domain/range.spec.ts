@@ -8,13 +8,14 @@ describe('Range', () => {
     expect([3, 4, 31, 32].map((value) => range.contains(value))).toEqual([true, true, true, true]);
   });
 
-  it('should_not_contain_value_when_it_lies_outside_the_bounds_or_is_not_a_number', () => {
-    const range = Range.ofNumbers(3, 32);
+  it.each([2, 33, -Infinity, Infinity, Number.NaN])(
+    'should_not_contain_value_when_it_lies_outside_the_bounds_or_is_not_a_number',
+    (value) => {
+      const range = Range.ofNumbers(3, 32);
 
-    for (const value of [2, 33, -Infinity, Infinity, Number.NaN]) {
       expect(range.contains(value)).toBe(false);
-    }
-  });
+    },
+  );
 
   it('should_contain_infinite_value_when_upper_bound_is_infinite', () => {
     const range = Range.ofNumbers(0, Infinity);
@@ -41,15 +42,19 @@ describe('Range', () => {
     expect(range.deliverBoundsTo(new RecordingBoundsReceiver<number>())).toBeUndefined();
   });
 
-  // Password.isTooLong() asks this, so it reads no bound.
-  it('should_be_exceeded_only_when_value_is_above_the_upper_bound', () => {
+  // Password.isTooLong() asks this, so it reads no bound. A row gives the
+  // value and the answer.
+  it.each([
+    [129, true],
+    [Infinity, true],
+    [128, false],
+    [8, false],
+    [7, false],
+    [-Infinity, false],
+  ])('should_be_exceeded_only_when_value_is_above_the_upper_bound', (value, exceeded) => {
     const range = Range.ofNumbers(8, 128);
 
-    expect(range.isExceededBy(129)).toBe(true);
-    expect(range.isExceededBy(Infinity)).toBe(true);
-    for (const value of [128, 8, 7, -Infinity]) {
-      expect(range.isExceededBy(value)).toBe(false);
-    }
+    expect(range.isExceededBy(value)).toBe(exceeded);
   });
 
   // A value without an order, such as NaN, is not above the range.
@@ -71,15 +76,16 @@ describe('Range', () => {
     expect([4, 5, 6].map((value) => range.contains(value))).toEqual([false, true, false]);
   });
 
-  it('should_throw_range_error_when_min_is_greater_than_max_or_a_bound_is_not_a_number', () => {
-    for (const [min, max] of [
-      [5, 4],
-      [Number.NaN, 4],
-      [1, Number.NaN],
-    ]) {
+  it.each([
+    [5, 4],
+    [Number.NaN, 4],
+    [1, Number.NaN],
+  ])(
+    'should_throw_range_error_when_min_is_greater_than_max_or_a_bound_is_not_a_number',
+    (min, max) => {
       expect(() => Range.ofNumbers(min, max)).toThrow(new RangeError('A Range needs min <= max.'));
-    }
-  });
+    },
+  );
 
   it('should_order_values_with_the_compare_function_when_bounds_are_not_numbers', () => {
     const byTime = (left: Date, right: Date) => left.getTime() - right.getTime();
@@ -103,11 +109,18 @@ describe('Range equals', () => {
     expect(twin).not.toBe(range);
     expect(range.equals(twin)).toBe(true);
     expect(twin.equals(range)).toBe(true);
-    for (const other of [Range.ofNumbers(2, 5), Range.ofNumbers(1, 6)]) {
-      expect(range.equals(other)).toBe(false);
-      expect(other.equals(range)).toBe(false);
-    }
     expect(Range.of({ n: 1 }, { n: 5 }, byN).equals(Range.of({ n: 1 }, { n: 5 }, byN))).toBe(true);
+  });
+
+  it.each([
+    [2, 5],
+    [1, 6],
+  ])('should_not_be_equal_when_one_bound_of_the_two_ranges_differs', (min, max) => {
+    const range = Range.ofNumbers(1, 5);
+    const other = Range.ofNumbers(min, max);
+
+    expect(range.equals(other)).toBe(false);
+    expect(other.equals(range)).toBe(false);
   });
 
   it('should_give_one_answer_in_both_directions_when_two_ranges_use_different_orders', () => {
