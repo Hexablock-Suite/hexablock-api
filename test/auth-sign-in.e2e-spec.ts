@@ -24,9 +24,14 @@ describe('sign-in with a malformed username (API-FR-01)', () => {
 
   beforeAll(async () => {
     testApp = await createTestApp();
-    await request(testApp.app.getHttpServer())
+    // The comparison with a wrong password needs a stored user, so a failed
+    // sign-up stops the file here.
+    const signUp = await request(testApp.app.getHttpServer())
       .post('/auth/register')
       .send({ username: USERNAME, password: PASSWORD });
+    if (signUp.status !== 201) {
+      throw new Error(`The sign-up of the stored user answered ${signUp.status}.`);
+    }
   });
 
   afterEach(() => {
