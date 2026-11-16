@@ -78,12 +78,14 @@
           check a PasswordAttempt against the hash of the user. PasswordAttempt is the text that a
           player types at sign-in: it has no length rule, and it tells if it is longer than any
           password. Each value object keeps its value private and delivers it to a receiver with
-          deliverTo(); Username also delivers its key. The factory of each value object returns a
-          Result with the code of a broken rule, and PasswordAttempt.of() cannot fail. Username,
-          Password and PasswordAttempt use the USERNAME_LENGTH and PASSWORD_LENGTH limits, two
-          values of the bound class Range&lt;CharacterCount&gt;, which binds the type parameter T of
-          the template Range&lt;T&gt; to the CharacterCount value object. Range&lt;T&gt; asks its
-          values isAfter() and equals(), so no number order crosses it.
+          deliverTo(); Username also delivers its key, and collidesWith() tells if two names
+          collide: their keys are equal, so they differ at most in letter case. The factory of each
+          value object returns a Result with the code of a broken rule, and PasswordAttempt.of()
+          cannot fail. Username, Password and PasswordAttempt use the USERNAME_LENGTH and
+          PASSWORD_LENGTH limits, two values of the bound class Range&lt;CharacterCount&gt;, which
+          binds the type parameter T of the template Range&lt;T&gt; to the CharacterCount value
+          object. Range&lt;T&gt; asks its values isAfter() and equals(), so no number order crosses
+          it.
         </desc>
         <defs>
           <marker
@@ -188,7 +190,7 @@
         />
         <!-- Username.create() asks USERNAME_LENGTH, a Range<CharacterCount> constant of its module: use with role and multiplicity (#99) -->
         <path
-          d="M984 272 L984 776 L640 776"
+          d="M984 288 L984 776 L640 776"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -601,7 +603,7 @@
           x="712"
           y="96"
           width="288"
-          height="176"
+          height="192"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -660,11 +662,14 @@
         <text x="728" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Username): boolean
         </text>
+        <text x="728" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + collidesWith(other: Username): boolean
+        </text>
         <text
           textLength="266"
           lengthAdjust="spacingAndGlyphs"
           x="728"
-          y="248"
+          y="264"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -675,7 +680,7 @@
           textLength="266"
           lengthAdjust="spacingAndGlyphs"
           x="728"
-          y="264"
+          y="280"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1243,7 +1248,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           port of layer 2 extends it (Part 2, view 4), and its adapter does the check. Username.key
-          is the name in lower case; two names with the same key are the same name for
+          is the name in lower case; collidesWith() tells if two names have the same key
         </text>
         <text
           x="24"
@@ -1252,8 +1257,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          uniqueness. Username and Password check their own limits in create(). Password is the
-          plain text that a new user chooses. RegisterUseCase creates it and hashes it
+          (#100). Username and Password check their own limits in create(). Password is the plain
+          text that a new user chooses. AuthDtoMapper creates it, and RegisterUseCase hashes it
         </text>
         <text
           x="24"
