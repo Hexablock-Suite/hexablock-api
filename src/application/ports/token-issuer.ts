@@ -6,7 +6,7 @@ export type SessionToken = string;
 
 // Port. It issues a SessionToken for a user and reads the id of the user
 // back from a token. issue() takes the User, so the use case reads no field
-// of it: the adapter reads the id from the snapshot. verify() returns null
+// of it: the adapter receives the id that the user delivers. verify() returns null
 // for a token that is not valid (decision 14).
 export interface TokenIssuer {
   issue(user: User): SessionToken;

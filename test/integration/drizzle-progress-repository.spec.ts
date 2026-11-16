@@ -16,6 +16,7 @@ import {
   describeProgressRepositoryContract,
   storeProgress,
 } from '../support/progress-repository.contract.js';
+import { progressPartsOf } from '../support/recording-receiver.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 
 // The text that the UserId delivers: the user_id of the rows.
@@ -159,8 +160,8 @@ describe('DrizzleProgressRepository', () => {
 
     expect(await countRows(database, 'progress')).toBe(1);
     const found = await repository.find(ADA, FIT);
-    expect(found?.snapshot().highScore?.equals(Score.of(300))).toBe(true);
-    expect(found?.snapshot().updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progressPartsOf(found)?.highScore?.equals(Score.of(300))).toBe(true);
+    expect(progressPartsOf(found)?.updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
   // The advisory lock makes the second sync read what the first one saved,
@@ -180,7 +181,7 @@ describe('DrizzleProgressRepository', () => {
 
     await Promise.all([sync.execute(syncRequest(500)), sync.execute(syncRequest(100))]);
 
-    expect((await repository.find(ADA, FIT))?.snapshot().highScore?.equals(Score.of(500))).toBe(
+    expect(progressPartsOf(await repository.find(ADA, FIT))?.highScore?.equals(Score.of(500))).toBe(
       true,
     );
     expect(await countRows(database, 'progress')).toBe(1);
@@ -198,8 +199,8 @@ describe('DrizzleProgressRepository', () => {
     await storeProgress(repository, progress);
     const found = await repository.find(ADA, FIT);
 
-    expect(found?.snapshot().results).toEqual([first, second]);
-    expect(found?.snapshot().highScore).toBeNull();
+    expect(progressPartsOf(found)?.results).toEqual([first, second]);
+    expect(progressPartsOf(found)?.highScore).toBeNull();
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 
@@ -215,10 +216,10 @@ describe('DrizzleProgressRepository', () => {
     progress.recordLevel(level('fit-02', 2, 12, 45_000));
     await storeProgress(repository, progress);
 
-    expect((await repository.find(ADA, FIT))?.snapshot().results).toEqual(
-      progress.snapshot().results,
+    expect(progressPartsOf(await repository.find(ADA, FIT))?.results).toEqual(
+      progressPartsOf(progress).results,
     );
-    expect((await repository.find(ADA, FIT))?.snapshot().results[0]).toEqual(retry);
+    expect(progressPartsOf(await repository.find(ADA, FIT))?.results[0]).toEqual(retry);
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 
@@ -239,7 +240,7 @@ describe('DrizzleProgressRepository', () => {
 
   // find() filters on a valid GameId, so it never reads a row with another
   // game_id. The test calls the mapper of the adapter directly: a stored
-  // row must pass the domain rules, as PlayerProgress.restore() says.
+  // row must pass the domain rules, as PlayerProgress.start() and restore() say.
   it('should_reject_stored_row_when_game_id_is_not_a_slug', () => {
     const row = { userId: ADA_VALUE, gameId: 'Hexa Lines', highScore: null, updatedAt: AT };
 

@@ -4,24 +4,27 @@ import { ProgressError } from './progress-error.js';
 import { Score } from './score.js';
 import { UserId } from '../user/user-id.js';
 
-// The state of one progress, as domain values. PlayerProgress.snapshot()
-// gives it, and PlayerProgress.restore() builds the aggregate again from it.
-// It is the Memento of the aggregate (Millett and Tune): a mapper reads it
-// and maps it to rows or to a DTO. It has no rule and no behavior.
-export interface PlayerProgressState {
-  readonly userId: UserId;
-  readonly gameId: GameId;
-  readonly highScore: Score | null;
-  readonly updatedAt: Date;
-  readonly results: readonly LevelResult[];
+// The receiver of the parts of a PlayerProgress. PlayerProgress.deliverTo()
+// calls it once. Only the border implements it, for example a row mapper or
+// a DTO mapper. TInstant is the type of updatedAt: deliverTo() binds it to
+// Date, and a delivery may pass a primitive (decision 15). The instant gets a
+// value object of its own later (#97).
+export interface PlayerProgressReceiver<TInstant> {
+  receive(
+    userId: UserId,
+    gameId: GameId,
+    highScore: Score | null,
+    updatedAt: TInstant,
+    results: readonly LevelResult[],
+  ): void;
 }
 
 // Aggregate root: one progress per userId and gameId (API-FR-02, classes.md
 // decision 2). It keeps the best level result of each level of its game.
 // recordLevel() is the only way to add one. highScore and updatedAt follow the proposal of
 // classes.md decision 3. The instant is a parameter: the use case reads it
-// from the Clock port. The aggregate has no getter: snapshot() gives a copy
-// of its state.
+// from the Clock port. The aggregate has no getter and no snapshot:
+// deliverTo() gives its parts to a receiver of the border.
 export class PlayerProgress {
   // One result per level, in the order of the first record. It holds the
   // best result of each level by the order of DS-4 (DS-12). A game has few
@@ -45,14 +48,25 @@ export class PlayerProgress {
     return new PlayerProgress(userId, gameId, null, epochMsOf(at));
   }
 
-  // Rebuilds a stored progress. It checks the same rules as start(),
-  // recordScore() and recordLevel().
-  static restore(state: PlayerProgressState): PlayerProgress {
-    const progress = PlayerProgress.start(state.userId, state.gameId, state.updatedAt);
-    if (state.highScore !== null) {
-      progress.best = checkedScore(state.highScore);
+  // Rebuilds a stored progress from the values that it delivered. started is
+  // the progress that start() gives for the stored userId, gameId and
+  // instant, so start() checks them. restore() keeps the key and the instant
+  // of started, and records the stored high score and results. It checks the
+  // same rules as recordScore() and recordLevel(). The records of started do
+  // not count, and restore() does not change started.
+  static restore(
+    started: PlayerProgress,
+    highScore: Score | null,
+    results: readonly LevelResult[],
+  ): PlayerProgress {
+    if (!(started instanceof PlayerProgress)) {
+      throw new ProgressError('restore needs a progress that start() made.');
     }
-    for (const result of state.results) {
+    const progress = new PlayerProgress(started.userId, started.gameId, null, started.updatedAtMs);
+    if (highScore !== null) {
+      progress.best = checkedScore(highScore);
+    }
+    for (const result of results) {
       progress.recordLevel(result);
     }
     return progress;
@@ -64,16 +78,14 @@ export class PlayerProgress {
     return this.userId.equals(other.userId) && this.gameId.equals(other.gameId);
   }
 
-  // Gives a copy of the state. A change to the copy does not change the
-  // aggregate: the Date and the list are new, and the values are immutable.
-  snapshot(): PlayerProgressState {
-    return {
-      userId: this.userId,
-      gameId: this.gameId,
-      highScore: this.best,
-      updatedAt: new Date(this.updatedAtMs),
-      results: [...this.levelResults],
-    };
+  // Delivers the parts to a receiver of the border in one call. No operation
+  // returns them. The Date and the list are new, and the values are
+  // immutable, so a change to what the receiver gets does not change the
+  // aggregate.
+  deliverTo(receiver: PlayerProgressReceiver<Date>): void {
+    receiver.receive(this.userId, this.gameId, this.best, new Date(this.updatedAtMs), [
+      ...this.levelResults,
+    ]);
   }
 
   // Keeps the highest score. Every record moves updatedAt to the given instant.

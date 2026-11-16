@@ -10,6 +10,7 @@ import type {
 import type { GameId } from '../../src/domain/progress/game-id.js';
 import type { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import type { UserId } from '../../src/domain/user/user-id.js';
+import { progressPartsOf } from './recording-receiver.js';
 
 // Test double for the ProgressRepository port. It keeps one progress per
 // userId and gameId. It keeps a copy and returns a copy, as the Drizzle
@@ -47,7 +48,7 @@ export class InMemoryProgressRepository implements ProgressRepository {
   // Not part of the port. A test seeds a stored progress with it, for
   // example the tests of GetProgress. It runs through update().
   async save(progress: PlayerProgress): Promise<void> {
-    const { userId, gameId } = progress.snapshot();
+    const { userId, gameId } = progressPartsOf(progress);
     await this.update(userId, gameId, () => progress);
   }
 }

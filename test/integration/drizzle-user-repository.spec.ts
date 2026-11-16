@@ -8,6 +8,7 @@ import { User } from '../../src/domain/user/user.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { Username } from '../../src/domain/user/username.js';
 import { PrefixPasswordHasher } from '../support/auth/fakes.js';
+import { userPartsOf } from '../support/recording-receiver.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 
 const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
@@ -22,7 +23,7 @@ function userNamed(id: string, name: string, hash: string): User {
 }
 
 function username(name: string): Username {
-  return userNamed(ADA_ID, name, 'unused').snapshot().username;
+  return userPartsOf(userNamed(ADA_ID, name, 'unused')).username;
 }
 
 // API-FR-01: the users table and its repository on PGlite (R-database-harness).
@@ -182,15 +183,15 @@ describe('DrizzleUserRepository', () => {
     expect(await database.db.select().from(users)).toEqual([]);
   });
 
-  // #91: the mapper reads the snapshot of the user and restores a user from a row.
-  it('should_map_the_same_row_both_ways_when_the_mapper_reads_the_snapshot', () => {
+  // #91, #96: the mapper receives the parts of the user and restores a user from a row.
+  it('should_map_the_same_row_both_ways_when_the_mapper_receives_the_parts_of_the_user', () => {
     const row = { id: ADA_ID, username: 'Ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' };
     const ada = userNamed(ADA_ID.toUpperCase(), 'Ada', 'scrypt$hash');
 
     expect(UserRowMapper.toRow(ada)).toEqual(row);
     const restored = UserRowMapper.toEntity(row);
     expect(restored.equals(ada)).toBe(true);
-    expect(restored.snapshot()).toEqual(ada.snapshot());
+    expect(userPartsOf(restored)).toEqual(userPartsOf(ada));
     expect(UserRowMapper.toRow(restored)).toEqual(row);
   });
 
