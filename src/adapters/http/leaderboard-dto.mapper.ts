@@ -10,7 +10,7 @@ import { LevelId } from '../../domain/progress/level-id.js';
 import type { Score } from '../../domain/progress/score.js';
 import type { Standing } from '../../domain/progress/standing.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import { receiveValueOf } from '../received.js';
+import { receiveLevelResultOf, receiveValueOf } from '../received.js';
 import type {
   LeaderboardDto,
   LevelEntryDto,
@@ -58,14 +58,11 @@ export const LeaderboardDtoMapper = {
   },
 };
 
+// A LevelResult delivers its four values in one call. The row of a level
+// board leaves out the levelId: the board names it once.
 function levelRow({ rank, userId, result }: RankedEntry<LevelResult>): LevelEntryDto {
-  return {
-    rank,
-    userId: receiveValueOf(userId),
-    stars: receiveValueOf(result.stars),
-    moves: receiveValueOf(result.moves),
-    elapsedMs: receiveValueOf(result.elapsedTime),
-  };
+  const { stars, moves, elapsedMs } = receiveLevelResultOf(result);
+  return { rank, userId: receiveValueOf(userId), stars, moves, elapsedMs };
 }
 
 function scoreRow({ rank, userId, result }: RankedEntry<Score>): ScoreEntryDto {

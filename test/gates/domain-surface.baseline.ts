@@ -5,15 +5,6 @@
 // longer has, so the list only shrinks. Each comment names the issue that
 // removes the entries below it.
 export const DOMAIN_SURFACE_BASELINE: readonly string[] = [
-  // #95: the public fields of LevelResultValues and LevelResult.
-  'src/domain/progress/level-result.ts LevelResultValues.levelId field',
-  'src/domain/progress/level-result.ts LevelResultValues.stars field',
-  'src/domain/progress/level-result.ts LevelResultValues.moves field',
-  'src/domain/progress/level-result.ts LevelResultValues.elapsedMs field',
-  'src/domain/progress/level-result.ts LevelResult.levelId field',
-  'src/domain/progress/level-result.ts LevelResult.stars field',
-  'src/domain/progress/level-result.ts LevelResult.moves field',
-  'src/domain/progress/level-result.ts LevelResult.elapsedTime field',
   // #96: the public fields of PlayerProgressState.
   'src/domain/progress/player-progress.ts PlayerProgressState.userId field',
   'src/domain/progress/player-progress.ts PlayerProgressState.gameId field',

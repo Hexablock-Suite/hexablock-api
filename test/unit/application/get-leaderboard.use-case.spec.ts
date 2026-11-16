@@ -9,7 +9,7 @@ import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/log
 import { ElapsedTime } from '../../../src/domain/progress/elapsed-time.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
-import { LevelResult } from '../../../src/domain/progress/level-result.js';
+import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { LevelsCompleted } from '../../../src/domain/progress/levels-completed.js';
 import { Moves } from '../../../src/domain/progress/moves.js';
 import { Score } from '../../../src/domain/progress/score.js';
@@ -17,6 +17,7 @@ import { Standing } from '../../../src/domain/progress/standing.js';
 import { Stars } from '../../../src/domain/progress/stars.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { levelResultOf } from '../../support/level-results.js';
 import { testUserId } from '../../support/user-ids.js';
 
 const FIT = GameId.of('hexa-fit');
@@ -33,7 +34,7 @@ function player(n: number): UserId {
 }
 
 function levelResult(stars: number, moves: number, elapsedMs: number): LevelResult {
-  return LevelResult.of({ levelId: 'fit-01', stars, moves, elapsedMs });
+  return levelResultOf({ levelId: 'fit-01', stars, moves, elapsedMs });
 }
 
 function standing(stars: number, levels: number, moves: number, elapsedMs: number): Standing {

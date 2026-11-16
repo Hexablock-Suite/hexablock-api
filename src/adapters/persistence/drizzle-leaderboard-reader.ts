@@ -3,7 +3,7 @@ import type { LeaderboardEntry } from '../../application/ports/leaderboard-entry
 import type { LeaderboardReader } from '../../application/ports/leaderboard-reader.js';
 import { ElapsedTime } from '../../domain/progress/elapsed-time.js';
 import type { GameId } from '../../domain/progress/game-id.js';
-import type { LevelId } from '../../domain/progress/level-id.js';
+import { LevelId } from '../../domain/progress/level-id.js';
 import { LevelResult } from '../../domain/progress/level-result.js';
 import { LevelsCompleted } from '../../domain/progress/levels-completed.js';
 import { Moves } from '../../domain/progress/moves.js';
@@ -34,9 +34,15 @@ export class DrizzleLeaderboardReader implements LeaderboardReader {
           eq(levelResults.levelId, receiveValueOf(levelId)),
         ),
       );
+    // The reader builds the four value objects of each stored result.
     return rows.map(({ userId, levelId: storedLevelId, stars, moves, elapsedMs }) => ({
       userId: UserId.from(userId),
-      result: LevelResult.of({ levelId: storedLevelId, stars, moves, elapsedMs }),
+      result: LevelResult.of(
+        LevelId.of(storedLevelId),
+        Stars.of(stars),
+        Moves.of(moves),
+        ElapsedTime.ofMs(elapsedMs),
+      ),
     }));
   }
 

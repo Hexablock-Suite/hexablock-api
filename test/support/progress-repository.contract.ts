@@ -1,9 +1,10 @@
 import type { ProgressRepository } from '../../src/application/ports/progress-repository.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelResult } from '../../src/domain/progress/level-result.js';
+import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { UserId } from '../../src/domain/user/user-id.js';
+import { levelResultOf } from './level-results.js';
 
 // UUIDs, because the Drizzle adapter keys progress on users.id (#34). An
 // adapter with a users table adds these users before the contract runs.
@@ -20,7 +21,7 @@ const LATER = new Date('2026-11-06T10:05:00.000Z');
 
 // A level result. A test names only the values that it needs.
 function level(levelId: string, stars = 1, moves = 9, elapsedMs = 1): LevelResult {
-  return LevelResult.of({ levelId, stars, moves, elapsedMs });
+  return levelResultOf({ levelId, stars, moves, elapsedMs });
 }
 
 // Stores a progress through the port: the change ignores the stored

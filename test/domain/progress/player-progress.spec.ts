@@ -1,5 +1,5 @@
 import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelResult } from '../../../src/domain/progress/level-result.js';
+import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import {
   PlayerProgress,
   type PlayerProgressState,
@@ -7,6 +7,7 @@ import {
 import { Score } from '../../../src/domain/progress/score.js';
 import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { levelResultOf } from '../../support/level-results.js';
 import { testUserId } from '../../support/user-ids.js';
 
 const USER = UserId.from(testUserId(1));
@@ -15,11 +16,11 @@ const START = new Date('2026-11-06T10:00:00.000Z');
 const LATER = new Date('2026-11-06T10:05:00.000Z');
 
 function level(levelId: string, stars: number): LevelResult {
-  return LevelResult.of({ levelId, stars, moves: 10, elapsedMs: 30_000 });
+  return levelResultOf({ levelId, stars, moves: 10, elapsedMs: 30_000 });
 }
 
 function attempt(stars: number, moves: number, elapsedMs: number): LevelResult {
-  return LevelResult.of({ levelId: 'fit-01', stars, moves, elapsedMs });
+  return levelResultOf({ levelId: 'fit-01', stars, moves, elapsedMs });
 }
 
 // Records the two results of one level in the given order, after a result of

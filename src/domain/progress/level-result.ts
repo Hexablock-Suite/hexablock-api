@@ -1,34 +1,33 @@
-import { ElapsedTime } from './elapsed-time.js';
-import { LevelId } from './level-id.js';
-import { Moves } from './moves.js';
-import { Stars } from './stars.js';
+import type { ElapsedTime } from './elapsed-time.js';
+import type { LevelId } from './level-id.js';
+import type { Moves } from './moves.js';
+import type { Stars } from './stars.js';
 
-// The plain values of one level result, as a row or a JSON body holds them.
-export interface LevelResultValues {
-  levelId: string;
-  stars: number;
-  moves: number;
-  elapsedMs: number;
+// The receiver of the four values of a LevelResult. LevelResult.deliverTo()
+// calls it once. Only the border implements it, for example a row mapper.
+export interface LevelResultReceiver {
+  receive(levelId: LevelId, stars: Stars, moves: Moves, elapsedTime: ElapsedTime): void;
 }
 
 // Value object for the result of one level. It has no userId and no gameId:
 // the PlayerProgress aggregate that keeps it gives both (classes.md decision 2).
 export class LevelResult {
   private constructor(
-    readonly levelId: LevelId,
-    readonly stars: Stars,
-    readonly moves: Moves,
-    readonly elapsedTime: ElapsedTime,
+    private readonly levelId: LevelId,
+    private readonly stars: Stars,
+    private readonly moves: Moves,
+    private readonly elapsedTime: ElapsedTime,
   ) {}
 
-  // Each value object checks its own rule, in the order of the fields.
-  static of(values: LevelResultValues): LevelResult {
-    return new LevelResult(
-      LevelId.of(values.levelId),
-      Stars.of(values.stars),
-      Moves.of(values.moves),
-      ElapsedTime.ofMs(values.elapsedMs),
-    );
+  // Each value object guards its own rule. The border builds them, so the
+  // factory checks nothing more.
+  static of(levelId: LevelId, stars: Stars, moves: Moves, elapsedTime: ElapsedTime): LevelResult {
+    return new LevelResult(levelId, stars, moves, elapsedTime);
+  }
+
+  // Delivers the four values to a receiver of the border. No operation returns them.
+  deliverTo(receiver: LevelResultReceiver): void {
+    receiver.receive(this.levelId, this.stars, this.moves, this.elapsedTime);
   }
 
   // Two results are equal when every field is equal.

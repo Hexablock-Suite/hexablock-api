@@ -9,7 +9,7 @@ import type { LeaderboardEntry } from '../../src/application/ports/leaderboard-e
 import { ElapsedTime } from '../../src/domain/progress/elapsed-time.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
-import { LevelResult } from '../../src/domain/progress/level-result.js';
+import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { LevelsCompleted } from '../../src/domain/progress/levels-completed.js';
 import { Moves } from '../../src/domain/progress/moves.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
@@ -19,6 +19,7 @@ import { Standing } from '../../src/domain/progress/standing.js';
 import { Stars } from '../../src/domain/progress/stars.js';
 import type { Result } from '../../src/domain/shared/result.js';
 import { UserId } from '../../src/domain/user/user-id.js';
+import { levelResultOf } from '../support/level-results.js';
 import { storeProgress } from '../support/progress-repository.contract.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 import { testUserId } from '../support/user-ids.js';
@@ -48,7 +49,7 @@ function created<T>(result: Result<T, string>): T {
 }
 
 function level(levelId: string, stars: number, moves: number, elapsedMs: number): LevelResult {
-  return LevelResult.of({ levelId, stars, moves, elapsedMs });
+  return levelResultOf({ levelId, stars, moves, elapsedMs });
 }
 
 function standing(stars: number, levels: number, moves: number, elapsedMs: number): Standing {

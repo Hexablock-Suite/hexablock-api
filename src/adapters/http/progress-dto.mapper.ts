@@ -1,13 +1,17 @@
 import type { GetProgressRequest } from '../../application/progress/get-progress.use-case.js';
 import { withProgressRules } from '../../application/progress/progress-problem.js';
 import type { SyncProgressRequest } from '../../application/progress/sync-progress.use-case.js';
+import { ElapsedTime } from '../../domain/progress/elapsed-time.js';
 import { GameId } from '../../domain/progress/game-id.js';
-import { LevelResult, type LevelResultValues } from '../../domain/progress/level-result.js';
+import { LevelId } from '../../domain/progress/level-id.js';
+import { LevelResult } from '../../domain/progress/level-result.js';
+import { Moves } from '../../domain/progress/moves.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { Score } from '../../domain/progress/score.js';
+import { Stars } from '../../domain/progress/stars.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
-import { receiveValueOf } from '../received.js';
+import { receiveLevelResultOf, receiveValueOf } from '../received.js';
 import type { ProgressDto } from './progress.dto.js';
 
 // Translates between the progress DTOs and the progress entities
@@ -35,8 +39,8 @@ export const ProgressDtoMapper = {
     }
     const values = withProgressRules(() => ({
       gameId: GameId.of(gameId as string),
-      // LevelResult.of() checks the type and the rule of each field.
-      results: (results as LevelResultValues[]).map((result) => LevelResult.of(result)),
+      // The shape check above makes each result an object.
+      results: (results as Record<string, unknown>[]).map(levelResultOf),
       score: score === undefined || score === null ? undefined : Score.of(score as number),
     }));
     return values.ok ? ok({ userId, ...values.value }) : err(values.error.problems);
@@ -57,15 +61,23 @@ export const ProgressDtoMapper = {
       // The JSON body keeps numbers and strings.
       highScore: highScore === null ? null : receiveValueOf(highScore),
       updatedAt: updatedAt.toISOString(),
-      results: results.map((result) => ({
-        levelId: receiveValueOf(result.levelId),
-        stars: receiveValueOf(result.stars),
-        moves: receiveValueOf(result.moves),
-        elapsedMs: receiveValueOf(result.elapsedTime),
-      })),
+      // Each LevelResult delivers its four values in one call.
+      results: results.map((result) => receiveLevelResultOf(result)),
     };
   },
 };
+
+// Builds the four value objects of one result in the order of the fields:
+// the levelId, the stars, the moves, then the time. Each value object checks
+// the type and the rule of its field, so the first broken rule stops the build.
+function levelResultOf(result: Record<string, unknown>): LevelResult {
+  return LevelResult.of(
+    LevelId.of(result.levelId as string),
+    Stars.of(result.stars as number),
+    Moves.of(result.moves as number),
+    ElapsedTime.ofMs(result.elapsedMs as number),
+  );
+}
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

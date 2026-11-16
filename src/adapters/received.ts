@@ -1,3 +1,4 @@
+import type { LevelResultReceiver } from '../domain/progress/level-result.js';
 import type { BoundsReceiver } from '../domain/shared/bounds-receiver.js';
 import type { ValueReceiver } from '../domain/shared/value-receiver.js';
 
@@ -23,9 +24,22 @@ interface DeliversBounds<T> {
   deliverBoundsTo(receiver: BoundsReceiver<T>): void;
 }
 
+// A domain object that delivers the four values of a level result.
+interface DeliversLevelResult {
+  deliverTo(receiver: LevelResultReceiver): void;
+}
+
 export interface Bounds<T> {
   readonly min: T;
   readonly max: T;
+}
+
+// The plain values of one level result, as a row or a JSON body keeps them.
+export interface LevelResultValues {
+  readonly levelId: string;
+  readonly stars: number;
+  readonly moves: number;
+  readonly elapsedMs: number;
 }
 
 // A receiver that keeps the one value of a delivery.
@@ -62,6 +76,23 @@ export function receiveBoundsOf<T>(source: DeliversBounds<T>): Bounds<T> {
   source.deliverBoundsTo({
     receive(min, max) {
       slot.receive({ min, max });
+    },
+  });
+  return slot.take();
+}
+
+// A level result delivers its four value objects in one call. The helper
+// receives the datum of each one, in the order of the fields.
+export function receiveLevelResultOf(source: DeliversLevelResult): LevelResultValues {
+  const slot = new Slot<LevelResultValues>();
+  source.deliverTo({
+    receive(levelId, stars, moves, elapsedTime) {
+      slot.receive({
+        levelId: receiveValueOf(levelId),
+        stars: receiveValueOf(stars),
+        moves: receiveValueOf(moves),
+        elapsedMs: receiveValueOf(elapsedTime),
+      });
     },
   });
   return slot.take();

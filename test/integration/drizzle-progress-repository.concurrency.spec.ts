@@ -12,10 +12,10 @@ import {
   type SyncProgressRequest,
 } from '../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelResult } from '../../src/domain/progress/level-result.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
+import { levelResultOf } from '../support/level-results.js';
 
 // Concurrency tests of the advisory lock in DrizzleProgressRepository.update()
 // (DEF-01, DEF-02). They need a real Postgres server. PGlite runs one
@@ -99,7 +99,7 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
       gameId: GameId.of(gameId),
       ...(score === undefined ? {} : { score: Score.of(score) }),
       results: levels.map((n) =>
-        LevelResult.of({ levelId: `l${n}`, stars: 1, moves: n, elapsedMs: n }),
+        levelResultOf({ levelId: `l${n}`, stars: 1, moves: n, elapsedMs: n }),
       ),
     };
   }
