@@ -11,7 +11,7 @@ import { levelExample, valueOf } from '../../support/level-format.js';
 // and returns a Result. The fixtures come from the Sort example of the format
 // document, so the document and the code cannot drift.
 function sortSection(): Record<string, unknown> {
-  return levelExample('sort').section;
+  return levelExample('hexa-sort').section;
 }
 
 const FIXED_SOURCE = { stacks: [['red', 'red', 'blue'], ['green'], ['blue', 'green']] };

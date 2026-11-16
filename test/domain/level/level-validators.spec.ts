@@ -50,17 +50,17 @@ describe('LevelValidators', () => {
     const fit = new RecordingValidator(ok('fit section'));
     const sort = new RecordingValidator(ok('sort section'));
     const validators = LevelValidators.of([
-      [GameId.of('fit'), fit],
-      [GameId.of('sort'), sort],
+      [GameId.of('hexa-fit'), fit],
+      [GameId.of('hexa-sort'), sort],
     ]);
 
-    const level = validators.check(GameId.of('fit'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION);
+    const level = validators.check(GameId.of('hexa-fit'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION);
 
     expect(fit.calls).toEqual([[RAW_SECTION, HEX]]);
     expect(sort.calls).toEqual([]);
     expect(
       valueOf(level).equals(
-        valueOf(LevelDefinition.of(GameId.of('fit'), LEVEL_01, FIRST, V1, HEX, ok('any'))),
+        valueOf(LevelDefinition.of(GameId.of('hexa-fit'), LEVEL_01, FIRST, V1, HEX, ok('any'))),
       ),
     ).toBe(true);
   });
@@ -69,9 +69,9 @@ describe('LevelValidators', () => {
   // find nothing. The registry compares with GameId.equals().
   it('should_find_one_strategy_when_the_same_game_id_is_built_twice', () => {
     const fit = new RecordingValidator(ok('fit section'));
-    const validators = LevelValidators.of([[GameId.of('fit'), fit]]);
+    const validators = LevelValidators.of([[GameId.of('hexa-fit'), fit]]);
 
-    const level = validators.check(GameId.of('fit'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION);
+    const level = validators.check(GameId.of('hexa-fit'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION);
 
     expect(level.ok).toBe(true);
     expect(fit.calls).toHaveLength(1);
@@ -80,9 +80,11 @@ describe('LevelValidators', () => {
   // Lines and Merge have no level files (API-FR-04).
   it('should_fail_with_a_level_problem_when_no_strategy_serves_the_game', () => {
     const fit = new RecordingValidator(ok('fit section'));
-    const validators = LevelValidators.of([[GameId.of('fit'), fit]]);
+    const validators = LevelValidators.of([[GameId.of('hexa-fit'), fit]]);
 
-    expect(validators.check(GameId.of('lines'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION)).toEqual({
+    expect(
+      validators.check(GameId.of('hexa-lines'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION),
+    ).toEqual({
       ok: false,
       error: 'game-without-levels',
     });
@@ -91,9 +93,9 @@ describe('LevelValidators', () => {
 
   it('should_return_the_problem_of_the_section_when_the_strategy_rejects_the_section', () => {
     const fit = new RecordingValidator({ ok: false, error: 'invalid-section' });
-    const validators = LevelValidators.of([[GameId.of('fit'), fit]]);
+    const validators = LevelValidators.of([[GameId.of('hexa-fit'), fit]]);
 
-    expect(validators.check(GameId.of('fit'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION)).toEqual({
+    expect(validators.check(GameId.of('hexa-fit'), LEVEL_01, FIRST, V1, HEX, RAW_SECTION)).toEqual({
       ok: false,
       error: 'invalid-section',
     });
@@ -103,20 +105,20 @@ describe('LevelValidators', () => {
   // (#78) picks the Sort section. The composition root registers both.
   it('should_build_each_example_when_the_strategies_pick_the_fit_and_the_sort_section', () => {
     const validators = LevelValidators.of([
-      [GameId.of('fit'), new FitLevelValidator(Topologies.of([[HEX, new HexTopology()]]))],
-      [GameId.of('sort'), new SortLevelValidator()],
+      [GameId.of('hexa-fit'), new FitLevelValidator(Topologies.of([[HEX, new HexTopology()]]))],
+      [GameId.of('hexa-sort'), new SortLevelValidator()],
     ]);
 
-    expect(checkExample(validators, levelExample('fit')).ok).toBe(true);
-    expect(checkExample(validators, levelExample('sort')).ok).toBe(true);
+    expect(checkExample(validators, levelExample('hexa-fit')).ok).toBe(true);
+    expect(checkExample(validators, levelExample('hexa-sort')).ok).toBe(true);
   });
 
   // Two strategies for one game are a defect of the composition root, not a
   // datum of a level, so the factory throws.
   it('should_throw_when_two_entries_name_one_game', () => {
     const entries = [
-      [GameId.of('fit'), new RecordingValidator(ok('first'))],
-      [GameId.of('fit'), new RecordingValidator(ok('second'))],
+      [GameId.of('hexa-fit'), new RecordingValidator(ok('first'))],
+      [GameId.of('hexa-fit'), new RecordingValidator(ok('second'))],
     ] as const;
 
     expect(() => LevelValidators.of(entries)).toThrow(

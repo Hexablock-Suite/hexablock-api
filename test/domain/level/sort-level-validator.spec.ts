@@ -22,8 +22,8 @@ function sortLevelFrom(json: LevelJson) {
 describe('SortLevelValidator', () => {
   // The composition root registers the strategy under the Sort gameId.
   it('should_build_the_sort_level_when_the_sort_example_of_the_format_document_is_checked', () => {
-    const example = levelExample('sort');
-    const validators = LevelValidators.of([[GameId.of('sort'), new SortLevelValidator()]]);
+    const example = levelExample('hexa-sort');
+    const validators = LevelValidators.of([[GameId.of('hexa-sort'), new SortLevelValidator()]]);
 
     const section = new SortLevelValidator().sectionOf(example.section, HEX);
     const checked = validators.check(
@@ -43,7 +43,7 @@ describe('SortLevelValidator', () => {
   // SortSection checks its own shape, and the strategy gives its problem
   // unchanged. No level exists for a rejected section.
   it('should_return_the_problem_of_the_section_when_the_sort_section_has_the_wrong_shape', () => {
-    const example = levelExample('sort');
+    const example = levelExample('hexa-sort');
     const section = example.section;
     const { goals, source, stars } = section;
     const wrong: unknown[] = [
@@ -51,7 +51,7 @@ describe('SortLevelValidator', () => {
       [],
       'section',
       { ...section, extra: true },
-      levelExample('fit').section,
+      levelExample('hexa-fit').section,
       { goals, source, stars },
       { ...section, radius: 0 },
       { ...section, goals: '3' },
@@ -83,7 +83,7 @@ describe('SortLevelValidator', () => {
   // The test asserts only what sectionOf() returns, so it holds in both
   // cases: a bad level file never gives a server error.
   it('should_return_invalid_stars_without_a_throw_when_a_star_threshold_is_negative', () => {
-    const example = levelExample('sort');
+    const example = levelExample('hexa-sort');
     const negative = [[{ maxMoves: -1 }], [{ maxMoves: 40 }, { maxMoves: -5 }]];
     const reads = negative.map(
       (stars) => () => new SortLevelValidator().sectionOf({ ...example.section, stars }, HEX),
@@ -101,7 +101,7 @@ describe('SortLevelValidator', () => {
   // No rule of the Sort section needs the topology (decision 6). The API
   // never rejects a level only because its topology is not hex.
   it('should_build_an_equal_section_when_the_topology_of_the_level_is_not_hex', () => {
-    const example = levelExample('sort');
+    const example = levelExample('hexa-sort');
     const square = valueOf(TopologyId.of('square'));
 
     const onHex = valueOf(new SortLevelValidator().sectionOf(example.section, HEX));

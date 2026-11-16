@@ -109,10 +109,13 @@ describe('DrizzleLevelRepository', () => {
     const database = await openDatabase();
     const repository = new DrizzleLevelRepository(database.db, levelValidators());
 
-    await storeLevel(repository, levelExample('fit'));
-    await storeLevel(repository, levelExample('sort'));
+    await storeLevel(repository, levelExample('hexa-fit'));
+    await storeLevel(repository, levelExample('hexa-sort'));
 
-    expect(await listedJson(repository)).toEqual([levelExample('fit'), levelExample('sort')]);
+    expect(await listedJson(repository)).toEqual([
+      levelExample('hexa-fit'),
+      levelExample('hexa-sort'),
+    ]);
     expect(await countLevelRows(database)).toBe(2);
   });
 
@@ -120,11 +123,11 @@ describe('DrizzleLevelRepository', () => {
     const database = await openDatabase();
     const repository = new DrizzleLevelRepository(database.db, levelValidators());
 
-    await storeLevel(repository, levelJson('sort', 'sort-01', 1));
-    await storeLevel(repository, levelJson('sort', 'sort-01', 3));
+    await storeLevel(repository, levelJson('hexa-sort', 'sort-01', 1));
+    await storeLevel(repository, levelJson('hexa-sort', 'sort-01', 3));
 
     expect(await countLevelRows(database)).toBe(1);
-    expect(await listedJson(repository)).toEqual([levelJson('sort', 'sort-01', 3)]);
+    expect(await listedJson(repository)).toEqual([levelJson('hexa-sort', 'sort-01', 3)]);
   });
 
   // A level is born valid (#77), also from the database: LevelRowMapper
@@ -135,20 +138,20 @@ describe('DrizzleLevelRepository', () => {
     const fit = new RecordingStrategy(new FitLevelValidator(hex));
     const sort = new RecordingStrategy(new SortLevelValidator());
     const validators = LevelValidators.of([
-      [GameId.of('fit'), fit],
-      [GameId.of('sort'), sort],
+      [GameId.of('hexa-fit'), fit],
+      [GameId.of('hexa-sort'), sort],
     ]);
     await database.db
       .insert(levels)
-      .values([rowOf(levelExample('sort')), rowOf(levelExample('fit'))]);
+      .values([rowOf(levelExample('hexa-sort')), rowOf(levelExample('hexa-fit'))]);
 
     const listed = await new DrizzleLevelRepository(database.db, validators).list();
 
-    expect(fit.read).toEqual([levelExample('fit').section]);
-    expect(sort.read).toEqual([levelExample('sort').section]);
+    expect(fit.read).toEqual([levelExample('hexa-fit').section]);
+    expect(sort.read).toEqual([levelExample('hexa-sort').section]);
     expect(listed.map((level) => receiveJsonOf(level))).toEqual([
-      levelExample('fit'),
-      levelExample('sort'),
+      levelExample('hexa-fit'),
+      levelExample('hexa-sort'),
     ]);
   });
 
@@ -157,16 +160,16 @@ describe('DrizzleLevelRepository', () => {
   it('should_reject_the_read_when_no_strategy_accepts_a_stored_row', async () => {
     const cases: [ReturnType<typeof rowOf>, string][] = [
       [
-        { ...rowOf(levelExample('sort')), gameId: 'lines', levelId: 'lines-01' },
-        'The levels row lines/lines-01 breaks the level rule game-without-levels.',
+        { ...rowOf(levelExample('hexa-sort')), gameId: 'hexa-lines', levelId: 'lines-01' },
+        'The levels row hexa-lines/lines-01 breaks the level rule game-without-levels.',
       ],
       [
-        { ...rowOf(levelExample('fit')), gameId: 'sort', levelId: 'sort-01' },
-        'The levels row sort/sort-01 breaks the level rule invalid-section.',
+        { ...rowOf(levelExample('hexa-fit')), gameId: 'hexa-sort', levelId: 'sort-01' },
+        'The levels row hexa-sort/sort-01 breaks the level rule invalid-section.',
       ],
       [
-        { ...rowOf(levelExample('fit')), version: 0 },
-        'The levels row fit/fit-01 breaks the level rule invalid-version.',
+        { ...rowOf(levelExample('hexa-fit')), version: 0 },
+        'The levels row hexa-fit/fit-01 breaks the level rule invalid-version.',
       ],
     ];
     for (const [row, message] of cases) {
@@ -182,7 +185,7 @@ describe('DrizzleLevelRepository', () => {
   // The row keeps the common part as text and numbers and the section as
   // the JSON of the shared level format.
   it('should_write_the_common_part_and_the_section_of_the_format_when_a_level_becomes_a_row', () => {
-    for (const example of [levelExample('fit'), levelExample('sort')]) {
+    for (const example of [levelExample('hexa-fit'), levelExample('hexa-sort')]) {
       expect(LevelRowMapper.toRow(checkedLevel(example))).toEqual(rowOf(example));
     }
   });
