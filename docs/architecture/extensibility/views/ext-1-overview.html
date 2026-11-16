@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 1 of 3</p>
       <h1>The application core and its extension axes</h1>
       <svg
-        viewBox="0 0 1040 1340"
+        viewBox="0 0 1040 1412"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext1overview-title ext1overview-desc"
@@ -74,9 +74,14 @@
           center, with five extension axes around them: drivers in layer 4, HTTP controllers and
           Drizzle repositories in layer 3, aspects in layer 2 (Q12), and level validators per
           variant in layer 1. Each driver and each Drizzle repository implements its own port, and
-          no line starts or ends on a dashed frame. The footnote names the DTO mappers, the
-          operations of LevelRepository, the values of a level and the leaderboard types that other
-          views draw.
+          no line starts or ends on a dashed frame. UseCase carries only the interface stereotype.
+          UpdateLevelsUseCase holds LevelRepository through a use arrow levels 1, and
+          LevelValidators holds LevelValidator through a use arrow entries 0..*. A dashed frame
+          labelled Aggregate encloses the LevelDefinition root alone. The footnote says that every
+          input port binds UseCase, that LevelDefinition keeps its fields private, that FitSection
+          and SortSection are value objects, that LeaderboardEntry is a response type of layer 2 and
+          that Standing is a value object of layer 1, and it names the DTO mappers and the
+          operations of LevelRepository that other views draw.
         </desc>
         <defs>
           <marker
@@ -165,7 +170,7 @@
           x="24"
           y="864"
           width="992"
-          height="160"
+          height="184"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -263,8 +268,8 @@
         <rect
           x="48"
           y="888"
-          width="944"
-          height="120"
+          width="952"
+          height="144"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -281,6 +286,29 @@
           letter-spacing="0.14em"
         >
           NEW VARIANT · STRATEGY · DS-6 · API-FR-04
+        </text>
+        <!-- Aggregate frame of LevelDefinition. This view draws the root alone; views 1.2 and 1.5 of classes.md draw its members. -->
+        <rect
+          x="60"
+          y="916"
+          width="276"
+          height="100"
+          rx="8"
+          fill="none"
+          stroke="rgba(23,33,42,0.65)"
+          stroke-width="1.25"
+          stroke-dasharray="9,4"
+        />
+        <text
+          x="76"
+          y="932"
+          fill="#17212a"
+          font-size="8"
+          font-weight="600"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          Aggregate · LevelDefinition · decision 4
         </text>
         <!-- Relationships (drawn before boxes). No line starts or ends on a dashed frame. -->
         <!-- Each driver implements its own driver port: realization, one line per class (Part 3, view 4) -->
@@ -356,7 +384,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- DrizzleLevelRepository implements LevelRepository -->
+        <!-- DrizzleUserRepository implements UserRepository (second store) -->
         <path
           d="M944 320 L988 320 L988 652 L944 652"
           fill="none"
@@ -365,7 +393,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- DrizzleUserRepository implements UserRepository -->
+        <!-- DrizzleLevelRepository implements LevelRepository -->
         <path
           d="M944 272 L996 272 L996 704 L944 704"
           fill="none"
@@ -394,7 +422,23 @@
         />
         <!-- UpdateLevelsUseCase holds LevelValidators: use (Part 2, view 3) -->
         <path
-          d="M668 704 L668 928"
+          d="M668 704 L668 956"
+          fill="none"
+          stroke-width="1"
+          stroke="#5b6873"
+          marker-end="url(#ext1overview-open)"
+        />
+        <!-- UpdateLevelsUseCase holds levels: LevelRepository: use with role and multiplicity (decision 13) -->
+        <path
+          d="M744 696 L816 696"
+          fill="none"
+          stroke-width="1"
+          stroke="#5b6873"
+          marker-end="url(#ext1overview-open)"
+        />
+        <!-- LevelValidators holds entries: one LevelValidator per gameId with level files: use with role and multiplicity, no diamond (decision 13) -->
+        <path
+          d="M736 980 L824 980"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -448,6 +492,30 @@
           letter-spacing="0.06em"
         >
           rules 1
+        </text>
+        <rect x="758" y="680" width="48" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="782"
+          y="689"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          levels 1
+        </text>
+        <rect x="742" y="964" width="76" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="780"
+          y="973"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          entries 0..*
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="345" height="12" rx="2" fill="#cfdcf3" />
@@ -710,7 +778,7 @@
         <text x="424" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           LevelsController: getLevels, updateLevels
         </text>
-        <!-- DrizzleUserRepository -->
+        <!-- DrizzleLevelRepository -->
         <rect
           x="760"
           y="252"
@@ -730,9 +798,9 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          DrizzleUserRepository
+          DrizzleLevelRepository
         </text>
-        <!-- DrizzleLevelRepository -->
+        <!-- DrizzleUserRepository -->
         <rect
           x="760"
           y="300"
@@ -752,7 +820,7 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          DrizzleLevelRepository
+          DrizzleUserRepository
         </text>
         <!-- DrizzleLeaderboardReader -->
         <rect
@@ -820,7 +888,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «input port»
+          «interface»
         </text>
         <text
           x="560"
@@ -982,9 +1050,9 @@
         </text>
         <!-- ProgressRepository -->
         <rect
-          x="760"
+          x="816"
           y="528"
-          width="184"
+          width="128"
           height="40"
           rx="6"
           fill="#ffffff"
@@ -992,7 +1060,7 @@
           stroke-width="1"
         />
         <text
-          x="852"
+          x="880"
           y="543"
           fill="#5b6873"
           font-size="8"
@@ -1003,7 +1071,7 @@
           «interface» «port»
         </text>
         <text
-          x="852"
+          x="880"
           y="559"
           fill="#17212a"
           font-size="12"
@@ -1015,9 +1083,9 @@
         </text>
         <!-- LeaderboardReader -->
         <rect
-          x="760"
+          x="816"
           y="580"
-          width="184"
+          width="128"
           height="40"
           rx="6"
           fill="#ffffff"
@@ -1025,7 +1093,7 @@
           stroke-width="1"
         />
         <text
-          x="852"
+          x="880"
           y="595"
           fill="#5b6873"
           font-size="8"
@@ -1036,7 +1104,7 @@
           «interface» «port»
         </text>
         <text
-          x="852"
+          x="880"
           y="611"
           fill="#17212a"
           font-size="12"
@@ -1046,11 +1114,11 @@
         >
           LeaderboardReader
         </text>
-        <!-- LevelRepository -->
+        <!-- UserRepository -->
         <rect
-          x="760"
+          x="816"
           y="632"
-          width="184"
+          width="128"
           height="40"
           rx="6"
           fill="#ffffff"
@@ -1058,7 +1126,7 @@
           stroke-width="1"
         />
         <text
-          x="852"
+          x="880"
           y="647"
           fill="#5b6873"
           font-size="8"
@@ -1069,7 +1137,7 @@
           «interface» «port»
         </text>
         <text
-          x="852"
+          x="880"
           y="663"
           fill="#17212a"
           font-size="12"
@@ -1077,13 +1145,13 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          LevelRepository
+          UserRepository
         </text>
-        <!-- UserRepository -->
+        <!-- LevelRepository -->
         <rect
-          x="760"
+          x="816"
           y="684"
-          width="184"
+          width="128"
           height="40"
           rx="6"
           fill="#ffffff"
@@ -1091,7 +1159,7 @@
           stroke-width="1"
         />
         <text
-          x="852"
+          x="880"
           y="699"
           fill="#5b6873"
           font-size="8"
@@ -1102,7 +1170,7 @@
           «interface» «port»
         </text>
         <text
-          x="852"
+          x="880"
           y="715"
           fill="#17212a"
           font-size="12"
@@ -1110,7 +1178,7 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          UserRepository
+          LevelRepository
         </text>
         <!-- Use cases: every listed class implements its input port -->
         <rect
@@ -1202,9 +1270,9 @@
         </text>
         <!-- LevelDefinition -->
         <rect
-          x="72"
-          y="928"
-          width="184"
+          x="76"
+          y="956"
+          width="244"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -1212,8 +1280,8 @@
           stroke-width="1"
         />
         <text
-          x="164"
-          y="946"
+          x="198"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1223,8 +1291,8 @@
           «entity» «aggregate root»
         </text>
         <text
-          x="164"
-          y="962"
+          x="198"
+          y="990"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1235,8 +1303,8 @@
         </text>
         <!-- FillLevelValidator -->
         <rect
-          x="300"
-          y="928"
+          x="360"
+          y="956"
           width="136"
           height="48"
           rx="6"
@@ -1246,8 +1314,8 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="368"
-          y="946"
+          x="428"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1257,8 +1325,8 @@
           DECLARED · §3.1
         </text>
         <text
-          x="368"
-          y="962"
+          x="428"
+          y="990"
           fill="#5b6873"
           font-size="12"
           font-weight="600"
@@ -1269,9 +1337,9 @@
         </text>
         <!-- LevelValidators -->
         <rect
-          x="580"
-          y="928"
-          width="176"
+          x="600"
+          y="956"
+          width="136"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -1280,7 +1348,7 @@
         />
         <text
           x="668"
-          y="946"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1291,7 +1359,7 @@
         </text>
         <text
           x="668"
-          y="962"
+          y="990"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1302,9 +1370,9 @@
         </text>
         <!-- LevelValidator -->
         <rect
-          x="784"
-          y="928"
-          width="160"
+          x="824"
+          y="956"
+          width="152"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -1312,8 +1380,8 @@
           stroke-width="1"
         />
         <text
-          x="864"
-          y="946"
+          x="900"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1323,8 +1391,8 @@
           «interface»
         </text>
         <text
-          x="864"
-          y="962"
+          x="900"
+          y="990"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1356,8 +1424,8 @@
           TRequest, TResponse
         </text>
         <rect
-          x="204"
-          y="918"
+          x="268"
+          y="946"
           width="60"
           height="18"
           rx="2"
@@ -1367,8 +1435,8 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="234"
-          y="930"
+          x="298"
+          y="958"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -1377,8 +1445,8 @@
           TSection
         </text>
         <rect
-          x="892"
-          y="918"
+          x="924"
+          y="946"
           width="60"
           height="18"
           rx="2"
@@ -1388,8 +1456,8 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="922"
-          y="930"
+          x="954"
+          y="958"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -1400,7 +1468,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="1052"
+          y="1076"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1410,7 +1478,7 @@
         </text>
         <text
           x="24"
-          y="1068"
+          y="1092"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1420,7 +1488,7 @@
         </text>
         <text
           x="24"
-          y="1084"
+          y="1108"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1430,17 +1498,27 @@
         </text>
         <text
           x="24"
-          y="1100"
+          y="1124"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
           every controller holds 1 or 2 input ports, and every listed use case implements its input
-          port, which binds UseCase. Views 2.2 to 2.4 draw the ports each use case holds.
+          port, which binds UseCase. Views 2.2 to 2.4 draw the other ports.
         </text>
         <text
           x="24"
-          y="1116"
+          y="1140"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          UseCase is the contract that every input port binds. UpdateLevelsUseCase holds
+          LevelRepository as levels, the one port of a use case that this view draws.
+        </text>
+        <text
+          x="24"
+          y="1156"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1450,7 +1528,7 @@
         </text>
         <text
           x="24"
-          y="1132"
+          y="1172"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1460,7 +1538,7 @@
         </text>
         <text
           x="24"
-          y="1148"
+          y="1188"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1470,7 +1548,7 @@
         </text>
         <text
           x="24"
-          y="1164"
+          y="1204"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1480,36 +1558,56 @@
         </text>
         <text
           x="24"
-          y="1180"
+          y="1220"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelDefinition holds a LevelOrder, a LevelVersion and a FitSection or a SortSection, and
-          FitSection holds Coordinate values (views 1.2 and 1.5).
+          The dashed Aggregate frame marks the boundary of LevelDefinition. LevelDefinition keeps
+          its fields private, and views 1.2 and 1.5 draw its members.
         </text>
         <text
           x="24"
-          y="1196"
+          y="1236"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LeaderboardReader gives LeaderboardEntry rows of layer 2, and the global board of Fit and
-          Sort ranks the Standing of each player (views 1.1 and 2.2).
+          LevelDefinition holds a LevelOrder, a LevelVersion and a section. FitSection and
+          SortSection are value objects, and FitSection holds Coordinate values.
+        </text>
+        <text
+          x="24"
+          y="1252"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LeaderboardReader gives LeaderboardEntry rows. LeaderboardEntry is a response type of
+          layer 2, with no tactical stereotype (views 1.1 and 2.2).
+        </text>
+        <text
+          x="24"
+          y="1268"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The global board of Fit and Sort ranks the Standing of each player. Standing is a value
+          object of layer 1.
         </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1224"
+          y1="1296"
           x2="1016"
-          y2="1224"
+          y2="1296"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1242"
+          y="1314"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1519,9 +1617,9 @@
         </text>
         <line
           x1="24"
-          y1="1260"
+          y1="1332"
           x2="52"
-          y2="1260"
+          y2="1332"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1529,7 +1627,7 @@
         />
         <text
           x="60"
-          y="1264"
+          y="1336"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1538,25 +1636,25 @@
         </text>
         <line
           x1="128"
-          y1="1260"
+          y1="1332"
           x2="156"
-          y2="1260"
+          y2="1332"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext1overview-open)"
         />
         <text
           x="164"
-          y="1264"
+          y="1336"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Use · attribute across layers, parameter, return, local or new
+          Use · attribute, parameter, return, local or new
         </text>
         <rect
           x="24"
-          y="1276"
+          y="1348"
           width="12"
           height="12"
           rx="2"
@@ -1566,7 +1664,7 @@
         />
         <rect
           x="40"
-          y="1276"
+          y="1348"
           width="12"
           height="12"
           rx="2"
@@ -1576,7 +1674,7 @@
         />
         <rect
           x="56"
-          y="1276"
+          y="1348"
           width="12"
           height="12"
           rx="2"
@@ -1586,7 +1684,7 @@
         />
         <rect
           x="72"
-          y="1276"
+          y="1348"
           width="12"
           height="12"
           rx="2"
@@ -1596,7 +1694,7 @@
         />
         <text
           x="92"
-          y="1286"
+          y="1358"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1605,7 +1703,7 @@
         </text>
         <rect
           x="272"
-          y="1276"
+          y="1348"
           width="28"
           height="12"
           rx="2"
@@ -1616,7 +1714,7 @@
         />
         <text
           x="308"
-          y="1286"
+          y="1358"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1625,7 +1723,7 @@
         </text>
         <rect
           x="520"
-          y="1276"
+          y="1348"
           width="28"
           height="12"
           rx="2"
@@ -1635,7 +1733,7 @@
         />
         <text
           x="556"
-          y="1286"
+          y="1358"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1644,7 +1742,7 @@
         </text>
         <rect
           x="768"
-          y="1276"
+          y="1348"
           width="28"
           height="12"
           rx="2"
@@ -1655,7 +1753,7 @@
         />
         <text
           x="804"
-          y="1286"
+          y="1358"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1664,7 +1762,7 @@
         </text>
         <rect
           x="24"
-          y="1298"
+          y="1370"
           width="28"
           height="12"
           rx="2"
@@ -1675,12 +1773,32 @@
         />
         <text
           x="60"
-          y="1308"
+          y="1380"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Grey dashed box · declared, placeholder name
+        </text>
+        <rect
+          x="272"
+          y="1370"
+          width="28"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="rgba(23,33,42,0.65)"
+          stroke-width="1.25"
+          stroke-dasharray="9,4"
+        />
+        <text
+          x="308"
+          y="1380"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Aggregate frame · root and its members
         </text>
       </svg>
     </div>

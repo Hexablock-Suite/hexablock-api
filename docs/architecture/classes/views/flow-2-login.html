@@ -73,14 +73,14 @@
           Cross-layer class diagram of the login use case. In layer 4, ScryptPasswordHasher
           implements PasswordHasher and JwtTokenIssuer implements TokenIssuer. In layer 3,
           AuthController holds the Login input port and uses AuthDtoMapper, which builds the
-          LoginRequest from the body: a Username and a PasswordAttempt. DrizzleUserRepository
-          implements UserRepository. In layer 2, LoginUseCase implements Login, takes the
-          LoginRequest and holds the UserRepository, PasswordHasher and TokenIssuer ports. In layer
-          1, the use case asks the PasswordAttempt if it is longer than any password, and it asks
-          the User aggregate root that the repository returns to check the attempt.
-          User.passwordMatches() asks the PasswordVerifier interface of the domain, which the
-          PasswordHasher port extends. A dashed frame labelled Aggregate marks the boundary of User;
-          view 3 of Part 1 draws its members.
+          LoginRequest from the body: a Username and a PasswordAttempt, which the request holds
+          through a use arrow attempt 1. DrizzleUserRepository implements UserRepository. In layer
+          2, LoginUseCase implements Login, takes the LoginRequest and holds the UserRepository,
+          PasswordHasher and TokenIssuer ports. In layer 1, the use case asks the PasswordAttempt if
+          it is longer than any password, and it asks the User aggregate root that the repository
+          returns to check the attempt. User.passwordMatches() asks the PasswordVerifier interface
+          of the domain, which the PasswordHasher port extends. A dashed frame labelled Aggregate
+          marks the boundary of User; view 3 of Part 1 draws its members.
         </desc>
         <defs>
           <marker
@@ -304,6 +304,14 @@
           stroke-width="1"
           marker-end="url(#flow2login-open)"
         />
+        <!-- LoginRequest holds attempt: PasswordAttempt: use with role and multiplicity (decision 13) -->
+        <path
+          d="M920 744 L920 796 L660 796 L660 1012 L500 1012 L500 1072"
+          fill="none"
+          stroke-width="1"
+          stroke="#5b6873"
+          marker-end="url(#flow2login-open)"
+        />
         <!-- Arrow labels and multiplicities -->
         <rect x="764" y="282" width="32" height="12" rx="2" fill="#e2ebf8" />
         <text
@@ -389,10 +397,10 @@
         >
           users 1
         </text>
-        <rect x="606" y="1018" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="606" y="1022" width="32" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="622"
-          y="1027"
+          y="1031"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -413,10 +421,10 @@
         >
           asks
         </text>
-        <rect x="426" y="1018" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="426" y="1022" width="32" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="442"
-          y="1027"
+          y="1031"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -424,6 +432,18 @@
           letter-spacing="0.06em"
         >
           asks
+        </text>
+        <rect x="666" y="956" width="58" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="695"
+          y="965"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          attempt 1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="327" height="12" rx="2" fill="#cfdcf3" />
@@ -1112,7 +1132,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          hash: PasswordHash): User
+          passwordHash: PasswordHash): User
         </text>
         <text
           textLength="218"
@@ -1134,7 +1154,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          hash: PasswordHash): User
+          passwordHash: PasswordHash): User
         </text>
         <text
           x="576"

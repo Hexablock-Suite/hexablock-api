@@ -63,7 +63,7 @@
       <p class="eyebrow">Sequence diagram · Use case 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1354"
+        viewBox="0 0 1240 1386"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="seq3updatelevels-title seq3updatelevels-desc"
@@ -88,7 +88,9 @@
           gives the Sort path: SortLevelValidator asks SortSection.of(raw) to check the radius, the
           goals, the source and the stars. The footnote names the LevelOrder, LevelVersion and
           Coordinate values that the request carries, and GetLevels, which only calls
-          LevelRepository.list().
+          LevelRepository.list(). The footnote also says that LevelDefinition is an entity and the
+          aggregate root of one level with private fields, that FitSection and SortSection are value
+          objects, and that LevelValidator and its validators form the Strategy pattern.
         </desc>
         <defs>
           <marker
@@ -460,7 +462,7 @@
           text-anchor="middle"
           letter-spacing="0.04em"
         >
-          Fit or Sort strategy
+          «interface»
         </text>
         <!-- Lifeline: DrizzleLevelRepository (layer 3) -->
         <line
@@ -1502,18 +1504,38 @@
           GetLevels has no sequence of its own: GetLevelsUseCase only calls LevelRepository.list()
           («Other use cases» in flows.md).
         </text>
+        <text
+          x="24"
+          y="1262"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelDefinition is an «entity» and the «aggregate root» of one level, and it keeps its
+          fields private. FitSection and SortSection are value objects.
+        </text>
+        <text
+          x="24"
+          y="1278"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelValidator and its validators (FitLevelValidator, SortLevelValidator) form the
+          Strategy pattern.
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1274"
+          y1="1306"
           x2="1216"
-          y2="1274"
+          y2="1306"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1292"
+          y="1324"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1523,16 +1545,16 @@
         </text>
         <line
           x1="24"
-          y1="1310"
+          y1="1342"
           x2="52"
-          y2="1310"
+          y2="1342"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
         <text
           x="60"
-          y="1314"
+          y="1346"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1541,9 +1563,9 @@
         </text>
         <line
           x1="196"
-          y1="1310"
+          y1="1342"
           x2="224"
-          y2="1310"
+          y2="1342"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1551,7 +1573,7 @@
         />
         <text
           x="232"
-          y="1314"
+          y="1346"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1560,7 +1582,7 @@
         </text>
         <rect
           x="392"
-          y="1302"
+          y="1334"
           width="10"
           height="16"
           fill="#ffffff"
@@ -1569,7 +1591,7 @@
         />
         <text
           x="410"
-          y="1314"
+          y="1346"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1578,7 +1600,7 @@
         </text>
         <rect
           x="548"
-          y="1304"
+          y="1336"
           width="28"
           height="12"
           rx="2"
@@ -1588,7 +1610,7 @@
         />
         <text
           x="584"
-          y="1314"
+          y="1346"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1597,7 +1619,7 @@
         </text>
         <rect
           x="24"
-          y="1330"
+          y="1362"
           width="20"
           height="12"
           rx="2"
@@ -1607,7 +1629,7 @@
         />
         <rect
           x="48"
-          y="1330"
+          y="1362"
           width="20"
           height="12"
           rx="2"
@@ -1617,7 +1639,7 @@
         />
         <rect
           x="72"
-          y="1330"
+          y="1362"
           width="20"
           height="12"
           rx="2"
@@ -1627,7 +1649,7 @@
         />
         <text
           x="104"
-          y="1339"
+          y="1371"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1636,7 +1658,7 @@
         </text>
         <rect
           x="352"
-          y="1330"
+          y="1362"
           width="28"
           height="12"
           rx="1"
@@ -1646,7 +1668,7 @@
         />
         <text
           x="388"
-          y="1339"
+          y="1371"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1654,14 +1676,14 @@
           Frame · sd names the interaction; a message on its left edge enters or leaves the API
         </text>
         <path
-          d="M788 1330 L804 1330 L808 1334 L808 1342 L788 1342 Z"
+          d="M788 1362 L804 1362 L808 1366 L808 1374 L788 1374 Z"
           fill="#ffffff"
           stroke="#5b6873"
           stroke-width="1"
         />
         <text
           x="816"
-          y="1339"
+          y="1371"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

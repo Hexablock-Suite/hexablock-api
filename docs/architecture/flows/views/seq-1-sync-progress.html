@@ -63,7 +63,7 @@
       <p class="eyebrow">Sequence diagram · Use case 1 of 3</p>
       <h1>Sync progress: one request through the four layers</h1>
       <svg
-        viewBox="0 0 1240 1342"
+        viewBox="0 0 1240 1374"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="seq1syncprogress-title seq1syncprogress-desc"
@@ -77,12 +77,14 @@
           Result. ProgressController gets a SyncProgressRequest from ProgressDtoMapper and calls
           SyncProgressUseCase through the SyncProgress input port. The use case creates the
           ProgressKey of the userId and the gameId of the request and calls
-          ProgressRepository.update(key, change) once. DrizzleProgressRepository locks the key in
-          one transaction, reads the stored PlayerProgress and calls the change of the use case with
-          it. The change reads the SyncInstant from SystemClock, starts the PlayerProgress when none
-          is stored, records the score when the request has one and each LevelResult at that
-          instant, and returns the aggregate, which the adapter saves in the same transaction. The
-          controller turns the PlayerProgress into a ProgressDto, which is the HTTP response.
+          ProgressRepository.update(key, change) once. The key holds the userId and the gameId, so
+          this call is the update(userId, gameId, change) call of the diagrams task, and it replaces
+          find() and save(). DrizzleProgressRepository locks the key in one transaction, reads the
+          stored PlayerProgress and calls the change of the use case with it. The change reads the
+          SyncInstant from SystemClock, starts the PlayerProgress when none is stored, records the
+          score when the request has one and each LevelResult at that instant, and returns the
+          aggregate, which the adapter saves in the same transaction. The controller turns the
+          PlayerProgress into a ProgressDto, which is the HTTP response.
         </desc>
         <defs>
           <marker
@@ -1377,18 +1379,37 @@
           update() runs the change of the use case under a lock of the key, in one transaction, so
           two overlapping syncs of one key run one after the other and lose no level result.
         </text>
+        <text
+          x="24"
+          y="1226"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          The key is a ProgressKey that holds the userId and the gameId, so this one update(key,
+          change) call is the update(userId, gameId, change) call
+        </text>
+        <text
+          x="24"
+          y="1242"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          of the diagrams task (#22), with the identity type of #107. It replaces find() and save().
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1238"
+          y1="1270"
           x2="1216"
-          y2="1238"
+          y2="1270"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1256"
+          y="1288"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1398,16 +1419,16 @@
         </text>
         <line
           x1="24"
-          y1="1274"
+          y1="1306"
           x2="52"
-          y2="1274"
+          y2="1306"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq1syncprogress-filled)"
         />
         <text
           x="60"
-          y="1278"
+          y="1310"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1416,9 +1437,9 @@
         </text>
         <line
           x1="196"
-          y1="1274"
+          y1="1306"
           x2="224"
-          y2="1274"
+          y2="1306"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1426,7 +1447,7 @@
         />
         <text
           x="232"
-          y="1278"
+          y="1310"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1435,7 +1456,7 @@
         </text>
         <rect
           x="392"
-          y="1266"
+          y="1298"
           width="10"
           height="16"
           fill="#ffffff"
@@ -1444,7 +1465,7 @@
         />
         <text
           x="410"
-          y="1278"
+          y="1310"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1453,7 +1474,7 @@
         </text>
         <rect
           x="548"
-          y="1268"
+          y="1300"
           width="28"
           height="12"
           rx="2"
@@ -1463,7 +1484,7 @@
         />
         <text
           x="584"
-          y="1278"
+          y="1310"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1472,7 +1493,7 @@
         </text>
         <rect
           x="24"
-          y="1294"
+          y="1326"
           width="20"
           height="12"
           rx="2"
@@ -1482,7 +1503,7 @@
         />
         <rect
           x="48"
-          y="1294"
+          y="1326"
           width="20"
           height="12"
           rx="2"
@@ -1492,7 +1513,7 @@
         />
         <rect
           x="72"
-          y="1294"
+          y="1326"
           width="20"
           height="12"
           rx="2"
@@ -1502,7 +1523,7 @@
         />
         <rect
           x="96"
-          y="1294"
+          y="1326"
           width="20"
           height="12"
           rx="2"
@@ -1512,7 +1533,7 @@
         />
         <text
           x="128"
-          y="1303"
+          y="1335"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1521,7 +1542,7 @@
         </text>
         <rect
           x="352"
-          y="1294"
+          y="1326"
           width="28"
           height="12"
           rx="1"
@@ -1531,7 +1552,7 @@
         />
         <text
           x="388"
-          y="1303"
+          y="1335"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

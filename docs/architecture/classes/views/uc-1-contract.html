@@ -63,20 +63,21 @@
       <p class="eyebrow">Class diagram · Part 2 · View 1 of 4</p>
       <h1>The use case contract and the aspects that wrap it</h1>
       <svg
-        viewBox="0 0 1040 1020"
+        viewBox="0 0 1040 1036"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc1contract-title uc1contract-desc"
       >
         <title id="uc1contract-title">HexaBlock API use case contract · UML class diagram</title>
         <desc id="uc1contract-desc">
-          Class diagram of layer 2 showing the generic UseCase input port, the SyncProgress input
-          port that binds it, the use case that implements it, and the UseCaseAspect decorator with
-          LoggingAspect and TimingAspect. Since Q12 the aspects live in layer 2, and LoggingAspect
-          writes to the Logger port. Its TError type parameter extends { readonly kind: string },
-          and every problem type of an input port has a kind. A footnote names LevelsController,
-          LeaderboardController, LevelDtoMapper and LeaderboardDtoMapper of layer 3, which call and
-          translate the level and leaderboard input ports.
+          Class diagram of layer 2 showing the generic UseCase interface, the contract that every
+          input port binds, the SyncProgress input port that binds it, the use case that implements
+          it, and the UseCaseAspect decorator with LoggingAspect and TimingAspect. Since Q12 the
+          aspects live in layer 2, and LoggingAspect writes to the Logger port. Its TError type
+          parameter extends { readonly kind: string }, and every problem type of an input port has a
+          kind. A footnote names LevelsController, LeaderboardController, LevelDtoMapper and
+          LeaderboardDtoMapper of layer 3, which call and translate the level and leaderboard input
+          ports.
         </desc>
         <defs>
           <marker
@@ -419,7 +420,7 @@
         >
           + execute(request: TRequest): Promise&lt;TResponse&gt;
         </text>
-        <!-- Class: UseCase (focal, «interface» «input port») -->
+        <!-- Class: UseCase (focal, «interface»: the interface of the Decorator carries no second stereotype) -->
         <rect
           x="520"
           y="504"
@@ -441,7 +442,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «input port»
+          «interface»
         </text>
         <text
           x="668"
@@ -722,8 +723,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          GetLevels returns Result&lt;LevelDefinition&lt;unknown&gt;[], never&gt; and UpdateLevels
-          Result&lt;void, InvalidLevels&gt;; AppModule wraps UpdateLevels in LoggingAspect (#81).
+          GetLevels returns Result&lt;readonly LevelDefinition&lt;unknown&gt;[], never&gt; and
+          UpdateLevels Result&lt;void, InvalidLevels&gt;; AppModule wraps UpdateLevels in
+          LoggingAspect (#81).
         </text>
         <text
           x="24"
@@ -755,11 +757,21 @@
           LoggingAspect asks TError for a kind, and every problem type has one: LoginProblem is {
           kind: 'invalid-credentials' } and TokenProblem { kind: 'invalid-token' } (#104).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="916" x2="1016" y2="916" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="934"
+          y="908"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          UseCase is the contract that every input port binds. The aspects of the Decorator frame
+          wrap it.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="932" x2="1016" y2="932" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="950"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -769,16 +781,16 @@
         </text>
         <line
           x1="24"
-          y1="952"
+          y1="968"
           x2="52"
-          y2="952"
+          y2="968"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#uc1contract-triangle)"
         />
         <text
           x="60"
-          y="956"
+          y="972"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -787,9 +799,9 @@
         </text>
         <line
           x1="128"
-          y1="952"
+          y1="968"
           x2="156"
-          y2="952"
+          y2="968"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -797,7 +809,7 @@
         />
         <text
           x="164"
-          y="956"
+          y="972"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -806,16 +818,16 @@
         </text>
         <line
           x1="232"
-          y1="952"
+          y1="968"
           x2="260"
-          y2="952"
+          y2="968"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc1contract-open)"
         />
         <text
           x="268"
-          y="956"
+          y="972"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -824,7 +836,7 @@
         </text>
         <rect
           x="24"
-          y="972"
+          y="988"
           width="20"
           height="12"
           rx="2"
@@ -834,7 +846,7 @@
         />
         <text
           x="56"
-          y="981"
+          y="997"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -843,7 +855,7 @@
         </text>
         <rect
           x="264"
-          y="972"
+          y="988"
           width="28"
           height="12"
           rx="2"
@@ -854,7 +866,7 @@
         />
         <text
           x="300"
-          y="981"
+          y="997"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -863,7 +875,7 @@
         </text>
         <rect
           x="470"
-          y="972"
+          y="988"
           width="28"
           height="12"
           rx="2"
@@ -873,7 +885,7 @@
         />
         <text
           x="506"
-          y="981"
+          y="997"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -882,7 +894,7 @@
         </text>
         <rect
           x="616"
-          y="972"
+          y="988"
           width="28"
           height="12"
           rx="2"
@@ -893,7 +905,7 @@
         />
         <text
           x="652"
-          y="981"
+          y="997"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -902,7 +914,7 @@
         </text>
         <rect
           x="24"
-          y="994"
+          y="1010"
           width="28"
           height="12"
           rx="2"
@@ -913,7 +925,7 @@
         />
         <text
           x="60"
-          y="1003"
+          y="1019"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
