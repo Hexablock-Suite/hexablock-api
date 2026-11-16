@@ -1,5 +1,6 @@
 import {
   receiveBoundsOf,
+  receiveBoundValuesOf,
   receiveJsonOf,
   receiveKeyOf,
   receiveLevelResultOf,
@@ -21,10 +22,12 @@ import {
 import { Score } from '../../../src/domain/progress/score.js';
 import { Range } from '../../../src/domain/shared/range.js';
 import type { ValueReceiver } from '../../../src/domain/shared/value-receiver.js';
+import { CharacterCount } from '../../../src/domain/user/character-count.js';
+import { PASSWORD_LENGTH } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { User, type UserReceiver } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { Username } from '../../../src/domain/user/username.js';
+import { USERNAME_LENGTH, Username } from '../../../src/domain/user/username.js';
 import { checkedLevel, levelExample } from '../../support/level-format.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { valueOf } from '../../support/result.js';
@@ -51,7 +54,20 @@ describe('received values', () => {
   });
 
   it('should_give_both_bounds_when_a_range_delivers_them', () => {
-    expect(receiveBoundsOf(Range.ofNumbers(8, 128))).toEqual({ min: 8, max: 128 });
+    const min = valueOf(CharacterCount.of(8));
+    const max = valueOf(CharacterCount.of(128));
+
+    const bounds = receiveBoundsOf(Range.of(min, max));
+
+    expect(bounds.min).toBe(min);
+    expect(bounds.max).toBe(max);
+  });
+
+  // #99: a credential range delivers two CharacterCount bounds, and each
+  // bound delivers its number. The OpenAPI limits and the messages need the numbers.
+  it('should_give_the_value_of_each_bound_when_a_range_of_value_objects_delivers_them', () => {
+    expect(receiveBoundValuesOf(USERNAME_LENGTH)).toEqual({ min: 3, max: 32 });
+    expect(receiveBoundValuesOf(PASSWORD_LENGTH)).toEqual({ min: 8, max: 128 });
   });
 
   it('should_throw_when_the_source_delivers_no_value', () => {

@@ -1,12 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PASSWORD_LENGTH } from '../../domain/user/password.js';
-import { USERNAME_LENGTH, USERNAME_PATTERN } from '../../domain/user/username.js';
-import { receiveBoundsOf } from '../received.js';
+import { USERNAME_LENGTH } from '../../domain/user/username.js';
+import { receiveBoundValuesOf } from '../received.js';
 
 // The decorators need the limits when the class is defined, so the module
 // receives them once from the domain ranges.
-const USERNAME_BOUNDS = receiveBoundsOf(USERNAME_LENGTH);
-const PASSWORD_BOUNDS = receiveBoundsOf(PASSWORD_LENGTH);
+const USERNAME_BOUNDS = receiveBoundValuesOf(USERNAME_LENGTH);
+const PASSWORD_BOUNDS = receiveBoundValuesOf(PASSWORD_LENGTH);
+
+// The username rule as one pattern, for the OpenAPI schema of the request
+// body. Username.create() checks the same rule in the domain: these
+// characters and the limits of USERNAME_LENGTH. The domain exports no
+// string, so the pattern lives at the border (#99).
+// test/unit/adapters/credentials-dto.spec.ts checks that both accept the same names.
+export const USERNAME_PATTERN = `^[A-Za-z0-9._-]{${USERNAME_BOUNDS.min},${USERNAME_BOUNDS.max}}$`;
 
 // The body of POST /auth/register (API-FR-01). The limits come from the
 // domain, so OpenAPI publishes the rules that Username and Password check.

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1466"
+        viewBox="0 0 1240 1482"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow3updatelevels-title flow3updatelevels-desc"
@@ -1257,18 +1257,29 @@
           FitLevelValidator finds the Topology of the level in Topologies with TopologyId.equals(),
           and FitSection checks A5 on it (decision 6).
         </text>
+        <text
+          x="24"
+          y="1372"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          AuthenticateToken binds UseCase&lt;SessionToken, Result&lt;UserId, TokenProblem&gt;&gt;,
+          as UpdateLevels binds UseCase (decision 7), and TokenProblem is { kind: 'invalid-token' }
+          (#104).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1384"
+          y1="1400"
           x2="1216"
-          y2="1384"
+          y2="1400"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1402"
+          y="1418"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1278,9 +1289,9 @@
         </text>
         <line
           x1="24"
-          y1="1420"
+          y1="1436"
           x2="52"
-          y2="1420"
+          y2="1436"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1288,7 +1299,7 @@
         />
         <text
           x="60"
-          y="1424"
+          y="1440"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1297,16 +1308,16 @@
         </text>
         <line
           x1="128"
-          y1="1420"
+          y1="1436"
           x2="156"
-          y2="1420"
+          y2="1436"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#flow3updatelevels-open)"
         />
         <text
           x="164"
-          y="1424"
+          y="1440"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1315,7 +1326,7 @@
         </text>
         <rect
           x="24"
-          y="1440"
+          y="1456"
           width="20"
           height="12"
           rx="2"
@@ -1325,7 +1336,7 @@
         />
         <rect
           x="48"
-          y="1440"
+          y="1456"
           width="20"
           height="12"
           rx="2"
@@ -1335,7 +1346,7 @@
         />
         <rect
           x="72"
-          y="1440"
+          y="1456"
           width="20"
           height="12"
           rx="2"
@@ -1345,7 +1356,7 @@
         />
         <text
           x="104"
-          y="1449"
+          y="1465"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1354,7 +1365,7 @@
         </text>
         <rect
           x="352"
-          y="1440"
+          y="1456"
           width="28"
           height="12"
           rx="2"
@@ -1364,7 +1375,7 @@
         />
         <text
           x="388"
-          y="1449"
+          y="1465"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1373,7 +1384,7 @@
         </text>
         <rect
           x="512"
-          y="1440"
+          y="1456"
           width="28"
           height="12"
           rx="2"
@@ -1384,7 +1395,7 @@
         />
         <text
           x="548"
-          y="1449"
+          y="1465"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

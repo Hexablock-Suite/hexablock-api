@@ -124,6 +124,14 @@ export function receiveBoundsOf<T>(source: DeliversBounds<T>): Bounds<T> {
   return slot.take();
 }
 
+// A range of value objects, such as the Range<CharacterCount> of a credential
+// length, delivers two bounds, and each bound delivers its own value. The
+// helper gives both values, for the OpenAPI limits and the HTTP messages (#99).
+export function receiveBoundValuesOf<T>(source: DeliversBounds<DeliversValue<T>>): Bounds<T> {
+  const { min, max } = receiveBoundsOf(source);
+  return { min: receiveValueOf(min), max: receiveValueOf(max) };
+}
+
 // A level result delivers its four value objects in one call. The helper
 // receives the datum of each one, in the order of the fields.
 export function receiveLevelResultOf(source: DeliversLevelResult): LevelResultValues {

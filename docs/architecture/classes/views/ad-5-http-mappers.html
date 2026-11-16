@@ -63,19 +63,21 @@
       <p class="eyebrow">Class diagram · Part 3 · View 5 of 5</p>
       <h1>HTTP mappers: the controllers translate between DTOs and entities</h1>
       <svg
-        viewBox="0 0 1040 738"
+        viewBox="0 0 1040 954"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad5httpmappers-title ad5httpmappers-desc"
       >
         <title id="ad5httpmappers-title">HexaBlock API HTTP mappers · UML class diagram</title>
         <desc id="ad5httpmappers-desc">
-          Class diagram of layers 3 and 1 showing ProgressDtoMapper and LevelDtoMapper in
-          src/adapters/http: ProgressController uses ProgressDtoMapper to turn PlayerProgress into
-          the response DTO through the parts that the aggregate delivers to a
-          PlayerProgressReceiver, and LevelsController uses LevelDtoMapper to build the update
-          request from the body, to turn each LevelDefinition into a LevelDto and to write the error
-          details of a failed Result.
+          Class diagram of layers 3 and 1 showing AuthDtoMapper, ProgressDtoMapper and
+          LevelDtoMapper in src/adapters/http: AuthController uses AuthDtoMapper to build the
+          RegisterUserRequest and the LoginRequest from the body and to build the token and user
+          answers, ProgressController uses ProgressDtoMapper to turn PlayerProgress into the
+          response DTO through the parts that the aggregate delivers to a PlayerProgressReceiver,
+          and LevelsController uses LevelDtoMapper to build the update request from the body, to
+          turn each LevelDefinition into a LevelDto and to write the error details of a failed
+          Result.
         </desc>
         <defs>
           <marker
@@ -134,7 +136,7 @@
           x="24"
           y="24"
           width="992"
-          height="404"
+          height="604"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -142,7 +144,7 @@
         />
         <rect
           x="24"
-          y="444"
+          y="644"
           width="992"
           height="116"
           rx="8"
@@ -151,12 +153,22 @@
           stroke-width="1"
         />
         <!-- Relationships (drawn before boxes) -->
+        <!-- AuthController uses AuthDtoMapper: use -->
+        <line
+          x1="368"
+          y1="96"
+          x2="560"
+          y2="96"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad5httpmappers-open)"
+        />
         <!-- ProgressController uses ProgressDtoMapper: use -->
         <line
           x1="144"
-          y1="120"
+          y1="320"
           x2="144"
-          y2="176"
+          y2="376"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -164,9 +176,9 @@
         <!-- LevelsController uses LevelDtoMapper: use -->
         <line
           x1="640"
-          y1="120"
+          y1="320"
           x2="640"
-          y2="176"
+          y2="376"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -174,9 +186,9 @@
         <!-- ProgressDtoMapper takes PlayerProgress as a parameter: use -->
         <line
           x1="144"
-          y1="328"
+          y1="528"
           x2="144"
-          y2="488"
+          y2="688"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -184,9 +196,9 @@
         <!-- ProgressDtoMapper receives the parts of PlayerProgress through PlayerProgressReceiver: use -->
         <line
           x1="424"
-          y1="328"
+          y1="528"
           x2="424"
-          y2="488"
+          y2="688"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -194,18 +206,30 @@
         <!-- LevelDtoMapper takes a LevelDefinition: use -->
         <line
           x1="640"
-          y1="312"
+          y1="512"
           x2="640"
-          y2="488"
+          y2="688"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
         <!-- Arrow labels and multiplicities -->
-        <rect x="150" y="140" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="448" y="80" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="464"
+          y="89"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          USES
+        </text>
+        <rect x="150" y="340" width="32" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="166"
-          y="149"
+          y="349"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -214,10 +238,10 @@
         >
           USES
         </text>
-        <rect x="646" y="140" width="32" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="646" y="340" width="32" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="662"
-          y="149"
+          y="349"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -226,10 +250,10 @@
         >
           USES
         </text>
-        <rect x="430" y="376" width="48" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="430" y="576" width="48" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="454"
-          y="385"
+          y="585"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -238,10 +262,10 @@
         >
           RECEIVES
         </text>
-        <rect x="150" y="376" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="150" y="576" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="170"
-          y="385"
+          y="585"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -250,10 +274,10 @@
         >
           TAKES
         </text>
-        <rect x="646" y="392" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="646" y="592" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="666"
-          y="401"
+          y="601"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -275,10 +299,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/http/
         </text>
-        <rect x="36" y="455" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="655" width="208" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="464"
+          y="664"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -287,7 +311,7 @@
         >
           LAYER 1 · ENTITIES · src/domain/
         </text>
-        <!-- Class: ProgressController (PART 3 · VIEW 3) -->
+        <!-- Class: AuthController (PART 3 · VIEW 3) -->
         <rect
           x="64"
           y="72"
@@ -313,6 +337,103 @@
         <text
           x="216"
           y="108"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AuthController
+        </text>
+        <!-- Class: AuthDtoMapper («mapper», #105) -->
+        <rect
+          x="560"
+          y="72"
+          width="424"
+          height="168"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="772"
+          y="90"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «mapper»
+        </text>
+        <text
+          x="772"
+          y="108"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AuthDtoMapper
+        </text>
+        <text
+          x="772"
+          y="122"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-01 · API-FR-06
+        </text>
+        <line x1="560" y1="132" x2="984" y2="132" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="576" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toRegisterRequest(body: unknown):
+        </text>
+        <text x="598" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Result&lt;RegisterUserRequest, string[]&gt;
+        </text>
+        <text x="576" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toLoginRequest(body: unknown):
+        </text>
+        <text x="598" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Result&lt;LoginRequest, SignInProblem&gt;
+        </text>
+        <text x="576" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toTokenDto(token: SessionToken): TokenDto
+        </text>
+        <text x="576" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toCurrentUserDto(userId: UserId): CurrentUserDto
+        </text>
+        <!-- Class: ProgressController (PART 3 · VIEW 3) -->
+        <rect
+          x="64"
+          y="272"
+          width="304"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="216"
+          y="290"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 3 · VIEW 3
+        </text>
+        <text
+          x="216"
+          y="308"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -324,7 +445,7 @@
         <!-- Class: LevelsController (PART 3 · VIEW 3) -->
         <rect
           x="560"
-          y="72"
+          y="272"
           width="304"
           height="48"
           rx="6"
@@ -335,7 +456,7 @@
         />
         <text
           x="712"
-          y="90"
+          y="290"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -346,7 +467,7 @@
         </text>
         <text
           x="712"
-          y="108"
+          y="308"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -358,7 +479,7 @@
         <!-- Class: ProgressDtoMapper (focal, «mapper») -->
         <rect
           x="64"
-          y="176"
+          y="376"
           width="376"
           height="152"
           rx="6"
@@ -366,11 +487,11 @@
           stroke="#0f6f74"
           stroke-width="1"
         />
-        <rect x="64" y="176" width="376" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="64" y="228" width="376" height="8" fill="rgba(15,111,116,0.10)" />
+        <rect x="64" y="376" width="376" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="64" y="428" width="376" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="252"
-          y="194"
+          y="394"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -381,7 +502,7 @@
         </text>
         <text
           x="252"
-          y="212"
+          y="412"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -392,7 +513,7 @@
         </text>
         <text
           x="252"
-          y="226"
+          y="426"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -401,26 +522,26 @@
         >
           API-FR-02
         </text>
-        <line x1="64" y1="236" x2="440" y2="236" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="80" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="436" x2="440" y2="436" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toRequest(body: unknown, userId: UserId):
         </text>
-        <text x="102" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Result&lt;SyncProgressRequest, string[]&gt;
         </text>
-        <text x="80" y="284" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toGetRequest(gameId: string, userId: UserId):
         </text>
-        <text x="102" y="300" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Result&lt;GetProgressRequest, string[]&gt;
         </text>
-        <text x="80" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDto(progress: PlayerProgress): ProgressDto
         </text>
         <!-- Class: LevelDtoMapper («mapper») -->
         <rect
           x="560"
-          y="176"
+          y="376"
           width="424"
           height="136"
           rx="6"
@@ -430,7 +551,7 @@
         />
         <text
           x="772"
-          y="194"
+          y="394"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -441,7 +562,7 @@
         </text>
         <text
           x="772"
-          y="212"
+          y="412"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -452,7 +573,7 @@
         </text>
         <text
           x="772"
-          y="226"
+          y="426"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -461,31 +582,31 @@
         >
           API-FR-04 · API-FR-06
         </text>
-        <line x1="560" y1="236" x2="984" y2="236" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="576" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="560" y1="436" x2="984" y2="436" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="576" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toRequest(body: unknown): Result&lt;UpdateLevelsRequest, string[]&gt;
         </text>
-        <text x="576" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="576" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDto(level: LevelDefinition&lt;unknown&gt;): LevelDto
         </text>
         <text
           textLength="390"
           lengthAdjust="spacingAndGlyphs"
           x="576"
-          y="284"
+          y="484"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           + toLevelsDto(levels: readonly LevelDefinition&lt;unknown&gt;[]): LevelsDto
         </text>
-        <text x="576" y="300" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="576" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDetails(problems: readonly LevelProblemReport[]): string[]
         </text>
         <!-- Class: PlayerProgress (PART 1 · VIEW 1) -->
         <rect
           x="64"
-          y="488"
+          y="688"
           width="304"
           height="48"
           rx="6"
@@ -496,7 +617,7 @@
         />
         <text
           x="216"
-          y="506"
+          y="706"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -507,7 +628,7 @@
         </text>
         <text
           x="216"
-          y="524"
+          y="724"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -519,7 +640,7 @@
         <!-- Class: PlayerProgressReceiver (PART 3 · VIEW 1) -->
         <rect
           x="380"
-          y="488"
+          y="688"
           width="168"
           height="48"
           rx="6"
@@ -530,7 +651,7 @@
         />
         <text
           x="464"
-          y="506"
+          y="706"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -541,7 +662,7 @@
         </text>
         <text
           x="464"
-          y="524"
+          y="724"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -553,7 +674,7 @@
         <!-- Class: LevelDefinition (PART 1 · VIEW 2) -->
         <rect
           x="560"
-          y="488"
+          y="688"
           width="304"
           height="48"
           rx="6"
@@ -564,7 +685,7 @@
         />
         <text
           x="712"
-          y="506"
+          y="706"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -575,7 +696,7 @@
         </text>
         <text
           x="712"
-          y="524"
+          y="724"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -587,7 +708,7 @@
         <!-- UML template box: the type parameter on the top-right corner -->
         <rect
           x="816"
-          y="478"
+          y="678"
           width="56"
           height="18"
           rx="2"
@@ -598,7 +719,7 @@
         />
         <text
           x="844"
-          y="490"
+          y="690"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -609,7 +730,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="584"
+          y="784"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -619,7 +740,17 @@
         </text>
         <text
           x="24"
-          y="600"
+          y="800"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          AuthDtoMapper builds the Username, the Password and the PasswordAttempt of the account
+          requests and writes the rule messages (#105).
+        </text>
+        <text
+          x="24"
+          y="816"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -630,7 +761,7 @@
         </text>
         <text
           x="24"
-          y="616"
+          y="832"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -640,7 +771,7 @@
         </text>
         <text
           x="24"
-          y="632"
+          y="848"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -649,10 +780,10 @@
           toDetails(). The mappers hold no state.
         </text>
         <!-- Legend -->
-        <line x1="24" y1="656" x2="1016" y2="656" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="872" x2="1016" y2="872" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="674"
+          y="890"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -662,16 +793,16 @@
         </text>
         <line
           x1="24"
-          y1="692"
+          y1="908"
           x2="52"
-          y2="692"
+          y2="908"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
         <text
           x="60"
-          y="696"
+          y="912"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -680,7 +811,7 @@
         </text>
         <rect
           x="24"
-          y="712"
+          y="928"
           width="20"
           height="12"
           rx="2"
@@ -690,7 +821,7 @@
         />
         <rect
           x="48"
-          y="712"
+          y="928"
           width="20"
           height="12"
           rx="2"
@@ -700,7 +831,7 @@
         />
         <text
           x="80"
-          y="721"
+          y="937"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -709,7 +840,7 @@
         </text>
         <rect
           x="470"
-          y="712"
+          y="928"
           width="28"
           height="12"
           rx="2"
@@ -719,7 +850,7 @@
         />
         <text
           x="506"
-          y="721"
+          y="937"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -728,7 +859,7 @@
         </text>
         <rect
           x="616"
-          y="712"
+          y="928"
           width="28"
           height="12"
           rx="2"
@@ -739,7 +870,7 @@
         />
         <text
           x="652"
-          y="721"
+          y="937"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

@@ -1,11 +1,14 @@
 import { inspect } from 'node:util';
 import type { Result } from '../../../src/domain/shared/result.js';
+import type { Range } from '../../../src/domain/shared/range.js';
+import type { CharacterCount } from '../../../src/domain/user/character-count.js';
 import * as passwordModule from '../../../src/domain/user/password.js';
 import { PASSWORD_LENGTH, Password } from '../../../src/domain/user/password.js';
 import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { USERNAME_LENGTH, USERNAME_PATTERN, Username } from '../../../src/domain/user/username.js';
+import * as usernameModule from '../../../src/domain/user/username.js';
+import { USERNAME_LENGTH, Username } from '../../../src/domain/user/username.js';
 import {
   boundsDeliveredBy,
   deliveredBy,
@@ -22,16 +25,21 @@ const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
 const userId = (value: string): UserId => valueOf(UserId.from(value));
 const passwordHash = (value: string): PasswordHash => valueOf(PasswordHash.from(value));
 
+// The numbers of the two CharacterCount bounds that a credential range delivers.
+const boundValuesOf = (range: Range<CharacterCount>): number[] =>
+  boundsDeliveredBy(range).flatMap(([min, max]) => [...deliveredBy(min), ...deliveredBy(max)]);
+
+// #99: each limit is a Range<CharacterCount>, so no Range<number> stays in the domain.
 describe('credential limits', () => {
   it('should_export_username_and_password_ranges_when_domain_sets_the_limits', () => {
-    expect(boundsDeliveredBy(USERNAME_LENGTH)).toEqual([[3, 32]]);
-    expect(boundsDeliveredBy(PASSWORD_LENGTH)).toEqual([[8, 128]]);
+    expect(boundValuesOf(USERNAME_LENGTH)).toEqual([3, 32]);
+    expect(boundValuesOf(PASSWORD_LENGTH)).toEqual([8, 128]);
   });
 
-  // The pattern and the range come from the same two limits, so the OpenAPI
-  // schema keeps the text that it had before #90.
-  it('should_keep_the_username_pattern_when_the_limits_build_it', () => {
-    expect(USERNAME_PATTERN).toBe('^[A-Za-z0-9._-]{3,32}$');
+  // The OpenAPI pattern of a username moved to the HTTP adapter (#99), so
+  // the module exports no string.
+  it('should_export_no_primitive_when_the_username_module_lists_its_exports', () => {
+    expect(Object.keys(usernameModule).sort()).toEqual(['USERNAME_LENGTH', 'Username']);
   });
 });
 
@@ -45,7 +53,11 @@ describe('Username', () => {
     },
   );
 
-  it.each(['ab', 'a'.repeat(33), 'ada lovelace', 'ada!', ''])(
+  // #100: the lower case of a letter outside ASCII, such as İ or ẞ, can
+  // differ between JavaScript and a database. The pattern rejects every such
+  // letter, so the rows of the UserRepository contract cover only ASCII names.
+  // A wider pattern needs new pairs in that contract.
+  it.each(['ab', 'a'.repeat(33), 'ada lovelace', 'ada!', '', 'İlker', 'STRAẞE'])(
     'should_reject_username_when_length_or_characters_break_the_rule',
     (raw) => {
       expect(Username.create(raw)).toEqual({ ok: false, error: 'invalid-username' });
@@ -65,6 +77,40 @@ describe('Username', () => {
       ]);
     },
   );
+
+  // #100: collidesWith() is the business name of the rule of #62. Two names
+  // collide when they differ at most in letter case. The answer is the same
+  // in both directions.
+  it.each(['ada', 'ADA', 'aDa'])(
+    'should_collide_when_two_usernames_differ_only_in_letter_case',
+    (raw) => {
+      const name = valueOf(Username.create('Ada'));
+      const other = valueOf(Username.create(raw));
+
+      expect(name.collidesWith(other)).toBe(true);
+      expect(other.collidesWith(name)).toBe(true);
+    },
+  );
+
+  it.each(['Adb', 'Ada1', 'grace'])(
+    'should_not_collide_when_two_usernames_differ_in_a_character',
+    (raw) => {
+      const name = valueOf(Username.create('Ada'));
+      const other = valueOf(Username.create(raw));
+
+      expect(name.collidesWith(other)).toBe(false);
+      expect(other.collidesWith(name)).toBe(false);
+    },
+  );
+
+  it('should_collide_when_a_username_is_compared_with_itself_or_its_twin', () => {
+    const name = valueOf(Username.create('Ada'));
+    const twin = valueOf(Username.create('Ada'));
+
+    expect(name.collidesWith(name)).toBe(true);
+    expect(name.collidesWith(twin)).toBe(true);
+    expect(twin.collidesWith(name)).toBe(true);
+  });
 
   // #90: the name and its key leave only through a delivery to a receiver.
   it('should_have_no_public_value_or_key_field_when_both_leave_through_a_delivery', () => {

@@ -8,8 +8,10 @@ import { User } from '../../src/domain/user/user.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { Username } from '../../src/domain/user/username.js';
 import { PrefixPasswordHasher } from '../support/auth/fakes.js';
+import { registerRequest } from '../support/auth/requests.js';
 import { userPartsOf } from '../support/recording-receiver.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
+import { describeUserRepositoryContract } from '../support/user-repository.contract.js';
 import { valueOf } from '../support/result.js';
 
 const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
@@ -23,24 +25,34 @@ function userNamed(id: string, name: string, hash: string): User {
   return User.register(valueOf(UserId.from(id)), username.value, valueOf(PasswordHash.from(hash)));
 }
 
-function username(name: string): Username {
-  return userPartsOf(userNamed(ADA_ID, name, 'unused')).username;
-}
+// One PGlite database for the whole file. A new PGlite costs about one
+// second to start, so a test that starts its own database pays that second
+// each time. Each test starts with an empty users table instead: the
+// repository reads and writes no other table.
+let database: TestDatabase;
+let repository: DrizzleUserRepository;
+
+beforeAll(async () => {
+  database = await createTestDatabase();
+});
+
+afterAll(async () => {
+  await database.close();
+});
+
+beforeEach(async () => {
+  await database.db.delete(users);
+  repository = new DrizzleUserRepository(database.db);
+});
+
+// The finds, the lookups and add() after a lookup that missed (#100).
+describeUserRepositoryContract(
+  'DrizzleUserRepository',
+  () => new DrizzleUserRepository(database.db),
+);
 
 // API-FR-01: the users table and its repository on PGlite (R-database-harness).
 describe('DrizzleUserRepository', () => {
-  let database: TestDatabase;
-  let repository: DrizzleUserRepository;
-
-  beforeEach(async () => {
-    database = await createTestDatabase();
-    repository = new DrizzleUserRepository(database.db);
-  });
-
-  afterEach(async () => {
-    await database.close();
-  });
-
   it('should_create_users_table_when_migrations_run', async () => {
     const result = await database.db.execute<{
       column_name: string;
@@ -83,23 +95,6 @@ describe('DrizzleUserRepository', () => {
     ]);
   });
 
-  it('should_return_added_user_when_username_matches', async () => {
-    const ada = userNamed(ADA_ID, 'ada', 'scrypt$hash');
-    await repository.add(ada);
-
-    const found = await repository.findByUsername(username('ada'));
-
-    expect(found).toEqual(ada);
-  });
-
-  it('should_return_null_when_username_is_unknown', async () => {
-    await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
-
-    const found = await repository.findByUsername(username('grace'));
-
-    expect(found).toBeNull();
-  });
-
   it('should_report_username_taken_when_insert_breaks_unique_constraint', async () => {
     await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
 
@@ -123,7 +118,7 @@ describe('DrizzleUserRepository', () => {
         next: () => valueOf(UserId.from(OTHER_ID)),
       });
 
-      const result = await register.execute({ username: name, password: 'other password' });
+      const result = await register.execute(registerRequest(name, 'other password'));
 
       expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
       const rows = await database.db.select().from(users);
@@ -152,26 +147,6 @@ describe('DrizzleUserRepository', () => {
     expect(await database.db.select().from(users)).toEqual([
       { id: ADA_ID, username: 'ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' },
     ]);
-  });
-
-  // A row gives the name that the lookup asks for and the answer.
-  it.each([
-    ['Ada', true],
-    ['ada', true],
-    ['ADA', true],
-    ['grace', false],
-  ])('should_report_username_taken_when_stored_name_differs_only_in_case', async (name, taken) => {
-    await repository.add(userNamed(ADA_ID, 'Ada', 'scrypt$hash'));
-
-    expect(await repository.isUsernameTaken(username(name))).toBe(taken);
-  });
-
-  it('should_return_null_when_username_differs_only_in_case', async () => {
-    await repository.add(userNamed(ADA_ID, 'ada', 'scrypt$hash'));
-
-    const found = await repository.findByUsername(username('ADA'));
-
-    expect(found).toBeNull();
   });
 
   it('should_rethrow_database_error_when_insert_fails_for_another_reason', async () => {

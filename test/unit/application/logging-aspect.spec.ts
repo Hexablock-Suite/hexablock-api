@@ -1,6 +1,15 @@
 import type { LoggerService } from '@nestjs/common';
 import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
 import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.js';
+import {
+  type AuthenticateToken,
+  AuthenticateTokenUseCase,
+} from '../../../src/application/auth/authenticate-token.use-case.js';
+import { type Login, LoginUseCase } from '../../../src/application/auth/login.use-case.js';
+import {
+  type RegisterUser,
+  RegisterUseCase,
+} from '../../../src/application/auth/register.use-case.js';
 import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { UseCase } from '../../../src/application/use-case.js';
 import {
@@ -14,6 +23,13 @@ import { Score } from '../../../src/domain/progress/score.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { NestLogger } from '../../../src/infrastructure/logging/nest-logger.js';
+import {
+  InMemoryUserRepository,
+  PrefixPasswordHasher,
+  PrefixTokenIssuer,
+  SequenceUserIdGenerator,
+} from '../../support/auth/fakes.js';
+import { loginRequest, registerRequest } from '../../support/auth/requests.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
@@ -434,5 +450,67 @@ describe('LoggingAspect', () => {
       useCase: 'GetLevels',
       outcome: 'success',
     });
+  });
+
+  // The three account ports bind UseCase, and each problem carries a kind
+  // (#104). So the aspect wraps each port, logs the kind of a failure and
+  // never logs a password or a token. Since #105 a request carries a
+  // Password or a PasswordAttempt, and the aspect logs no part of a request.
+  it('should_log_username_taken_kind_and_no_password_when_aspect_wraps_register_user_and_the_username_is_taken', async () => {
+    const logger = recordingLogger();
+    const register: RegisterUser = new RegisterUseCase(
+      new InMemoryUserRepository(),
+      new PrefixPasswordHasher(),
+      new SequenceUserIdGenerator(),
+    );
+    await register.execute(registerRequest('ada', 'correct horse'));
+    const aspect = new LoggingAspect(register, 'RegisterUser', logger);
+
+    const result = await aspect.execute(registerRequest('ada', 'typed-secret-07'));
+
+    expect(result).toEqual({ ok: false, error: { kind: 'username-taken' } });
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'RegisterUser',
+      outcome: 'failure',
+      kind: 'username-taken',
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain('typed-secret-07');
+  });
+
+  it('should_log_invalid_credentials_kind_and_no_password_when_aspect_wraps_login_and_the_password_is_wrong', async () => {
+    const logger = recordingLogger();
+    const users = new InMemoryUserRepository();
+    const hasher = new PrefixPasswordHasher();
+    await new RegisterUseCase(users, hasher, new SequenceUserIdGenerator()).execute(
+      registerRequest('ada', 'correct horse'),
+    );
+    const login: Login = new LoginUseCase(users, hasher, new PrefixTokenIssuer());
+    const aspect = new LoggingAspect(login, 'Login', logger);
+
+    const result = await aspect.execute(loginRequest('ada', 'typed-secret-07'));
+
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Login',
+      outcome: 'failure',
+      kind: 'invalid-credentials',
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain('typed-secret-07');
+  });
+
+  it('should_log_invalid_token_kind_and_no_token_when_aspect_wraps_authenticate_token_and_the_token_is_forged', async () => {
+    const logger = recordingLogger();
+    const authenticate: AuthenticateToken = new AuthenticateTokenUseCase(new PrefixTokenIssuer());
+    const aspect = new LoggingAspect(authenticate, 'AuthenticateToken', logger);
+
+    const result = await aspect.execute('forged-token-secret-07');
+
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-token' } });
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'AuthenticateToken',
+      outcome: 'failure',
+      kind: 'invalid-token',
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain('forged-token-secret-07');
   });
 });

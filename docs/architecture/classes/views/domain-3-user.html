@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 3 of 5</p>
       <h1>User: one aggregate root and its credential values</h1>
       <svg
-        viewBox="0 0 1040 1018"
+        viewBox="0 0 1040 1394"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain3user-title domain3user-desc"
@@ -78,8 +78,14 @@
           check a PasswordAttempt against the hash of the user. PasswordAttempt is the text that a
           player types at sign-in: it has no length rule, and it tells if it is longer than any
           password. Each value object keeps its value private and delivers it to a receiver with
-          deliverTo(); Username also delivers its key. The factory of each value object returns a
-          Result with the code of a broken rule, and PasswordAttempt.of() cannot fail.
+          deliverTo(); Username also delivers its key, and collidesWith() tells if two names
+          collide: their keys are equal, so they differ at most in letter case. The factory of each
+          value object returns a Result with the code of a broken rule, and PasswordAttempt.of()
+          cannot fail. Username, Password and PasswordAttempt use the USERNAME_LENGTH and
+          PASSWORD_LENGTH limits, two values of the bound class Range&lt;CharacterCount&gt;, which
+          binds the type parameter T of the template Range&lt;T&gt; to the CharacterCount value
+          object. Range&lt;T&gt; asks its values isAfter() and equals(), so no number order crosses
+          it.
         </desc>
         <defs>
           <marker
@@ -111,7 +117,7 @@
           x="24"
           y="24"
           width="992"
-          height="720"
+          height="1048"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -177,6 +183,47 @@
         <!-- PasswordVerifier.verify() takes a PasswordAttempt as a parameter: use -->
         <path
           d="M520 504 L520 544"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- Username.create() asks USERNAME_LENGTH, a Range<CharacterCount> constant of its module: use with role and multiplicity (#99) -->
+        <path
+          d="M984 288 L984 776 L640 776"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- Password.create() asks PASSWORD_LENGTH, a Range<CharacterCount> constant of its module: use with role and multiplicity (#99) -->
+        <path
+          d="M64 440 L44 440 L44 776 L400 776"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- PasswordAttempt.isLongerThanAnyPassword() asks PASSWORD_LENGTH: use with a verb (#99) -->
+        <path
+          d="M520 688 L520 760"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- The bound class Range<CharacterCount> binds T of the template Range<T>: «bind» dependency, dashed with an open head (UML template binding) -->
+        <path
+          d="M440 808 L440 856"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain3user-open)"
+        />
+        <!-- Range<CharacterCount> holds min and max: CharacterCount: use with role and multiplicity -->
+        <path
+          d="M400 796 L356 796 L356 900 L328 900"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -278,6 +325,77 @@
           letter-spacing="0.06em"
         >
           takes
+        </text>
+        <rect x="763" y="758" width="98" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="812"
+          y="767"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          USERNAME_LENGTH 1
+        </text>
+        <rect x="173" y="758" width="98" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="222"
+          y="767"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          PASSWORD_LENGTH 1
+        </text>
+        <rect x="526" y="718" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="542"
+          y="727"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          asks
+        </text>
+        <rect x="446" y="826" width="140" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="450"
+          y="835"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="start"
+          letter-spacing="0.06em"
+        >
+          «bind» T → CharacterCount
+        </text>
+        <rect x="362" y="836" width="34" height="24" rx="2" fill="#f9f4dc" />
+        <text
+          x="379"
+          y="845"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          min 1
+        </text>
+        <text
+          x="379"
+          y="857"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          max 1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
@@ -485,7 +603,7 @@
           x="712"
           y="96"
           width="288"
-          height="176"
+          height="192"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -544,16 +662,8 @@
         <text x="728" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Username): boolean
         </text>
-        <text
-          textLength="266"
-          lengthAdjust="spacingAndGlyphs"
-          x="728"
-          y="248"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + deliverTo(receiver: ValueReceiver&lt;string&gt;): void
+        <text x="728" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + collidesWith(other: Username): boolean
         </text>
         <text
           textLength="266"
@@ -564,21 +674,32 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
+          + deliverTo(receiver: ValueReceiver&lt;string&gt;): void
+        </text>
+        <text
+          textLength="266"
+          lengthAdjust="spacingAndGlyphs"
+          x="728"
+          y="280"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
           + deliverKeyTo(receiver: ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: PasswordHash («value object») -->
         <rect
           x="712"
           y="300"
-          width="288"
-          height="144"
+          width="256"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="856"
+          x="840"
           y="318"
           fill="#5b6873"
           font-size="8"
@@ -589,7 +710,7 @@
           «value object»
         </text>
         <text
-          x="856"
+          x="840"
           y="336"
           fill="#17212a"
           font-size="12"
@@ -599,11 +720,11 @@
         >
           PasswordHash
         </text>
-        <line x1="712" y1="348" x2="1000" y2="348" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="712" y1="348" x2="968" y2="348" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="728" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - value: string
         </text>
-        <line x1="712" y1="372" x2="1000" y2="372" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="712" y1="372" x2="968" y2="372" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="728"
           y="388"
@@ -615,6 +736,8 @@
           + from(value: string):
         </text>
         <text
+          textLength="210"
+          lengthAdjust="spacingAndGlyphs"
           x="750"
           y="404"
           fill="#17212a"
@@ -627,23 +750,18 @@
         <text x="728" y="420" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: PasswordHash): boolean
         </text>
-        <text
-          textLength="266"
-          lengthAdjust="spacingAndGlyphs"
-          x="728"
-          y="436"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + deliverTo(receiver: ValueReceiver&lt;string&gt;): void
+        <text x="728" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="750" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: Password («value object») -->
         <rect
           x="64"
           y="300"
           width="264"
-          height="176"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -696,23 +814,13 @@
         >
           Result&lt;Password, PasswordProblem&gt;
         </text>
-        <text
-          x="80"
-          y="420"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          - codePoints(raw: string): number
-        </text>
-        <text x="80" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="420" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Password): boolean
         </text>
-        <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: PasswordVerifier («interface») -->
@@ -822,7 +930,7 @@
           x="400"
           y="544"
           width="240"
-          height="160"
+          height="144"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -868,26 +976,232 @@
         <text x="416" y="648" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isLongerThanAnyPassword(): boolean
         </text>
+        <text x="416" y="664" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="438" y="680" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;string&gt;): void
+        </text>
+        <!-- Class: Range<CharacterCount> (bound class: the template Range<T> with T bound to CharacterCount, #99) -->
+        <rect
+          x="400"
+          y="760"
+          width="240"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="520"
+          y="789"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Range&lt;CharacterCount&gt;
+        </text>
+        <!-- Class: Range («value object», template with the type parameter T, #99) -->
+        <rect
+          x="400"
+          y="856"
+          width="240"
+          height="192"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="520"
+          y="874"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="520"
+          y="892"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Range
+        </text>
+        <line x1="400" y1="904" x2="640" y2="904" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="920" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - min: T
+        </text>
+        <text x="416" y="936" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - max: T
+        </text>
+        <line x1="400" y1="944" x2="640" y2="944" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="416"
-          y="664"
+          y="960"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          - codePoints(text: string): number
+          + of(min: T, max: T): Range&lt;T&gt;
         </text>
-        <text x="416" y="680" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="976" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + contains(value: T): boolean
+        </text>
+        <text x="416" y="992" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isExceededBy(value: T): boolean
+        </text>
+        <text
+          x="416"
+          y="1008"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + equals(other: Range&lt;T&gt;): boolean
+        </text>
+        <text
+          x="416"
+          y="1024"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverBoundsTo(receiver:
+        </text>
+        <text
+          x="438"
+          y="1040"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          BoundsReceiver&lt;T&gt;): void
+        </text>
+        <!-- Class: CharacterCount («value object», #99) -->
+        <rect
+          x="64"
+          y="820"
+          width="264"
+          height="192"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="196"
+          y="838"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="196"
+          y="856"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          CharacterCount
+        </text>
+        <line x1="64" y1="868" x2="328" y2="868" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="884" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - value: number
+        </text>
+        <line x1="64" y1="892" x2="328" y2="892" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="80"
+          y="908"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(value: number):
+        </text>
+        <text
+          textLength="218"
+          lengthAdjust="spacingAndGlyphs"
+          x="102"
+          y="924"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;CharacterCount, CharacterCountProblem&gt;
+        </text>
+        <text
+          x="80"
+          y="940"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + ofText(text: string): CharacterCount
+        </text>
+        <text x="80" y="956" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isAfter(other: CharacterCount): boolean
+        </text>
+        <text x="80" y="972" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: CharacterCount): boolean
+        </text>
+        <text x="80" y="988" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="438" y="696" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          ValueReceiver&lt;string&gt;): void
+        <text
+          x="102"
+          y="1004"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          ValueReceiver&lt;number&gt;): void
+        </text>
+        <!-- UML template box: the type parameter on the top-right corner -->
+        <rect
+          x="532"
+          y="846"
+          width="116"
+          height="18"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="590"
+          y="858"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+        >
+          T extends Ordered&lt;T&gt;
         </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="768"
+          y="1096"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -897,7 +1211,7 @@
         </text>
         <text
           x="24"
-          y="784"
+          y="1112"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -907,7 +1221,7 @@
         </text>
         <text
           x="24"
-          y="800"
+          y="1128"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -918,7 +1232,7 @@
         </text>
         <text
           x="24"
-          y="816"
+          y="1144"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -928,27 +1242,27 @@
         </text>
         <text
           x="24"
-          y="832"
+          y="1160"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
           port of layer 2 extends it (Part 2, view 4), and its adapter does the check. Username.key
-          is the name in lower case; two names with the same key are the same name for
+          is the name in lower case; collidesWith() tells if two names have the same key
         </text>
         <text
           x="24"
-          y="848"
+          y="1176"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          uniqueness. Username and Password check their own limits in create(). Password is the
-          plain text that a new user chooses. RegisterUseCase creates it and hashes it
+          (#100). Username and Password check their own limits in create(). Password is the plain
+          text that a new user chooses. AuthDtoMapper creates it, and RegisterUseCase hashes it
         </text>
         <text
           x="24"
-          y="864"
+          y="1192"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -958,7 +1272,7 @@
         </text>
         <text
           x="24"
-          y="880"
+          y="1208"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -968,7 +1282,7 @@
         </text>
         <text
           x="24"
-          y="896"
+          y="1224"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -978,7 +1292,7 @@
         </text>
         <text
           x="24"
-          y="912"
+          y="1240"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -986,11 +1300,51 @@
           No operation returns it. Each factory returns a Result with the code of a broken rule;
           PasswordAttempt.of() cannot fail, so it returns the value itself.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="936" x2="1016" y2="936" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="954"
+          y="1256"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Each length limit is a Range&lt;CharacterCount&gt; (#99): USERNAME_LENGTH (3 to 32) and
+          PASSWORD_LENGTH (8 to 128). The bound class binds T of the template Range&lt;T&gt; to
+          CharacterCount.
+        </text>
+        <text
+          x="24"
+          y="1272"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Range&lt;T&gt; asks its values isAfter() and equals() of Ordered&lt;T&gt;, which
+          CharacterCount implements, so no number order crosses the range. Range.of() takes only the
+          two bounds.
+        </text>
+        <text
+          x="24"
+          y="1288"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          CharacterCount counts code points, so an emoji is one character. Username, Password and
+          PasswordAttempt count their text with CharacterCount.ofText(); the view draws no line for
+          it.
+        </text>
+        <!-- Legend -->
+        <line
+          x1="24"
+          y1="1312"
+          x2="1016"
+          y2="1312"
+          stroke="rgba(23,33,42,0.10)"
+          stroke-width="0.8"
+        />
+        <text
+          x="24"
+          y="1330"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1000,16 +1354,16 @@
         </text>
         <line
           x1="24"
-          y1="972"
+          y1="1348"
           x2="52"
-          y2="972"
+          y2="1348"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain3user-open)"
         />
         <text
           x="60"
-          y="976"
+          y="1352"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1018,7 +1372,7 @@
         </text>
         <text
           x="300"
-          y="976"
+          y="1352"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1027,7 +1381,7 @@
         </text>
         <rect
           x="24"
-          y="992"
+          y="1368"
           width="20"
           height="12"
           rx="2"
@@ -1037,7 +1391,7 @@
         />
         <text
           x="56"
-          y="1001"
+          y="1377"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1046,7 +1400,7 @@
         </text>
         <rect
           x="166"
-          y="992"
+          y="1368"
           width="28"
           height="12"
           rx="2"
@@ -1056,12 +1410,51 @@
         />
         <text
           x="202"
-          y="1001"
+          y="1377"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
+        </text>
+        <line
+          x1="460"
+          y1="1348"
+          x2="488"
+          y2="1348"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain3user-open)"
+        />
+        <text
+          x="496"
+          y="1352"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          «bind» · bound class to its template
+        </text>
+        <rect
+          x="332"
+          y="1368"
+          width="28"
+          height="12"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="368"
+          y="1377"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Corner box · type parameters
         </text>
       </svg>
     </div>

@@ -26,7 +26,9 @@ export class DrizzleUserRepository implements UserRepository {
   }
 
   // Compares the key that the domain computed (#73). The unique index on
-  // username_key answers the lookup.
+  // username_key answers the lookup. Equal keys are the SQL form of
+  // Username.collidesWith(), and the UserRepository contract pins that the
+  // two agree (#100).
   async isUsernameTaken(username: Username): Promise<boolean> {
     const rows = await this.db
       .select({ id: users.id })
