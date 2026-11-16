@@ -11,8 +11,4 @@ export const DOMAIN_SURFACE_BASELINE: readonly string[] = [
   'src/domain/user/password.ts PASSWORD_LENGTH constant',
   'src/domain/user/username.ts USERNAME_LENGTH constant',
   'src/domain/user/username.ts USERNAME_PATTERN constant',
-  // #98: the typed password text.
-  'src/domain/user/password.ts Password.isTooLong(raw) parameter',
-  'src/domain/user/password-verifier.ts PasswordVerifier.verify(typed) parameter',
-  'src/domain/user/user.ts User.passwordMatches(typed) parameter',
 ];

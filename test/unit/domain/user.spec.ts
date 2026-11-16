@@ -1,3 +1,4 @@
+import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import type { PasswordVerifier } from '../../../src/domain/user/password-verifier.js';
 import { User } from '../../../src/domain/user/user.js';
@@ -24,12 +25,12 @@ function userOf(n: number, name: string, hash: string): User {
 // Test double for the PasswordVerifier interface. It keeps each call and
 // gives the answer that the test sets.
 class RecordingVerifier implements PasswordVerifier {
-  readonly calls: (readonly [string, PasswordHash])[] = [];
+  readonly calls: (readonly [PasswordAttempt, PasswordHash])[] = [];
 
   constructor(private readonly answer: boolean) {}
 
-  verify(typed: string, hash: PasswordHash): Promise<boolean> {
-    this.calls.push([typed, hash]);
+  verify(attempt: PasswordAttempt, hash: PasswordHash): Promise<boolean> {
+    this.calls.push([attempt, hash]);
     return Promise.resolve(this.answer);
   }
 }
@@ -145,23 +146,27 @@ describe('User delivery', () => {
 });
 
 // #91: the user checks a typed password, so no caller reads its hash.
+// #98: the typed text is a PasswordAttempt, not a string.
 describe('User password check', () => {
+  const ATTEMPT = PasswordAttempt.of('correct horse');
+
   it('should_give_the_answer_of_the_verifier_when_a_typed_password_is_checked', async () => {
     const user = userOf(1, 'ada', '$one');
 
-    expect(await user.passwordMatches('correct horse', new RecordingVerifier(true))).toBe(true);
-    expect(await user.passwordMatches('correct horse', new RecordingVerifier(false))).toBe(false);
+    expect(await user.passwordMatches(ATTEMPT, new RecordingVerifier(true))).toBe(true);
+    expect(await user.passwordMatches(ATTEMPT, new RecordingVerifier(false))).toBe(false);
   });
 
-  it('should_pass_the_typed_text_and_its_own_hash_to_the_verifier_when_a_typed_password_is_checked', async () => {
+  it('should_pass_the_attempt_and_its_own_hash_to_the_verifier_when_a_typed_password_is_checked', async () => {
     const hash = valueOf(PasswordHash.from('$one'));
     const user = User.register(valueOf(UserId.from(testUserId(1))), nameOf('ada'), hash);
     const verifier = new RecordingVerifier(true);
+    const short = PasswordAttempt.of('short');
 
-    await user.passwordMatches('short', verifier);
+    await user.passwordMatches(short, verifier);
 
     expect(verifier.calls).toHaveLength(1);
-    expect(verifier.calls[0][0]).toBe('short');
+    expect(verifier.calls[0][0]).toBe(short);
     expect(verifier.calls[0][1]).toBe(hash);
   });
 
@@ -170,7 +175,7 @@ describe('User password check', () => {
     const user = userOf(1, 'ada', '$one');
 
     await expect(
-      user.passwordMatches('correct horse', { verify: () => Promise.reject(failure) }),
+      user.passwordMatches(ATTEMPT, { verify: () => Promise.reject(failure) }),
     ).rejects.toBe(failure);
   });
 });

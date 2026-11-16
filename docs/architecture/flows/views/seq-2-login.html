@@ -63,7 +63,7 @@
       <p class="eyebrow">Sequence diagram · Use case 2 of 3</p>
       <h1>Login: one sign-in request through the four layers</h1>
       <svg
-        viewBox="0 0 1420 1016"
+        viewBox="0 0 1420 1032"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="seq2login-title seq2login-desc"
@@ -77,7 +77,8 @@
           controller answers 401. Otherwise the use case asks the User if the password matches, and
           the User passes its own hash to ScryptPasswordHasher. When the password does not match,
           the use case returns a failure and the controller answers 401. Otherwise JwtTokenIssuer
-          issues a SessionToken, and the controller answers with a TokenDto.
+          issues a SessionToken, and the controller answers with a TokenDto. The typed password
+          travels as a PasswordAttempt value object.
         </desc>
         <defs>
           <marker
@@ -695,7 +696,7 @@
         >
           User | null
         </text>
-        <!-- Message: PasswordHasher.verify(password, dummyHash) -->
+        <!-- Message: PasswordHasher.verify(attempt, dummyHash) -->
         <line
           x1="455"
           y1="318"
@@ -705,7 +706,7 @@
           stroke-width="1"
           marker-end="url(#seq2login-filled)"
         />
-        <rect x="477" y="303" width="216" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="479.5" y="303" width="211" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="585"
           y="312"
@@ -714,7 +715,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          PasswordHasher.verify(password, dummyHash)
+          PasswordHasher.verify(attempt, dummyHash)
         </text>
         <!-- Reply: boolean -->
         <line
@@ -782,7 +783,7 @@
         >
           HTTP 401 · error body (API-FR-06)
         </text>
-        <!-- Message: passwordMatches(password, hasher) -->
+        <!-- Message: passwordMatches(attempt, hasher) -->
         <line
           x1="455"
           y1="444"
@@ -792,7 +793,7 @@
           stroke-width="1"
           marker-end="url(#seq2login-filled)"
         />
-        <rect x="499" y="429" width="172" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="501.5" y="429" width="167" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="585"
           y="438"
@@ -801,9 +802,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          passwordMatches(password, hasher)
+          passwordMatches(attempt, hasher)
         </text>
-        <!-- Message: PasswordVerifier.verify(password, hash) -->
+        <!-- Message: PasswordVerifier.verify(attempt, hash) -->
         <line
           x1="885"
           y1="464"
@@ -813,7 +814,7 @@
           stroke-width="1"
           marker-end="url(#seq2login-filled)"
         />
-        <rect x="904.5" y="449" width="201" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="907" y="449" width="196" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="1005"
           y="458"
@@ -822,7 +823,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          PasswordVerifier.verify(password, hash)
+          PasswordVerifier.verify(attempt, hash)
         </text>
         <!-- Reply: boolean -->
         <line
@@ -1047,8 +1048,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The User of layer 1 checks the password itself. LoginUseCase asks
-          passwordMatches(password, hasher), and the User passes its own hash to
+          The User of layer 1 checks the password itself. LoginUseCase asks passwordMatches(attempt,
+          hasher), and the User passes its own hash to
         </text>
         <text
           x="24"
@@ -1078,12 +1079,23 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           TokenIssuer.issue() takes the User, and JwtTokenIssuer receives the id that it delivers.
+          The typed password is a PasswordAttempt (#98):
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="936" x2="1396" y2="936" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="954"
+          y="924"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LoginUseCase creates it first, and a text longer than any password fails before any hash
+          work, so the view draws no call for that check.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="952" x2="1396" y2="952" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="970"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1093,16 +1105,16 @@
         </text>
         <line
           x1="24"
-          y1="972"
+          y1="988"
           x2="52"
-          y2="972"
+          y2="988"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq2login-filled)"
         />
         <text
           x="60"
-          y="976"
+          y="992"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1111,9 +1123,9 @@
         </text>
         <line
           x1="196"
-          y1="972"
+          y1="988"
           x2="224"
-          y2="972"
+          y2="988"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1121,7 +1133,7 @@
         />
         <text
           x="232"
-          y="976"
+          y="992"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1130,7 +1142,7 @@
         </text>
         <rect
           x="392"
-          y="964"
+          y="980"
           width="10"
           height="16"
           fill="#ffffff"
@@ -1139,7 +1151,7 @@
         />
         <text
           x="410"
-          y="976"
+          y="992"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1148,7 +1160,7 @@
         </text>
         <rect
           x="548"
-          y="966"
+          y="982"
           width="28"
           height="12"
           rx="2"
@@ -1158,7 +1170,7 @@
         />
         <text
           x="584"
-          y="976"
+          y="992"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1167,7 +1179,7 @@
         </text>
         <rect
           x="24"
-          y="992"
+          y="1008"
           width="20"
           height="12"
           rx="2"
@@ -1177,7 +1189,7 @@
         />
         <rect
           x="48"
-          y="992"
+          y="1008"
           width="20"
           height="12"
           rx="2"
@@ -1187,7 +1199,7 @@
         />
         <rect
           x="72"
-          y="992"
+          y="1008"
           width="20"
           height="12"
           rx="2"
@@ -1197,7 +1209,7 @@
         />
         <rect
           x="96"
-          y="992"
+          y="1008"
           width="20"
           height="12"
           rx="2"
@@ -1207,7 +1219,7 @@
         />
         <text
           x="128"
-          y="1001"
+          y="1017"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1216,7 +1228,7 @@
         </text>
         <rect
           x="352"
-          y="992"
+          y="1008"
           width="28"
           height="12"
           rx="1"
@@ -1226,7 +1238,7 @@
         />
         <text
           x="388"
-          y="1001"
+          y="1017"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

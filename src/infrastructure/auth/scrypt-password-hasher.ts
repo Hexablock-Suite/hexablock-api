@@ -2,6 +2,7 @@ import { randomBytes, scrypt, type ScryptOptions, timingSafeEqual } from 'node:c
 import { receiveValueOf } from '../../adapters/received.js';
 import type { PasswordHasher } from '../../application/ports/password-hasher.js';
 import type { Password } from '../../domain/user/password.js';
+import type { PasswordAttempt } from '../../domain/user/password-attempt.js';
 import { PasswordHash } from '../../domain/user/password-hash.js';
 
 // The scrypt cost of node:crypto's default. The hash keeps its parameters,
@@ -19,7 +20,8 @@ function derive(plain: string, salt: Buffer, options: ScryptOptions): Promise<Bu
 
 // Adapter of the PasswordHasher port with scrypt from node:crypto. The
 // stored form is scrypt$N$r$p$<salt>$<key>, with base64url salt and key.
-// It is the one place that receives the text of a Password and of a PasswordHash.
+// It is the one place that receives the text of a Password, of a
+// PasswordAttempt and of a PasswordHash.
 export class ScryptPasswordHasher implements PasswordHasher {
   async hash(password: Password): Promise<PasswordHash> {
     const salt = randomBytes(SALT_BYTES);
@@ -41,8 +43,9 @@ export class ScryptPasswordHasher implements PasswordHasher {
     return hash.value;
   }
 
-  // The typed text is a plain string: a wrong password can be shorter than any Password.
-  async verify(typed: string, hash: PasswordHash): Promise<boolean> {
+  // The typed text is a PasswordAttempt: a wrong password can be shorter than
+  // any Password. The adapter receives its text by delivery, as for a Password.
+  async verify(attempt: PasswordAttempt, hash: PasswordHash): Promise<boolean> {
     const parts = receiveValueOf(hash).split('$');
     if (parts.length !== 6 || parts[0] !== SCHEME) {
       return false;
@@ -57,7 +60,7 @@ export class ScryptPasswordHasher implements PasswordHasher {
     ) {
       return false;
     }
-    const actual = await derive(typed, salt, { N, r, p });
+    const actual = await derive(receiveValueOf(attempt), salt, { N, r, p });
     return timingSafeEqual(actual, expected);
   }
 }

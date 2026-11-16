@@ -5,6 +5,7 @@ import type { UserIdGenerator } from '../../../src/application/ports/user-id-gen
 import type { UserRepository } from '../../../src/application/ports/user-repository.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import type { Password } from '../../../src/domain/user/password.js';
+import type { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import type { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
@@ -41,14 +42,15 @@ export class InMemoryUserRepository implements UserRepository {
 
 // The hash is the plain password with a prefix. Tests can see that the
 // use case stores the hasher output, not the plain password. As the scrypt
-// adapter does, this double receives the text of the Password.
+// adapter does, this double receives the text of the Password and of the
+// PasswordAttempt.
 export class PrefixPasswordHasher implements PasswordHasher {
   async hash(password: Password): Promise<PasswordHash> {
     return valueOf(PasswordHash.from(`hashed:${receiveValueOf(password)}`));
   }
 
-  async verify(typed: string, hash: PasswordHash): Promise<boolean> {
-    return hash.equals(valueOf(PasswordHash.from(`hashed:${typed}`)));
+  async verify(attempt: PasswordAttempt, hash: PasswordHash): Promise<boolean> {
+    return hash.equals(valueOf(PasswordHash.from(`hashed:${receiveValueOf(attempt)}`)));
   }
 }
 
