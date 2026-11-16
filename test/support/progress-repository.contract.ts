@@ -22,9 +22,9 @@ const OTHER_USER = valueOf(UserId.from(CONTRACT_USER_IDS[1]));
 const FIT = valueOf(GameId.of('fit'));
 const LINES = valueOf(GameId.of('lines'));
 // The key of each progress: one progress per userId and gameId (#107).
-const USER_FIT = ProgressKey.of(USER, FIT);
-const USER_LINES = ProgressKey.of(USER, LINES);
-const OTHER_USER_FIT = ProgressKey.of(OTHER_USER, FIT);
+const USER_FIT = valueOf(ProgressKey.of(USER, FIT));
+const USER_LINES = valueOf(ProgressKey.of(USER, LINES));
+const OTHER_USER_FIT = valueOf(ProgressKey.of(OTHER_USER, FIT));
 const AT = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
 const LATER = syncInstantOf(new Date('2026-11-06T10:05:00.000Z'));
 
@@ -65,7 +65,9 @@ export function describeProgressRepositoryContract(
       await storeProgress(repository, progress);
       // A key built again from equal parts finds the progress.
       const found = await repository.find(
-        ProgressKey.of(valueOf(UserId.from(CONTRACT_USER_IDS[0])), valueOf(GameId.of('fit'))),
+        valueOf(
+          ProgressKey.of(valueOf(UserId.from(CONTRACT_USER_IDS[0])), valueOf(GameId.of('fit'))),
+        ),
       );
 
       expect(progressPartsOf(found)?.key.equals(USER_FIT)).toBe(true);

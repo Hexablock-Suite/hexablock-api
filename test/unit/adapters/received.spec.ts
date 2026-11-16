@@ -99,9 +99,11 @@ describe('received values', () => {
   // call. The helper gives the text of each one: the lock key and the SQL
   // filters of the progress rows keep them.
   it('should_give_the_user_id_and_the_game_id_when_a_progress_key_delivers_them', () => {
-    const key = ProgressKey.of(
-      valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
-      valueOf(GameId.of('fit')),
+    const key = valueOf(
+      ProgressKey.of(
+        valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
+        valueOf(GameId.of('fit')),
+      ),
     );
 
     expect(receiveProgressKeyOf(key)).toEqual({
@@ -122,9 +124,11 @@ describe('received values', () => {
   it('should_give_the_plain_values_of_the_progress_when_a_progress_delivers_its_parts', () => {
     const at = new Date('2026-11-06T10:05:00.000Z');
     const progress = PlayerProgress.start(
-      ProgressKey.of(
-        valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
-        valueOf(GameId.of('fit')),
+      valueOf(
+        ProgressKey.of(
+          valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
+          valueOf(GameId.of('fit')),
+        ),
       ),
       syncInstantOf(at),
     );
@@ -146,9 +150,11 @@ describe('received values', () => {
   it('should_give_a_null_high_score_when_the_progress_has_no_score', () => {
     const at = new Date('2026-11-06T10:00:00.000Z');
     const progress = PlayerProgress.start(
-      ProgressKey.of(
-        valueOf(UserId.from('6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01')),
-        valueOf(GameId.of('lines')),
+      valueOf(
+        ProgressKey.of(
+          valueOf(UserId.from('6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01')),
+          valueOf(GameId.of('lines')),
+        ),
       ),
       syncInstantOf(at),
     );

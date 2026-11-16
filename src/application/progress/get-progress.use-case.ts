@@ -25,7 +25,12 @@ export class GetProgressUseCase implements GetProgress {
   constructor(private readonly progress: ProgressRepository) {}
 
   async execute(request: GetProgressRequest): Promise<Result<PlayerProgress, ProgressProblem>> {
-    const stored = await this.progress.find(ProgressKey.of(request.userId, request.gameId));
+    const key = ProgressKey.of(request.userId, request.gameId);
+    // ProgressKey.of() has no expected failure: its error type is never.
+    if (!key.ok) {
+      return key.error;
+    }
+    const stored = await this.progress.find(key.value);
     return stored === null ? err({ kind: 'progress-not-found' }) : ok(stored);
   }
 }

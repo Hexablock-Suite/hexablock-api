@@ -28,7 +28,8 @@ export const ProgressRowMapper = {
     const highScore = row.highScore === null ? null : storedValue(Score.of(row.highScore), rows);
     const updatedAt = storedValue(SyncInstant.of(row.updatedAt.getTime()), rows);
     const results = resultRows.map((result) => storedValue(buildLevelResult(result), rows));
-    return PlayerProgress.restore(ProgressKey.of(userId, gameId), highScore, updatedAt, results);
+    const key = storedValue(ProgressKey.of(userId, gameId), rows);
+    return PlayerProgress.restore(key, highScore, updatedAt, results);
   },
 
   // The aggregate delivers its parts to the mapper. The mapper receives the
