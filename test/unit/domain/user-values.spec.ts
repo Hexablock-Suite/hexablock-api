@@ -184,6 +184,22 @@ describe('UserId', () => {
     expect(UserId.from(testUserId(1)).equals(UserId.from(testUserId(2)))).toBe(false);
   });
 
+  // A leaderboard lists full ties in one fixed order: the ids in ascending
+  // order of their lower case text (decision of #83).
+  it('should_come_before_another_id_when_its_lower_case_value_sorts_first', () => {
+    const first = UserId.from(testUserId(1));
+    const second = UserId.from(testUserId(2));
+    // The raw text «F…» sorts before «a…», but the lower case text «f…» sorts after it.
+    const upperF = UserId.from('F0000000-0000-4000-8000-000000000000');
+    const lowerA = UserId.from('a0000000-0000-4000-8000-000000000000');
+
+    expect(first.comesBefore(second)).toBe(true);
+    expect(second.comesBefore(first)).toBe(false);
+    expect(first.comesBefore(UserId.from(testUserId(1)))).toBe(false);
+    expect(lowerA.comesBefore(upperF)).toBe(true);
+    expect(upperF.comesBefore(lowerA)).toBe(false);
+  });
+
   // #90: the id leaves only through a delivery to a receiver.
   it('should_have_no_public_value_field_when_the_user_id_leaves_through_a_delivery', () => {
     const userId = UserId.from(ADA_ID);

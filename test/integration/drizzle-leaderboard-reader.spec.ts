@@ -3,7 +3,11 @@ import { resolve } from 'node:path';
 import ts from 'typescript';
 import { DrizzleLeaderboardReader } from '../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
-import { users } from '../../src/adapters/persistence/schema.js';
+import {
+  levelResults,
+  progress as progressRows,
+  users,
+} from '../../src/adapters/persistence/schema.js';
 import { receiveValueOf } from '../../src/adapters/received.js';
 import type { LeaderboardEntry } from '../../src/application/ports/leaderboard-entry.js';
 import { ElapsedTime } from '../../src/domain/progress/elapsed-time.js';
@@ -36,10 +40,18 @@ const READER_SOURCE = resolve(
   '../../src/adapters/persistence/drizzle-leaderboard-reader.ts',
 );
 
-const openDatabases: TestDatabase[] = [];
+// One PGlite database serves the whole file. The start of a PGlite database
+// takes more than one second on a slow runner, so one database for each test
+// reaches the test timeout. Each test empties the three tables before it
+// stores its rows.
+let shared: TestDatabase;
 
-afterEach(async () => {
-  await Promise.all(openDatabases.splice(0).map((database) => database.close()));
+beforeAll(async () => {
+  shared = await createTestDatabase();
+});
+
+afterAll(async () => {
+  await shared.close();
 });
 
 function created<T>(result: Result<T, string>): T {
@@ -70,12 +82,14 @@ interface Played {
   readonly results?: readonly LevelResult[];
 }
 
-// Opens a PGlite database with three players and stores each progress
-// through DrizzleProgressRepository, the one writer of both tables
+// Empties the shared PGlite database, adds three players and stores each
+// progress through DrizzleProgressRepository, the one writer of both tables
 // (R-database-harness).
 async function openDatabase(progresses: readonly Played[]): Promise<TestDatabase> {
-  const database = await createTestDatabase();
-  openDatabases.push(database);
+  const database = shared;
+  await database.db.delete(levelResults);
+  await database.db.delete(progressRows);
+  await database.db.delete(users);
   await database.db.insert(users).values(
     [ADA, GRACE, LINUS].map((id, index) => ({
       id,

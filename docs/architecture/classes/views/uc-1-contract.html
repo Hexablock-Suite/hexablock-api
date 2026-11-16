@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 1 of 4</p>
       <h1>The use case contract and the aspects that wrap it</h1>
       <svg
-        viewBox="0 0 1040 972"
+        viewBox="0 0 1040 988"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc1contract-title uc1contract-desc"
@@ -744,11 +744,21 @@
           GetLevels returns Result&lt;LevelDefinition&lt;unknown&gt;[], never&gt; and UpdateLevels
           Result&lt;void, InvalidLevels&gt;; AppModule wraps UpdateLevels in LoggingAspect (#81).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="868" x2="1016" y2="868" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="886"
+          y="860"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          GetLeaderboard binds UseCase with TRequest → LeaderboardQuery and TResponse →
+          Result&lt;Leaderboard, never&gt;, and AppModule wraps it in LoggingAspect too (#83).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="884" x2="1016" y2="884" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="902"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -758,16 +768,16 @@
         </text>
         <line
           x1="24"
-          y1="904"
+          y1="920"
           x2="52"
-          y2="904"
+          y2="920"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#uc1contract-triangle)"
         />
         <text
           x="60"
-          y="908"
+          y="924"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -776,9 +786,9 @@
         </text>
         <line
           x1="128"
-          y1="904"
+          y1="920"
           x2="156"
-          y2="904"
+          y2="920"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -786,7 +796,7 @@
         />
         <text
           x="164"
-          y="908"
+          y="924"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -795,16 +805,16 @@
         </text>
         <line
           x1="232"
-          y1="904"
+          y1="920"
           x2="260"
-          y2="904"
+          y2="920"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc1contract-open)"
         />
         <text
           x="268"
-          y="908"
+          y="924"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -813,7 +823,7 @@
         </text>
         <rect
           x="24"
-          y="924"
+          y="940"
           width="20"
           height="12"
           rx="2"
@@ -823,7 +833,7 @@
         />
         <text
           x="56"
-          y="933"
+          y="949"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -832,7 +842,7 @@
         </text>
         <rect
           x="264"
-          y="924"
+          y="940"
           width="28"
           height="12"
           rx="2"
@@ -843,7 +853,7 @@
         />
         <text
           x="300"
-          y="933"
+          y="949"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -852,7 +862,7 @@
         </text>
         <rect
           x="470"
-          y="924"
+          y="940"
           width="28"
           height="12"
           rx="2"
@@ -862,7 +872,7 @@
         />
         <text
           x="506"
-          y="933"
+          y="949"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -871,7 +881,7 @@
         </text>
         <rect
           x="616"
-          y="924"
+          y="940"
           width="28"
           height="12"
           rx="2"
@@ -882,7 +892,7 @@
         />
         <text
           x="652"
-          y="933"
+          y="949"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -891,7 +901,7 @@
         </text>
         <rect
           x="24"
-          y="946"
+          y="962"
           width="28"
           height="12"
           rx="2"
@@ -902,7 +912,7 @@
         />
         <text
           x="60"
-          y="955"
+          y="971"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

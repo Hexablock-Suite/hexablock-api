@@ -3,8 +3,10 @@ import { APP_FILTER } from '@nestjs/core';
 import { AuthController } from '../adapters/http/auth.controller.js';
 import { HealthController } from '../adapters/http/health.controller.js';
 import { HttpErrorFilter } from '../adapters/http/http-error.filter.js';
+import { LeaderboardController } from '../adapters/http/leaderboard.controller.js';
 import { LevelsController } from '../adapters/http/levels.controller.js';
 import { ProgressController } from '../adapters/http/progress.controller.js';
+import { DrizzleLeaderboardReader } from '../adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleLevelRepository } from '../adapters/persistence/drizzle-level-repository.js';
 import { DrizzleProgressRepository } from '../adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../adapters/persistence/drizzle-user-repository.js';
@@ -15,12 +17,20 @@ import {
 import { LOGIN, LoginUseCase } from '../application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../application/auth/register.use-case.js';
 import { LoggingAspect } from '../application/aspects/logging-aspect.js';
+import {
+  GET_LEADERBOARD,
+  GetLeaderboardUseCase,
+} from '../application/leaderboard/get-leaderboard.use-case.js';
 import { GET_LEVELS, GetLevelsUseCase } from '../application/levels/get-levels.use-case.js';
 import {
   UPDATE_LEVELS,
   UpdateLevelsUseCase,
 } from '../application/levels/update-levels.use-case.js';
 import { CLOCK, type Clock } from '../application/ports/clock.js';
+import {
+  LEADERBOARD_READER,
+  type LeaderboardReader,
+} from '../application/ports/leaderboard-reader.js';
 import { LEVEL_REPOSITORY, type LevelRepository } from '../application/ports/level-repository.js';
 import { LOGGER, type Logger } from '../application/ports/logger.js';
 import { PASSWORD_HASHER, type PasswordHasher } from '../application/ports/password-hasher.js';
@@ -74,7 +84,13 @@ function levelValidators(): LevelValidators {
 // The composition root: it binds each port to its adapter.
 @Module({
   imports: [DatabaseModule],
-  controllers: [HealthController, AuthController, ProgressController, LevelsController],
+  controllers: [
+    HealthController,
+    AuthController,
+    ProgressController,
+    LevelsController,
+    LeaderboardController,
+  ],
   providers: [
     { provide: CLOCK, useClass: SystemClock },
     { provide: LOGGER, useFactory: (): Logger => new NestLogger() },
@@ -141,6 +157,17 @@ function levelValidators(): LevelValidators {
       inject: [LEVEL_REPOSITORY, LEVEL_VALIDATORS, LOGGER],
       useFactory: (levels: LevelRepository, validators: LevelValidators, logger: Logger) =>
         new LoggingAspect(new UpdateLevelsUseCase(levels, validators), 'UpdateLevels', logger),
+    },
+    {
+      provide: LEADERBOARD_READER,
+      inject: [DATABASE],
+      useFactory: (database: Database): LeaderboardReader => new DrizzleLeaderboardReader(database),
+    },
+    {
+      provide: GET_LEADERBOARD,
+      inject: [LEADERBOARD_READER, LOGGER],
+      useFactory: (leaderboard: LeaderboardReader, logger: Logger) =>
+        new LoggingAspect(new GetLeaderboardUseCase(leaderboard), 'GetLeaderboard', logger),
     },
     // Every route, also the routes of later modules, answers errors with ErrorDto.
     { provide: APP_FILTER, useClass: HttpErrorFilter },

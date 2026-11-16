@@ -1,11 +1,17 @@
 import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { DrizzleLeaderboardReader } from '../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleLevelRepository } from '../../src/adapters/persistence/drizzle-level-repository.js';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../../src/adapters/persistence/drizzle-user-repository.js';
 import { LoggingAspect } from '../../src/application/aspects/logging-aspect.js';
+import {
+  GET_LEADERBOARD,
+  type GetLeaderboard,
+} from '../../src/application/leaderboard/get-leaderboard.use-case.js';
 import { GET_LEVELS, GetLevelsUseCase } from '../../src/application/levels/get-levels.use-case.js';
 import { UPDATE_LEVELS } from '../../src/application/levels/update-levels.use-case.js';
+import { LEADERBOARD_READER } from '../../src/application/ports/leaderboard-reader.js';
 import { LEVEL_REPOSITORY } from '../../src/application/ports/level-repository.js';
 import { LOGGER } from '../../src/application/ports/logger.js';
 import { PROGRESS_REPOSITORY } from '../../src/application/ports/progress-repository.js';
@@ -97,6 +103,35 @@ describe('AppModule account wiring', () => {
     expect(moduleRef.get(LEVEL_REPOSITORY)).toBeInstanceOf(DrizzleLevelRepository);
     expect(moduleRef.get(GET_LEVELS)).toBeInstanceOf(GetLevelsUseCase);
     expect(moduleRef.get(UPDATE_LEVELS)).toBeInstanceOf(LoggingAspect);
+    await moduleRef.close();
+  });
+
+  it('should_bind_the_leaderboard_reader_and_wrap_get_leaderboard_in_logging_aspect_when_app_module_compiles', async () => {
+    stubTestEnvironment();
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+
+    expect(moduleRef.get(LEADERBOARD_READER)).toBeInstanceOf(DrizzleLeaderboardReader);
+    expect(moduleRef.get(GET_LEADERBOARD)).toBeInstanceOf(LoggingAspect);
+    await moduleRef.close();
+  });
+
+  // The stub reader takes the place of the Drizzle one, so no database is
+  // needed. The spy starts after the module is built, so it sees only the
+  // line of the aspect.
+  it('should_run_get_leaderboard_inside_logging_aspect_when_get_leaderboard_port_is_called', async () => {
+    stubTestEnvironment();
+    const empty = () => Promise.resolve([]);
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(LEADERBOARD_READER)
+      .useValue({ levelResults: empty, highScores: empty, standings: empty })
+      .compile();
+    const getLeaderboard = moduleRef.get<GetLeaderboard>(GET_LEADERBOARD);
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+
+    const result = await getLeaderboard.execute({ board: 'global', gameId: GameId.of('hexa-fit') });
+
+    expect(result.ok).toBe(true);
+    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetLeaderboard outcome=success');
     await moduleRef.close();
   });
 

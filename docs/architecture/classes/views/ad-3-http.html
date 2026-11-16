@@ -72,9 +72,9 @@
         <desc id="ad3http-desc">
           Class diagram of layer 3 showing the Auth, Progress, Leaderboard and Levels controllers,
           each holding the input ports it calls, the JwtAuthGuard that the controller decorators
-          apply to progress and level updates and that holds the AuthenticateToken input port, the
-          LevelDto that carries the section for the validator of its gameId, and the HttpErrorFilter
-          for unexpected errors.
+          apply to progress, leaderboard reads and level updates and that holds the
+          AuthenticateToken input port, the LevelDto that carries the section for the validator of
+          its gameId, and the HttpErrorFilter for unexpected errors.
         </desc>
         <defs>
           <marker
@@ -375,7 +375,7 @@
           x="40"
           y="372"
           width="340"
-          height="108"
+          height="172"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -412,23 +412,27 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-03
+          API-FR-03 · guarded by JwtAuthGuard
         </text>
         <line x1="40" y1="432" x2="380" y2="432" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="56" y="448" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - getLeaderboard: GetLeaderboard
         </text>
         <line x1="40" y1="456" x2="380" y2="456" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          textLength="318"
-          lengthAdjust="spacingAndGlyphs"
-          x="56"
-          y="472"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + top(query: LeaderboardQueryDto): Promise&lt;LeaderboardDto&gt;
+        <text x="56" y="472" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + top(gameId: string): Promise&lt;LeaderboardDto&gt;
+        </text>
+        <text x="56" y="488" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + topOfLevel(gameId: string, levelId: string):
+        </text>
+        <text x="78" y="504" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;LeaderboardDto&gt;
+        </text>
+        <text x="56" y="520" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - answer(query: Result&lt;LeaderboardQuery, string[]&gt;):
+        </text>
+        <text x="78" y="536" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;LeaderboardDto&gt;
         </text>
         <!-- Class: JwtAuthGuard («guard») -->
         <rect
@@ -673,8 +677,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The mappers of view 5 translate between DTOs and entities. A controller turns a failed
-          Result into the error body of API-FR-06.
+          The mappers of view 5 and LeaderboardDtoMapper translate between DTOs and entities. A
+          controller turns a failed Result into the error body of API-FR-06.
         </text>
         <text
           x="24"

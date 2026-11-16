@@ -37,7 +37,8 @@ Drizzle repository. It also holds sign-up, sign-in and `GET /auth/me`, the first
 `JwtAuthGuard`, and the progress sync `POST /progress` with its read `GET /progress/{gameId}`,
 both behind the guard. It holds the level schema of DS-6 with the Fit and Sort level validators,
 the level store, the level read `GET /levels` with no guard and the level update `PUT /levels`
-behind the guard. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
+behind the guard. It holds the leaderboard reads `GET /leaderboard/{gameId}` and
+`GET /leaderboard/{gameId}/levels/{levelId}`, both behind the guard. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
 
 ## Architecture
 

@@ -239,6 +239,34 @@
         ],
         "type": "object"
       },
+      "GlobalLeaderboardDto": {
+        "properties": {
+          "gameId": {
+            "example": "hexa-lines",
+            "type": "string"
+          },
+          "highScores": {
+            "description": "The high scores, the higher score first. Empty for a game that keeps no score, such as Fit and Sort.",
+            "items": {
+              "$ref": "#/components/schemas/ScoreEntryDto"
+            },
+            "type": "array"
+          },
+          "standings": {
+            "description": "The totals of the level results: more stars first, then more levels completed, then fewer moves, then less time. Empty for a game with no level results, such as Lines and Merge.",
+            "items": {
+              "$ref": "#/components/schemas/StandingEntryDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "gameId",
+          "highScores",
+          "standings"
+        ],
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -304,6 +332,69 @@
           "version",
           "topology",
           "section"
+        ],
+        "type": "object"
+      },
+      "LevelEntryDto": {
+        "properties": {
+          "elapsedMs": {
+            "example": 45000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "moves": {
+            "example": 12,
+            "minimum": 0,
+            "type": "number"
+          },
+          "rank": {
+            "description": "1 plus the number of rows that are strictly better. A full tie shares a rank, and the next rank skips: 1, 1, 3.",
+            "example": 1,
+            "minimum": 1,
+            "type": "number"
+          },
+          "stars": {
+            "example": 3,
+            "minimum": 0,
+            "type": "number"
+          },
+          "userId": {
+            "description": "The player. A full tie lists its players by userId ascending.",
+            "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rank",
+          "userId",
+          "stars",
+          "moves",
+          "elapsedMs"
+        ],
+        "type": "object"
+      },
+      "LevelLeaderboardDto": {
+        "properties": {
+          "entries": {
+            "description": "More stars first, then fewer moves, then less time (DS-4).",
+            "items": {
+              "$ref": "#/components/schemas/LevelEntryDto"
+            },
+            "type": "array"
+          },
+          "gameId": {
+            "example": "hexa-fit",
+            "type": "string"
+          },
+          "levelId": {
+            "example": "fit-01",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gameId",
+          "levelId",
+          "entries"
         ],
         "type": "object"
       },
@@ -404,6 +495,32 @@
         ],
         "type": "object"
       },
+      "ScoreEntryDto": {
+        "properties": {
+          "highScore": {
+            "example": 2048,
+            "minimum": 0,
+            "type": "number"
+          },
+          "rank": {
+            "description": "1 plus the number of rows that are strictly better. A full tie shares a rank, and the next rank skips: 1, 1, 3.",
+            "example": 1,
+            "minimum": 1,
+            "type": "number"
+          },
+          "userId": {
+            "description": "The player. A full tie lists its players by userId ascending.",
+            "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rank",
+          "userId",
+          "highScore"
+        ],
+        "type": "object"
+      },
       "SeededSourceDto": {
         "properties": {
           "colors": {
@@ -479,6 +596,54 @@
         },
         "required": [
           "maxMoves"
+        ],
+        "type": "object"
+      },
+      "StandingEntryDto": {
+        "properties": {
+          "elapsedMs": {
+            "description": "The total of the elapsed time.",
+            "example": 90000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "levelsCompleted": {
+            "description": "The number of levels with a stored result.",
+            "example": 3,
+            "minimum": 1,
+            "type": "number"
+          },
+          "moves": {
+            "description": "The total of the moves.",
+            "example": 40,
+            "minimum": 0,
+            "type": "number"
+          },
+          "rank": {
+            "description": "1 plus the number of rows that are strictly better. A full tie shares a rank, and the next rank skips: 1, 1, 3.",
+            "example": 1,
+            "minimum": 1,
+            "type": "number"
+          },
+          "stars": {
+            "description": "The total of the stars.",
+            "example": 9,
+            "minimum": 0,
+            "type": "number"
+          },
+          "userId": {
+            "description": "The player. A full tie lists its players by userId ascending.",
+            "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rank",
+          "userId",
+          "stars",
+          "levelsCompleted",
+          "moves",
+          "elapsedMs"
         ],
         "type": "object"
       },
@@ -689,6 +854,124 @@
         },
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/leaderboard/{gameId}": {
+      "get": {
+        "operationId": "LeaderboardController_top",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalLeaderboardDto"
+                }
+              }
+            },
+            "description": "The score board and the standing board of the gameId."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The gameId breaks its rule."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "leaderboard"
+        ]
+      }
+    },
+    "/leaderboard/{gameId}/levels/{levelId}": {
+      "get": {
+        "operationId": "LeaderboardController_topOfLevel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "levelId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelLeaderboardDto"
+                }
+              }
+            },
+            "description": "The board of one level."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The gameId or the levelId breaks its rule."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The bearer token is missing, malformed, expired or signed with another key."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "leaderboard"
         ]
       }
     },
