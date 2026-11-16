@@ -12,6 +12,7 @@ import { InMemoryLevelRepository } from '../../support/in-memory-level-repositor
 import { levelJson, levelValidators, type LevelJson } from '../../support/level-format.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
 import { listedJson, storeLevel } from '../../support/level-repository.contract.js';
+import { valueOf } from '../../support/result.js';
 
 // The request of a batch, built as LevelDtoMapper builds it.
 function batchOf(...levels: LevelJson[]): UpdateLevelsRequest {
@@ -25,8 +26,8 @@ function invalidLevels(...problems: [gameId: string, levelId: string, problem: s
     error: {
       kind: 'invalid-levels',
       problems: problems.map(([gameId, levelId, problem]) => ({
-        gameId: GameId.of(gameId),
-        levelId: LevelId.of(levelId),
+        gameId: valueOf(GameId.of(gameId)),
+        levelId: valueOf(LevelId.of(levelId)),
         problem,
       })),
     },

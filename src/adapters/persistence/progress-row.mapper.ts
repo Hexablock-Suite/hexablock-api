@@ -1,14 +1,11 @@
-import { ElapsedTime } from '../../domain/progress/elapsed-time.js';
 import { GameId } from '../../domain/progress/game-id.js';
-import { LevelId } from '../../domain/progress/level-id.js';
-import { LevelResult } from '../../domain/progress/level-result.js';
-import { Moves } from '../../domain/progress/moves.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { Score } from '../../domain/progress/score.js';
-import { Stars } from '../../domain/progress/stars.js';
 import { UserId } from '../../domain/user/user-id.js';
+import { buildLevelResult } from '../built.js';
 import { receiveProgressOf } from '../received.js';
 import type { levelResults, progress } from './schema.js';
+import { storedValue } from './stored-value.js';
 
 export type ProgressRow = typeof progress.$inferSelect;
 export type LevelResultRow = typeof levelResults.$inferSelect;
@@ -17,19 +14,14 @@ export type LevelResultRow = typeof levelResults.$inferSelect;
 // level_results rows, and joins them back (classes.md decision 2).
 export const ProgressRowMapper = {
   // The mapper builds the value objects of the row and of each stored result.
-  // start() takes the key and the instant, and restore() records the rest.
+  // start() takes the key and the instant, and restore() records the rest. A
+  // stored value that breaks its rule is a server fault, so the mapper throws.
   toAggregate(row: ProgressRow, resultRows: readonly LevelResultRow[]): PlayerProgress {
-    const userId = UserId.from(row.userId);
-    const gameId = GameId.of(row.gameId);
-    const highScore = row.highScore === null ? null : Score.of(row.highScore);
-    const results = resultRows.map(({ levelId, stars, moves, elapsedMs }) =>
-      LevelResult.of(
-        LevelId.of(levelId),
-        Stars.of(stars),
-        Moves.of(moves),
-        ElapsedTime.ofMs(elapsedMs),
-      ),
-    );
+    const rows = `The progress rows of user ${row.userId} and game ${row.gameId}`;
+    const userId = storedValue(UserId.from(row.userId), rows);
+    const gameId = storedValue(GameId.of(row.gameId), rows);
+    const highScore = row.highScore === null ? null : storedValue(Score.of(row.highScore), rows);
+    const results = resultRows.map((result) => storedValue(buildLevelResult(result), rows));
     return PlayerProgress.restore(
       PlayerProgress.start(userId, gameId, row.updatedAt),
       highScore,

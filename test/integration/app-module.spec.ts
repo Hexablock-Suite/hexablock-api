@@ -39,6 +39,7 @@ import { NestLogger } from '../../src/infrastructure/logging/nest-logger.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
 import { InMemoryProgressRepository } from '../support/in-memory-progress-repository.js';
 import { testUserId } from '../support/user-ids.js';
+import { valueOf } from '../support/result.js';
 
 // AppModule is the composition root: it binds each account port to one adapter.
 describe('AppModule account wiring', () => {
@@ -84,8 +85,8 @@ describe('AppModule account wiring', () => {
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
 
     const result = await sync.execute({
-      userId: UserId.from(testUserId(1)),
-      gameId: GameId.of('hexa-lines'),
+      userId: valueOf(UserId.from(testUserId(1))),
+      gameId: valueOf(GameId.of('hexa-lines')),
       results: [],
     });
 
@@ -128,7 +129,10 @@ describe('AppModule account wiring', () => {
     const getLeaderboard = moduleRef.get<GetLeaderboard>(GET_LEADERBOARD);
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
 
-    const result = await getLeaderboard.execute({ board: 'global', gameId: GameId.of('hexa-fit') });
+    const result = await getLeaderboard.execute({
+      board: 'global',
+      gameId: valueOf(GameId.of('hexa-fit')),
+    });
 
     expect(result.ok).toBe(true);
     expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetLeaderboard outcome=success');

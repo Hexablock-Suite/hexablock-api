@@ -19,10 +19,11 @@ import type { Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { testUserId } from '../../support/user-ids.js';
+import { valueOf } from '../../support/result.js';
 
-const FIT = GameId.of('hexa-fit');
-const LINES = GameId.of('hexa-lines');
-const LEVEL = LevelId.of('fit-01');
+const FIT = valueOf(GameId.of('hexa-fit'));
+const LINES = valueOf(GameId.of('hexa-lines'));
+const LEVEL = valueOf(LevelId.of('fit-01'));
 
 function created<T>(result: Result<T, string>): T {
   if (!result.ok) throw new Error(result.error);
@@ -30,7 +31,7 @@ function created<T>(result: Result<T, string>): T {
 }
 
 function player(n: number): UserId {
-  return UserId.from(testUserId(n));
+  return valueOf(UserId.from(testUserId(n)));
 }
 
 function levelResult(stars: number, moves: number, elapsedMs: number): LevelResult {
@@ -40,10 +41,10 @@ function levelResult(stars: number, moves: number, elapsedMs: number): LevelResu
 function standing(stars: number, levels: number, moves: number, elapsedMs: number): Standing {
   return created(
     Standing.of(
-      Stars.of(stars),
+      valueOf(Stars.of(stars)),
       created(LevelsCompleted.of(levels)),
-      Moves.of(moves),
-      ElapsedTime.ofMs(elapsedMs),
+      valueOf(Moves.of(moves)),
+      valueOf(ElapsedTime.ofMs(elapsedMs)),
     ),
   );
 }
@@ -114,9 +115,9 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
 
   // The global board of Lines and Merge: the higher score wins (S3-03).
   it('should_order_the_high_scores_by_the_higher_score_when_the_reader_gives_entries_in_no_order', async () => {
-    const low = entry(1, Score.of(80));
-    const high = entry(2, Score.of(2048));
-    const middle = entry(3, Score.of(120));
+    const low = entry(1, valueOf(Score.of(80)));
+    const high = entry(2, valueOf(Score.of(2048)));
+    const middle = entry(3, valueOf(Score.of(120)));
     const reader = readerOf({ highScores: [low, high, middle] });
 
     const board = await boardOf(reader, { board: 'global', gameId: LINES });
@@ -166,9 +167,9 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
     const levelTieA = entry(1, levelResult(3, 10, 40_000));
     const levelTieB = entry(2, levelResult(3, 10, 40_000));
     const levelLast = entry(3, levelResult(1, 10, 40_000));
-    const scoreTieA = entry(1, Score.of(120));
-    const scoreTieB = entry(2, Score.of(120));
-    const scoreLast = entry(3, Score.of(80));
+    const scoreTieA = entry(1, valueOf(Score.of(120)));
+    const scoreTieB = entry(2, valueOf(Score.of(120)));
+    const scoreLast = entry(3, valueOf(Score.of(80)));
     const standingFirst = entry(1, standing(9, 3, 40, 90_000));
     const standingTieA = entry(2, standing(5, 2, 20, 50_000));
     const standingTieB = entry(3, standing(5, 2, 20, 50_000));
@@ -197,7 +198,7 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
 
   // Equal entries come out in one fixed order: userId ascending.
   it('should_list_full_ties_by_user_id_ascending_when_the_reader_gives_them_in_another_order', async () => {
-    const tied = [4, 2, 3, 1].map((n) => entry(n, Score.of(500)));
+    const tied = [4, 2, 3, 1].map((n) => entry(n, valueOf(Score.of(500))));
     const reader = readerOf({ highScores: tied });
 
     const board = await boardOf(reader, { board: 'global', gameId: LINES });
@@ -238,7 +239,7 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
   // GetLeaderboard binds UseCase, so LoggingAspect wraps it. The use case
   // holds no logging code (decision 7).
   it('should_log_get_leaderboard_success_and_return_the_board_unchanged_when_logging_aspect_wraps_it', async () => {
-    const score = entry(1, Score.of(120));
+    const score = entry(1, valueOf(Score.of(120)));
     const logger = { log: vi.fn<(entry: UseCaseLogEntry) => void>() } satisfies Logger;
     const inner = new GetLeaderboardUseCase(readerOf({ highScores: [score] }));
     const aspect = new LoggingAspect(inner, 'GetLeaderboard', logger);

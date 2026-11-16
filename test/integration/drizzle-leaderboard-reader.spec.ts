@@ -17,7 +17,6 @@ import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { LevelsCompleted } from '../../src/domain/progress/levels-completed.js';
 import { Moves } from '../../src/domain/progress/moves.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
-import { ProgressError } from '../../src/domain/progress/progress-error.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { Standing } from '../../src/domain/progress/standing.js';
 import { Stars } from '../../src/domain/progress/stars.js';
@@ -27,14 +26,15 @@ import { levelResultOf } from '../support/level-results.js';
 import { storeProgress } from '../support/progress-repository.contract.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 import { testUserId } from '../support/user-ids.js';
+import { valueOf } from '../support/result.js';
 
 const ADA = testUserId(1);
 const GRACE = testUserId(2);
 const LINUS = testUserId(3);
-const FIT = GameId.of('fit');
-const SORT = GameId.of('sort');
-const LINES = GameId.of('lines');
-const MERGE = GameId.of('merge');
+const FIT = valueOf(GameId.of('fit'));
+const SORT = valueOf(GameId.of('sort'));
+const LINES = valueOf(GameId.of('lines'));
+const MERGE = valueOf(GameId.of('merge'));
 const AT = new Date('2026-11-15T10:00:00.000Z');
 const READER_SOURCE = resolve(
   import.meta.dirname,
@@ -67,10 +67,10 @@ function level(levelId: string, stars: number, moves: number, elapsedMs: number)
 function standing(stars: number, levels: number, moves: number, elapsedMs: number): Standing {
   return created(
     Standing.of(
-      Stars.of(stars),
+      valueOf(Stars.of(stars)),
       created(LevelsCompleted.of(levels)),
-      Moves.of(moves),
-      ElapsedTime.ofMs(elapsedMs),
+      valueOf(Moves.of(moves)),
+      valueOf(ElapsedTime.ofMs(elapsedMs)),
     ),
   );
 }
@@ -101,9 +101,9 @@ async function openDatabase(progresses: readonly Played[]): Promise<TestDatabase
   );
   const repository = new DrizzleProgressRepository(database.db);
   for (const { userId, gameId, score, results = [] } of progresses) {
-    const progress = PlayerProgress.start(UserId.from(userId), gameId, AT);
+    const progress = PlayerProgress.start(valueOf(UserId.from(userId)), gameId, AT);
     if (score !== undefined) {
-      progress.recordScore(Score.of(score), AT);
+      progress.recordScore(valueOf(Score.of(score)), AT);
     }
     for (const result of results) {
       progress.recordLevel(result);
@@ -152,7 +152,7 @@ describe('DrizzleLeaderboardReader', () => {
     ]);
     const reader = new DrizzleLeaderboardReader(database.db);
 
-    const board = await reader.levelResults(FIT, LevelId.of('level-01'));
+    const board = await reader.levelResults(FIT, valueOf(LevelId.of('level-01')));
 
     expect(byPlayer(board)).toEqual([
       { userId: ADA, result: level('level-01', 3, 12, 40_000) },
@@ -196,8 +196,8 @@ describe('DrizzleLeaderboardReader', () => {
     const board = await reader.highScores(LINES);
 
     expect(byPlayer(board)).toEqual([
-      { userId: ADA, result: Score.of(500) },
-      { userId: GRACE, result: Score.of(700) },
+      { userId: ADA, result: valueOf(Score.of(500)) },
+      { userId: GRACE, result: valueOf(Score.of(700)) },
     ]);
   });
 
@@ -216,7 +216,9 @@ describe('DrizzleLeaderboardReader', () => {
     ]);
     const reader = new DrizzleLeaderboardReader(database.db);
 
-    await expect(reader.standings(FIT)).rejects.toThrow(ProgressError);
+    await expect(reader.standings(FIT)).rejects.toThrow(
+      new Error(`The level_results rows of user ${ADA} break the rule invalid-elapsed-time.`),
+    );
   });
 
   // The users table belongs to the user module. The reader reads only the

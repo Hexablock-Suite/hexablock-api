@@ -3,10 +3,7 @@ import type {
   LeaderboardQuery,
   RankedEntry,
 } from '../../application/leaderboard/get-leaderboard.use-case.js';
-import { withProgressRules } from '../../application/progress/progress-problem.js';
-import { GameId } from '../../domain/progress/game-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
-import { LevelId } from '../../domain/progress/level-id.js';
 import type { Score } from '../../domain/progress/score.js';
 import type { Standing } from '../../domain/progress/standing.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
@@ -17,26 +14,28 @@ import type {
   ScoreEntryDto,
   StandingEntryDto,
 } from './leaderboard.dto.js';
+import { gameIdFrom, levelIdFrom } from './progress-values.js';
 
 // Translates between the leaderboard routes and GetLeaderboard (decision 12).
 // The controller holds no translation code. The mapper builds the domain
 // values of each query, so the use case gets them built. A value that breaks
-// its rule gives the message of the rule as the one problem.
+// its rule gives the text of the rule as the one problem: the factory gives
+// the code, and progress-values.ts writes the text.
 export const LeaderboardDtoMapper = {
   // The gameId of a global board comes from the path.
   toGlobalQuery(gameId: string): Result<LeaderboardQuery, string[]> {
-    const built = withProgressRules(() => GameId.of(gameId));
-    return built.ok ? ok({ board: 'global', gameId: built.value }) : err(built.error.problems);
+    const built = gameIdFrom(gameId);
+    return built.ok ? ok({ board: 'global', gameId: built.value }) : err([built.error]);
   },
 
   // The gameId and the levelId of a level board come from the path. The
   // values are built in one order: the gameId, then the levelId.
   toLevelQuery(gameId: string, levelId: string): Result<LeaderboardQuery, string[]> {
-    const built = withProgressRules(() => ({
-      gameId: GameId.of(gameId),
-      levelId: LevelId.of(levelId),
-    }));
-    return built.ok ? ok({ board: 'level', ...built.value }) : err(built.error.problems);
+    const builtGameId = gameIdFrom(gameId);
+    if (!builtGameId.ok) return err([builtGameId.error]);
+    const builtLevelId = levelIdFrom(levelId);
+    if (!builtLevelId.ok) return err([builtLevelId.error]);
+    return ok({ board: 'level', gameId: builtGameId.value, levelId: builtLevelId.value });
   },
 
   // The mapper receives the value that each value object delivers. It keeps

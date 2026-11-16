@@ -18,10 +18,11 @@ export class JwtTokenIssuer implements TokenIssuer {
   verify(token: SessionToken): UserId | null {
     try {
       const { sub } = this.jwt.verify<{ sub?: unknown }>(token);
-      return typeof sub === 'string' && sub.length > 0 ? UserId.from(sub) : null;
+      // A sub that is not a UUID gives a failed UserId, so the answer is null.
+      const userId = typeof sub === 'string' ? UserId.from(sub) : null;
+      return userId?.ok === true ? userId.value : null;
     } catch {
-      // A bad signature, an expired token, a malformed token or a sub that
-      // is not a UUID (UserId.from throws for it).
+      // A bad signature, an expired token or a malformed token.
       return null;
     }
   }

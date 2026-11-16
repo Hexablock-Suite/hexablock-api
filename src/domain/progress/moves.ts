@@ -1,16 +1,16 @@
+import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
-import { ProgressError } from './progress-error.js';
+
+// The code of the broken rule. The border writes the message (decision 11).
+export type MovesProblem = 'invalid-moves';
 
 // Value object for the moves that a player uses in one level. It is a non-negative
 // safe integer.
 export class Moves {
   private constructor(private readonly value: number) {}
 
-  static of(value: number): Moves {
-    if (!Number.isSafeInteger(value) || value < 0) {
-      throw new ProgressError(`moves must be a non-negative integer, got ${value}.`);
-    }
-    return new Moves(value);
+  static of(value: number): Result<Moves, MovesProblem> {
+    return Number.isSafeInteger(value) && value >= 0 ? ok(new Moves(value)) : err('invalid-moves');
   }
 
   // Delivers the value to a receiver of the border. No operation returns it.

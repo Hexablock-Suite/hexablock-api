@@ -3,8 +3,14 @@ import type { UserIdGenerator } from '../../application/ports/user-id-generator.
 import { UserId } from '../../domain/user/user-id.js';
 
 // Production adapter of the UserIdGenerator port: a random UUID v4.
+// randomUUID() always gives a UUID, so a failed UserId is a defect of the
+// code, and the adapter throws.
 export class RandomUserIdGenerator implements UserIdGenerator {
   next(): UserId {
-    return UserId.from(randomUUID());
+    const id = UserId.from(randomUUID());
+    if (!id.ok) {
+      throw new Error('randomUUID() must give a UUID.');
+    }
+    return id.value;
   }
 }

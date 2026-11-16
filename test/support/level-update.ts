@@ -26,8 +26,8 @@ export function a5FailingFitJson(levelId = 'fit-01', version = 1): LevelJson {
 // of the common part as domain values, and the section as it arrives.
 export function incomingLevel(json: LevelJson): IncomingLevel {
   return {
-    gameId: GameId.of(json.gameId),
-    levelId: LevelId.of(json.levelId),
+    gameId: valueOf(GameId.of(json.gameId)),
+    levelId: valueOf(LevelId.of(json.levelId)),
     order: valueOf(LevelOrder.of(json.order)),
     version: valueOf(LevelVersion.of(json.version)),
     topology: valueOf(TopologyId.of(json.topology)),

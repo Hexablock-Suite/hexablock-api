@@ -5,6 +5,7 @@ import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
 import { type UserParts, userPartsOf } from '../../support/recording-receiver.js';
 import { testUserId } from '../../support/user-ids.js';
+import { valueOf } from '../../support/result.js';
 
 function nameOf(raw: string): Username {
   const result = Username.create(raw);
@@ -13,7 +14,11 @@ function nameOf(raw: string): Username {
 }
 
 function userOf(n: number, name: string, hash: string): User {
-  return User.register(UserId.from(testUserId(n)), nameOf(name), PasswordHash.from(hash));
+  return User.register(
+    valueOf(UserId.from(testUserId(n))),
+    nameOf(name),
+    valueOf(PasswordHash.from(hash)),
+  );
 }
 
 // Test double for the PasswordVerifier interface. It keeps each call and
@@ -47,9 +52,9 @@ describe('User identity', () => {
 // build it. #96: it delivers its parts to a receiver of the border, as a
 // value object delivers its datum (decision 15).
 describe('User delivery', () => {
-  const ID = UserId.from(testUserId(1));
+  const ID = valueOf(UserId.from(testUserId(1)));
   const NAME = nameOf('Ada');
-  const HASH = PasswordHash.from('$one');
+  const HASH = valueOf(PasswordHash.from('$one'));
 
   // Vitest does not check types. `pnpm typecheck` fails on a directive below
   // when its field, the constructor or the snapshot is public.
@@ -92,9 +97,9 @@ describe('User delivery', () => {
     const user = User.register(ID, NAME, HASH);
     const copy = userPartsOf(user) as { -readonly [K in keyof UserParts]: UserParts[K] };
 
-    copy.id = UserId.from(testUserId(2));
+    copy.id = valueOf(UserId.from(testUserId(2)));
     copy.username = nameOf('grace');
-    copy.passwordHash = PasswordHash.from('$two');
+    copy.passwordHash = valueOf(PasswordHash.from('$two'));
 
     const parts = userPartsOf(user);
     expect(parts).not.toBe(copy);
@@ -122,12 +127,12 @@ describe('User delivery', () => {
   // The value objects already guard their rules, so the factories add none:
   // every valid id, name and hash builds a user.
   it.each([
-    { id: UserId.from('00000000-0000-0000-0000-000000000000'), name: 'abc', hash: 'x' },
-    { id: UserId.from(testUserId(2).toUpperCase()), name: 'A'.repeat(32), hash: '$' },
+    { id: valueOf(UserId.from('00000000-0000-0000-0000-000000000000')), name: 'abc', hash: 'x' },
+    { id: valueOf(UserId.from(testUserId(2).toUpperCase())), name: 'A'.repeat(32), hash: '$' },
   ])(
     'should_build_the_user_when_register_and_restore_take_any_valid_values',
     ({ id, name, hash }) => {
-      const parts = { id, username: nameOf(name), passwordHash: PasswordHash.from(hash) };
+      const parts = { id, username: nameOf(name), passwordHash: valueOf(PasswordHash.from(hash)) };
 
       expect(userPartsOf(User.register(parts.id, parts.username, parts.passwordHash))).toEqual(
         parts,
@@ -149,8 +154,8 @@ describe('User password check', () => {
   });
 
   it('should_pass_the_typed_text_and_its_own_hash_to_the_verifier_when_a_typed_password_is_checked', async () => {
-    const hash = PasswordHash.from('$one');
-    const user = User.register(UserId.from(testUserId(1)), nameOf('ada'), hash);
+    const hash = valueOf(PasswordHash.from('$one'));
+    const user = User.register(valueOf(UserId.from(testUserId(1))), nameOf('ada'), hash);
     const verifier = new RecordingVerifier(true);
 
     await user.passwordMatches('short', verifier);

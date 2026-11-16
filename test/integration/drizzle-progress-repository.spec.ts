@@ -7,7 +7,6 @@ import { GameId } from '../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import { Score } from '../../src/domain/progress/score.js';
-import { ProgressError } from '../../src/domain/progress/progress-error.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
 import { levelResultOf } from '../support/level-results.js';
@@ -18,12 +17,13 @@ import {
 } from '../support/progress-repository.contract.js';
 import { progressPartsOf } from '../support/recording-receiver.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
+import { valueOf } from '../support/result.js';
 
 // The text that the UserId delivers: the user_id of the rows.
 const ADA_VALUE = CONTRACT_USER_IDS[0];
-const ADA = UserId.from(ADA_VALUE);
-const UNKNOWN = UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d');
-const FIT = GameId.of('fit');
+const ADA = valueOf(UserId.from(ADA_VALUE));
+const UNKNOWN = valueOf(UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d'));
+const FIT = valueOf(GameId.of('fit'));
 const AT = new Date('2026-11-06T10:00:00.000Z');
 const LATER = new Date('2026-11-06T10:05:00.000Z');
 
@@ -154,13 +154,13 @@ describe('DrizzleProgressRepository', () => {
     const repository = new DrizzleProgressRepository(database.db);
     await storeProgress(repository, PlayerProgress.start(ADA, FIT, AT));
     const second = PlayerProgress.start(ADA, FIT, AT);
-    second.recordScore(Score.of(300), LATER);
+    second.recordScore(valueOf(Score.of(300)), LATER);
 
     await storeProgress(repository, second);
 
     expect(await countRows(database, 'progress')).toBe(1);
     const found = await repository.find(ADA, FIT);
-    expect(progressPartsOf(found)?.highScore?.equals(Score.of(300))).toBe(true);
+    expect(progressPartsOf(found)?.highScore?.equals(valueOf(Score.of(300)))).toBe(true);
     expect(progressPartsOf(found)?.updatedAt.toISOString()).toBe(LATER.toISOString());
   });
 
@@ -175,15 +175,15 @@ describe('DrizzleProgressRepository', () => {
     const syncRequest = (score: number) => ({
       userId: ADA,
       gameId: FIT,
-      score: Score.of(score),
+      score: valueOf(Score.of(score)),
       results: [],
     });
 
     await Promise.all([sync.execute(syncRequest(500)), sync.execute(syncRequest(100))]);
 
-    expect(progressPartsOf(await repository.find(ADA, FIT))?.highScore?.equals(Score.of(500))).toBe(
-      true,
-    );
+    expect(
+      progressPartsOf(await repository.find(ADA, FIT))?.highScore?.equals(valueOf(Score.of(500))),
+    ).toBe(true);
     expect(await countRows(database, 'progress')).toBe(1);
   });
 
@@ -240,34 +240,31 @@ describe('DrizzleProgressRepository', () => {
 
   // find() filters on a valid GameId, so it never reads a row with another
   // game_id. The test calls the mapper of the adapter directly: a stored
-  // row must pass the domain rules, as PlayerProgress.start() and restore() say.
-  it('should_reject_stored_row_when_game_id_is_not_a_slug', () => {
+  // row must pass the domain rules. A stored value that breaks its rule is a
+  // server fault, so the mapper throws an Error with the code of the rule.
+  it('should_throw_a_server_fault_with_the_code_of_the_rule_when_a_stored_game_id_is_not_a_slug', () => {
     const row = { userId: ADA_VALUE, gameId: 'Hexa Lines', highScore: null, updatedAt: AT };
 
-    expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(ProgressError);
     expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
-      'gameId must be a lowercase slug, got "Hexa Lines".',
+      new Error(
+        `The progress rows of user ${ADA_VALUE} and game Hexa Lines break the rule invalid-game-id.`,
+      ),
     );
   });
 
-  // The check constraint of the column is not the only guard: Score checks
-  // the stored number again.
+  // The column has no check constraint: Score checks the stored number again.
   it.each([-1, 2.5, 2 ** 53])(
-    'should_reject_stored_row_when_high_score_breaks_its_rule',
+    'should_throw_a_server_fault_with_the_code_of_the_rule_when_a_stored_high_score_breaks_its_rule',
     (highScore) => {
       const row = { userId: ADA_VALUE, gameId: 'fit', highScore, updatedAt: AT };
 
-      expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(ProgressError);
+      expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
+        new Error(
+          `The progress rows of user ${ADA_VALUE} and game fit break the rule invalid-score.`,
+        ),
+      );
     },
   );
-
-  it('should_name_the_rule_and_the_value_when_a_stored_high_score_is_rejected', () => {
-    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: -1, updatedAt: AT };
-
-    expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
-      'score must be a non-negative integer, got -1.',
-    );
-  });
 
   // The level_results columns keep text and numbers.
   it('should_write_level_results_as_text_and_numbers_when_aggregate_becomes_rows', () => {
@@ -291,20 +288,36 @@ describe('DrizzleProgressRepository', () => {
     );
   });
 
-  // A stored level result must pass the rules of its value objects.
-  it('should_reject_stored_level_result_when_a_column_breaks_its_rule', () => {
-    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT };
-    const stored = { userId: ADA_VALUE, gameId: 'fit', levelId: 'fit-01', stars: 3, moves: 12 };
+  // A stored level result must pass the rules of its value objects. The
+  // mapper combines the four Results, and the first broken rule names its code.
+  it.each([
+    [{ levelId: ' ', stars: -1 }, 'invalid-level-id'],
+    [{ stars: -1, moves: -1 }, 'invalid-stars'],
+    [{ moves: 1.5, elapsedMs: -1 }, 'invalid-moves'],
+    [{ elapsedMs: -1 }, 'invalid-elapsed-time'],
+  ])(
+    'should_throw_a_server_fault_with_the_first_broken_rule_when_a_stored_level_result_breaks_a_rule',
+    (broken, code) => {
+      const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT };
+      const stored = {
+        userId: ADA_VALUE,
+        gameId: 'fit',
+        levelId: 'fit-01',
+        stars: 3,
+        moves: 12,
+        elapsedMs: 45_000,
+      };
 
-    expect(() => ProgressRowMapper.toAggregate(row, [{ ...stored, elapsedMs: -1 }])).toThrow(
-      'elapsedMs must be a non-negative integer, got -1.',
-    );
-  });
+      expect(() => ProgressRowMapper.toAggregate(row, [{ ...stored, ...broken }])).toThrow(
+        new Error(`The progress rows of user ${ADA_VALUE} and game fit break the rule ${code}.`),
+      );
+    },
+  );
 
   // The row keeps a number: the high_score column does not change.
   it('should_write_the_high_score_as_a_number_or_null_when_aggregate_becomes_a_row', () => {
     const scored = PlayerProgress.start(ADA, FIT, AT);
-    scored.recordScore(Score.of(120), LATER);
+    scored.recordScore(valueOf(Score.of(120)), LATER);
 
     expect(ProgressRowMapper.toProgressRow(scored)).toEqual({
       userId: ADA_VALUE,

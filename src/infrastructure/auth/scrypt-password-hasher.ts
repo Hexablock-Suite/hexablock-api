@@ -32,7 +32,13 @@ export class ScryptPasswordHasher implements PasswordHasher {
       salt.toString('base64url'),
       key.toString('base64url'),
     ].join('$');
-    return PasswordHash.from(stored);
+    // The stored form always holds the scheme, so a failed PasswordHash is a
+    // defect of the code, and the adapter throws.
+    const hash = PasswordHash.from(stored);
+    if (!hash.ok) {
+      throw new Error('The stored form of a hash must not be empty.');
+    }
+    return hash.value;
   }
 
   // The typed text is a plain string: a wrong password can be shorter than any Password.

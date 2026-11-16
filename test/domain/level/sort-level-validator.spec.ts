@@ -23,12 +23,14 @@ describe('SortLevelValidator', () => {
   // The composition root registers the strategy under the Sort gameId.
   it('should_build_the_sort_level_when_the_sort_example_of_the_format_document_is_checked', () => {
     const example = levelExample('hexa-sort');
-    const validators = LevelValidators.of([[GameId.of('hexa-sort'), new SortLevelValidator()]]);
+    const validators = LevelValidators.of([
+      [valueOf(GameId.of('hexa-sort')), new SortLevelValidator()],
+    ]);
 
     const section = new SortLevelValidator().sectionOf(example.section, HEX);
     const checked = validators.check(
-      GameId.of(example.gameId),
-      LevelId.of(example.levelId),
+      valueOf(GameId.of(example.gameId)),
+      valueOf(LevelId.of(example.levelId)),
       valueOf(LevelOrder.of(example.order)),
       valueOf(LevelVersion.of(example.version)),
       valueOf(TopologyId.of(example.topology)),
@@ -79,10 +81,9 @@ describe('SortLevelValidator', () => {
     });
   });
 
-  // Moves.of throws ProgressError until #103, and returns a Result after it.
-  // The test asserts only what sectionOf() returns, so it holds in both
-  // cases: a bad level file never gives a server error. No level exists for
-  // the rejected section.
+  // Moves.of() returns a failed Result for a negative limit (#103), and the
+  // section turns it into its level problem. A bad level file never gives a
+  // server error. No level exists for the rejected section.
   it.each([{ stars: [{ maxMoves: -1 }] }, { stars: [{ maxMoves: 40 }, { maxMoves: -5 }] }])(
     'should_return_invalid_stars_without_a_throw_when_a_star_threshold_is_negative',
     ({ stars }) => {

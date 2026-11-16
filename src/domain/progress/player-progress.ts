@@ -1,6 +1,5 @@
 import { GameId } from './game-id.js';
 import { LevelResult } from './level-result.js';
-import { ProgressError } from './progress-error.js';
 import { Score } from './score.js';
 import { UserId } from '../user/user-id.js';
 
@@ -24,7 +23,10 @@ export interface PlayerProgressReceiver<TInstant> {
 // recordLevel() is the only way to add one. highScore and updatedAt follow the proposal of
 // classes.md decision 3. The instant is a parameter: the use case reads it
 // from the Clock port. The aggregate has no getter and no snapshot:
-// deliverTo() gives its parts to a receiver of the border.
+// deliverTo() gives its parts to a receiver of the border. A broken rule of
+// a value stops at its factory, which returns a failed Result (decision 11).
+// So a wrong argument here is a defect of the caller, and its guard throws a
+// TypeError or a RangeError.
 export class PlayerProgress {
   // One result per level, in the order of the first record. It holds the
   // best result of each level by the order of DS-4 (DS-12). A game has few
@@ -40,10 +42,10 @@ export class PlayerProgress {
 
   static start(userId: UserId, gameId: GameId, at: Date): PlayerProgress {
     if (!(userId instanceof UserId)) {
-      throw new ProgressError('A progress needs a userId.');
+      throw new TypeError('A progress needs a userId.');
     }
     if (!(gameId instanceof GameId)) {
-      throw new ProgressError('A progress needs a gameId.');
+      throw new TypeError('A progress needs a gameId.');
     }
     return new PlayerProgress(userId, gameId, null, epochMsOf(at));
   }
@@ -60,7 +62,7 @@ export class PlayerProgress {
     results: readonly LevelResult[],
   ): PlayerProgress {
     if (!(started instanceof PlayerProgress)) {
-      throw new ProgressError('restore needs a progress that start() made.');
+      throw new TypeError('restore needs a progress that start() made.');
     }
     const progress = new PlayerProgress(started.userId, started.gameId, null, started.updatedAtMs);
     if (highScore !== null) {
@@ -102,7 +104,7 @@ export class PlayerProgress {
   // better than the stored one changes nothing, so a tie keeps the stored one.
   recordLevel(result: LevelResult): void {
     if (!(result instanceof LevelResult)) {
-      throw new ProgressError('recordLevel needs a LevelResult.');
+      throw new TypeError('recordLevel needs a LevelResult.');
     }
     const index = this.levelResults.findIndex((stored) => stored.isForSameLevelAs(result));
     if (index === -1) {
@@ -116,7 +118,7 @@ export class PlayerProgress {
 // Score guards the rule of a valid score. The aggregate takes only a Score.
 function checkedScore(score: Score): Score {
   if (!(score instanceof Score)) {
-    throw new ProgressError('A high score must be a Score.');
+    throw new TypeError('A high score must be a Score.');
   }
   return score;
 }
@@ -124,7 +126,7 @@ function checkedScore(score: Score): Score {
 function epochMsOf(at: Date): number {
   const epochMs = at instanceof Date ? at.getTime() : Number.NaN;
   if (Number.isNaN(epochMs)) {
-    throw new ProgressError('The instant must be a valid Date.');
+    throw new RangeError('The instant must be a valid Date.');
   }
   return epochMs;
 }

@@ -17,8 +17,8 @@ import {
 
 // A level is born valid (#77): LevelDefinition.of() builds a level only from
 // a section that its section type accepted.
-const FIT = GameId.of('hexa-fit');
-const FIT_01 = LevelId.of('fit-01');
+const FIT = valueOf(GameId.of('hexa-fit'));
+const FIT_01 = valueOf(LevelId.of('fit-01'));
 const FIRST = valueOf(LevelOrder.of(1));
 const V1 = valueOf(LevelVersion.of(1));
 const HEX = valueOf(TopologyId.of('hex'));
@@ -78,8 +78,8 @@ describe('LevelDefinition', () => {
     const stored = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('stored')));
     const newer = valueOf(
       LevelDefinition.of(
-        GameId.of('hexa-fit'),
-        LevelId.of('fit-01'),
+        valueOf(GameId.of('hexa-fit')),
+        valueOf(LevelId.of('fit-01')),
         valueOf(LevelOrder.of(2)),
         valueOf(LevelVersion.of(2)),
         valueOf(TopologyId.of('square')),
@@ -123,7 +123,7 @@ describe('LevelDefinition', () => {
     it('should_throw_when_the_incoming_level_is_another_level', () => {
       const stored = copy(1);
       const otherLevel = valueOf(
-        LevelDefinition.of(FIT, LevelId.of('fit-02'), FIRST, V1, HEX, ok('copy')),
+        LevelDefinition.of(FIT, valueOf(LevelId.of('fit-02')), FIRST, V1, HEX, ok('copy')),
       );
 
       expect(() => stored.accepts(otherLevel)).toThrow(
@@ -136,18 +136,20 @@ describe('LevelDefinition', () => {
   it('should_tell_its_identity_when_asked_with_a_game_and_a_level_id', () => {
     const level = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('section')));
 
-    expect(level.isIdentifiedBy(GameId.of('hexa-fit'), LevelId.of('fit-01'))).toBe(true);
-    expect(level.isIdentifiedBy(FIT, LevelId.of('fit-02'))).toBe(false);
-    expect(level.isIdentifiedBy(GameId.of('hexa-sort'), FIT_01)).toBe(false);
+    expect(
+      level.isIdentifiedBy(valueOf(GameId.of('hexa-fit')), valueOf(LevelId.of('fit-01'))),
+    ).toBe(true);
+    expect(level.isIdentifiedBy(FIT, valueOf(LevelId.of('fit-02')))).toBe(false);
+    expect(level.isIdentifiedBy(valueOf(GameId.of('hexa-sort')), FIT_01)).toBe(false);
   });
 
   it('should_be_another_level_when_the_game_or_the_level_id_differs', () => {
     const level = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('section')));
     const otherLevel = valueOf(
-      LevelDefinition.of(FIT, LevelId.of('fit-02'), FIRST, V1, HEX, ok('section')),
+      LevelDefinition.of(FIT, valueOf(LevelId.of('fit-02')), FIRST, V1, HEX, ok('section')),
     );
     const otherGame = valueOf(
-      LevelDefinition.of(GameId.of('hexa-sort'), FIT_01, FIRST, V1, HEX, ok('section')),
+      LevelDefinition.of(valueOf(GameId.of('hexa-sort')), FIT_01, FIRST, V1, HEX, ok('section')),
     );
 
     expect(level.equals(otherLevel)).toBe(false);

@@ -2,6 +2,7 @@ import { receiveValueOf } from '../../../src/adapters/received.js';
 import { Password } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { ScryptPasswordHasher } from '../../../src/infrastructure/auth/scrypt-password-hasher.js';
+import { valueOf } from '../../support/result.js';
 
 const PLAIN = 'correct horse battery';
 
@@ -47,8 +48,10 @@ describe('ScryptPasswordHasher', () => {
 
   // A hash stored before #90 still verifies.
   it('should_accept_password_when_hash_was_stored_before_the_delivery_change', async () => {
-    const stored = PasswordHash.from(
-      'scrypt$16384$8$1$bOg4QntoItjjaC_jUW8_nw$GgPWraqoGpxXdvbV1ASiBFnbvyJRR8FoixnyRPQEU_8dKxA_wNuDagDbBFzrMe9uyMAWgO05fLyUPefBUokPTw',
+    const stored = valueOf(
+      PasswordHash.from(
+        'scrypt$16384$8$1$bOg4QntoItjjaC_jUW8_nw$GgPWraqoGpxXdvbV1ASiBFnbvyJRR8FoixnyRPQEU_8dKxA_wNuDagDbBFzrMe9uyMAWgO05fLyUPefBUokPTw',
+      ),
     );
 
     expect(await hasher.verify(PLAIN, stored)).toBe(true);
@@ -59,7 +62,7 @@ describe('ScryptPasswordHasher', () => {
   it.each(['plain text', 'scrypt$1$2$3$salt', 'bcrypt$16384$8$1$c2FsdA$aGFzaA'])(
     'should_reject_password_when_hash_is_malformed',
     async (hash) => {
-      expect(await hasher.verify(PLAIN, PasswordHash.from(hash))).toBe(false);
+      expect(await hasher.verify(PLAIN, valueOf(PasswordHash.from(hash)))).toBe(false);
     },
   );
 });
