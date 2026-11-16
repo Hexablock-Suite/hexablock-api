@@ -17,7 +17,7 @@ import {
 
 // A level is born valid (#77): LevelDefinition.of() builds a level only from
 // a section that its section type accepted.
-const FIT = GameId.of('fit');
+const FIT = GameId.of('hexa-fit');
 const FIT_01 = LevelId.of('fit-01');
 const FIRST = valueOf(LevelOrder.of(1));
 const V1 = valueOf(LevelVersion.of(1));
@@ -26,21 +26,23 @@ const HEX = valueOf(TopologyId.of('hex'));
 describe('LevelDefinition', () => {
   describe('the shared level format', () => {
     it('should_build_a_level_when_the_fit_example_of_the_format_document_is_read', () => {
-      const level = levelFrom(levelExample('fit'), (raw) => FitSection.of(raw, new HexTopology()));
+      const level = levelFrom(levelExample('hexa-fit'), (raw) =>
+        FitSection.of(raw, new HexTopology()),
+      );
 
       expect(level.ok).toBe(true);
-      expect(valueOf(level).equals(valueOf(levelFrom(levelExample('fit'), () => ok('any'))))).toBe(
-        true,
-      );
+      expect(
+        valueOf(level).equals(valueOf(levelFrom(levelExample('hexa-fit'), () => ok('any')))),
+      ).toBe(true);
     });
 
     it('should_build_a_level_when_the_sort_example_of_the_format_document_is_read', () => {
-      const level = levelFrom(levelExample('sort'), (raw) => SortSection.of(raw));
+      const level = levelFrom(levelExample('hexa-sort'), (raw) => SortSection.of(raw));
 
       expect(level.ok).toBe(true);
-      expect(valueOf(level).equals(valueOf(levelFrom(levelExample('sort'), () => ok('any'))))).toBe(
-        true,
-      );
+      expect(
+        valueOf(level).equals(valueOf(levelFrom(levelExample('hexa-sort'), () => ok('any')))),
+      ).toBe(true);
     });
 
     // Every other block of the document is a part of a level, never a second example.
@@ -50,14 +52,14 @@ describe('LevelDefinition', () => {
       );
 
       expect(complete.map((block) => (block as { gameId: string }).gameId)).toEqual([
-        'fit',
-        'sort',
+        'hexa-fit',
+        'hexa-sort',
       ]);
     });
   });
 
   it('should_return_the_section_problem_when_the_section_has_the_wrong_shape', () => {
-    const wrongShape = { ...levelExample('fit').section, figure: 'not a list' };
+    const wrongShape = { ...levelExample('hexa-fit').section, figure: 'not a list' };
 
     expect(
       LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, FitSection.of(wrongShape, new HexTopology())),
@@ -76,7 +78,7 @@ describe('LevelDefinition', () => {
     const stored = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('stored')));
     const newer = valueOf(
       LevelDefinition.of(
-        GameId.of('fit'),
+        GameId.of('hexa-fit'),
         LevelId.of('fit-01'),
         valueOf(LevelOrder.of(2)),
         valueOf(LevelVersion.of(2)),
@@ -134,9 +136,9 @@ describe('LevelDefinition', () => {
   it('should_tell_its_identity_when_asked_with_a_game_and_a_level_id', () => {
     const level = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('section')));
 
-    expect(level.isIdentifiedBy(GameId.of('fit'), LevelId.of('fit-01'))).toBe(true);
+    expect(level.isIdentifiedBy(GameId.of('hexa-fit'), LevelId.of('fit-01'))).toBe(true);
     expect(level.isIdentifiedBy(FIT, LevelId.of('fit-02'))).toBe(false);
-    expect(level.isIdentifiedBy(GameId.of('sort'), FIT_01)).toBe(false);
+    expect(level.isIdentifiedBy(GameId.of('hexa-sort'), FIT_01)).toBe(false);
   });
 
   it('should_be_another_level_when_the_game_or_the_level_id_differs', () => {
@@ -145,7 +147,7 @@ describe('LevelDefinition', () => {
       LevelDefinition.of(FIT, LevelId.of('fit-02'), FIRST, V1, HEX, ok('section')),
     );
     const otherGame = valueOf(
-      LevelDefinition.of(GameId.of('sort'), FIT_01, FIRST, V1, HEX, ok('section')),
+      LevelDefinition.of(GameId.of('hexa-sort'), FIT_01, FIRST, V1, HEX, ok('section')),
     );
 
     expect(level.equals(otherLevel)).toBe(false);

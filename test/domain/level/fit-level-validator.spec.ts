@@ -34,7 +34,7 @@ function fitLevelFrom(json: LevelJson) {
 
 // The Fit section of the format document and its lists, so a test can change one item.
 function fitParts() {
-  const section = levelExample('fit').section;
+  const section = levelExample('hexa-fit').section;
   const [pieceA, pieceB, pieceC] = section.pieces as Record<string, unknown>[];
   const [placeA, placeB, placeC] = section.witness as Record<string, unknown>[];
   return { section, pieceA, pieceB, pieceC, placeA, placeB, placeC };
@@ -43,8 +43,8 @@ function fitParts() {
 describe('FitLevelValidator', () => {
   // The composition root registers the strategy under the Fit gameId.
   it('should_build_the_fit_level_when_the_fit_example_of_the_format_document_is_checked', () => {
-    const example = levelExample('fit');
-    const validators = LevelValidators.of([[GameId.of('fit'), fitValidator()]]);
+    const example = levelExample('hexa-fit');
+    const validators = LevelValidators.of([[GameId.of('hexa-fit'), fitValidator()]]);
 
     const section = sectionOf(example.section);
     const checked = validators.check(
@@ -66,7 +66,7 @@ describe('FitLevelValidator', () => {
   // FitSection checks its own shape, and the strategy gives its problem
   // unchanged. No level exists for a rejected section.
   it('should_return_the_problem_of_the_section_when_the_fit_section_has_the_wrong_shape', () => {
-    const example = levelExample('fit');
+    const example = levelExample('hexa-fit');
     const section = example.section;
     const { pieces, witness, stars } = section;
     const wrong: unknown[] = [
@@ -74,7 +74,7 @@ describe('FitLevelValidator', () => {
       [],
       'section',
       { ...section, extra: true },
-      levelExample('sort').section,
+      levelExample('hexa-sort').section,
       { pieces, witness, stars },
       { ...section, pieces: [] },
       { ...section, witness: [{ piece: 'a', rotation: 0.5, at: [0, 0] }] },
@@ -102,7 +102,7 @@ describe('FitLevelValidator', () => {
   // a Result after it. The test asserts only what sectionOf() returns, so it
   // holds in both cases: a bad level file never gives a server error.
   it('should_return_invalid_stars_without_a_throw_when_a_star_threshold_is_negative', () => {
-    const example = levelExample('fit');
+    const example = levelExample('hexa-fit');
     const negative = [
       [{ maxMoves: -1, maxElapsedMs: 120000 }],
       [
@@ -125,7 +125,7 @@ describe('FitLevelValidator', () => {
   // Decision 6: the strategy finds the Topology with TopologyId.equals(). A
   // topology with no entry has no rotation steps, so A5 cannot run.
   it('should_return_unknown_topology_when_the_strategy_has_no_topology_for_the_level', () => {
-    const example = levelExample('fit');
+    const example = levelExample('hexa-fit');
     const square = valueOf(TopologyId.of('square'));
     const knowsNone = new FitLevelValidator(Topologies.of([]));
 
@@ -161,7 +161,7 @@ describe('FitLevelValidator', () => {
   // has pieces of 6 cells and a figure of 6 cells.
   it('should_return_inexact_witness_when_the_areas_are_equal_and_the_witness_does_not_cover_the_figure_exactly', () => {
     const { section, placeA, placeB, placeC } = fitParts();
-    const example = levelExample('fit');
+    const example = levelExample('hexa-fit');
     const wrong = [
       // b keeps its cells [2, 0] and [3, 0]: [3, 0] lies outside, and [2, 1] stays open.
       [placeA, { ...placeB, rotation: 0 }, placeC],

@@ -36,7 +36,7 @@ import { checkedLevel, levelJson, levelValidators } from '../support/level-forma
 
 const PG_URL = process.env.HB_TEST_PG_URL;
 const MIGRATIONS = resolve(import.meta.dirname, '../../drizzle');
-const SORT = GameId.of('sort');
+const SORT = GameId.of('hexa-sort');
 
 describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
   let pool: pg.Pool;
@@ -50,9 +50,10 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
   });
 
   afterAll(async () => {
-    await pool.query("delete from levels where game_id = 'sort' and level_id = any($1::text[])", [
-      createdLevels,
-    ]);
+    await pool.query(
+      "delete from levels where game_id = 'hexa-sort' and level_id = any($1::text[])",
+      [createdLevels],
+    );
     await pool.end();
   });
 
@@ -78,13 +79,13 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     return (stored) => {
       seen.push(stored === null ? null : versionOf(stored));
       const version = stored === null ? 1 : versionOf(stored) + 1;
-      return ok(checkedLevel(levelJson('sort', levelId, version)));
+      return ok(checkedLevel(levelJson('hexa-sort', levelId, version)));
     };
   }
 
   async function storedVersion(levelId: string): Promise<string | undefined> {
     const result = await pool.query<{ version: string }>(
-      "select version from levels where game_id = 'sort' and level_id = $1",
+      "select version from levels where game_id = 'hexa-sort' and level_id = $1",
       [levelId],
     );
     return result.rows.map((row) => row.version).join(',') || undefined;
@@ -93,7 +94,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
   // Every stored row of the level, as text, to compare before and after.
   async function snapshot(levelId: string): Promise<string> {
     const result = await pool.query(
-      "select * from levels where game_id = 'sort' and level_id = $1",
+      "select * from levels where game_id = 'hexa-sort' and level_id = $1",
       [levelId],
     );
     return JSON.stringify(result.rows);
@@ -125,7 +126,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     ]) {
       const levelId = newLevelId();
       const updates = order.map((version) => {
-        const incoming = checkedLevel(levelJson('sort', levelId, version));
+        const incoming = checkedLevel(levelJson('hexa-sort', levelId, version));
         return repository().update(SORT, LevelId.of(levelId), (stored) =>
           stored === null ? ok(incoming) : stored.accepts(incoming),
         );
@@ -150,7 +151,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
       await holder.query('begin');
       // The same key as DrizzleLevelRepository.update(): "levels:<gameId>:<levelId>".
       await holder.query('select pg_advisory_xact_lock(hashtextextended($1, 0))', [
-        `levels:sort:${levelId}`,
+        `levels:hexa-sort:${levelId}`,
       ]);
     } catch (error) {
       holder.release();
@@ -194,7 +195,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     await expect(thrown).rejects.toThrow('boom');
     expect(await snapshot(levelId)).toBe(before);
 
-    const older = checkedLevel(levelJson('sort', levelId, 1));
+    const older = checkedLevel(levelJson('hexa-sort', levelId, 1));
     const newer = await repository().update(SORT, LevelId.of(levelId), raise(levelId));
     const rejected = await repository().update(SORT, LevelId.of(levelId), (stored) =>
       stored === null ? ok(older) : stored.accepts(older),

@@ -40,7 +40,7 @@ export function jsonBlocksOfFormat(): unknown[] {
 // The complete example of a game in the format document. A complete example
 // is a block with a gameId. Each call parses the document again, so a test
 // can change its copy.
-export function levelExample(gameId: 'fit' | 'sort'): LevelJson {
+export function levelExample(gameId: 'hexa-fit' | 'hexa-sort'): LevelJson {
   const examples = jsonBlocksOfFormat().filter(
     (block): block is LevelJson =>
       typeof block === 'object' && block !== null && (block as LevelJson).gameId === gameId,
@@ -81,19 +81,21 @@ export function levelFrom<TSection>(
 export function levelValidators(): LevelValidators {
   const hex = Topologies.of([[valueOf(TopologyId.of('hex')), new HexTopology()]]);
   return LevelValidators.of([
-    [GameId.of('fit'), new FitLevelValidator(hex)],
-    [GameId.of('sort'), new SortLevelValidator()],
+    [GameId.of('hexa-fit'), new FitLevelValidator(hex)],
+    [GameId.of('hexa-sort'), new SortLevelValidator()],
   ]);
 }
 
 // A level of the format document with its own levelId and version, so a
-// test names only the values that it needs.
+// test names only the values that it needs. The levelId of the example,
+// fit-01 or sort-01, is the default.
 export function levelJson(
-  gameId: 'fit' | 'sort',
-  levelId = `${gameId}-01`,
+  gameId: 'hexa-fit' | 'hexa-sort',
+  levelId?: string,
   version = 1,
 ): LevelJson {
-  return { ...levelExample(gameId), levelId, version };
+  const example = levelExample(gameId);
+  return { ...example, levelId: levelId ?? example.levelId, version };
 }
 
 // Builds a level as the border does: the common part as domain values and

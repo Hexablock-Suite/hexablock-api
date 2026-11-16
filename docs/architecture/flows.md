@@ -37,7 +37,7 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ## Use case 3: update levels
 
-A signed-in client calls this endpoint to publish new levels without an app update. The professor asks for no level editor and no roles (Q4, answered 2026-11-03), so the token guard is the only check. The endpoint is `LevelsController.update()` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a domain service that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The strategy only picks the section type, the section checks its own shape and holds its rules, and `LevelValidators` creates each level, so no level exists before its section is valid (decisions 4 and 5 of [classes.md](classes.md)). The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels one by one or returns the problems. No class of layer 4 takes part.
+A signed-in client calls this endpoint to publish new levels without an app update. The professor asks for no level editor and no roles (Q4, answered 2026-11-03), so the token guard is the only check. The endpoint is `LevelsController.update()`, `PUT /levels` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a domain service that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The strategy only picks the section type, the section checks its own shape and holds its rules, and `LevelValidators` creates each level, so no level exists before its section is valid (decisions 4 and 5 of [classes.md](classes.md)). The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels one by one or returns the problems. No class of layer 4 takes part.
 
 ### Class view
 
@@ -48,6 +48,59 @@ A signed-in client calls this endpoint to publish new levels without an app upda
 ![Update levels sequence: JwtAuthGuard verifies the token, LevelsController builds the request with LevelDtoMapper and calls UpdateLevels, the use case asks LevelValidators to check each level, the LevelValidator strategy of its gameId picks the section type and LevelValidators builds the level, a note gives the Fit path through Topologies and FitSection, and then the use case saves each level with LevelRepository.update(gameId, levelId, change), one transaction per level under a lock of its key, or returns the problems as an error body](flows/views/seq-3-update-levels.png)
 
 The code saves each level with one call, `LevelRepository.update(gameId, levelId, change)` (#80). `DrizzleLevelRepository` opens one transaction per level, takes a Postgres advisory lock for the `gameId` and the `levelId`, restores the stored level through `LevelValidators` and passes it, or `null`, to the change. The change runs `stored.accepts(level)`, the version rule of S3-10, and the adapter saves the level that a successful change returns in the same transaction. So two overlapping updates of one level run one after the other, and the later one cannot save an older copy: it gets the level problem `older-version`. A row lock is not enough, because the first update of a level has no row yet.
+
+### Level routes
+
+`LevelsController` serves the two routes of the level use cases (API-FR-04), as decided on [#81](https://github.com/Hexablock-Suite/hexablock-api/issues/81). `openapi/openapi.json` holds the same schemas. Both routes code against S3-02, one level format, and S3-10, which rejects only a lower `version`. Both are proposals for the team on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), «Propuesta, pendiente del equipo».
+
+| Route         | Handler    | Guard          | Request body                            | Success                                                                   |
+| ------------- | ---------- | -------------- | --------------------------------------- | ------------------------------------------------------------------------- |
+| `GET /levels` | `list()`   | none           | none                                    | 200, `LevelsDto`: `{ "levels": LevelDto[] }`, by `gameId`, then `levelId` |
+| `PUT /levels` | `update()` | `JwtAuthGuard` | `LevelsDto`: `{ "levels": LevelDto[] }` | 204, no body                                                              |
+
+- `LevelDto` is one level of [`docs/level-format.md`](../level-format.md), field for field: `gameId`, `levelId`, `order`, `version`, `topology` and `section`. The OpenAPI document gives the section as `FitSectionDto` or `SortSectionDto`.
+- No route has a parameter, a page size or a filter: one read gives every level.
+- `PUT /levels` is an idempotent batch. An equal `version` passes (S3-10), so a retry of the same batch is safe. An empty batch saves nothing and answers 204.
+- Each failure has the `ErrorDto` body (API-FR-06):
+  - 400 for a body with no array of level objects: `details` is `["levels must be an array of objects"]`.
+  - 400 for a level that breaks a rule, with `message` `Request validation failed`. The API checks a batch in two steps. First `LevelDtoMapper` checks the fields and the common values of every level: the six fields of the format, then `gameId`, `levelId`, `order`, `version` and `topology`. Each level that fails gets one line of `details`, for its first problem. Only when every level passes that step, `UpdateLevelsUseCase` checks the rules of each level through the strategy of its `gameId`: its section, A5, or a `gameId` with no level files. Each level that breaks a rule gets one line, for its first broken rule. So a level with a wrong field hides the A5 problem of another level of the same batch.
+  - Each line of `details` names one level by its `gameId` and its `levelId`. A level with no valid `gameId` or `levelId` is named by its place in the list, such as `levels[0]`. A problem of either step saves no level of the batch. A lower `version` fails in the save of its own level and gets its own line, and the other levels of the batch are saved.
+  - 401 for an update without a valid token.
+  - 500 for an unexpected failure, with no stack, no SQL and no rule in the body. A stored level that breaks a rule is such a failure. A save that fails after the first level keeps the levels saved before it, and a retry of the same batch saves every level.
+
+Example request of `PUT /levels`, with the Sort example of the format:
+
+```json
+{
+  "levels": [
+    {
+      "gameId": "hexa-sort",
+      "levelId": "sort-01",
+      "order": 1,
+      "version": 1,
+      "topology": "hex",
+      "section": {
+        "radius": 2,
+        "goals": 3,
+        "source": { "seed": 20261115, "colors": ["red", "green", "blue"] },
+        "stars": [{ "maxMoves": 40 }, { "maxMoves": 30 }, { "maxMoves": 20 }]
+      }
+    }
+  ]
+}
+```
+
+`GET /levels` then answers 200 with the same body. Example answer of `PUT /levels` when the witness of the Fit example fails A5:
+
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "Request validation failed",
+  "details": ["gameId \"hexa-fit\", levelId \"fit-01\": inexact-witness"],
+  "path": "/levels"
+}
+```
 
 ## Other use cases
 
@@ -99,9 +152,10 @@ The flows need some members that the small views of [classes.md](classes.md) do 
 
 ### Flow 3: update levels
 
-- `UpdateLevelsRequest` holds, for each level, the values of the common part as domain values and the section as it arrives. `LevelDtoMapper.toRequest()` builds it from the `LevelDto` values. The use case asks `LevelValidators.check()` for each level, so no level exists before its strategy builds the section (#77). View 2.3 names the type but not its fields, and #81 fixes them.
-- A failed `Result` gives the error body that `LevelDtoMapper.toErrorBody()` builds. The HTTP status of that body waits on API-FR-06 and the OpenAPI export.
-- Q4 stays open: who may call `UpdateLevels`. The guard checks only that the caller has a valid token.
+- `UpdateLevelsRequest` holds `levels`, one `IncomingLevel` per level: the values of the common part as domain values and the section as it arrives. `LevelDtoMapper.toRequest()` builds it from the body. The use case asks `LevelValidators.check()` for each level, so no level exists before its strategy builds the section (#77). Built in #81.
+- A failed `Result` holds `InvalidLevels`. `LevelDtoMapper.toDetails()` writes the details of the 400 body, one line per level problem, and `HttpErrorFilter` answers it with `ErrorDto` ([Level routes](#level-routes)). Built in #81.
+- Q4 is answered (2026-11-03): the professor asks for no level editor and no roles, so the token guard is the only check of `UpdateLevels`. `GetLevels` has no guard.
+- S3-02 and S3-10 are proposals for the team on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), «Propuesta, pendiente del equipo», and #81 codes against both.
 
 ## Render the images
 

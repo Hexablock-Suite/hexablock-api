@@ -6,9 +6,9 @@ import { LevelId } from '../../src/domain/progress/level-id.js';
 import { err, ok, type Result } from '../../src/domain/shared/result.js';
 import { checkedLevel, levelJson, type LevelJson } from './level-format.js';
 
-const FIT = GameId.of('fit');
+const FIT = GameId.of('hexa-fit');
 const FIT_01 = LevelId.of('fit-01');
-const SORT = GameId.of('sort');
+const SORT = GameId.of('hexa-sort');
 const SORT_01 = LevelId.of('sort-01');
 
 // Stores a level of the format through the port: the change ignores the
@@ -49,7 +49,11 @@ export function describeLevelRepositoryContract(
     // text: fit-10 comes before fit-9. The Drizzle adapter sorts them in SQL.
     it('should_list_each_level_by_game_and_level_id_when_levels_are_saved_out_of_order', async () => {
       const repository = await createRepository();
-      const saved = [levelJson('sort'), levelJson('fit', 'fit-9'), levelJson('fit', 'fit-10', 2)];
+      const saved = [
+        levelJson('hexa-sort'),
+        levelJson('hexa-fit', 'fit-9'),
+        levelJson('hexa-fit', 'fit-10', 2),
+      ];
 
       for (const json of saved) {
         await storeLevel(repository, json);
@@ -63,7 +67,7 @@ export function describeLevelRepositoryContract(
     it('should_pass_null_to_change_and_save_its_level_when_no_level_is_stored', async () => {
       const repository = await createRepository();
       const seen: (LevelDefinition<unknown> | null)[] = [];
-      const level = checkedLevel(levelJson('fit'));
+      const level = checkedLevel(levelJson('hexa-fit'));
 
       const saved = await repository.update(FIT, FIT_01, (stored) => {
         seen.push(stored);
@@ -72,17 +76,17 @@ export function describeLevelRepositoryContract(
 
       expect(seen).toEqual([null]);
       expect(saved.ok && saved.value).toBe(level);
-      expect(await listedJson(repository)).toEqual([levelJson('fit')]);
+      expect(await listedJson(repository)).toEqual([levelJson('hexa-fit')]);
     });
 
     // The change gets a copy of the stored level, and the copy that it
     // returns replaces the stored one. The other levels stay as they are.
     it('should_pass_stored_level_to_change_and_replace_it_when_the_level_is_stored', async () => {
       const repository = await createRepository();
-      const first = checkedLevel(levelJson('fit'));
+      const first = checkedLevel(levelJson('hexa-fit'));
       await repository.update(FIT, FIT_01, () => ok(first));
-      await storeLevel(repository, levelJson('sort'));
-      const newer = checkedLevel(levelJson('fit', 'fit-01', 2));
+      await storeLevel(repository, levelJson('hexa-sort'));
+      const newer = checkedLevel(levelJson('hexa-fit', 'fit-01', 2));
       const seen: { copy: boolean; json: unknown }[] = [];
 
       const saved = await repository.update(FIT, FIT_01, (stored) => {
@@ -93,11 +97,11 @@ export function describeLevelRepositoryContract(
         return stored.accepts(newer);
       });
 
-      expect(seen).toEqual([{ copy: true, json: levelJson('fit') }]);
+      expect(seen).toEqual([{ copy: true, json: levelJson('hexa-fit') }]);
       expect(saved.ok && saved.value).toBe(newer);
       expect(await listedJson(repository)).toEqual([
-        levelJson('fit', 'fit-01', 2),
-        levelJson('sort'),
+        levelJson('hexa-fit', 'fit-01', 2),
+        levelJson('hexa-sort'),
       ]);
     });
 
@@ -105,8 +109,8 @@ export function describeLevelRepositoryContract(
     // saves nothing, and update() resolves to it.
     it('should_save_nothing_and_resolve_the_failed_result_when_change_rejects_the_level', async () => {
       const repository = await createRepository();
-      await storeLevel(repository, levelJson('fit', 'fit-01', 2));
-      const older = checkedLevel(levelJson('fit', 'fit-01', 1));
+      await storeLevel(repository, levelJson('hexa-fit', 'fit-01', 2));
+      const older = checkedLevel(levelJson('hexa-fit', 'fit-01', 1));
 
       const rejected = await repository.update(FIT, FIT_01, (stored) =>
         stored === null ? ok(older) : stored.accepts(older),
@@ -115,12 +119,12 @@ export function describeLevelRepositoryContract(
 
       expect(rejected).toEqual({ ok: false, error: 'older-version' });
       expect(empty).toEqual({ ok: false, error: 'invalid-section' });
-      expect(await listedJson(repository)).toEqual([levelJson('fit', 'fit-01', 2)]);
+      expect(await listedJson(repository)).toEqual([levelJson('hexa-fit', 'fit-01', 2)]);
     });
 
     it('should_save_nothing_and_reject_with_its_error_when_change_throws', async () => {
       const repository = await createRepository();
-      await storeLevel(repository, levelJson('fit'));
+      await storeLevel(repository, levelJson('hexa-fit'));
       const failure = new Error('the change failed');
 
       const stored = repository.update(FIT, FIT_01, () => {
@@ -132,14 +136,14 @@ export function describeLevelRepositoryContract(
 
       await expect(stored).rejects.toBe(failure);
       await expect(empty).rejects.toBe(failure);
-      expect(await listedJson(repository)).toEqual([levelJson('fit')]);
+      expect(await listedJson(repository)).toEqual([levelJson('hexa-fit')]);
     });
 
     // update() saves a level only under the key that it locks. A change that
     // returns another level is a defect of the caller, so update() throws.
     it('should_reject_and_save_nothing_when_change_returns_another_level', async () => {
       const repository = await createRepository();
-      const otherLevel = checkedLevel(levelJson('fit', 'fit-02'));
+      const otherLevel = checkedLevel(levelJson('hexa-fit', 'fit-02'));
 
       const saved = repository.update(FIT, FIT_01, () => ok(otherLevel));
 
@@ -156,7 +160,7 @@ export function describeLevelRepositoryContract(
       const raise = (stored: LevelDefinition<unknown> | null) => {
         seen.push(stored === null ? null : versionOf(stored));
         const version = stored === null ? 1 : versionOf(stored) + 1;
-        return ok(checkedLevel(levelJson('fit', 'fit-01', version)));
+        return ok(checkedLevel(levelJson('hexa-fit', 'fit-01', version)));
       };
 
       await Promise.all([
@@ -165,7 +169,7 @@ export function describeLevelRepositoryContract(
       ]);
 
       expect(seen).toEqual([null, 1]);
-      expect(await listedJson(repository)).toEqual([levelJson('fit', 'fit-01', 2)]);
+      expect(await listedJson(repository)).toEqual([levelJson('hexa-fit', 'fit-01', 2)]);
     });
   });
 }

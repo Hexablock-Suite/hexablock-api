@@ -12,7 +12,7 @@ import { levelExample, valueOf } from '../../support/level-format.js';
 // and returns a Result. The fixtures come from the Fit example of the format
 // document, so the document and the code cannot drift.
 function fitSection(): Record<string, unknown> {
-  return levelExample('fit').section;
+  return levelExample('hexa-fit').section;
 }
 
 // Reads a raw section of a hex level, as the Fit example is.

@@ -82,8 +82,8 @@
           LevelRepository.update(gameId, levelId, change): DrizzleLevelRepository opens one
           transaction, locks the gameId and the levelId, and the change runs stored.accepts(level)
           on the stored copy (S3-10). Otherwise the use case returns a failed Result, and the
-          controller answers with the error body that LevelDtoMapper builds. A note on the strategy
-          gives the Fit path: FitLevelValidator finds the Topology of the level in Topologies, and
+          controller answers a 400 whose details LevelDtoMapper writes. A note on the strategy gives
+          the Fit path: FitLevelValidator finds the Topology of the level in Topologies, and
           FitSection checks A5 on it; a topology with no entry gives unknown-topology.
         </desc>
         <defs>
@@ -834,7 +834,7 @@
           execute(token) · Part 2, view 4
         </text>
         <!-- Messages, top to bottom -->
-        <!-- Message: HTTP request · LevelDto[], Bearer token -->
+        <!-- Message: HTTP request · PUT /levels, Bearer token -->
         <line
           x1="24"
           y1="160"
@@ -844,7 +844,7 @@
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="36" y="145" width="201" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="33.5" y="145" width="206" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="136.5"
           y="154"
@@ -853,7 +853,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          HTTP request · LevelDto[], Bearer token
+          HTTP request · PUT /levels, Bearer token
         </text>
         <text x="36" y="176" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           Nest calls canActivate(ctx)
@@ -1263,7 +1263,7 @@
         >
           ok Result
         </text>
-        <!-- Reply: HTTP response · no body -->
+        <!-- Reply: HTTP 204 · no body -->
         <line
           x1="387"
           y1="918"
@@ -1274,7 +1274,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="36" y="903" width="123" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="48.5" y="903" width="98" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="97.5"
           y="912"
@@ -1283,9 +1283,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          HTTP response · no body
+          HTTP 204 · no body
         </text>
-        <!-- Reply: failed Result · LevelProblem[] -->
+        <!-- Reply: failed Result · InvalidLevels -->
         <line
           x1="687"
           y1="956"
@@ -1296,7 +1296,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="453.5" y="941" width="157" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="456" y="941" width="152" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="532"
           y="950"
@@ -1305,9 +1305,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          failed Result · LevelProblem[]
+          failed Result · InvalidLevels
         </text>
-        <!-- Message: toErrorBody(problems) -->
+        <!-- Message: toDetails(problems) -->
         <line
           x1="377"
           y1="988"
@@ -1317,7 +1317,7 @@
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="400.5" y="973" width="113" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="405.5" y="973" width="103" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="457"
           y="982"
@@ -1326,9 +1326,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          toErrorBody(problems)
+          toDetails(problems)
         </text>
-        <!-- Reply: ErrorDto -->
+        <!-- Reply: string[] -->
         <line
           x1="537"
           y1="1008"
@@ -1348,9 +1348,9 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          ErrorDto
+          string[]
         </text>
-        <!-- Reply: HTTP error · ErrorDto (API-FR-06) -->
+        <!-- Reply: HTTP 400 · ErrorDto (API-FR-06) -->
         <line
           x1="387"
           y1="1054"
@@ -1361,7 +1361,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq3updatelevels-open)"
         />
-        <rect x="36" y="1039" width="172" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="41" y="1039" width="162" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="122"
           y="1048"
@@ -1370,7 +1370,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          HTTP error · ErrorDto (API-FR-06)
+          HTTP 400 · ErrorDto (API-FR-06)
         </text>
         <!-- Footnote -->
         <text
@@ -1430,7 +1430,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          flows.md holds the class view with the same names. The route waits on the OpenAPI export.
+          A lower version fails in update() with older-version, and the 400 lists it. flows.md holds
+          the class view with the same names and the routes.
         </text>
         <!-- Legend -->
         <line
