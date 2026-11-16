@@ -739,7 +739,7 @@
         >
           boolean
         </text>
-        <!-- Reply: failure (proposal) -->
+        <!-- Reply: failure -->
         <line
           x1="465"
           y1="376"
@@ -750,7 +750,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq2login-open)"
         />
-        <rect x="310" y="361" width="100" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="336" y="361" width="48" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="360"
           y="370"
@@ -759,7 +759,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          failure (proposal)
+          failure
         </text>
         <!-- Reply: HTTP 401 · error body (API-FR-06) -->
         <line
@@ -869,7 +869,7 @@
         >
           boolean
         </text>
-        <!-- Reply: failure (proposal) -->
+        <!-- Reply: failure -->
         <line
           x1="465"
           y1="558"
@@ -880,7 +880,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq2login-open)"
         />
-        <rect x="310" y="543" width="100" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="336" y="543" width="48" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="360"
           y="552"
@@ -889,7 +889,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          failure (proposal)
+          failure
         </text>
         <!-- Reply: HTTP 401 · error body (API-FR-06) -->
         <line
@@ -1038,8 +1038,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          has no token yet. The failure reply, the 401 status for wrong credentials and the route
-          path are proposals for team review (flows.md).
+          has no token yet. A failure is a Result with LoginProblem (#104), and AuthController
+          answers it with 401 at POST /auth/login.
         </text>
         <text
           x="24"

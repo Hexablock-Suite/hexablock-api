@@ -20,34 +20,34 @@ flowchart TB
 
   subgraph INFRA["4. Frameworks and drivers: src/infrastructure"]
     APPMOD["AppModule<br/>composition root"]
-    FEATMOD["Nest feature modules: Auth, Progress,<br/>Leaderboard, Levels (planned)"]
     HTTPAPP["http-app.ts<br/>Swagger and OpenAPI document"]
-    DB["database/: DatabaseModule, connection.ts<br/>(AppModule does not import them yet)"]
+    DB["database/: DatabaseModule, connection.ts"]
     SYSCLOCK["clock/SystemClock"]
-    SECURITY["JWT token issuer and password hasher<br/>adapters (planned)"]
+    SECURITY["auth/: JwtTokenIssuer, ScryptPasswordHasher,<br/>RandomUserIdGenerator"]
     NESTLOGGER["logging/NestLogger"]
   end
 
   subgraph ADAPTERS["3. Interface adapters: src/adapters"]
     HEALTH["http/: HealthController, HealthResponse"]
-    CONTROLLERS["http/: Auth, Progress, Leaderboard and<br/>Levels controllers with their DTOs<br/>and DTO mappers (planned)"]
-    GUARD["http/: JwtAuthGuard and<br/>HTTP error filter (planned)"]
-    REPOS["persistence/: Drizzle repositories<br/>and row mappers (planned)"]
-    SCHEMA["persistence/schema.ts:<br/>Drizzle schema, no tables yet"]
+    CONTROLLERS["http/: Auth, Progress, Leaderboard and<br/>Levels controllers with their DTOs<br/>and DTO mappers"]
+    GUARD["http/: JwtAuthGuard and<br/>HttpErrorFilter"]
+    REPOS["persistence/: Drizzle repositories,<br/>DrizzleLeaderboardReader and row mappers"]
+    SCHEMA["persistence/schema.ts: Drizzle schema<br/>of users, progress, level_results, levels"]
   end
 
   subgraph APP["2. Application (use cases): src/application"]
-    INPORTS(["Input ports, one interface per use case:<br/>RegisterUser, Login, AuthenticateToken, SyncProgress,<br/>GetLeaderboard, GetLevels, UpdateLevels (planned)"])
-    UC["RegisterUseCase, LoginUseCase, AuthenticateTokenUseCase,<br/>SyncProgressUseCase, GetLeaderboardUseCase,<br/>GetLevelsUseCase, UpdateLevelsUseCase (planned)"]
-    REPOPORTS(["Repository ports: User, Progress,<br/>Leaderboard, Level (planned)"])
-    SECPORTS(["PasswordHasher and TokenIssuer<br/>ports (planned)"])
+    INPORTS(["Input ports, one interface per use case:<br/>RegisterUser, Login, AuthenticateToken, SyncProgress,<br/>GetProgress, GetLeaderboard, GetLevels, UpdateLevels"])
+    UC["RegisterUseCase, LoginUseCase, AuthenticateTokenUseCase,<br/>SyncProgressUseCase, GetProgressUseCase, GetLeaderboardUseCase,<br/>GetLevelsUseCase, UpdateLevelsUseCase"]
+    REPOPORTS(["Output ports: UserRepository, ProgressRepository,<br/>LeaderboardReader, LevelRepository"])
+    SECPORTS(["PasswordHasher, TokenIssuer and<br/>UserIdGenerator ports"])
     CLOCK(["Clock port and CLOCK token<br/>ports/clock.ts"])
-    ASPECTS["aspects/: UseCaseAspect, LoggingAspect;<br/>TimingAspect (planned)"]
+    ASPECTS["aspects/: UseCaseAspect, LoggingAspect"]
+    TIMING["aspects/: TimingAspect (planned)"]
     LOGPORT(["Logger port and LOGGER token<br/>ports/logger.ts"])
   end
 
   subgraph DOMAIN["1. Domain (entities): src/domain"]
-    ENT["User, GameId, PlayerProgress aggregate per user<br/>and gameId with its LevelResults, Standing,<br/>LevelDefinition: common part plus a typed section<br/>per gameId, LevelValidators: one registered<br/>LevelValidator per gameId with levels (planned)"]
+    ENT["User, GameId, PlayerProgress aggregate per ProgressKey<br/>with its LevelResults, Standing,<br/>LevelDefinition: common part plus a typed section<br/>per gameId, LevelValidators: one registered<br/>LevelValidator per gameId with levels"]
   end
 
   MAIN --> INFRA
@@ -71,8 +71,9 @@ flowchart TB
   SECURITY -.->|implements| SECPORTS
   REPOS -->|queries tables of| SCHEMA
   DB -->|passes to Drizzle| SCHEMA
+  APPMOD -->|imports| DB
   APPMOD -->|registers| HEALTH
-  FEATMOD -->|register| CONTROLLERS
+  APPMOD -->|registers| CONTROLLERS
 
   subgraph LEGEND["Legend"]
     direction LR
@@ -93,7 +94,8 @@ flowchart TB
   classDef real fill:#ffffff,stroke:#222222,color:#111111
   classDef planned fill:#ffffff,stroke:#777777,stroke-dasharray:5 5,color:#444444
   class MAIN,APPMOD,HTTPAPP,DB,SYSCLOCK,NESTLOGGER,HEALTH,SCHEMA,CLOCK,ASPECTS,LOGPORT real
-  class FEATMOD,SECURITY,CONTROLLERS,GUARD,REPOS,UC,INPORTS,ENT,REPOPORTS,SECPORTS planned
+  class SECURITY,CONTROLLERS,GUARD,REPOS,UC,INPORTS,ENT,REPOPORTS,SECPORTS real
+  class TIMING planned
   class KEYPORT,KEYIMPL real
   class KEYPLANNED planned
 
@@ -137,7 +139,7 @@ How to read it:
 - **Use cases:** `src/application`. There is one use case per action, parameterized by `gameId`, never one per game. A use case returns an expected failure as a `Result<T, E>` value, never as an exception, so no domain error crosses the input port.
 - **Input ports:** `src/application`, one port per use case: `RegisterUser`, `Login`, `AuthenticateToken`, `SyncProgress`, `GetProgress`, `GetLeaderboard`, `GetLevels` and `UpdateLevels`. Each port binds the one generic interface `UseCase<TRequest, TResponse>` and declares no `execute()` of its own, and its error type is an object with a `kind` (decision 7 of [classes.md](classes.md)). The controllers and the guard depend on the port, not on the class. Each use case implements its port, and each AOP aspect implements `UseCase` to wrap it (§3.5). Tests call the same ports.
 - **Ports:** `src/application`, next to the use cases that use them (Q10). The persistence adapters and the system adapters implement these ports. `src/application/ports/clock.ts` holds the `Clock` port. `src/application/ports/leaderboard-entry.ts` holds `LeaderboardEntry`, the response type that the `LeaderboardReader` port returns.
-- **Composition root:** `AppModule` in `src/infrastructure`. It binds each port to one adapter, and the feature modules do the same for their repositories. `src/main.ts` only starts the app.
+- **Composition root:** `AppModule` in `src/infrastructure`. It registers every controller and binds each port to one adapter, the repositories included, over the database connection that `DatabaseModule` gives. `src/main.ts` only starts the app.
 - **Controllers:** `src/adapters/http`. They translate HTTP requests into use case calls.
 - **HTTP mappers:** `src/adapters/http`, next to the controllers. `AuthDtoMapper`, `ProgressDtoMapper` and `LevelDtoMapper` translate between DTOs and entities, as the row mappers do for persistence. They build the domain values of each request, so a use case never builds one ([#105](https://github.com/Hexablock-Suite/hexablock-api/issues/105) for the account use cases). A controller also turns a failed `Result` into the error body of API-FR-06.
 - **DTOs and validation:** `src/adapters/http`, next to their controllers. A DTO checks the shape of the common part. The domain checks its own rules, such as the Fit level check of assumption A5, and the validator registered for a `gameId` checks the section.
