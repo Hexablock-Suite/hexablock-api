@@ -79,7 +79,7 @@
           1, the use case asks the PasswordAttempt if it is longer than any password, and it asks
           the User aggregate root that the repository returns to check the attempt.
           User.passwordMatches() asks the PasswordVerifier interface of the domain, which the
-          PasswordHasher port extends. A dashed frame labelled AGGREGATE marks the boundary of User;
+          PasswordHasher port extends. A dashed frame labelled Aggregate marks the boundary of User;
           view 3 of Part 1 draws its members.
         </desc>
         <defs>
@@ -148,7 +148,7 @@
           stroke="rgba(180,83,9,0.45)"
           stroke-width="1"
         />
-        <!-- Group frame: the AGGREGATE frame of User. This view draws the root alone; Part 1, view 3 draws its members. -->
+        <!-- Group frame: the Aggregate frame of User. This view draws the root alone; Part 1, view 3 draws its members. -->
         <rect
           x="544"
           y="1040"
@@ -169,7 +169,7 @@
           font-family="'IBM Plex Mono', monospace"
           letter-spacing="0.14em"
         >
-          AGGREGATE · User · decision 16
+          Aggregate · User · decision 16
         </text>
         <!-- Relationships (drawn before boxes) -->
         <!-- AuthController uses AuthDtoMapper: use (#105) -->
@@ -1454,7 +1454,7 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The dashed AGGREGATE frame marks the boundary of User. View 3 of Part 1 draws its members.
+          The dashed Aggregate frame marks the boundary of User. View 3 of Part 1 draws its members.
         </text>
         <!-- Legend -->
         <line
@@ -1616,7 +1616,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          AGGREGATE frame · root and its members
+          Aggregate frame · root and its members
         </text>
       </svg>
     </div>

@@ -13,7 +13,7 @@ import { valueOf } from '../../support/result.js';
 
 const USER = valueOf(UserId.from(testUserId(1)));
 const FIT = valueOf(GameId.of('fit'));
-const KEY = ProgressKey.of(USER, FIT);
+const KEY = valueOf(ProgressKey.of(USER, FIT));
 const START = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
 const LATER = syncInstantOf(new Date('2026-11-06T10:05:00.000Z'));
 const LATEST = syncInstantOf(new Date('2026-11-06T10:10:00.000Z'));
@@ -473,7 +473,7 @@ describe('PlayerProgress identity', () => {
       results: [level('fit-01', 3)],
     });
     const fresh = PlayerProgress.start(
-      ProgressKey.of(valueOf(UserId.from(testUserId(1))), valueOf(GameId.of('fit'))),
+      valueOf(ProgressKey.of(valueOf(UserId.from(testUserId(1))), valueOf(GameId.of('fit')))),
       START,
     );
 
@@ -487,7 +487,7 @@ describe('PlayerProgress identity', () => {
     [USER, valueOf(GameId.of('sort'))],
   ])('should_not_be_the_same_progress_when_the_user_or_the_game_differs', (userId, gameId) => {
     const progress = PlayerProgress.start(KEY, START);
-    const other = PlayerProgress.start(ProgressKey.of(userId, gameId), START);
+    const other = PlayerProgress.start(valueOf(ProgressKey.of(userId, gameId)), START);
 
     expect(progress.equals(other)).toBe(false);
     expect(other.equals(progress)).toBe(false);
