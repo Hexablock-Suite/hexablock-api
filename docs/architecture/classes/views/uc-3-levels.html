@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 3 of 4</p>
       <h1>Levels: read them, and check every level before an update</h1>
       <svg
-        viewBox="0 0 1040 800"
+        viewBox="0 0 1040 816"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc3levels-title uc3levels-desc"
@@ -76,7 +76,8 @@
           service and returns a Result whose InvalidLevels failure holds one problem per broken
           level with its gameId and levelId, so a level that fails its check is never saved and no
           exception reaches the HTTP layer. GetLevelsUseCase takes no request and has no expected
-          failure.
+          failure. A footnote names LevelDtoMapper, which builds the UpdateLevelsRequest, and
+          LevelRowMapper, which restores each stored row through LevelValidators.
         </desc>
         <defs>
           <marker
@@ -698,11 +699,21 @@
           LevelRepository.update() saves one level per transaction, under a lock of its gameId and
           levelId. Its LevelChange runs LevelDefinition.accepts(), the version rule of S3-10.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="696" x2="1016" y2="696" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="714"
+          y="688"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          In layer 3, LevelDtoMapper builds the UpdateLevelsRequest (Part 3, view 5), and
+          LevelRowMapper restores each stored row through LevelValidators (Part 3, view 2).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="712" x2="1016" y2="712" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="730"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -712,16 +723,16 @@
         </text>
         <line
           x1="24"
-          y1="732"
+          y1="748"
           x2="52"
-          y2="732"
+          y2="748"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
         <text
           x="60"
-          y="736"
+          y="752"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -730,7 +741,7 @@
         </text>
         <rect
           x="24"
-          y="752"
+          y="768"
           width="20"
           height="12"
           rx="2"
@@ -740,7 +751,7 @@
         />
         <rect
           x="48"
-          y="752"
+          y="768"
           width="20"
           height="12"
           rx="2"
@@ -750,7 +761,7 @@
         />
         <text
           x="80"
-          y="761"
+          y="777"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -759,7 +770,7 @@
         </text>
         <rect
           x="264"
-          y="752"
+          y="768"
           width="28"
           height="12"
           rx="2"
@@ -770,7 +781,7 @@
         />
         <text
           x="300"
-          y="761"
+          y="777"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -779,7 +790,7 @@
         </text>
         <rect
           x="470"
-          y="752"
+          y="768"
           width="28"
           height="12"
           rx="2"
@@ -789,7 +800,7 @@
         />
         <text
           x="506"
-          y="761"
+          y="777"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -798,7 +809,7 @@
         </text>
         <rect
           x="616"
-          y="752"
+          y="768"
           width="28"
           height="12"
           rx="2"
@@ -809,18 +820,18 @@
         />
         <text
           x="652"
-          y="761"
+          y="777"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Corner box · type parameters
         </text>
-        <line x1="808" y1="758" x2="824" y2="758" stroke="#17212a" stroke-width="1" />
-        <circle cx="829" cy="758" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="808" y1="774" x2="824" y2="774" stroke="#17212a" stroke-width="1" />
+        <circle cx="829" cy="774" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="844"
-          y="761"
+          y="777"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -829,7 +840,7 @@
         </text>
         <rect
           x="24"
-          y="774"
+          y="790"
           width="28"
           height="12"
           rx="2"
@@ -840,7 +851,7 @@
         />
         <text
           x="60"
-          y="783"
+          y="799"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

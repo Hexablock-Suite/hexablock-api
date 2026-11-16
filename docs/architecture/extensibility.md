@@ -19,7 +19,7 @@ Statement §4 asks for an extensibility diagram with the engine in the center an
 
 ## View 1: the core and its extension axes
 
-![Overview: UseCase and the eight use cases in the center of layer 2, with the four driver ports and the four output ports; around them the drivers in layer 4, the HTTP controllers and the four Drizzle repositories in layer 3, the aspects in layer 2, and the level validators of layer 1 with the declared FillLevelValidator](extensibility/views/ext-1-overview.png)
+![Overview: UseCase and the eight use cases in the center of layer 2, with the four driver ports and the four output ports; around them the drivers in layer 4, the HTTP controllers and the four Drizzle repositories in layer 3, the aspects in layer 2, and the level validators of layer 1 with the declared FillLevelValidator; the footnote names LeaderboardDtoMapper and LevelDtoMapper, list() and update(gameId, levelId, change) of LevelRepository, the LevelOrder, LevelVersion, FitSection, SortSection and Coordinate values of a level, and the LeaderboardEntry and Standing of the boards](extensibility/views/ext-1-overview.png)
 
 Five axes surround the core. The drivers sit in layer 4. The HTTP controllers and the database adapters sit in layer 3. The aspects sit in layer 2, next to the use cases they wrap (Q12). The level validators of each variant sit in layer 1. Every arrow from layers 3 and 4 points to the core, so a new driver, aspect, controller or database adapter adds a class and the core does not change. Each driver and each Drizzle repository implements one port, so each one has its own line to that port. The view does not draw the ports that each use case holds: views 2.2 to 2.4 of the class diagram draw them, and view 3 draws the output ports with their use cases and the declared MongoDB adapters. The core points inward to layer 1 only through `LevelValidators`, a domain service that the composition root fills: a new variant registers its strategy there and changes no existing class. No source declares a second transport, so the HTTP controllers are the only input adapters, and the view draws no placeholder for another one.
 
@@ -31,7 +31,7 @@ The statement gives the example of a fifth variant: «por ejemplo, Hexa Fill: pi
 
 ## View 3: a new database engine
 
-![A new database engine: the four output ports of layer 2, each held by the use cases that need it and implemented by one Drizzle repository, and the declared MongoDB repositories, each of which implements the same port as the Drizzle repository above it](extensibility/views/ext-3-database-engine.png)
+![A new database engine: the four output ports of layer 2, each held by the use cases that need it and implemented by one Drizzle repository, and the declared MongoDB repositories, each of which implements the same port as the Drizzle repository above it; the footnote names update(gameId, levelId, change) of LevelRepository and the LeaderboardEntry rows of LeaderboardReader with their Standing](extensibility/views/ext-3-database-engine.png)
 
 The database engine row of §8 names MongoDB instead of Postgres (professor, class of 2026-10-26). The `Mongo` class names are placeholders. Each column holds one output port, its Drizzle adapter, its declared Mongo adapter and the use cases that hold it, as views 2.2 to 2.4 of the class diagram show.
 

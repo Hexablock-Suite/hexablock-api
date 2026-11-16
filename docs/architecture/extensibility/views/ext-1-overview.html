@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 1 of 3</p>
       <h1>The application core and its extension axes</h1>
       <svg
-        viewBox="0 0 1040 1292"
+        viewBox="0 0 1040 1340"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext1overview-title ext1overview-desc"
@@ -74,7 +74,9 @@
           center, with five extension axes around them: drivers in layer 4, HTTP controllers and
           Drizzle repositories in layer 3, aspects in layer 2 (Q12), and level validators per
           variant in layer 1. Each driver and each Drizzle repository implements its own port, and
-          no line starts or ends on a dashed frame.
+          no line starts or ends on a dashed frame. The footnote names the DTO mappers, the
+          operations of LevelRepository, the values of a level and the leaderboard types that other
+          views draw.
         </desc>
         <defs>
           <marker
@@ -1466,18 +1468,48 @@
           LeaderboardController serves both routes of GetLeaderboard, and LeaderboardDtoMapper
           builds its query and its answer (decision 12, #83).
         </text>
+        <text
+          x="24"
+          y="1164"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelDtoMapper translates the level bodies of LevelsController (view 3.5), and
+          LevelRepository has list() and update(gameId, levelId, change) (view 2.3).
+        </text>
+        <text
+          x="24"
+          y="1180"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelDefinition holds a LevelOrder, a LevelVersion and a FitSection or a SortSection, and
+          FitSection holds Coordinate values (views 1.2 and 1.5).
+        </text>
+        <text
+          x="24"
+          y="1196"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LeaderboardReader gives LeaderboardEntry rows of layer 2, and the global board of Fit and
+          Sort ranks the Standing of each player (views 1.1 and 2.2).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1176"
+          y1="1224"
           x2="1016"
-          y2="1176"
+          y2="1224"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1194"
+          y="1242"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1487,9 +1519,9 @@
         </text>
         <line
           x1="24"
-          y1="1212"
+          y1="1260"
           x2="52"
-          y2="1212"
+          y2="1260"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1497,7 +1529,7 @@
         />
         <text
           x="60"
-          y="1216"
+          y="1264"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1506,16 +1538,16 @@
         </text>
         <line
           x1="128"
-          y1="1212"
+          y1="1260"
           x2="156"
-          y2="1212"
+          y2="1260"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext1overview-open)"
         />
         <text
           x="164"
-          y="1216"
+          y="1264"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1524,7 +1556,7 @@
         </text>
         <rect
           x="24"
-          y="1228"
+          y="1276"
           width="12"
           height="12"
           rx="2"
@@ -1534,7 +1566,7 @@
         />
         <rect
           x="40"
-          y="1228"
+          y="1276"
           width="12"
           height="12"
           rx="2"
@@ -1544,7 +1576,7 @@
         />
         <rect
           x="56"
-          y="1228"
+          y="1276"
           width="12"
           height="12"
           rx="2"
@@ -1554,7 +1586,7 @@
         />
         <rect
           x="72"
-          y="1228"
+          y="1276"
           width="12"
           height="12"
           rx="2"
@@ -1564,7 +1596,7 @@
         />
         <text
           x="92"
-          y="1238"
+          y="1286"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1573,7 +1605,7 @@
         </text>
         <rect
           x="272"
-          y="1228"
+          y="1276"
           width="28"
           height="12"
           rx="2"
@@ -1584,7 +1616,7 @@
         />
         <text
           x="308"
-          y="1238"
+          y="1286"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1593,7 +1625,7 @@
         </text>
         <rect
           x="520"
-          y="1228"
+          y="1276"
           width="28"
           height="12"
           rx="2"
@@ -1603,7 +1635,7 @@
         />
         <text
           x="556"
-          y="1238"
+          y="1286"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1612,7 +1644,7 @@
         </text>
         <rect
           x="768"
-          y="1228"
+          y="1276"
           width="28"
           height="12"
           rx="2"
@@ -1623,7 +1655,7 @@
         />
         <text
           x="804"
-          y="1238"
+          y="1286"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1632,7 +1664,7 @@
         </text>
         <rect
           x="24"
-          y="1250"
+          y="1298"
           width="28"
           height="12"
           rx="2"
@@ -1643,7 +1675,7 @@
         />
         <text
           x="60"
-          y="1260"
+          y="1308"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

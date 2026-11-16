@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 2 of 4</p>
       <h1>Progress and leaderboard: use cases over output ports</h1>
       <svg
-        viewBox="0 0 1040 854"
+        viewBox="0 0 1040 870"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc2progress-title uc2progress-desc"
@@ -75,7 +75,9 @@
           holds the LeaderboardReader port. The reader only filters and sums, and the use case
           orders the entries with the comparisons of the domain. Each progress use case joins the
           userId and the gameId of its request in a ProgressKey, and ProgressRepository finds and
-          updates one progress by that key.
+          updates one progress by that key. A footnote names LeaderboardController and
+          LeaderboardDtoMapper of layer 3, which call GetLeaderboard and translate its query and
+          answer.
         </desc>
         <defs>
           <marker
@@ -648,11 +650,21 @@
           Each progress use case joins the userId and the gameId of its request in a ProgressKey
           value object of layer 1 (#107), the key of find() and update().
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="772" x2="1016" y2="772" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="790"
+          y="764"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          In layer 3, LeaderboardController calls GetLeaderboard, and LeaderboardDtoMapper builds
+          its LeaderboardQuery and its LeaderboardDto (Part 3, views 3 and 5).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="788" x2="1016" y2="788" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="806"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -662,16 +674,16 @@
         </text>
         <line
           x1="24"
-          y1="808"
+          y1="824"
           x2="52"
-          y2="808"
+          y2="824"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
         <text
           x="60"
-          y="812"
+          y="828"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -680,7 +692,7 @@
         </text>
         <rect
           x="24"
-          y="828"
+          y="844"
           width="20"
           height="12"
           rx="2"
@@ -690,7 +702,7 @@
         />
         <text
           x="56"
-          y="837"
+          y="853"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -699,7 +711,7 @@
         </text>
         <rect
           x="166"
-          y="828"
+          y="844"
           width="28"
           height="12"
           rx="2"
@@ -710,7 +722,7 @@
         />
         <text
           x="202"
-          y="837"
+          y="853"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -719,7 +731,7 @@
         </text>
         <rect
           x="372"
-          y="828"
+          y="844"
           width="28"
           height="12"
           rx="2"
@@ -729,18 +741,18 @@
         />
         <text
           x="408"
-          y="837"
+          y="853"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
         </text>
-        <line x1="518" y1="834" x2="534" y2="834" stroke="#17212a" stroke-width="1" />
-        <circle cx="539" cy="834" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="518" y1="850" x2="534" y2="850" stroke="#17212a" stroke-width="1" />
+        <circle cx="539" cy="850" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="554"
-          y="837"
+          y="853"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
