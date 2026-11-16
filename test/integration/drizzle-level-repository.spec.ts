@@ -28,24 +28,34 @@ import {
 } from '../support/level-repository.contract.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 
-const openDatabases: TestDatabase[] = [];
+// One PGlite database for the whole file. A new PGlite costs about one
+// second to start, and the migrations cost about 20 ms, so a test that starts
+// its own database pays that second each time. Each test starts with an
+// empty levels table instead: the repository reads and writes no other table.
+let database: TestDatabase;
 
-async function openDatabase(): Promise<TestDatabase> {
-  const database = await createTestDatabase();
-  openDatabases.push(database);
-  return database;
+beforeAll(async () => {
+  database = await createTestDatabase();
+});
+
+afterAll(async () => {
+  await database.close();
+});
+
+beforeEach(async () => {
+  await emptyLevels();
+});
+
+async function emptyLevels(): Promise<void> {
+  await database.db.delete(levels);
 }
 
-afterEach(async () => {
-  await Promise.all(openDatabases.splice(0).map((database) => database.close()));
-});
+describeLevelRepositoryContract(
+  'DrizzleLevelRepository',
+  () => new DrizzleLevelRepository(database.db, levelValidators()),
+);
 
-describeLevelRepositoryContract('DrizzleLevelRepository', async () => {
-  const database = await openDatabase();
-  return new DrizzleLevelRepository(database.db, levelValidators());
-});
-
-async function countLevelRows(database: TestDatabase): Promise<number | undefined> {
+async function countLevelRows(): Promise<number | undefined> {
   const result = await database.db.execute<{ count: number }>(
     sql`select count(*)::int as count from levels`,
   );
@@ -74,8 +84,6 @@ class RecordingStrategy implements LevelValidator<unknown> {
 // API-FR-04 and DS-6: one row per gameId and levelId, with the section as JSON.
 describe('DrizzleLevelRepository', () => {
   it('should_create_the_levels_table_unique_on_game_and_level_id_when_migrations_run', async () => {
-    const database = await openDatabase();
-
     const columns = await database.db.execute<{
       column_name: string;
       data_type: string;
@@ -106,31 +114,28 @@ describe('DrizzleLevelRepository', () => {
   });
 
   it('should_list_both_levels_back_when_two_levels_are_saved', async () => {
-    const database = await openDatabase();
     const repository = new DrizzleLevelRepository(database.db, levelValidators());
 
     await storeLevel(repository, levelExample('fit'));
     await storeLevel(repository, levelExample('sort'));
 
     expect(await listedJson(repository)).toEqual([levelExample('fit'), levelExample('sort')]);
-    expect(await countLevelRows(database)).toBe(2);
+    expect(await countLevelRows()).toBe(2);
   });
 
   it('should_keep_one_row_when_one_level_is_saved_twice', async () => {
-    const database = await openDatabase();
     const repository = new DrizzleLevelRepository(database.db, levelValidators());
 
     await storeLevel(repository, levelJson('sort', 'sort-01', 1));
     await storeLevel(repository, levelJson('sort', 'sort-01', 3));
 
-    expect(await countLevelRows(database)).toBe(1);
+    expect(await countLevelRows()).toBe(1);
     expect(await listedJson(repository)).toEqual([levelJson('sort', 'sort-01', 3)]);
   });
 
   // A level is born valid (#77), also from the database: LevelRowMapper
   // builds each stored section through the strategy of the row's gameId.
   it('should_restore_a_stored_fit_row_and_a_stored_sort_row_into_valid_levels_when_rows_are_read', async () => {
-    const database = await openDatabase();
     const hex = Topologies.of([[valueOf(TopologyId.of('hex')), new HexTopology()]]);
     const fit = new RecordingStrategy(new FitLevelValidator(hex));
     const sort = new RecordingStrategy(new SortLevelValidator());
@@ -170,7 +175,7 @@ describe('DrizzleLevelRepository', () => {
       ],
     ];
     for (const [row, message] of cases) {
-      const database = await openDatabase();
+      await emptyLevels();
       await database.db.insert(levels).values(row);
 
       await expect(
