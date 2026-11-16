@@ -1,6 +1,7 @@
 import type { GameId } from '../progress/game-id.js';
 import type { LevelId } from '../progress/level-id.js';
-import { ok, type Result } from '../shared/result.js';
+import { err, ok, type Result } from '../shared/result.js';
+import type { ValueReceiver } from '../shared/value-receiver.js';
 import type { LevelOrder } from './level-order.js';
 import type { LevelProblem } from './level-problem.js';
 import type { LevelVersion } from './level-version.js';
@@ -14,6 +15,8 @@ import type { TopologyId } from './topology-id.js';
 // The boundary is one level. The section rules hold inside one level, and so
 // does the version rule of S3-10, which compares two copies of the same level.
 // No requirement links two levels (DS-6, DS-11, S3-02, S3-10).
+// The level has no getter. deliverTo() gives its parts to a receiver of the
+// border, in the fields of the shared level format (docs/level-format.md).
 export class LevelDefinition<TSection> {
   private constructor(
     private readonly gameId: GameId,
@@ -44,6 +47,47 @@ export class LevelDefinition<TSection> {
   // same levelId. The other data does not count: two copies of one level can
   // have two versions (DS-11).
   equals(other: LevelDefinition<unknown>): boolean {
-    return this.gameId.equals(other.gameId) && this.levelId.equals(other.levelId);
+    return this.isIdentifiedBy(other.gameId, other.levelId);
+  }
+
+  // Tells if this level has this gameId and this levelId. LevelRepository
+  // saves a level only under the key that it locks.
+  isIdentifiedBy(gameId: GameId, levelId: LevelId): boolean {
+    return this.gameId.equals(gameId) && this.levelId.equals(levelId);
+  }
+
+  // The version rule of S3-10. This level is the stored copy. It accepts an
+  // incoming copy with an equal or a higher version, and it gives that copy.
+  // It rejects a lower version with older-version. An equal version passes,
+  // so a retry of the same update is safe. The rule compares two copies of
+  // one level, so another level is a defect of the caller and throws.
+  accepts(incoming: LevelDefinition<TSection>): Result<LevelDefinition<TSection>, LevelProblem> {
+    if (!this.equals(incoming)) {
+      throw new RangeError('The version rule compares two copies of one level.');
+    }
+    return incoming.version.isOlderThan(this.version) ? err('older-version') : ok(incoming);
+  }
+
+  // Delivers the common part and the section to a receiver of the border, in
+  // the fields of the shared level format. No operation returns them. Each
+  // part delivers its own value in turn, and the section delivers its parts.
+  deliverTo(
+    receiver: ValueReceiver<{
+      readonly gameId: GameId;
+      readonly levelId: LevelId;
+      readonly order: LevelOrder;
+      readonly version: LevelVersion;
+      readonly topology: TopologyId;
+      readonly section: TSection;
+    }>,
+  ): void {
+    receiver.receive({
+      gameId: this.gameId,
+      levelId: this.levelId,
+      order: this.order,
+      version: this.version,
+      topology: this.topology,
+      section: this.section,
+    });
   }
 }

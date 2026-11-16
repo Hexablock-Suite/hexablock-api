@@ -33,9 +33,11 @@ jobs:
         run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
       - run: pnpm verify
 
-  # Runs the advisory-lock suite of DrizzleProgressRepository.update() on a
-  # throwaway Postgres (rule R-database-harness). PGlite runs one session, so
-  # only a real server shows two syncs that wait for one lock.
+  # Runs the advisory-lock suites of DrizzleProgressRepository.update() and
+  # DrizzleLevelRepository.update() on a throwaway Postgres (rule
+  # R-database-harness). PGlite runs one session, so only a real server shows
+  # two updates that wait for one lock. Each suite migrates the fresh database
+  # first, so the files run one at a time.
   postgres-lock:
     name: postgres-lock
     runs-on: ubuntu-latest
@@ -62,10 +64,11 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec vitest run test/integration/drizzle-progress-repository.concurrency.spec.ts --reporter=default --reporter=json --outputFile=postgres-lock.json
-      # A skipped suite would pass without testing the lock, so the job fails on it.
+      - run: pnpm exec vitest run test/integration/drizzle-progress-repository.concurrency.spec.ts test/integration/drizzle-level-repository.concurrency.spec.ts --no-file-parallelism --reporter=default --reporter=json --outputFile=postgres-lock.json
+      # A skipped or missing suite would pass without testing its lock, so the
+      # job fails unless both files ran and every test of each file passed.
       - name: fail when the suite was skipped
-        run: jq -e '.numPassedTests > 0 and .numPendingTests == 0 and .numTodoTests == 0' postgres-lock.json
+        run: jq -e '(.testResults | length) == 2 and all(.testResults[]; (.assertionResults | length) > 0 and all(.assertionResults[]; .status == "passed"))' postgres-lock.json
 
   # Verifies the pact from the client main branch against this commit (spec S9).
   contract:

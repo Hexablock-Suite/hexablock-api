@@ -37,7 +37,7 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ## Use case 3: update levels
 
-A signed-in client calls this endpoint to publish new levels without an app update. The professor asks for no level editor and no roles (Q4, answered 2026-11-03), so the token guard is the only check. The endpoint is `LevelsController.update()` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a domain service that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The strategy only picks the section type, the section checks its own shape and holds its rules, and `LevelValidators` creates each level, so no level exists before its section is valid (decisions 4 and 5 of [classes.md](classes.md)). The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels or returns the problems. No class of layer 4 takes part.
+A signed-in client calls this endpoint to publish new levels without an app update. The professor asks for no level editor and no roles (Q4, answered 2026-11-03), so the token guard is the only check. The endpoint is `LevelsController.update()` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a domain service that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The strategy only picks the section type, the section checks its own shape and holds its rules, and `LevelValidators` creates each level, so no level exists before its section is valid (decisions 4 and 5 of [classes.md](classes.md)). The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels one by one or returns the problems. No class of layer 4 takes part.
 
 ### Class view
 
@@ -45,7 +45,9 @@ A signed-in client calls this endpoint to publish new levels without an app upda
 
 ### Sequence diagram
 
-![Update levels sequence: JwtAuthGuard verifies the token, LevelsController builds the request with LevelDtoMapper and calls UpdateLevels, the use case asks LevelValidators to check each level, the LevelValidator strategy of its gameId picks the section type and LevelValidators builds the level, a note gives the Fit path through Topologies and FitSection, and then the use case saves the levels or returns the problems as an error body](flows/views/seq-3-update-levels.png)
+![Update levels sequence: JwtAuthGuard verifies the token, LevelsController builds the request with LevelDtoMapper and calls UpdateLevels, the use case asks LevelValidators to check each level, the LevelValidator strategy of its gameId picks the section type and LevelValidators builds the level, a note gives the Fit path through Topologies and FitSection, and then the use case saves each level with LevelRepository.update(gameId, levelId, change), one transaction per level under a lock of its key, or returns the problems as an error body](flows/views/seq-3-update-levels.png)
+
+The code saves each level with one call, `LevelRepository.update(gameId, levelId, change)` (#80). `DrizzleLevelRepository` opens one transaction per level, takes a Postgres advisory lock for the `gameId` and the `levelId`, restores the stored level through `LevelValidators` and passes it, or `null`, to the change. The change runs `stored.accepts(level)`, the version rule of S3-10, and the adapter saves the level that a successful change returns in the same transaction. So two overlapping updates of one level run one after the other, and the later one cannot save an older copy: it gets the level problem `older-version`. A row lock is not enough, because the first update of a level has no row yet.
 
 ## Other use cases
 

@@ -4,6 +4,7 @@ import { ok, type Result } from '../../shared/result.js';
 import type { LevelProblem } from '../level-problem.js';
 import { readFields } from '../parts.js';
 import { maxElapsedTimeIn, maxMovesIn } from '../star-limits.js';
+import type { ValueReceiver } from '../../shared/value-receiver.js';
 
 // Value object for the two limits of one Fit star: a move count and a time.
 // A Fit star needs both (DS-6, hexablock-app#60). The stars are cumulative:
@@ -24,6 +25,14 @@ export class FitStarThreshold {
     return threshold.ok
       ? ok(new FitStarThreshold(threshold.value.maxMoves, threshold.value.maxElapsedMs))
       : threshold;
+  }
+
+  // Delivers the two limits to a receiver of the border, in the fields that
+  // of() reads. No operation returns them. ElapsedTime delivers milliseconds.
+  deliverTo(
+    receiver: ValueReceiver<{ readonly maxMoves: Moves; readonly maxElapsedMs: ElapsedTime }>,
+  ): void {
+    receiver.receive({ maxMoves: this.maxMoves, maxElapsedMs: this.maxElapsedTime });
   }
 
   // Two thresholds are equal when their two limits are equal.

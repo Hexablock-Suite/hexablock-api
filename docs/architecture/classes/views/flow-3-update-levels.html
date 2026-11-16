@@ -175,7 +175,7 @@
         />
         <!-- UpdateLevelsUseCase holds LevelRepository: use -->
         <path
-          d="M580 672 L580 708"
+          d="M580 672 L580 700"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -192,9 +192,9 @@
         <!-- DrizzleLevelRepository implements LevelRepository: realization -->
         <line
           x1="492"
-          y1="340"
+          y1="372"
           x2="492"
-          y2="708"
+          y2="700"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -498,19 +498,19 @@
         <text x="532" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(body: LevelDto[]): Promise&lt;void&gt;
         </text>
-        <!-- Class: DrizzleLevelRepository («Adapter») -->
+        <!-- Class: DrizzleLevelRepository («repository»; no role label) -->
         <rect
           x="196"
           y="216"
-          width="310"
-          height="124"
+          width="344"
+          height="156"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="351"
+          x="368"
           y="234"
           fill="#5b6873"
           font-size="8"
@@ -518,10 +518,10 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «Adapter»
+          «repository»
         </text>
         <text
-          x="351"
+          x="368"
           y="252"
           fill="#17212a"
           font-size="12"
@@ -532,7 +532,7 @@
           DrizzleLevelRepository
         </text>
         <text
-          x="351"
+          x="368"
           y="266"
           fill="#5b6873"
           font-size="8"
@@ -542,32 +542,22 @@
         >
           DS-6 · src/adapters/persistence/
         </text>
-        <line x1="196" y1="276" x2="506" y2="276" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="196" y1="276" x2="540" y2="276" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="212" y="292" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - db: PgDatabase
+          - db: PersistenceDatabase
         </text>
-        <line x1="196" y1="300" x2="506" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          textLength="288"
-          lengthAdjust="spacingAndGlyphs"
-          x="212"
-          y="316"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + list(gameId: GameId): Promise&lt;LevelDefinition&lt;unknown&gt;[]&gt;
+        <line x1="196" y1="300" x2="540" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="212" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + list(): Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
         </text>
-        <text
-          textLength="288"
-          lengthAdjust="spacingAndGlyphs"
-          x="212"
-          y="332"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + save(levels: LevelDefinition&lt;unknown&gt;[]): Promise&lt;void&gt;
+        <text x="212" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + update(gameId: GameId, levelId: LevelId,
+        </text>
+        <text x="234" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          change: LevelChange):
+        </text>
+        <text x="234" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;&gt;
         </text>
         <!-- Class: LevelDtoMapper («mapper») -->
         <rect
@@ -770,31 +760,31 @@
         <text x="532" y="664" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + execute(request: UpdateLevelsRequest): Promise&lt;Result&lt;void, LevelProblem[]&gt;&gt;
         </text>
-        <!-- Class: LevelRepository («interface» «port») -->
+        <!-- Class: LevelRepository («interface» «port» «repository») -->
         <rect
           x="300"
-          y="708"
-          width="320"
-          height="88"
+          y="700"
+          width="440"
+          height="104"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="460"
-          y="726"
+          x="520"
+          y="718"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «port»
+          «interface» «port» «repository»
         </text>
         <text
-          x="460"
-          y="744"
+          x="520"
+          y="736"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -803,28 +793,15 @@
         >
           LevelRepository
         </text>
-        <line x1="300" y1="756" x2="620" y2="756" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          textLength="298"
-          lengthAdjust="spacingAndGlyphs"
-          x="316"
-          y="772"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + list(gameId: GameId): Promise&lt;LevelDefinition&lt;unknown&gt;[]&gt;
+        <line x1="300" y1="748" x2="740" y2="748" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="316" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + list(): Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
         </text>
-        <text
-          textLength="298"
-          lengthAdjust="spacingAndGlyphs"
-          x="316"
-          y="788"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + save(levels: LevelDefinition&lt;unknown&gt;[]): Promise&lt;void&gt;
+        <text x="316" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + update(gameId: GameId, levelId: LevelId, change: LevelChange):
+        </text>
+        <text x="338" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;&gt;
         </text>
         <!-- Class: LevelValidators («domain service») -->
         <rect
@@ -1280,7 +1257,8 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           LevelDefinition&lt;unknown&gt; is a valid level whose section type only its strategy
-          knows. #80 and #81 fix the port and the request; flows.md holds the sequence.
+          knows. DrizzleLevelRepository saves one level per transaction and restores each row
+          through LevelValidators (view 3.2).
         </text>
         <text
           x="24"

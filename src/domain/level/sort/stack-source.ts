@@ -1,5 +1,6 @@
 import { err, ok, type Result } from '../../shared/result.js';
 import type { LevelProblem } from '../level-problem.js';
+import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { readFields, readList, sameItems } from '../parts.js';
 import { Seed } from './seed.js';
 import { TileColor } from './tile-color.js';
@@ -38,6 +39,17 @@ export class StackSource {
       'invalid-source',
     );
     return fixed.ok ? ok(new StackSource(fixed.value)) : err('invalid-source');
+  }
+
+  // Delivers the data of its kind to a receiver of the border, the mirror of
+  // of(): { seed, colors } or { stacks }. No operation returns them.
+  deliverTo(
+    receiver: ValueReceiver<
+      | { readonly seed: Seed; readonly colors: readonly TileColor[] }
+      | { readonly stacks: readonly (readonly TileColor[])[] }
+    >,
+  ): void {
+    receiver.receive({ ...this.supply });
   }
 
   // Two sources are equal when they are of the same kind and hold equal data

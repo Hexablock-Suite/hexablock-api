@@ -89,6 +89,56 @@ describe('LevelDefinition', () => {
     expect(newer.equals(stored)).toBe(true);
   });
 
+  // S3-10: the stored copy accepts a copy of the same level with an equal or
+  // a higher version, and it rejects a lower version. The rule lives in the
+  // root, and LevelRepository.update() runs it again under its lock (#80).
+  describe('the version rule of S3-10', () => {
+    const copy = (version: number) =>
+      valueOf(
+        LevelDefinition.of(FIT, FIT_01, FIRST, valueOf(LevelVersion.of(version)), HEX, ok('copy')),
+      );
+
+    it('should_reject_the_incoming_copy_with_older_version_when_its_version_is_lower', () => {
+      const stored = copy(2);
+
+      expect(stored.accepts(copy(1))).toEqual({ ok: false, error: 'older-version' });
+    });
+
+    it('should_accept_the_incoming_copy_when_its_version_is_equal_or_higher', () => {
+      const stored = copy(2);
+      const equal = copy(2);
+      const higher = copy(3);
+
+      const acceptedEqual = stored.accepts(equal);
+      const acceptedHigher = stored.accepts(higher);
+
+      expect(acceptedEqual.ok && acceptedEqual.value).toBe(equal);
+      expect(acceptedHigher.ok && acceptedHigher.value).toBe(higher);
+    });
+
+    // The rule compares two copies of one level. Another level is a defect
+    // of the caller, not a datum of a level, so this guard throws.
+    it('should_throw_when_the_incoming_level_is_another_level', () => {
+      const stored = copy(1);
+      const otherLevel = valueOf(
+        LevelDefinition.of(FIT, LevelId.of('fit-02'), FIRST, V1, HEX, ok('copy')),
+      );
+
+      expect(() => stored.accepts(otherLevel)).toThrow(
+        'The version rule compares two copies of one level.',
+      );
+    });
+  });
+
+  // The repository saves a level only under its own key (#80).
+  it('should_tell_its_identity_when_asked_with_a_game_and_a_level_id', () => {
+    const level = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('section')));
+
+    expect(level.isIdentifiedBy(GameId.of('fit'), LevelId.of('fit-01'))).toBe(true);
+    expect(level.isIdentifiedBy(FIT, LevelId.of('fit-02'))).toBe(false);
+    expect(level.isIdentifiedBy(GameId.of('sort'), FIT_01)).toBe(false);
+  });
+
   it('should_be_another_level_when_the_game_or_the_level_id_differs', () => {
     const level = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('section')));
     const otherLevel = valueOf(
