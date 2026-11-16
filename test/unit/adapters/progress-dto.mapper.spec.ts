@@ -33,8 +33,9 @@ describe('ProgressDtoMapper.toRequest', () => {
     expect(request.value.results[0]?.equals(levelResultOf(LEVEL))).toBe(true);
   });
 
-  it('should_build_no_score_and_no_results_when_body_has_only_a_game_id', () => {
-    for (const body of [{ gameId: 'hexa-fit' }, { gameId: 'hexa-fit', score: null }]) {
+  it.each([{ gameId: 'hexa-fit' }, { gameId: 'hexa-fit', score: null }])(
+    'should_build_no_score_and_no_results_when_body_has_only_a_game_id',
+    (body) => {
       const request = ProgressDtoMapper.toRequest(body, ADA);
 
       if (!request.ok) {
@@ -43,52 +44,51 @@ describe('ProgressDtoMapper.toRequest', () => {
       expect(request.value.gameId.equals(GameId.of('hexa-fit'))).toBe(true);
       expect(request.value.score).toBeUndefined();
       expect(request.value.results).toEqual([]);
-    }
-  });
+    },
+  );
 
-  it('should_fail_with_the_message_of_the_rule_when_one_value_breaks_its_rule', () => {
-    for (const [body, problem] of [
-      [{ gameId: BAD_GAME, score: 120 }, GAME_PROBLEM],
-      [{ gameId: 'hexa-fit', results: [LEVEL, BAD_LEVEL] }, LEVEL_PROBLEM],
-      [{ gameId: 'hexa-fit', score: -1 }, SCORE_PROBLEM],
-    ] as const) {
-      expect(ProgressDtoMapper.toRequest(body, ADA)).toEqual({ ok: false, error: [problem] });
-    }
+  it.each([
+    [{ gameId: BAD_GAME, score: 120 }, GAME_PROBLEM],
+    [{ gameId: 'hexa-fit', results: [LEVEL, BAD_LEVEL] }, LEVEL_PROBLEM],
+    [{ gameId: 'hexa-fit', score: -1 }, SCORE_PROBLEM],
+  ])('should_fail_with_the_message_of_the_rule_when_one_value_breaks_its_rule', (body, problem) => {
+    expect(ProgressDtoMapper.toRequest(body, ADA)).toEqual({ ok: false, error: [problem] });
   });
 
   // The order of the checks is the game id, then the results, then the
   // score. The first broken rule gives the one problem of the answer.
-  it('should_fail_with_the_first_problem_in_game_results_score_order_when_several_values_break_their_rules', () => {
-    for (const [body, problem] of [
-      [{ gameId: BAD_GAME, results: [BAD_LEVEL] }, GAME_PROBLEM],
-      [{ gameId: BAD_GAME, score: -1 }, GAME_PROBLEM],
-      [{ gameId: 'hexa-fit', score: -1, results: [BAD_LEVEL] }, LEVEL_PROBLEM],
-      [{ gameId: BAD_GAME, score: -1, results: [BAD_LEVEL] }, GAME_PROBLEM],
-    ] as const) {
+  it.each([
+    [{ gameId: BAD_GAME, results: [BAD_LEVEL] }, GAME_PROBLEM],
+    [{ gameId: BAD_GAME, score: -1 }, GAME_PROBLEM],
+    [{ gameId: 'hexa-fit', score: -1, results: [BAD_LEVEL] }, LEVEL_PROBLEM],
+    [{ gameId: BAD_GAME, score: -1, results: [BAD_LEVEL] }, GAME_PROBLEM],
+  ])(
+    'should_fail_with_the_first_problem_in_game_results_score_order_when_several_values_break_their_rules',
+    (body, problem) => {
       expect(ProgressDtoMapper.toRequest(body, ADA)).toEqual({ ok: false, error: [problem] });
-    }
-  });
+    },
+  );
 
   // The mapper builds the values of one result in the order of the fields:
   // the level id, the stars, the moves, the time. The first broken rule
   // gives the one problem. A missing field breaks the rule of its value.
-  it('should_fail_with_the_first_broken_field_when_several_fields_of_a_result_break_their_rules', () => {
-    const broken = { levelId: ' ', stars: -1, moves: -2, elapsedMs: -3 };
-
-    for (const [result, problem] of [
-      [broken, 'levelId must be a non-blank string.'],
-      [{ ...broken, levelId: 'fit-01' }, 'stars must be a non-negative integer, got -1.'],
-      [{ ...LEVEL, moves: -2, elapsedMs: -3 }, 'moves must be a non-negative integer, got -2.'],
-      [{ ...LEVEL, elapsedMs: -3 }, 'elapsedMs must be a non-negative integer, got -3.'],
-      [{}, 'levelId must be a non-blank string.'],
-      [{ levelId: 'fit-01' }, 'stars must be a non-negative integer, got undefined.'],
-    ] as const) {
+  const broken = { levelId: ' ', stars: -1, moves: -2, elapsedMs: -3 };
+  it.each([
+    [broken, 'levelId must be a non-blank string.'],
+    [{ ...broken, levelId: 'fit-01' }, 'stars must be a non-negative integer, got -1.'],
+    [{ ...LEVEL, moves: -2, elapsedMs: -3 }, 'moves must be a non-negative integer, got -2.'],
+    [{ ...LEVEL, elapsedMs: -3 }, 'elapsedMs must be a non-negative integer, got -3.'],
+    [{}, 'levelId must be a non-blank string.'],
+    [{ levelId: 'fit-01' }, 'stars must be a non-negative integer, got undefined.'],
+  ])(
+    'should_fail_with_the_first_broken_field_when_several_fields_of_a_result_break_their_rules',
+    (result, problem) => {
       expect(ProgressDtoMapper.toRequest({ gameId: 'hexa-fit', results: [result] }, ADA)).toEqual({
         ok: false,
         error: [problem],
       });
-    }
-  });
+    },
+  );
 
   // The shape check comes first and reports every wrong type together.
   it('should_fail_with_every_shape_problem_when_body_fields_have_wrong_types', () => {

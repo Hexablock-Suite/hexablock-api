@@ -56,9 +56,10 @@ describe('ScryptPasswordHasher', () => {
   });
 
   // A PasswordHash is never empty, so the empty text is not a case here.
-  it('should_reject_password_when_hash_is_malformed', async () => {
-    for (const hash of ['plain text', 'scrypt$1$2$3$salt', 'bcrypt$16384$8$1$c2FsdA$aGFzaA']) {
+  it.each(['plain text', 'scrypt$1$2$3$salt', 'bcrypt$16384$8$1$c2FsdA$aGFzaA'])(
+    'should_reject_password_when_hash_is_malformed',
+    async (hash) => {
       expect(await hasher.verify(PLAIN, PasswordHash.from(hash))).toBe(false);
-    }
-  });
+    },
+  );
 });

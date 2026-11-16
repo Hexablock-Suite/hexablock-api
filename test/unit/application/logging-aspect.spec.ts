@@ -276,8 +276,9 @@ describe('LoggingAspect', () => {
   });
 
   // A logger that throws does not change the outcome of the use case.
-  it('should_return_inner_result_unchanged_when_logger_throws_on_success_or_failure', async () => {
-    for (const result of [ok('done'), err({ kind: 'progress-not-found' })] as EchoResult[]) {
+  it.each<EchoResult>([ok('done'), err({ kind: 'progress-not-found' })])(
+    'should_return_inner_result_unchanged_when_logger_throws_on_success_or_failure',
+    async (result) => {
       const { inner } = echo(() => Promise.resolve(result));
       const logger = recordingLogger();
       logger.log.mockImplementation(() => {
@@ -287,8 +288,8 @@ describe('LoggingAspect', () => {
 
       await expect(aspect.execute('ping')).resolves.toBe(result);
       expect(logger.log).toHaveBeenCalledOnce();
-    }
-  });
+    },
+  );
 
   it('should_rethrow_inner_error_when_logger_throws_while_it_logs_that_error', async () => {
     const failure = new Error('database is down');
