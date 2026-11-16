@@ -4,6 +4,8 @@ Entities, value objects and domain services. Imports only other files in `src/do
 
 `progress/` holds the `PlayerProgress` aggregate root, one per `userId` and `gameId` (API-FR-02), with its value objects `UserId`, `GameId`, `Score` and `LevelResult`. A `LevelResult` holds a `LevelId`, a `Stars`, a `Moves` and an `ElapsedTime` value object. A broken rule throws `ProgressError`.
 
+`level/` holds the `LevelDefinition<TSection>` aggregate root, one per `gameId` and `levelId` (API-FR-04, DS-6), with the values of its common part (`LevelOrder`, `LevelVersion`, `TopologyId`) and the `Coordinate` of a cell. `level/fit/` and `level/sort/` hold the `FitSection` and `SortSection` value objects and their parts. Each section reads the section as it arrives, checks its own shape and returns a `Result` with a `LevelProblem` code, so a level is born valid. The `LevelValidators` domain service finds the `LevelValidator` strategy of a `gameId` with `GameId.equals()` and builds the level. `docs/level-format.md` gives the shared level format.
+
 `user/` holds the `User` aggregate root, its value objects, its `UserState` snapshot and the `PasswordVerifier` interface. `User` has no public field and no public constructor: `User.register()` creates a user, `User.restore()` builds a stored one again, `snapshot()` gives a copy of its state, and `passwordMatches()` passes its hash to a `PasswordVerifier`. `Username` and `Password` check their length with the `USERNAME_LENGTH` and `PASSWORD_LENGTH` ranges, which also deliver their bounds to the HTTP adapters. `shared/` holds `Result<T, E>`, the generic `Range<T>` and the receiver interfaces `ValueReceiver<T>` and `BoundsReceiver<T>`.
 
 ## The primitive rule and its exceptions

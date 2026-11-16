@@ -37,15 +37,15 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ## Use case 3: update levels
 
-A signed-in client calls this endpoint to publish new levels without an app update. The professor asks for no level editor and no roles (Q4, answered 2026-11-03), so the token guard is the only check. The endpoint is `LevelsController.update()` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a registry that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The class view draws a diamond only there, because it is a pattern inside one layer. The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels or returns the problems. No class of layer 4 takes part.
+A signed-in client calls this endpoint to publish new levels without an app update. The professor asks for no level editor and no roles (Q4, answered 2026-11-03), so the token guard is the only check. The endpoint is `LevelsController.update()` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a domain service that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The strategy only picks the section type, the section checks its own shape and holds its rules, and `LevelValidators` creates each level, so no level exists before its section is valid (decisions 4 and 5 of [classes.md](classes.md)). The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels or returns the problems. No class of layer 4 takes part.
 
 ### Class view
 
-![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and LevelValidators with its LevelValidator strategies FitLevelValidator and SortLevelValidator and the LevelDefinition entity in layer 1](classes/views/flow-3-update-levels.png)
+![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and the LevelValidators domain service with its LevelValidator strategies FitLevelValidator and SortLevelValidator and the LevelDefinition aggregate root in layer 1](classes/views/flow-3-update-levels.png)
 
 ### Sequence diagram
 
-![Update levels sequence: JwtAuthGuard verifies the token, LevelsController maps each LevelDto with LevelDtoMapper and calls UpdateLevels, the use case asks LevelValidators to check each level through the LevelValidator strategy of its gameId, and then saves the levels or returns the problems as an error body](flows/views/seq-3-update-levels.png)
+![Update levels sequence: JwtAuthGuard verifies the token, LevelsController builds the request with LevelDtoMapper and calls UpdateLevels, the use case asks LevelValidators to check each level, the LevelValidator strategy of its gameId picks the section type and LevelValidators builds the level, and then the use case saves the levels or returns the problems as an error body](flows/views/seq-3-update-levels.png)
 
 ## Other use cases
 
@@ -61,7 +61,7 @@ The other four use cases follow a path that one of the three flows already draws
 ## How to read the class view
 
 - The zones are the Clean layers, with the colors of [layers.md](layers.md): dark blue for layer 4, light blue for layer 3, purple for layer 2 and yellow for layer 1. The outer layer is at the top, so every dependency between layers points down.
-- The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A filled diamond joins the root of an aggregate to each internal entity, and every other attribute, a GoF pattern included, is a use arrow (decision 13 of [classes.md](classes.md)). The flows draw no internal entity, so they draw no diamond: `PlayerProgress` keeps its `LevelResult` values through a use arrow labelled `results 0..*`. Flow 3 still draws a hollow diamond from `LevelValidators` to `LevelValidator`, from the rule of 2026-11-02. It changes to a use arrow when the view is drawn again.
+- The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A filled diamond joins the root of an aggregate to each internal entity, and every other attribute, a GoF pattern included, is a use arrow (decision 13 of [classes.md](classes.md)). The flows draw no internal entity, so they draw no diamond: `PlayerProgress` keeps its `LevelResult` values through a use arrow labelled `results 0..*`. Flow 3 draws a use arrow `entries 0..*` from `LevelValidators` to `LevelValidator`.
 - The views draw the input ports, such as `SyncProgress`, `Login`, `UpdateLevels` and `AuthenticateToken`, as interface boxes, not as lollipops. A box lets the controller and the guard point at the port they hold. The `execute()` member of each input port is the one of its use case: every input port binds `UseCase` (decision 7).
 - The teal class is the focal class: the use case.
 - A flow view shows more than the seven classes of the other views, because it follows one request through every layer.
@@ -75,7 +75,7 @@ The other four use cases follow a path that one of the three flows already draws
 - A white bar on a lifeline is an activation: the object runs.
 - A call through a port names the port, for example `ProgressRepository.find()`. The caller holds only the port. `AppModule` binds the port to the adapter, so the lifeline is the adapter that runs.
 - An `alt` or `loop` fragment shows a choice or a repetition. Its guard, in square brackets, says when it runs. Fragments can nest: in flow 2 the wrong-password `alt` sits inside the `[else]` of the unknown-user `alt`. A `ref` box stands for a flow that another view details: in flows 1 and 3, the token check of Part 2, view 4.
-- In flow 3, the `LevelValidator` lifeline is the strategy that `LevelValidators` finds for the `gameId` of the level: `FitLevelValidator` or `SortLevelValidator`. A lifeline of the interface shows that the registry knows only the Strategy interface.
+- In flow 3, the `LevelValidator` lifeline is the strategy that `LevelValidators` finds for the `gameId` of the level: `FitLevelValidator` or `SortLevelValidator`. A lifeline of the interface shows that the domain service knows only the Strategy interface. `LevelValidators` then builds the level with `LevelDefinition.of()`; the diagram writes that step as an action on its lifeline.
 
 ## Proposals in these views
 
@@ -97,7 +97,7 @@ The flows need some members that the small views of [classes.md](classes.md) do 
 
 ### Flow 3: update levels
 
-- `UpdateLevelsRequest` holds `levels: AnyLevel[]`, which `LevelsController` builds from the `LevelDto` values that `LevelDtoMapper.toLevel()` returns. View 2.3 names the type but not its fields.
+- `UpdateLevelsRequest` holds, for each level, the values of the common part as domain values and the section as it arrives. `LevelDtoMapper.toRequest()` builds it from the `LevelDto` values. The use case asks `LevelValidators.check()` for each level, so no level exists before its strategy builds the section (#77). View 2.3 names the type but not its fields, and #81 fixes them.
 - A failed `Result` gives the error body that `LevelDtoMapper.toErrorBody()` builds. The HTTP status of that body waits on API-FR-06 and the OpenAPI export.
 - Q4 stays open: who may call `UpdateLevels`. The guard checks only that the caller has a valid token.
 
