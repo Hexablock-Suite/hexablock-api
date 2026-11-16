@@ -1,4 +1,4 @@
-import { receiveValueOf } from '../../src/adapters/received.js';
+import { receiveProgressKeyOf } from '../../src/adapters/received.js';
 import {
   type LevelResultRow,
   ProgressRowMapper,
@@ -7,13 +7,12 @@ import type {
   ProgressChange,
   ProgressRepository,
 } from '../../src/application/ports/progress-repository.js';
-import type { GameId } from '../../src/domain/progress/game-id.js';
 import type { PlayerProgress } from '../../src/domain/progress/player-progress.js';
-import type { UserId } from '../../src/domain/user/user-id.js';
+import type { ProgressKey } from '../../src/domain/progress/progress-key.js';
 import { progressPartsOf } from './recording-receiver.js';
 
 // Test double for the ProgressRepository port. It keeps one progress per
-// userId and gameId. It keeps a copy and returns a copy, as the Drizzle
+// ProgressKey. It keeps a copy and returns a copy, as the Drizzle
 // adapter keeps rows. It applies no domain rule: the aggregate does.
 export class InMemoryProgressRepository implements ProgressRepository {
   private readonly progressByKey = new Map<string, PlayerProgress>();
@@ -21,41 +20,42 @@ export class InMemoryProgressRepository implements ProgressRepository {
   // the advisory lock of the Drizzle adapter makes a second sync wait.
   private readonly lastUpdateByKey = new Map<string, Promise<unknown>>();
 
-  find(userId: UserId, gameId: GameId): Promise<PlayerProgress | null> {
-    const stored = this.progressByKey.get(keyOf(userId, gameId));
+  find(key: ProgressKey): Promise<PlayerProgress | null> {
+    const stored = this.progressByKey.get(textOf(key));
     return Promise.resolve(stored === undefined ? null : copyOf(stored));
   }
 
-  update(userId: UserId, gameId: GameId, change: ProgressChange): Promise<PlayerProgress | null> {
-    const key = keyOf(userId, gameId);
-    const previous = this.lastUpdateByKey.get(key) ?? Promise.resolve();
+  update(key: ProgressKey, change: ProgressChange): Promise<PlayerProgress | null> {
+    const text = textOf(key);
+    const previous = this.lastUpdateByKey.get(text) ?? Promise.resolve();
     const current = previous
       .catch(() => undefined)
       .then(async () => {
         // The read awaits, as a database read does. So an update without
         // the wait above would let another update run in between.
-        const stored = await this.find(userId, gameId);
+        const stored = await this.find(key);
         const changed = change(stored);
         if (changed !== null) {
-          this.progressByKey.set(key, copyOf(changed));
+          this.progressByKey.set(text, copyOf(changed));
         }
         return changed;
       });
-    this.lastUpdateByKey.set(key, current);
+    this.lastUpdateByKey.set(text, current);
     return current;
   }
 
   // Not part of the port. A test seeds a stored progress with it, for
   // example the tests of GetProgress. It runs through update().
   async save(progress: PlayerProgress): Promise<void> {
-    const { userId, gameId } = progressPartsOf(progress);
-    await this.update(userId, gameId, () => progress);
+    await this.update(progressPartsOf(progress).key, () => progress);
   }
 }
 
-// JSON keeps the two values apart, whatever characters they hold.
-function keyOf(userId: UserId, gameId: GameId): string {
-  return JSON.stringify([receiveValueOf(userId), receiveValueOf(gameId)]);
+// The text of a map key. The ProgressKey delivers its two values, and JSON
+// keeps them apart, whatever characters they hold.
+function textOf(key: ProgressKey): string {
+  const { userId, gameId } = receiveProgressKeyOf(key);
+  return JSON.stringify([userId, gameId]);
 }
 
 // A new aggregate with the same state. The copy goes through the rows of

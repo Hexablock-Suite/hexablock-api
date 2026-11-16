@@ -3,10 +3,9 @@ import type {
   ProgressChange,
   ProgressRepository,
 } from '../../application/ports/progress-repository.js';
-import type { GameId } from '../../domain/progress/game-id.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
-import type { UserId } from '../../domain/user/user-id.js';
-import { receiveValueOf } from '../received.js';
+import type { ProgressKey } from '../../domain/progress/progress-key.js';
+import { receiveProgressKeyOf } from '../received.js';
 import type { PersistenceDatabase } from './drizzle-user-repository.js';
 import { ProgressRowMapper } from './progress-row.mapper.js';
 import { levelResults, progress } from './schema.js';
@@ -19,26 +18,24 @@ type Queries = Pick<PersistenceDatabase, 'select' | 'insert' | 'delete'>;
 export class DrizzleProgressRepository implements ProgressRepository {
   constructor(private readonly db: PersistenceDatabase) {}
 
-  find(userId: UserId, gameId: GameId): Promise<PlayerProgress | null> {
-    return readAggregate(this.db, userId, gameId);
+  find(key: ProgressKey): Promise<PlayerProgress | null> {
+    return readAggregate(this.db, key);
   }
 
-  // One transaction holds an advisory lock for the userId and the gameId.
-  // A row lock is not enough: the first sync of a game has no row to lock.
-  // A second update of the key waits for the lock, so it reads what the
-  // first one saved. Postgres releases the lock at commit or rollback.
+  // One transaction holds an advisory lock for the key: the userId and the
+  // gameId. A row lock is not enough: the first sync of a game has no row to
+  // lock. A second update of the key waits for the lock, so it reads what
+  // the first one saved. Postgres releases the lock at commit or rollback.
   // When the change throws, the transaction rolls back and saves nothing.
-  async update(
-    userId: UserId,
-    gameId: GameId,
-    change: ProgressChange,
-  ): Promise<PlayerProgress | null> {
+  async update(key: ProgressKey, change: ProgressChange): Promise<PlayerProgress | null> {
     return this.db.transaction(async (tx) => {
-      // A gameId is a lowercase slug and holds no colon, so the text names
-      // one key. Two keys with the same 64-bit hash only wait for each other.
-      const lockKey = `${receiveValueOf(userId)}:${receiveValueOf(gameId)}`;
+      // The key delivers its userId and its gameId. A gameId is a lowercase
+      // slug and holds no colon, so the text names one key. Two keys with
+      // the same 64-bit hash only wait for each other.
+      const { userId, gameId } = receiveProgressKeyOf(key);
+      const lockKey = `${userId}:${gameId}`;
       await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`);
-      const changed = change(await readAggregate(tx, userId, gameId));
+      const changed = change(await readAggregate(tx, key));
       if (changed !== null) {
         await writeAggregate(tx, changed);
       }
@@ -47,17 +44,12 @@ export class DrizzleProgressRepository implements ProgressRepository {
   }
 }
 
-async function readAggregate(
-  db: Queries,
-  userId: UserId,
-  gameId: GameId,
-): Promise<PlayerProgress | null> {
+async function readAggregate(db: Queries, key: ProgressKey): Promise<PlayerProgress | null> {
+  const { userId, gameId } = receiveProgressKeyOf(key);
   const [row] = await db
     .select()
     .from(progress)
-    .where(
-      and(eq(progress.userId, receiveValueOf(userId)), eq(progress.gameId, receiveValueOf(gameId))),
-    )
+    .where(and(eq(progress.userId, userId), eq(progress.gameId, gameId)))
     .limit(1);
   if (row === undefined) {
     return null;

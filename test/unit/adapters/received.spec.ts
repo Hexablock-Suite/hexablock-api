@@ -3,6 +3,7 @@ import {
   receiveJsonOf,
   receiveKeyOf,
   receiveLevelResultOf,
+  receiveProgressKeyOf,
   receiveProgressOf,
   receiveUserOf,
   receiveValueOf,
@@ -13,6 +14,10 @@ import {
   PlayerProgress,
   type PlayerProgressReceiver,
 } from '../../../src/domain/progress/player-progress.js';
+import {
+  ProgressKey,
+  type ProgressKeyReceiver,
+} from '../../../src/domain/progress/progress-key.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { Range } from '../../../src/domain/shared/range.js';
 import type { ValueReceiver } from '../../../src/domain/shared/value-receiver.js';
@@ -74,14 +79,37 @@ describe('received values', () => {
     expect(() => receiveLevelResultOf(silent)).toThrow('The source delivered no value.');
   });
 
+  // #107: the key of a progress delivers its UserId and its GameId in one
+  // call. The helper gives the text of each one: the lock key and the SQL
+  // filters of the progress rows keep them.
+  it('should_give_the_user_id_and_the_game_id_when_a_progress_key_delivers_them', () => {
+    const key = ProgressKey.of(
+      valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
+      valueOf(GameId.of('fit')),
+    );
+
+    expect(receiveProgressKeyOf(key)).toEqual({
+      userId: '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01',
+      gameId: 'fit',
+    });
+  });
+
+  it('should_throw_when_the_progress_key_delivers_no_parts', () => {
+    const silentKey = { deliverTo(_receiver: ProgressKeyReceiver): void {} };
+
+    expect(() => receiveProgressKeyOf(silentKey)).toThrow('The source delivered no value.');
+  });
+
   // #96: an aggregate delivers its parts in one call. The helper gives the
   // datum of each value object, as the rows and the JSON body keep it. #97:
   // the SyncInstant delivers its milliseconds, and the helper gives a Date.
   it('should_give_the_plain_values_of_the_progress_when_a_progress_delivers_its_parts', () => {
     const at = new Date('2026-11-06T10:05:00.000Z');
     const progress = PlayerProgress.start(
-      valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
-      valueOf(GameId.of('fit')),
+      ProgressKey.of(
+        valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
+        valueOf(GameId.of('fit')),
+      ),
       syncInstantOf(at),
     );
     progress.recordScore(valueOf(Score.of(120)), syncInstantOf(at));
@@ -102,8 +130,10 @@ describe('received values', () => {
   it('should_give_a_null_high_score_when_the_progress_has_no_score', () => {
     const at = new Date('2026-11-06T10:00:00.000Z');
     const progress = PlayerProgress.start(
-      valueOf(UserId.from('6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01')),
-      valueOf(GameId.of('lines')),
+      ProgressKey.of(
+        valueOf(UserId.from('6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01')),
+        valueOf(GameId.of('lines')),
+      ),
       syncInstantOf(at),
     );
 

@@ -17,6 +17,7 @@ import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { LevelsCompleted } from '../../src/domain/progress/levels-completed.js';
 import { Moves } from '../../src/domain/progress/moves.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
+import { ProgressKey } from '../../src/domain/progress/progress-key.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { Standing } from '../../src/domain/progress/standing.js';
 import { Stars } from '../../src/domain/progress/stars.js';
@@ -102,7 +103,7 @@ async function openDatabase(progresses: readonly Played[]): Promise<TestDatabase
   );
   const repository = new DrizzleProgressRepository(database.db);
   for (const { userId, gameId, score, results = [] } of progresses) {
-    const progress = PlayerProgress.start(valueOf(UserId.from(userId)), gameId, AT);
+    const progress = PlayerProgress.start(ProgressKey.of(valueOf(UserId.from(userId)), gameId), AT);
     if (score !== undefined) {
       progress.recordScore(valueOf(Score.of(score)), AT);
     }

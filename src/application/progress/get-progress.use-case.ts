@@ -1,5 +1,6 @@
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
+import { ProgressKey } from '../../domain/progress/progress-key.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import type { UseCase } from '../use-case.js';
@@ -18,12 +19,13 @@ export type GetProgress = UseCase<GetProgressRequest, Result<PlayerProgress, Pro
 
 export const GET_PROGRESS = Symbol('GetProgress');
 
-// Finds the one progress of the user and the game.
+// Finds the one progress of the user and the game. The key of the progress
+// joins the two values of the request.
 export class GetProgressUseCase implements GetProgress {
   constructor(private readonly progress: ProgressRepository) {}
 
   async execute(request: GetProgressRequest): Promise<Result<PlayerProgress, ProgressProblem>> {
-    const stored = await this.progress.find(request.userId, request.gameId);
+    const stored = await this.progress.find(ProgressKey.of(request.userId, request.gameId));
     return stored === null ? err({ kind: 'progress-not-found' }) : ok(stored);
   }
 }

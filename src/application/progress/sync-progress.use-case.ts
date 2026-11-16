@@ -1,6 +1,7 @@
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
+import { ProgressKey } from '../../domain/progress/progress-key.js';
 import type { Score } from '../../domain/progress/score.js';
 import { ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
@@ -25,7 +26,8 @@ export type SyncProgress = UseCase<SyncProgressRequest, Result<PlayerProgress, P
 
 export const SYNC_PROGRESS = Symbol('SyncProgress');
 
-// Changes the one progress of the user and the game, or starts it. It
+// Changes the one progress of the user and the game, or starts it. The key
+// of the progress joins the userId and the gameId of the request. It
 // records the score and the level results at the Clock instant. The whole
 // read, change and save runs under the lock of ProgressRepository.update(),
 // so two overlapping syncs of one key run one after the other and lose no
@@ -42,14 +44,15 @@ export class SyncProgressUseCase implements SyncProgress {
   ) {}
 
   async execute(request: SyncProgressRequest): Promise<Result<PlayerProgress, ProgressProblem>> {
-    const { userId, gameId, score, results } = request;
+    const { score, results } = request;
+    const key = ProgressKey.of(request.userId, request.gameId);
     let outcome: Result<PlayerProgress, ProgressProblem> | undefined;
-    await this.progress.update(userId, gameId, (stored) => {
+    await this.progress.update(key, (stored) => {
       // The use case reads the Clock under the lock, so the instants follow
       // the order of the saves. The aggregate keeps updatedAt from moving
       // back in any case.
       const at = this.clock.now();
-      const progress = stored ?? PlayerProgress.start(userId, gameId, at);
+      const progress = stored ?? PlayerProgress.start(key, at);
       if (score !== undefined) {
         progress.recordScore(score, at);
       }

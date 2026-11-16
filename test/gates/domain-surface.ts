@@ -188,7 +188,7 @@ class ModuleSurface {
 
   // The factory of a value object is static, returns its class or a Result of
   // it, and takes only raw values. A factory that also takes a domain value,
-  // such as PlayerProgress.start(userId, gameId, at), takes no raw value.
+  // such as PlayerProgress.start(key, at), takes no raw value.
   private isRawValueFactory(owner: string, node: ts.MethodDeclaration): boolean {
     return (
       (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) !== 0 &&

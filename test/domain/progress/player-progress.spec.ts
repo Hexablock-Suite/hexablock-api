@@ -1,6 +1,7 @@
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
+import { ProgressKey } from '../../../src/domain/progress/progress-key.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
@@ -12,6 +13,7 @@ import { valueOf } from '../../support/result.js';
 
 const USER = valueOf(UserId.from(testUserId(1)));
 const FIT = valueOf(GameId.of('fit'));
+const KEY = ProgressKey.of(USER, FIT);
 const START = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
 const LATER = syncInstantOf(new Date('2026-11-06T10:05:00.000Z'));
 const LATEST = syncInstantOf(new Date('2026-11-06T10:10:00.000Z'));
@@ -29,20 +31,14 @@ function attempt(stars: number, moves: number, elapsedMs: number): LevelResult {
 
 // Restores a progress from its parts, as ProgressRowMapper does. restore()
 // takes the parts in the order of the delivery.
-function restoreFrom({
-  userId,
-  gameId,
-  highScore,
-  updatedAt,
-  results,
-}: ProgressParts): PlayerProgress {
-  return PlayerProgress.restore(userId, gameId, highScore, updatedAt, results);
+function restoreFrom({ key, highScore, updatedAt, results }: ProgressParts): PlayerProgress {
+  return PlayerProgress.restore(key, highScore, updatedAt, results);
 }
 
 // Records the two results of one level in the given order, after a result of
 // another level. It returns the results that the progress keeps.
 function keptAfter(first: LevelResult, second: LevelResult): readonly LevelResult[] {
-  const progress = PlayerProgress.start(USER, FIT, START);
+  const progress = PlayerProgress.start(KEY, START);
   progress.recordLevel(level('fit-02', 1), START);
   progress.recordLevel(first, START);
   progress.recordLevel(second, START);
@@ -51,10 +47,9 @@ function keptAfter(first: LevelResult, second: LevelResult): readonly LevelResul
 
 describe('PlayerProgress', () => {
   it('should_start_with_no_high_score_and_no_results_when_progress_is_started', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
-    expect(progressPartsOf(progress).userId.equals(USER)).toBe(true);
-    expect(progressPartsOf(progress).gameId.equals(FIT)).toBe(true);
+    expect(progressPartsOf(progress).key.equals(KEY)).toBe(true);
     expect(progressPartsOf(progress).highScore).toBeNull();
     expect(progressPartsOf(progress).updatedAt).toEqual(START);
     expect(progressPartsOf(progress).results).toEqual([]);
@@ -62,41 +57,39 @@ describe('PlayerProgress', () => {
 
   // A missing argument is a defect of the caller, not a broken rule of a
   // value. So the guard still throws, and no Result carries it (decision 11).
-  it('should_throw_a_type_error_when_game_id_is_missing', () => {
-    expect(() => PlayerProgress.start(USER, undefined as unknown as GameId, START)).toThrow(
-      new TypeError('A progress needs a gameId.'),
-    );
-    expect(() => PlayerProgress.start(USER, 'fit' as unknown as GameId, START)).toThrow(
-      new TypeError('A progress needs a gameId.'),
-    );
-  });
+  // #107: the aggregate takes its identity as one ProgressKey, so a UserId
+  // alone is not a key.
+  it.each([[undefined as unknown as ProgressKey], [USER as unknown as ProgressKey]])(
+    'should_throw_a_type_error_when_the_key_is_missing',
+    (key) => {
+      expect(() => PlayerProgress.start(key, START)).toThrow(
+        new TypeError('A progress needs a ProgressKey.'),
+      );
+    },
+  );
 
   // SyncInstant guards the rule of a valid instant. The aggregate takes only
   // a SyncInstant, so a Date or a missing instant is a defect of the caller.
-  it('should_throw_when_user_id_or_instant_is_missing', () => {
-    expect(() => PlayerProgress.start(undefined as unknown as UserId, FIT, START)).toThrow(
-      new TypeError('A progress needs a userId.'),
-    );
-    expect(() => PlayerProgress.start(USER, FIT, NOT_AN_INSTANT)).toThrow(
+  it('should_throw_when_instant_is_missing', () => {
+    expect(() => PlayerProgress.start(KEY, NOT_AN_INSTANT)).toThrow(
       new TypeError('The instant must be a SyncInstant.'),
     );
-    expect(() => PlayerProgress.start(USER, FIT, undefined as unknown as SyncInstant)).toThrow(
+    expect(() => PlayerProgress.start(KEY, undefined as unknown as SyncInstant)).toThrow(
       new TypeError('The instant must be a SyncInstant.'),
     );
   });
 
   it('should_keep_its_user_and_game_key_when_scores_and_levels_are_recorded', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
     progress.recordScore(valueOf(Score.of(120)), LATER);
     progress.recordLevel(level('fit-01', 2), LATER);
 
-    expect(progressPartsOf(progress).userId.equals(USER)).toBe(true);
-    expect(progressPartsOf(progress).gameId.equals(FIT)).toBe(true);
+    expect(progressPartsOf(progress).key.equals(KEY)).toBe(true);
   });
 
   it('should_record_the_score_and_take_the_given_instant_when_score_is_recorded', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
     progress.recordScore(valueOf(Score.of(120)), LATER);
 
@@ -105,7 +98,7 @@ describe('PlayerProgress', () => {
   });
 
   it('should_keep_the_high_score_and_take_the_instant_when_a_lower_score_is_recorded', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     progress.recordScore(valueOf(Score.of(120)), START);
 
     progress.recordScore(valueOf(Score.of(80)), LATER);
@@ -117,7 +110,7 @@ describe('PlayerProgress', () => {
   // #97: updatedAt is the instant of the last sync. A level result moves it,
   // as a score does.
   it('should_move_updated_at_to_the_given_instant_when_a_level_is_recorded', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
     progress.recordLevel(level('fit-01', 2), LATER);
 
@@ -128,7 +121,7 @@ describe('PlayerProgress', () => {
   // The aggregate keeps updatedAt from moving back, whatever the caller
   // passes. A record at an earlier instant still keeps the higher score.
   it('should_keep_updated_at_and_keep_the_higher_score_when_a_score_is_recorded_at_an_earlier_instant', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     progress.recordScore(valueOf(Score.of(80)), LATEST);
 
     progress.recordScore(valueOf(Score.of(120)), LATER);
@@ -138,7 +131,7 @@ describe('PlayerProgress', () => {
   });
 
   it('should_keep_updated_at_and_keep_the_better_result_when_a_level_is_recorded_at_an_earlier_instant', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     progress.recordLevel(level('fit-01', 1), LATEST);
 
     progress.recordLevel(level('fit-01', 3), LATER);
@@ -158,7 +151,7 @@ describe('PlayerProgress', () => {
   ])(
     'should_throw_and_keep_state_when_score_is_not_a_score_or_instant_is_not_a_sync_instant',
     (score, at) => {
-      const progress = PlayerProgress.start(USER, FIT, START);
+      const progress = PlayerProgress.start(KEY, START);
       progress.recordScore(valueOf(Score.of(50)), START);
 
       expect(() => progress.recordScore(score, at)).toThrow(TypeError);
@@ -169,7 +162,7 @@ describe('PlayerProgress', () => {
   );
 
   it('should_take_the_higher_score_when_a_higher_score_is_recorded', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     progress.recordScore(valueOf(Score.of(120)), START);
 
     progress.recordScore(valueOf(Score.of(121)), LATER);
@@ -179,7 +172,7 @@ describe('PlayerProgress', () => {
 
   // A score of 0 is a score. Only a progress with no record has no high score.
   it('should_tell_a_zero_high_score_from_no_score_when_zero_is_recorded', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
     progress.recordScore(valueOf(Score.of(0)), LATER);
 
@@ -189,7 +182,7 @@ describe('PlayerProgress', () => {
 
   // -0 is a non-negative integer: -0 < 0 is false. It counts as a zero score.
   it('should_record_a_zero_score_when_score_is_negative_zero', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
     progress.recordScore(valueOf(Score.of(-0)), LATER);
 
@@ -198,7 +191,7 @@ describe('PlayerProgress', () => {
   });
 
   it('should_add_the_level_result_when_level_is_recorded', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     const first = level('fit-01', 2);
     const second = level('fit-02', 3);
 
@@ -211,7 +204,7 @@ describe('PlayerProgress', () => {
   // One result per levelId, as the level_results key of DS-5. A better result
   // takes the place of the stored one (DS-4, DS-12).
   it('should_keep_one_result_per_level_when_same_level_is_recorded_again', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     const second = level('fit-02', 1);
     const retry = level('fit-01', 3);
     progress.recordLevel(level('fit-01', 2), START);
@@ -265,7 +258,7 @@ describe('PlayerProgress', () => {
   // A worse result changes no result, but the record still moves updatedAt
   // to its instant, as a lower score does.
   it('should_keep_the_better_result_and_take_the_instant_when_a_worse_result_of_the_level_is_recorded_after_it', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     const best = attempt(3, 9, 30_000);
     const other = level('fit-02', 1);
     progress.recordLevel(best, START);
@@ -283,7 +276,7 @@ describe('PlayerProgress', () => {
     [undefined as unknown as LevelResult, LATER, 'recordLevel needs a LevelResult.'],
     [level('fit-01', 2), NOT_AN_INSTANT, 'The instant must be a SyncInstant.'],
   ])('should_throw_and_keep_state_when_result_or_instant_is_missing', (result, at, message) => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
     expect(() => progress.recordLevel(result, at)).toThrow(new TypeError(message));
 
@@ -296,15 +289,13 @@ describe('PlayerProgress', () => {
     const second = level('fit-02', 3);
 
     const progress = restoreFrom({
-      userId: USER,
-      gameId: FIT,
+      key: KEY,
       highScore: valueOf(Score.of(120)),
       updatedAt: LATER,
       results: [first, second],
     });
 
-    expect(progressPartsOf(progress).userId.equals(USER)).toBe(true);
-    expect(progressPartsOf(progress).gameId.equals(FIT)).toBe(true);
+    expect(progressPartsOf(progress).key.equals(KEY)).toBe(true);
     expect(progressPartsOf(progress).highScore?.equals(valueOf(Score.of(120)))).toBe(true);
     expect(progressPartsOf(progress).updatedAt).toEqual(LATER);
     expect(progressPartsOf(progress).results).toEqual([first, second]);
@@ -312,8 +303,7 @@ describe('PlayerProgress', () => {
 
   it('should_restore_no_high_score_when_stored_high_score_is_null', () => {
     const progress = restoreFrom({
-      userId: USER,
-      gameId: FIT,
+      key: KEY,
       highScore: null,
       updatedAt: START,
       results: [],
@@ -326,16 +316,15 @@ describe('PlayerProgress', () => {
   // restore() checks each part with the same rules as start(), recordScore()
   // and recordLevel(). A part of another type is a defect of the caller.
   it.each<[Partial<ProgressParts>]>([
-    [{ userId: 'user' as unknown as UserId }],
-    [{ gameId: 'fit' as unknown as GameId }],
+    [{ key: undefined as unknown as ProgressKey }],
+    [{ key: USER as unknown as ProgressKey }],
     [{ highScore: 1 as unknown as Score }],
     [{ highScore: undefined as unknown as Score }],
     [{ updatedAt: NOT_AN_INSTANT }],
     [{ results: [undefined as unknown as LevelResult] }],
   ])('should_throw_when_stored_state_breaks_a_rule', (broken) => {
     const valid = {
-      userId: USER,
-      gameId: FIT,
+      key: KEY,
       highScore: valueOf(Score.of(1)),
       updatedAt: START,
       results: [],
@@ -347,8 +336,7 @@ describe('PlayerProgress', () => {
   // Score counts -0 as a zero score, and restore() keeps it.
   it('should_restore_a_zero_high_score_when_stored_high_score_is_negative_zero', () => {
     const progress = restoreFrom({
-      userId: USER,
-      gameId: FIT,
+      key: KEY,
       highScore: valueOf(Score.of(-0)),
       updatedAt: START,
       results: [],
@@ -365,8 +353,7 @@ describe('PlayerProgress', () => {
     const second = level('fit-02', 1);
 
     const progress = restoreFrom({
-      userId: USER,
-      gameId: FIT,
+      key: KEY,
       highScore: null,
       updatedAt: LATER,
       results: [best, second, level('fit-01', 2)],
@@ -395,7 +382,7 @@ describe('PlayerProgress delivery', () => {
   it('should_deliver_its_key_score_instant_and_results_once_as_domain_values_when_it_delivers_to_a_receiver', () => {
     const first = level('fit-01', 2);
     const second = level('fit-02', 3);
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     progress.recordScore(valueOf(Score.of(120)), LATER);
     progress.recordLevel(first, LATER);
     progress.recordLevel(second, LATER);
@@ -403,12 +390,10 @@ describe('PlayerProgress delivery', () => {
     const calls = deliveriesOf(progress);
 
     expect(calls).toHaveLength(1);
-    expect(calls[0]).toHaveLength(5);
-    const [userId, gameId, highScore, updatedAt, results] = calls[0];
-    expect(userId).toBeInstanceOf(UserId);
-    expect((userId as UserId).equals(USER)).toBe(true);
-    expect(gameId).toBeInstanceOf(GameId);
-    expect((gameId as GameId).equals(FIT)).toBe(true);
+    expect(calls[0]).toHaveLength(4);
+    const [key, highScore, updatedAt, results] = calls[0];
+    expect(key).toBeInstanceOf(ProgressKey);
+    expect((key as ProgressKey).equals(KEY)).toBe(true);
     expect(highScore).toBeInstanceOf(Score);
     expect((highScore as Score).equals(valueOf(Score.of(120)))).toBe(true);
     expect(updatedAt).toBeInstanceOf(SyncInstant);
@@ -418,7 +403,7 @@ describe('PlayerProgress delivery', () => {
   });
 
   it('should_deliver_no_high_score_and_no_results_when_a_started_progress_delivers', () => {
-    const parts = progressPartsOf(PlayerProgress.start(USER, FIT, START));
+    const parts = progressPartsOf(PlayerProgress.start(KEY, START));
 
     expect(parts.highScore).toBeNull();
     expect(parts.updatedAt).toEqual(START);
@@ -428,7 +413,7 @@ describe('PlayerProgress delivery', () => {
   // Each delivery gives a new list, and the values are immutable. So nothing
   // that the receiver gets is a part of the aggregate that it can change.
   it('should_keep_its_state_when_the_receiver_changes_the_list_it_received', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     progress.recordScore(valueOf(Score.of(50)), START);
     progress.recordLevel(level('fit-01', 2), START);
     const received = progressPartsOf(progress);
@@ -440,12 +425,11 @@ describe('PlayerProgress delivery', () => {
     expect(after.updatedAt).toEqual(START);
     expect(after.results).toEqual([level('fit-01', 2)]);
     expect(after.highScore?.equals(valueOf(Score.of(50)))).toBe(true);
-    expect(after.userId.equals(USER)).toBe(true);
-    expect(after.gameId.equals(FIT)).toBe(true);
+    expect(after.key.equals(KEY)).toBe(true);
   });
 
   it('should_hold_the_same_data_when_restored_from_the_values_that_it_delivered', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
     progress.recordScore(valueOf(Score.of(120)), LATER);
     progress.recordLevel(level('fit-01', 2), LATER);
     progress.recordLevel(level('fit-02', 3), LATER);
@@ -460,7 +444,7 @@ describe('PlayerProgress delivery', () => {
   // The delivery is the one read of the state, so the aggregate keeps no
   // getter, no snapshot and no public field of its key.
   it('should_have_no_getter_and_no_public_field_when_the_state_is_read_through_the_delivery', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
+    const progress = PlayerProgress.start(KEY, START);
 
     for (const name of ['highScore', 'updatedAt', 'results', 'snapshot']) {
       expect(name in progress).toBe(false);
@@ -471,27 +455,25 @@ describe('PlayerProgress delivery', () => {
     void progress.updatedAt;
     // @ts-expect-error -- R16 removes the getter of results.
     void progress.results;
-    // @ts-expect-error -- R16 makes the userId field private.
-    void progress.userId;
-    // @ts-expect-error -- R16 makes the gameId field private.
-    void progress.gameId;
+    // @ts-expect-error -- #107 makes the key field private.
+    void progress.key;
     // @ts-expect-error -- #96 replaces snapshot() with deliverTo().
     void progress.snapshot;
   });
 });
 
+// #107: the aggregate holds its identity as one ProgressKey, and equals()
+// compares the two keys.
 describe('PlayerProgress identity', () => {
-  it('should_be_the_same_progress_when_user_and_game_match_whatever_the_rest_holds', () => {
+  it('should_be_the_same_progress_when_the_keys_are_equal_whatever_the_rest_holds', () => {
     const played = restoreFrom({
-      userId: USER,
-      gameId: FIT,
+      key: KEY,
       highScore: valueOf(Score.of(900)),
       updatedAt: LATER,
       results: [level('fit-01', 3)],
     });
     const fresh = PlayerProgress.start(
-      valueOf(UserId.from(testUserId(1))),
-      valueOf(GameId.of('fit')),
+      ProgressKey.of(valueOf(UserId.from(testUserId(1))), valueOf(GameId.of('fit'))),
       START,
     );
 
@@ -504,8 +486,8 @@ describe('PlayerProgress identity', () => {
     [valueOf(UserId.from(testUserId(2))), FIT],
     [USER, valueOf(GameId.of('sort'))],
   ])('should_not_be_the_same_progress_when_the_user_or_the_game_differs', (userId, gameId) => {
-    const progress = PlayerProgress.start(USER, FIT, START);
-    const other = PlayerProgress.start(userId, gameId, START);
+    const progress = PlayerProgress.start(KEY, START);
+    const other = PlayerProgress.start(ProgressKey.of(userId, gameId), START);
 
     expect(progress.equals(other)).toBe(false);
     expect(other.equals(progress)).toBe(false);
