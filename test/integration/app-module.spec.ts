@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DrizzleLeaderboardReader } from '../../src/adapters/persistence/drizzle-leaderboard-reader.js';
+import { DrizzleLevelRepository } from '../../src/adapters/persistence/drizzle-level-repository.js';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../../src/adapters/persistence/drizzle-user-repository.js';
 import { LoggingAspect } from '../../src/application/aspects/logging-aspect.js';
@@ -8,7 +9,10 @@ import {
   GET_LEADERBOARD,
   type GetLeaderboard,
 } from '../../src/application/leaderboard/get-leaderboard.use-case.js';
+import { GET_LEVELS, GetLevelsUseCase } from '../../src/application/levels/get-levels.use-case.js';
+import { UPDATE_LEVELS } from '../../src/application/levels/update-levels.use-case.js';
 import { LEADERBOARD_READER } from '../../src/application/ports/leaderboard-reader.js';
+import { LEVEL_REPOSITORY } from '../../src/application/ports/level-repository.js';
 import { LOGGER } from '../../src/application/ports/logger.js';
 import { PROGRESS_REPOSITORY } from '../../src/application/ports/progress-repository.js';
 import {
@@ -87,6 +91,18 @@ describe('AppModule account wiring', () => {
 
     expect(result.ok).toBe(true);
     expect(log).toHaveBeenCalledExactlyOnceWith('useCase=SyncProgress outcome=success');
+    await moduleRef.close();
+  });
+
+  // AppModule registers the Fit and Sort strategies once. The level store
+  // and UpdateLevels share them, and LoggingAspect wraps UpdateLevels.
+  it('should_bind_level_ports_and_wrap_update_levels_in_logging_aspect_when_app_module_compiles', async () => {
+    stubTestEnvironment();
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+
+    expect(moduleRef.get(LEVEL_REPOSITORY)).toBeInstanceOf(DrizzleLevelRepository);
+    expect(moduleRef.get(GET_LEVELS)).toBeInstanceOf(GetLevelsUseCase);
+    expect(moduleRef.get(UPDATE_LEVELS)).toBeInstanceOf(LoggingAspect);
     await moduleRef.close();
   });
 

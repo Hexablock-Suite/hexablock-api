@@ -364,27 +364,11 @@
           - updateLevels: UpdateLevels
         </text>
         <line x1="736" y1="188" x2="1000" y2="188" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          textLength="242"
-          lengthAdjust="spacingAndGlyphs"
-          x="752"
-          y="204"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + list(gameId: string): Promise&lt;LevelDto[]&gt;
+        <text x="752" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + list(): Promise&lt;LevelsDto&gt;
         </text>
-        <text
-          textLength="242"
-          lengthAdjust="spacingAndGlyphs"
-          x="752"
-          y="220"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + update(body: LevelDto[]): Promise&lt;void&gt;
+        <text x="752" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + update(body: LevelsDto): Promise&lt;void&gt;
         </text>
         <!-- Class: LeaderboardController («controller») -->
         <rect
@@ -634,8 +618,16 @@
           + topology: string
         </text>
         <line x1="736" y1="548" x2="1000" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="752" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + section: Record&lt;string, unknown&gt;
+        <text
+          textLength="230"
+          lengthAdjust="spacingAndGlyphs"
+          x="752"
+          y="564"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + section: FitSectionDto | SortSectionDto
         </text>
         <!-- Footnote -->
         <text
@@ -675,8 +667,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          an assumption for team review). LevelDto checks the common part; the validator of its
-          gameId checks the section (Part 1, view 2).
+          an assumption for team review). LevelDtoMapper builds the common part; the validator of
+          its gameId checks the section (Part 1, view 2).
         </text>
         <text
           x="24"
