@@ -1,4 +1,5 @@
 import { FitSection } from '../../../src/domain/level/fit/fit-section.js';
+import { HexTopology } from '../../../src/domain/level/hex-topology.js';
 import { LevelDefinition } from '../../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../../src/domain/level/level-order.js';
 import { LevelVersion } from '../../../src/domain/level/level-version.js';
@@ -25,7 +26,7 @@ const HEX = valueOf(TopologyId.of('hex'));
 describe('LevelDefinition', () => {
   describe('the shared level format', () => {
     it('should_build_a_level_when_the_fit_example_of_the_format_document_is_read', () => {
-      const level = levelFrom(levelExample('fit'), (raw) => FitSection.of(raw));
+      const level = levelFrom(levelExample('fit'), (raw) => FitSection.of(raw, new HexTopology()));
 
       expect(level.ok).toBe(true);
       expect(valueOf(level).equals(valueOf(levelFrom(levelExample('fit'), () => ok('any'))))).toBe(
@@ -58,7 +59,9 @@ describe('LevelDefinition', () => {
   it('should_return_the_section_problem_when_the_section_has_the_wrong_shape', () => {
     const wrongShape = { ...levelExample('fit').section, figure: 'not a list' };
 
-    expect(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, FitSection.of(wrongShape))).toEqual({
+    expect(
+      LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, FitSection.of(wrongShape, new HexTopology())),
+    ).toEqual({
       ok: false,
       error: 'invalid-figure',
     });

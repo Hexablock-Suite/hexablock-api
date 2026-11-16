@@ -4,6 +4,7 @@ import { FitStarThreshold } from '../../../src/domain/level/fit/fit-star-thresho
 import { PieceId } from '../../../src/domain/level/fit/piece-id.js';
 import { Placement } from '../../../src/domain/level/fit/placement.js';
 import { Rotation } from '../../../src/domain/level/fit/rotation.js';
+import { HexTopology } from '../../../src/domain/level/hex-topology.js';
 import { deliveredBy } from '../../support/recording-receiver.js';
 import { levelExample, valueOf } from '../../support/level-format.js';
 
@@ -14,15 +15,20 @@ function fitSection(): Record<string, unknown> {
   return levelExample('fit').section;
 }
 
+// Reads a raw section of a hex level, as the Fit example is.
+function sectionOf(raw: unknown) {
+  return FitSection.of(raw, new HexTopology());
+}
+
 describe('FitSection', () => {
   it('should_build_the_section_when_the_fit_example_is_read', () => {
-    expect(FitSection.of(fitSection()).ok).toBe(true);
+    expect(sectionOf(fitSection()).ok).toBe(true);
   });
 
   it('should_return_invalid_section_when_the_raw_value_is_not_an_object_with_exactly_the_four_fields', () => {
     const bad: unknown[] = [null, [], 'section', { ...fitSection(), extra: true }];
 
-    expect(bad.map((raw) => FitSection.of(raw))).toEqual(
+    expect(bad.map((raw) => sectionOf(raw))).toEqual(
       bad.map(() => ({ ok: false, error: 'invalid-section' })),
     );
   });
@@ -32,14 +38,14 @@ describe('FitSection', () => {
     const { figure, pieces, witness, stars } = fitSection();
 
     expect([
-      FitSection.of({ pieces, witness, stars }),
-      FitSection.of({ figure, witness, stars }),
-      FitSection.of({ figure, pieces, stars }),
-      FitSection.of({ figure, pieces, witness }),
-      FitSection.of({ figure: [], pieces, witness, stars }),
-      FitSection.of({ figure, pieces: [], witness, stars }),
-      FitSection.of({ figure, pieces, witness: [], stars }),
-      FitSection.of({ figure, pieces, witness, stars: [] }),
+      sectionOf({ pieces, witness, stars }),
+      sectionOf({ figure, witness, stars }),
+      sectionOf({ figure, pieces, stars }),
+      sectionOf({ figure, pieces, witness }),
+      sectionOf({ figure: [], pieces, witness, stars }),
+      sectionOf({ figure, pieces: [], witness, stars }),
+      sectionOf({ figure, pieces, witness: [], stars }),
+      sectionOf({ figure, pieces, witness, stars: [] }),
     ]).toEqual([
       { ok: false, error: 'invalid-figure' },
       { ok: false, error: 'invalid-pieces' },
@@ -56,16 +62,16 @@ describe('FitSection', () => {
     const section = fitSection();
 
     expect([
-      FitSection.of({
+      sectionOf({
         ...section,
         figure: [
           [0, 0],
           [0.5, 1],
         ],
       }),
-      FitSection.of({ ...section, pieces: [{ id: 'a', cells: [] }] }),
-      FitSection.of({ ...section, witness: [{ piece: 'a', rotation: 0.5, at: [0, 0] }] }),
-      FitSection.of({ ...section, stars: [{ maxMoves: 4 }] }),
+      sectionOf({ ...section, pieces: [{ id: 'a', cells: [] }] }),
+      sectionOf({ ...section, witness: [{ piece: 'a', rotation: 0.5, at: [0, 0] }] }),
+      sectionOf({ ...section, stars: [{ maxMoves: 4 }] }),
     ]).toEqual([
       { ok: false, error: 'invalid-figure' },
       { ok: false, error: 'invalid-pieces' },
@@ -79,26 +85,26 @@ describe('FitSection', () => {
   it('should_return_invalid_stars_when_a_star_threshold_is_negative', () => {
     const section = fitSection();
 
-    expect(FitSection.of({ ...section, stars: [{ maxMoves: -1, maxElapsedMs: 1000 }] })).toEqual({
+    expect(sectionOf({ ...section, stars: [{ maxMoves: -1, maxElapsedMs: 1000 }] })).toEqual({
       ok: false,
       error: 'invalid-stars',
     });
-    expect(FitSection.of({ ...section, stars: [{ maxMoves: 4, maxElapsedMs: -1 }] })).toEqual({
+    expect(sectionOf({ ...section, stars: [{ maxMoves: 4, maxElapsedMs: -1 }] })).toEqual({
       ok: false,
       error: 'invalid-stars',
     });
   });
 
   it('should_be_equal_when_two_sections_are_read_from_the_same_data', () => {
-    expect(valueOf(FitSection.of(fitSection())).equals(valueOf(FitSection.of(fitSection())))).toBe(
-      true,
-    );
+    expect(valueOf(sectionOf(fitSection())).equals(valueOf(sectionOf(fitSection())))).toBe(true);
   });
 
-  // The section keeps every field it reads: a change to one value of one
-  // field gives another section. Each list keeps its length.
-  it('should_differ_when_one_value_of_the_raw_section_differs', () => {
-    const example = valueOf(FitSection.of(fitSection()));
+  // The section keeps every field it reads, in order: a change to one field
+  // gives another section. Each list keeps its length. Each change keeps the
+  // cover of A5, so each changed section is valid: the figure and the cells
+  // of a come in another order, and c, a single cell, turns one step.
+  it('should_differ_when_one_field_of_the_raw_section_differs', () => {
+    const example = valueOf(sectionOf(fitSection()));
     const section = fitSection();
     const [figure, pieces, witness, stars] = [
       section.figure,
@@ -106,14 +112,21 @@ describe('FitSection', () => {
       section.witness,
       section.stars,
     ] as Record<string, unknown>[][];
+    const cellsOfA = pieces[0].cells as number[][];
     const changed = [
-      { ...section, figure: [...figure.slice(0, -1), [3, 1]] },
-      { ...section, pieces: [{ ...pieces[0], id: 'z' }, ...pieces.slice(1)] },
-      { ...section, witness: [{ ...witness[0], rotation: 2 }, ...witness.slice(1)] },
+      { ...section, figure: [figure[1], figure[0], ...figure.slice(2)] },
+      {
+        ...section,
+        pieces: [
+          { ...pieces[0], cells: [cellsOfA[1], cellsOfA[0], cellsOfA[2]] },
+          ...pieces.slice(1),
+        ],
+      },
+      { ...section, witness: [...witness.slice(0, 2), { ...witness[2], rotation: 1 }] },
       { ...section, stars: [{ ...stars[0], maxElapsedMs: 119999 }, ...stars.slice(1)] },
     ];
 
-    expect(changed.map((raw) => example.equals(valueOf(FitSection.of(raw))))).toEqual([
+    expect(changed.map((raw) => example.equals(valueOf(sectionOf(raw))))).toEqual([
       false,
       false,
       false,

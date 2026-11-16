@@ -2,6 +2,8 @@ import { ok, type Result } from '../../shared/result.js';
 import { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
 import { readFields } from '../parts.js';
+import type { Topology } from '../topology.js';
+import type { FitPiece } from './fit-piece.js';
 import { PieceId } from './piece-id.js';
 import { Rotation } from './rotation.js';
 
@@ -38,5 +40,21 @@ export class Placement {
       this.rotation.equals(other.rotation) &&
       this.at.equals(other.at)
     );
+  }
+
+  // Tells if this entry places the piece: the entry names the id of the piece.
+  places(piece: FitPiece): boolean {
+    return piece.isNamed(this.piece);
+  }
+
+  // Tells if the offset is a cell of the topology.
+  isOn(topology: Topology): boolean {
+    return topology.holds(this.at);
+  }
+
+  // Gives the cells that the piece covers in this entry: the piece turns by
+  // the rotation of the entry, and then it moves by its offset (A5).
+  coveredCells(piece: FitPiece, topology: Topology): readonly Coordinate[] {
+    return piece.coveredCells(this.rotation, this.at, topology);
   }
 }

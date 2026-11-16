@@ -97,6 +97,9 @@ describe('TopologyId', () => {
 });
 
 describe('Coordinate', () => {
+  // A cell with values that the test writes.
+  const cellOf = (values: number[]) => valueOf(Coordinate.of(values));
+
   // The topology says how to read the values: [q, r] for hex, three values for a 3D cell.
   it('should_deliver_the_values_when_they_are_a_list_of_safe_integers', () => {
     expect(deliveredBy(valueOf(Coordinate.of([0, 0])))).toEqual([[0, 0]]);
@@ -136,5 +139,41 @@ describe('Coordinate', () => {
     expect(cell.equals(valueOf(Coordinate.of([1, 2])))).toBe(true);
     expect(cell.equals(valueOf(Coordinate.of([2, 1])))).toBe(false);
     expect(cell.equals(valueOf(Coordinate.of([1, 2, 0])))).toBe(false);
+  });
+
+  it('should_add_each_value_of_the_offset_when_a_cell_moves_by_it', () => {
+    expect(deliveredBy(cellOf([1, 2]).movedBy(cellOf([3, -5])))).toEqual([[4, -3]]);
+    expect(deliveredBy(cellOf([7]).movedBy(cellOf([0])))).toEqual([[7]]);
+  });
+
+  // Each turned unit cell is where the step takes [1, 0] or [0, 1]. The
+  // turned cell adds each turned unit cell times the value of its place.
+  it('should_add_the_turned_unit_cells_times_the_values_when_a_cell_turns_by_them', () => {
+    const turnedUnits = [cellOf([0, 1]), cellOf([-1, 1])];
+
+    expect(deliveredBy(cellOf([2, 3]).turnedBy(turnedUnits))).toEqual([[-3, 5]]);
+    expect(deliveredBy(cellOf([0, 0]).turnedBy(turnedUnits))).toEqual([[0, 0]]);
+  });
+
+  it('should_have_the_same_length_when_two_cells_hold_as_many_values', () => {
+    expect([
+      cellOf([1, 2]).hasSameLengthAs(cellOf([-4, 0])),
+      cellOf([1, 2]).hasSameLengthAs(cellOf([1, 2, 3])),
+      cellOf([1]).hasSameLengthAs(cellOf([1, 2])),
+    ]).toEqual([true, false, false]);
+  });
+
+  // A topology checks the length of each cell first, so cells of two lengths
+  // here are a defect of the code, not a datum of a level.
+  it('should_throw_when_a_cell_moves_or_turns_by_cells_of_another_length', () => {
+    expect(() => cellOf([1, 2]).movedBy(cellOf([1, 2, 3]))).toThrow(
+      new RangeError('A cell moves only by an offset of its own length.'),
+    );
+    expect(() => cellOf([1, 2, 3]).turnedBy([cellOf([0, 1]), cellOf([-1, 1])])).toThrow(
+      new RangeError('A cell turns only by one turned unit cell per value, each of its length.'),
+    );
+    expect(() => cellOf([1, 2]).turnedBy([cellOf([0, 1, 0]), cellOf([-1, 1, 0])])).toThrow(
+      new RangeError('A cell turns only by one turned unit cell per value, each of its length.'),
+    );
   });
 });

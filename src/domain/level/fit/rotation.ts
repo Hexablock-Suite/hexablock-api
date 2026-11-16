@@ -1,5 +1,6 @@
 import { err, ok, type Result } from '../../shared/result.js';
 import type { ValueReceiver } from '../../shared/value-receiver.js';
+import type { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
 
 // Value object for the rotation of a piece in the witness of a Fit level: a
@@ -25,5 +26,19 @@ export class Rotation {
   // knows its full turn, so 6 and 0 are two rotations here.
   equals(other: Rotation): boolean {
     return this.steps === other.steps;
+  }
+
+  // Turns a cell by this count of steps of a topology. `step` turns a cell by
+  // one step, and `fullTurn` counts the steps of one full turn. Whole turns
+  // change no cell, so the cell turns only by the steps that are left. A
+  // negative count turns the other way: -1 is the same as a full turn less
+  // one step. So a turn never runs more steps than a full turn.
+  turn(cell: Coordinate, step: (cell: Coordinate) => Coordinate, fullTurn: Rotation): Coordinate {
+    const left = ((this.steps % fullTurn.steps) + fullTurn.steps) % fullTurn.steps;
+    let turned = cell;
+    for (let done = 0; done < left; done += 1) {
+      turned = step(turned);
+    }
+    return turned;
   }
 }
