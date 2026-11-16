@@ -44,12 +44,12 @@ describe('FitLevelValidator', () => {
   // The composition root registers the strategy under the Fit gameId.
   it('should_build_the_fit_level_when_the_fit_example_of_the_format_document_is_checked', () => {
     const example = levelExample('hexa-fit');
-    const validators = LevelValidators.of([[GameId.of('hexa-fit'), fitValidator()]]);
+    const validators = LevelValidators.of([[valueOf(GameId.of('hexa-fit')), fitValidator()]]);
 
     const section = sectionOf(example.section);
     const checked = validators.check(
-      GameId.of(example.gameId),
-      LevelId.of(example.levelId),
+      valueOf(GameId.of(example.gameId)),
+      valueOf(LevelId.of(example.levelId)),
       valueOf(LevelOrder.of(example.order)),
       valueOf(LevelVersion.of(example.version)),
       valueOf(TopologyId.of(example.topology)),
@@ -98,9 +98,9 @@ describe('FitLevelValidator', () => {
     });
   });
 
-  // Moves.of and ElapsedTime.ofMs throw ProgressError until #103, and return
-  // a Result after it. The test asserts only what sectionOf() returns, so it
-  // holds in both cases: a bad level file never gives a server error.
+  // Moves.of() and ElapsedTime.ofMs() return a failed Result for a negative
+  // limit (#103), and the section turns it into its level problem. A bad
+  // level file never gives a server error.
   it('should_return_invalid_stars_without_a_throw_when_a_star_threshold_is_negative', () => {
     const example = levelExample('hexa-fit');
     const negative = [

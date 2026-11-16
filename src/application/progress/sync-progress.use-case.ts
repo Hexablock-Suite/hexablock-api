@@ -2,12 +2,12 @@ import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import type { Score } from '../../domain/progress/score.js';
-import type { Result } from '../../domain/shared/result.js';
+import { ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import type { UseCase } from '../use-case.js';
 import type { Clock } from '../ports/clock.js';
 import type { ProgressRepository } from '../ports/progress-repository.js';
-import { type ProgressProblem, withProgressRules } from './progress-problem.js';
+import type { ProgressProblem } from './progress-problem.js';
 
 // The input of SyncProgress. The userId comes from the bearer token. The
 // score is absent for a variant that keeps only level results. The mapper
@@ -29,9 +29,11 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // records the score and the level results at the Clock instant. The whole
 // read, change and save runs under the lock of ProgressRepository.update(),
 // so two overlapping syncs of one key run one after the other and lose no
-// data (DEF-01, DEF-02). A rule that the aggregate breaks saves nothing. A Clock that gives an
-// invalid Date is a fault of the server, so the use case throws and saves
-// nothing (decision 11).
+// data (DEF-01, DEF-02). The mapper of the border builds every value, so a
+// sync has no broken value to report. A guard of the aggregate that throws is
+// a defect of the caller, and a Clock that gives an invalid Date is a fault
+// of the server. In both cases the use case throws and saves nothing
+// (decision 11).
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
@@ -48,17 +50,15 @@ export class SyncProgressUseCase implements SyncProgress {
       if (!(at instanceof Date) || Number.isNaN(at.getTime())) {
         throw new Error('The Clock must return a valid Date.');
       }
-      outcome = withProgressRules(() => {
-        const progress = stored ?? PlayerProgress.start(userId, gameId, at);
-        if (score !== undefined) {
-          progress.recordScore(score, at);
-        }
-        for (const result of results) {
-          progress.recordLevel(result);
-        }
-        return progress;
-      });
-      return outcome.ok ? outcome.value : null;
+      const progress = stored ?? PlayerProgress.start(userId, gameId, at);
+      if (score !== undefined) {
+        progress.recordScore(score, at);
+      }
+      for (const result of results) {
+        progress.recordLevel(result);
+      }
+      outcome = ok(progress);
+      return progress;
     });
     if (outcome === undefined) {
       throw new Error('ProgressRepository.update() must run the change.');

@@ -13,6 +13,7 @@ import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import { ok } from '../../src/domain/shared/result.js';
 import { checkedLevel, levelJson, levelValidators } from '../support/level-format.js';
+import { valueOf } from '../support/result.js';
 
 // Concurrency tests of the advisory lock in DrizzleLevelRepository.update()
 // (#80). They need a real Postgres server. PGlite runs one session, so it
@@ -36,7 +37,7 @@ import { checkedLevel, levelJson, levelValidators } from '../support/level-forma
 
 const PG_URL = process.env.HB_TEST_PG_URL;
 const MIGRATIONS = resolve(import.meta.dirname, '../../drizzle');
-const SORT = GameId.of('hexa-sort');
+const SORT = valueOf(GameId.of('hexa-sort'));
 
 describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
   let pool: pg.Pool;
@@ -107,7 +108,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
 
     await Promise.all(
       Array.from({ length: count }, () =>
-        repository().update(SORT, LevelId.of(levelId), raise(levelId, seen)),
+        repository().update(SORT, valueOf(LevelId.of(levelId)), raise(levelId, seen)),
       ),
     );
 
@@ -128,7 +129,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
       const levelId = newLevelId();
       const updates = [firstVersion, secondVersion, thirdVersion].map((version) => {
         const incoming = checkedLevel(levelJson('hexa-sort', levelId, version));
-        return repository().update(SORT, LevelId.of(levelId), (stored) =>
+        return repository().update(SORT, valueOf(LevelId.of(levelId)), (stored) =>
           stored === null ? ok(incoming) : stored.accepts(incoming),
         );
       });
@@ -161,7 +162,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
 
     let settled = false;
     const pending = repository()
-      .update(SORT, LevelId.of(levelId), counting)
+      .update(SORT, valueOf(LevelId.of(levelId)), counting)
       .then((outcome) => {
         settled = true;
         return outcome;
@@ -172,7 +173,11 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
       expect(settled).toBe(false);
       expect(changes).toBe(0);
       // The lock of one level does not block another level.
-      const other = await repository().update(SORT, LevelId.of(otherLevelId), raise(otherLevelId));
+      const other = await repository().update(
+        SORT,
+        valueOf(LevelId.of(otherLevelId)),
+        raise(otherLevelId),
+      );
       expect(other.ok).toBe(true);
     } finally {
       await holder.query('commit');
@@ -187,18 +192,18 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
 
   it('should_leave_the_row_unchanged_and_release_the_lock_when_an_update_fails', async () => {
     const levelId = newLevelId();
-    await repository().update(SORT, LevelId.of(levelId), raise(levelId));
+    await repository().update(SORT, valueOf(LevelId.of(levelId)), raise(levelId));
     const before = await snapshot(levelId);
 
-    const thrown = repository().update(SORT, LevelId.of(levelId), () => {
+    const thrown = repository().update(SORT, valueOf(LevelId.of(levelId)), () => {
       throw new Error('boom');
     });
     await expect(thrown).rejects.toThrow('boom');
     expect(await snapshot(levelId)).toBe(before);
 
     const older = checkedLevel(levelJson('hexa-sort', levelId, 1));
-    const newer = await repository().update(SORT, LevelId.of(levelId), raise(levelId));
-    const rejected = await repository().update(SORT, LevelId.of(levelId), (stored) =>
+    const newer = await repository().update(SORT, valueOf(LevelId.of(levelId)), raise(levelId));
+    const rejected = await repository().update(SORT, valueOf(LevelId.of(levelId)), (stored) =>
       stored === null ? ok(older) : stored.accepts(older),
     );
     expect(newer.ok).toBe(true);
@@ -206,7 +211,9 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     expect(await storedVersion(levelId)).toBe('2');
 
     // Each failure released the lock, so the next update of the key completes.
-    expect((await repository().update(SORT, LevelId.of(levelId), raise(levelId))).ok).toBe(true);
+    expect((await repository().update(SORT, valueOf(LevelId.of(levelId)), raise(levelId))).ok).toBe(
+      true,
+    );
     expect(await storedVersion(levelId)).toBe('3');
   });
 
@@ -216,7 +223,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     const levelId = newLevelId();
     await Promise.all(
       Array.from({ length: 50 }, () =>
-        repository().update(SORT, LevelId.of(levelId), raise(levelId)),
+        repository().update(SORT, valueOf(LevelId.of(levelId)), raise(levelId)),
       ),
     );
     expect(await storedVersion(levelId)).toBe('50');
@@ -232,7 +239,9 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
       `sort:${levelId}`,
     ]);
     try {
-      expect((await repository().update(SORT, LevelId.of(levelId), raise(levelId))).ok).toBe(true);
+      expect(
+        (await repository().update(SORT, valueOf(LevelId.of(levelId)), raise(levelId))).ok,
+      ).toBe(true);
     } finally {
       await holder.query('commit');
       holder.release();

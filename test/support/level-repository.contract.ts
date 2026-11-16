@@ -5,11 +5,12 @@ import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import { err, ok, type Result } from '../../src/domain/shared/result.js';
 import { checkedLevel, levelJson, type LevelJson } from './level-format.js';
+import { valueOf } from './result.js';
 
-const FIT = GameId.of('hexa-fit');
-const FIT_01 = LevelId.of('fit-01');
-const SORT = GameId.of('hexa-sort');
-const SORT_01 = LevelId.of('sort-01');
+const FIT = valueOf(GameId.of('hexa-fit'));
+const FIT_01 = valueOf(LevelId.of('fit-01'));
+const SORT = valueOf(GameId.of('hexa-sort'));
+const SORT_01 = valueOf(LevelId.of('sort-01'));
 
 // Stores a level of the format through the port: the change ignores the
 // stored level and returns the given one.
@@ -18,7 +19,9 @@ export function storeLevel(
   json: LevelJson,
 ): Promise<Result<LevelDefinition<unknown>, unknown>> {
   const level = checkedLevel(json);
-  return repository.update(GameId.of(json.gameId), LevelId.of(json.levelId), () => ok(level));
+  return repository.update(valueOf(GameId.of(json.gameId)), valueOf(LevelId.of(json.levelId)), () =>
+    ok(level),
+  );
 }
 
 // The JSON of each level that list() gives, in its order.

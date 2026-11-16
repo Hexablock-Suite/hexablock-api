@@ -5,8 +5,9 @@ import { Score } from '../../../src/domain/progress/score.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { testUserId } from '../../support/user-ids.js';
+import { valueOf } from '../../support/result.js';
 
-const ADA = UserId.from(testUserId(1));
+const ADA = valueOf(UserId.from(testUserId(1)));
 const LEVEL = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
 const BAD_GAME = 'Hexa Lines';
 const BAD_LEVEL = { ...LEVEL, stars: -2 };
@@ -27,8 +28,8 @@ describe('ProgressDtoMapper.toRequest', () => {
       throw new Error('The mapper must build the request.');
     }
     expect(request.value.userId).toBe(ADA);
-    expect(request.value.gameId.equals(GameId.of('hexa-fit'))).toBe(true);
-    expect(request.value.score?.equals(Score.of(120))).toBe(true);
+    expect(request.value.gameId.equals(valueOf(GameId.of('hexa-fit')))).toBe(true);
+    expect(request.value.score?.equals(valueOf(Score.of(120)))).toBe(true);
     expect(request.value.results).toHaveLength(1);
     expect(request.value.results[0]?.equals(levelResultOf(LEVEL))).toBe(true);
   });
@@ -41,7 +42,7 @@ describe('ProgressDtoMapper.toRequest', () => {
       if (!request.ok) {
         throw new Error('The mapper must build the request.');
       }
-      expect(request.value.gameId.equals(GameId.of('hexa-fit'))).toBe(true);
+      expect(request.value.gameId.equals(valueOf(GameId.of('hexa-fit')))).toBe(true);
       expect(request.value.score).toBeUndefined();
       expect(request.value.results).toEqual([]);
     },
@@ -117,7 +118,7 @@ describe('ProgressDtoMapper.toGetRequest', () => {
       throw new Error('The mapper must build the request.');
     }
     expect(request.value.userId).toBe(ADA);
-    expect(request.value.gameId.equals(GameId.of('hexa-lines'))).toBe(true);
+    expect(request.value.gameId.equals(valueOf(GameId.of('hexa-lines')))).toBe(true);
   });
 
   it('should_fail_with_the_message_of_the_rule_when_path_value_is_not_a_slug', () => {
@@ -132,8 +133,8 @@ describe('ProgressDtoMapper.toGetRequest', () => {
 describe('ProgressDtoMapper.toDto', () => {
   it('should_write_plain_numbers_and_strings_when_progress_becomes_a_dto', () => {
     const at = new Date('2026-11-06T10:00:00.000Z');
-    const progress = PlayerProgress.start(ADA, GameId.of('hexa-fit'), at);
-    progress.recordScore(Score.of(120), at);
+    const progress = PlayerProgress.start(ADA, valueOf(GameId.of('hexa-fit')), at);
+    progress.recordScore(valueOf(Score.of(120)), at);
     progress.recordLevel(levelResultOf(LEVEL));
 
     expect(ProgressDtoMapper.toDto(progress)).toEqual({

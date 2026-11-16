@@ -6,16 +6,17 @@ import { Username } from '../../../src/domain/user/username.js';
 import { createJwtService } from '../../../src/infrastructure/auth/auth-config.js';
 import { JwtTokenIssuer } from '../../../src/infrastructure/auth/jwt-token-issuer.js';
 import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';
+import { valueOf } from '../../support/result.js';
 
 // The text that the UserId delivers: the token subject.
 const USER_ID_VALUE = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
-const USER_ID = UserId.from(USER_ID_VALUE);
+const USER_ID = valueOf(UserId.from(USER_ID_VALUE));
 
 // The issuer takes the User and receives the id that it delivers (#91, #96).
 function userWithId(id: UserId): User {
   const username = Username.create('ada');
   if (!username.ok) throw new Error(username.error);
-  return User.register(id, username.value, PasswordHash.from('scrypt$hash'));
+  return User.register(id, username.value, valueOf(PasswordHash.from('scrypt$hash')));
 }
 
 const USER = userWithId(USER_ID);
@@ -45,7 +46,7 @@ describe('JwtTokenIssuer', () => {
 
   // #91: the subject is the text that the UserId delivers, in lower case.
   it('should_sign_the_lower_case_user_id_as_subject_when_the_user_id_came_in_upper_case', () => {
-    const token = issuer.issue(userWithId(UserId.from(USER_ID_VALUE.toUpperCase())));
+    const token = issuer.issue(userWithId(valueOf(UserId.from(USER_ID_VALUE.toUpperCase()))));
 
     expect(new JwtService().decode<{ sub: string }>(token).sub).toBe(USER_ID_VALUE);
     expect(Object.keys(new JwtService().decode<object>(token)).sort()).toEqual([
@@ -83,12 +84,16 @@ describe('JwtTokenIssuer', () => {
     },
   );
 
-  // A sub that is not a UUID is one more bad token (#64).
-  it('should_return_null_when_token_subject_is_not_a_uuid', () => {
-    const notUuid = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub: 'not-a-uuid' });
+  // A sub that is not a UUID is one more bad token (#64). UserId.from()
+  // gives a failed Result for it, and verify() answers null (#103).
+  it.each([['not-a-uuid'], [''], [`{${USER_ID_VALUE}}`], [42]])(
+    'should_return_null_when_token_subject_is_not_a_uuid',
+    (sub) => {
+      const notUuid = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub });
 
-    expect(issuer.verify(notUuid)).toBeNull();
-  });
+      expect(issuer.verify(notUuid)).toBeNull();
+    },
+  );
 
   it('should_return_null_when_token_has_alg_none_and_no_signature', () => {
     expect(issuer.verify(unsignedToken({ sub: USER_ID_VALUE }))).toBeNull();

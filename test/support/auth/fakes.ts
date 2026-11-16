@@ -11,6 +11,7 @@ import { UserId } from '../../../src/domain/user/user-id.js';
 import type { Username } from '../../../src/domain/user/username.js';
 import { userPartsOf } from '../recording-receiver.js';
 import { testUserId } from '../user-ids.js';
+import { valueOf } from '../result.js';
 
 // Test doubles for the account ports. Each one is plain and predictable,
 // so a use case test can read the stored state. A double is border code, as
@@ -43,11 +44,11 @@ export class InMemoryUserRepository implements UserRepository {
 // adapter does, this double receives the text of the Password.
 export class PrefixPasswordHasher implements PasswordHasher {
   async hash(password: Password): Promise<PasswordHash> {
-    return PasswordHash.from(`hashed:${receiveValueOf(password)}`);
+    return valueOf(PasswordHash.from(`hashed:${receiveValueOf(password)}`));
   }
 
   async verify(typed: string, hash: PasswordHash): Promise<boolean> {
-    return hash.equals(PasswordHash.from(`hashed:${typed}`));
+    return hash.equals(valueOf(PasswordHash.from(`hashed:${typed}`)));
   }
 }
 
@@ -62,7 +63,7 @@ export class PrefixTokenIssuer implements TokenIssuer {
   verify(token: SessionToken): UserId | null {
     if (!token.startsWith(TOKEN_PREFIX)) return null;
     try {
-      return UserId.from(token.slice(TOKEN_PREFIX.length));
+      return valueOf(UserId.from(token.slice(TOKEN_PREFIX.length)));
     } catch {
       return null;
     }
@@ -75,6 +76,6 @@ export class SequenceUserIdGenerator implements UserIdGenerator {
 
   next(): UserId {
     this.count += 1;
-    return UserId.from(testUserId(this.count));
+    return valueOf(UserId.from(testUserId(this.count)));
   }
 }

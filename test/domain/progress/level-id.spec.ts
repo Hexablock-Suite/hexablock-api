@@ -1,24 +1,28 @@
 import { LevelId } from '../../../src/domain/progress/level-id.js';
-import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
+import { valueOf } from '../../support/result.js';
+
+const levelId = (value: string): LevelId => valueOf(LevelId.of(value));
 
 // The id of one level of a game, such as fit-01.
 describe('LevelId', () => {
-  // Each row is an array of one value, so the array case reaches the factory whole.
+  // One failure mechanism (decision 11): a failed Result with the code of
+  // the rule, never an exception. The border writes the message. Each row is
+  // an array of one value, so the array case reaches the factory whole.
   it.each([[undefined], [null], [''], ['  '], [5], [['fit-01']]])(
-    'should_reject_the_id_when_it_is_blank_or_not_a_string',
+    'should_give_the_code_of_the_rule_when_the_id_is_blank_or_not_a_string',
     (bad) => {
-      expect(() => LevelId.of(bad as unknown as string)).toThrow(ProgressError);
-      expect(() => LevelId.of(bad as unknown as string)).toThrow(
-        'levelId must be a non-blank string.',
-      );
+      expect(LevelId.of(bad as unknown as string)).toEqual({
+        ok: false,
+        error: 'invalid-level-id',
+      });
     },
   );
 
   // The id is kept as it arrives: letter case and spaces count.
   it('should_be_equal_when_two_ids_hold_the_same_text', () => {
-    const id = LevelId.of('fit-01');
-    const twin = LevelId.of('fit-01');
+    const id = levelId('fit-01');
+    const twin = levelId('fit-01');
 
     expect(twin).not.toBe(id);
     expect(id.equals(twin)).toBe(true);
@@ -28,10 +32,10 @@ describe('LevelId', () => {
   it.each(['fit-02', 'FIT-01', ' fit-01'])(
     'should_not_be_equal_when_the_text_differs_in_a_letter_its_case_or_a_space',
     (other) => {
-      const id = LevelId.of('fit-01');
+      const id = levelId('fit-01');
 
-      expect(id.equals(LevelId.of(other))).toBe(false);
-      expect(LevelId.of(other).equals(id)).toBe(false);
+      expect(id.equals(levelId(other))).toBe(false);
+      expect(levelId(other).equals(id)).toBe(false);
     },
   );
 
@@ -39,18 +43,18 @@ describe('LevelId', () => {
   it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
     const receiver = new RecordingReceiver<string>();
 
-    LevelId.of('fit-01').deliverTo(receiver);
+    levelId('fit-01').deliverTo(receiver);
 
     expect(receiver.received).toEqual(['fit-01']);
   });
 
   it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
-    const levelId = LevelId.of('fit-01');
+    const built = levelId('fit-01');
     const receiver = new RecordingReceiver<string>();
 
     // @ts-expect-error -- #90 makes the value private.
-    void levelId.value;
+    void built.value;
     // The delivery returns nothing: the receiver holds the value.
-    expect(levelId.deliverTo(receiver)).toBeUndefined();
+    expect(built.deliverTo(receiver)).toBeUndefined();
   });
 });

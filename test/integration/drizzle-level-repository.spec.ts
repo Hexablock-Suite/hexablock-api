@@ -143,8 +143,8 @@ describe('DrizzleLevelRepository', () => {
     const fit = new RecordingStrategy(new FitLevelValidator(hex));
     const sort = new RecordingStrategy(new SortLevelValidator());
     const validators = LevelValidators.of([
-      [GameId.of('hexa-fit'), fit],
-      [GameId.of('hexa-sort'), sort],
+      [valueOf(GameId.of('hexa-fit')), fit],
+      [valueOf(GameId.of('hexa-sort')), sort],
     ]);
     await database.db
       .insert(levels)

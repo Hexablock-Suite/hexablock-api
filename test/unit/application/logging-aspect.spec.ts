@@ -20,6 +20,7 @@ import { InMemoryProgressRepository } from '../../support/in-memory-progress-rep
 import { levelValidators } from '../../support/level-format.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
 import { testUserId } from '../../support/user-ids.js';
+import { valueOf } from '../../support/result.js';
 
 type EchoResult = Result<string, { kind: string }>;
 
@@ -378,9 +379,9 @@ describe('LoggingAspect', () => {
     const aspect = new LoggingAspect(sync, 'SyncProgress', logger);
 
     const result = await aspect.execute({
-      userId: UserId.from(testUserId(1)),
-      gameId: GameId.of('hexa-lines'),
-      score: Score.of(120),
+      userId: valueOf(UserId.from(testUserId(1))),
+      gameId: valueOf(GameId.of('hexa-lines')),
+      score: valueOf(Score.of(120)),
       results: [],
     });
 

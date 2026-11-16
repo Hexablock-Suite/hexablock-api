@@ -8,8 +8,6 @@ export const DOMAIN_SURFACE_BASELINE: readonly string[] = [
   // #97: the Date parameters of PlayerProgress.
   'src/domain/progress/player-progress.ts PlayerProgress.start(at) parameter',
   'src/domain/progress/player-progress.ts PlayerProgress.recordScore(at) parameter',
-  // #103: the message text of ProgressError.
-  'src/domain/progress/progress-error.ts ProgressError.constructor(message) parameter',
   // #99: the number order of Range and the Range<number> of the credential limits.
   'src/domain/shared/range.ts Compare() return',
   'src/domain/shared/range.ts Range.ofNumbers() return',

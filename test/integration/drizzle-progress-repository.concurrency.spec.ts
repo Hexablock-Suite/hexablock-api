@@ -16,6 +16,7 @@ import { Score } from '../../src/domain/progress/score.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
 import { levelResultOf } from '../support/level-results.js';
+import { valueOf } from '../support/result.js';
 
 // Concurrency tests of the advisory lock in DrizzleProgressRepository.update()
 // (DEF-01, DEF-02). They need a real Postgres server. PGlite runs one
@@ -95,9 +96,9 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     gameId = 'fit',
   ): SyncProgressRequest {
     return {
-      userId: UserId.from(userId),
-      gameId: GameId.of(gameId),
-      ...(score === undefined ? {} : { score: Score.of(score) }),
+      userId: valueOf(UserId.from(userId)),
+      gameId: valueOf(GameId.of(gameId)),
+      ...(score === undefined ? {} : { score: valueOf(Score.of(score)) }),
       results: levels.map((n) =>
         levelResultOf({ levelId: `l${n}`, stars: 1, moves: n, elapsedMs: n }),
       ),
@@ -266,13 +267,14 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     await expect(throwingClock.execute(syncRequest(player, 999, [9]))).rejects.toThrow('boom');
     expect(await snapshot(player)).toBe(before);
 
-    // The request types forbid this score. The aggregate rejects it under
-    // the lock, and the use case answers a failed Result.
-    const badScore = await syncWith().execute({
-      ...syncRequest(player, undefined, [9]),
-      score: 999 as unknown as Score,
-    });
-    expect(badScore.ok).toBe(false);
+    // The request types forbid this score. The guard of the aggregate throws
+    // under the lock: a defect of the caller is not a failed Result (#103).
+    await expect(
+      syncWith().execute({
+        ...syncRequest(player, undefined, [9]),
+        score: 999 as unknown as Score,
+      }),
+    ).rejects.toThrow(new TypeError('A high score must be a Score.'));
     expect(await snapshot(player)).toBe(before);
 
     // The foreign key to users.id rejects a user that does not exist.

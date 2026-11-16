@@ -10,6 +10,7 @@ import { Username } from '../../src/domain/user/username.js';
 import { PrefixPasswordHasher } from '../support/auth/fakes.js';
 import { userPartsOf } from '../support/recording-receiver.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
+import { valueOf } from '../support/result.js';
 
 const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
 const OTHER_ID = '0b9e7f4a-5c3d-4e2b-8a1f-9c8d7e6f5a40';
@@ -19,7 +20,7 @@ function userNamed(id: string, name: string, hash: string): User {
   if (!username.ok) {
     throw new Error(`invalid test username ${name}`);
   }
-  return User.register(UserId.from(id), username.value, PasswordHash.from(hash));
+  return User.register(valueOf(UserId.from(id)), username.value, valueOf(PasswordHash.from(hash)));
 }
 
 function username(name: string): Username {
@@ -119,7 +120,7 @@ describe('DrizzleUserRepository', () => {
       // The lookup misses, as when two sign-ups run at the same time.
       vi.spyOn(repository, 'isUsernameTaken').mockResolvedValue(false);
       const register = new RegisterUseCase(repository, new PrefixPasswordHasher(), {
-        next: () => UserId.from(OTHER_ID),
+        next: () => valueOf(UserId.from(OTHER_ID)),
       });
 
       const result = await register.execute({ username: name, password: 'other password' });
@@ -207,4 +208,18 @@ describe('DrizzleUserRepository', () => {
       `The users row ${ADA_ID} holds an invalid username.`,
     );
   });
+
+  // UserId.from() and PasswordHash.from() give a failed Result for a broken
+  // stored value (#103). The mapper treats it as a server fault and throws.
+  it.each([
+    [{ id: 'not-a-uuid' }, 'The users row not-a-uuid holds an invalid id.'],
+    [{ passwordHash: '' }, `The users row ${ADA_ID} holds an invalid password hash.`],
+  ])(
+    'should_throw_a_server_fault_when_a_stored_id_or_password_hash_breaks_its_rule',
+    (broken, message) => {
+      const row = { id: ADA_ID, username: 'ada', usernameKey: 'ada', passwordHash: 'scrypt$hash' };
+
+      expect(() => UserRowMapper.toEntity({ ...row, ...broken })).toThrow(new Error(message));
+    },
+  );
 });

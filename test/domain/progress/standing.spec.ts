@@ -5,6 +5,7 @@ import { Standing, type StandingReceiver } from '../../../src/domain/progress/st
 import { Stars } from '../../../src/domain/progress/stars.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import { receiveValueOf } from '../../../src/adapters/received.js';
+import { valueOf } from '../../support/result.js';
 
 function created<T>(result: Result<T, string>): T {
   if (!result.ok) throw new Error(result.error);
@@ -16,10 +17,10 @@ function created<T>(result: Result<T, string>): T {
 function standing(stars: number, levels: number, moves: number, elapsedMs: number): Standing {
   return created(
     Standing.of(
-      Stars.of(stars),
+      valueOf(Stars.of(stars)),
       created(LevelsCompleted.of(levels)),
-      Moves.of(moves),
-      ElapsedTime.ofMs(elapsedMs),
+      valueOf(Moves.of(moves)),
+      valueOf(ElapsedTime.ofMs(elapsedMs)),
     ),
   );
 }
@@ -50,10 +51,10 @@ describe('Standing', () => {
   // One failure mechanism: a failed Result with the code of the rule, never an exception.
   it('should_give_the_code_of_the_rule_when_no_level_is_completed', () => {
     const result = Standing.of(
-      Stars.of(0),
+      valueOf(Stars.of(0)),
       created(LevelsCompleted.of(0)),
-      Moves.of(0),
-      ElapsedTime.ofMs(0),
+      valueOf(Moves.of(0)),
+      valueOf(ElapsedTime.ofMs(0)),
     );
 
     expect(result).toEqual({ ok: false, error: 'no-level-completed' });

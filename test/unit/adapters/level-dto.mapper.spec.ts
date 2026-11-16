@@ -8,6 +8,7 @@ import {
   type LevelJson,
 } from '../../support/level-format.js';
 import { incomingLevel } from '../../support/level-update.js';
+import { valueOf } from '../../support/result.js';
 
 const SHAPE_PROBLEM = 'levels must be an array of objects';
 const FIELDS_PROBLEM =
@@ -114,10 +115,14 @@ describe('LevelDtoMapper', () => {
 
   it('should_name_the_game_and_level_id_of_each_problem_when_the_update_reports_level_problems', () => {
     const details = LevelDtoMapper.toDetails([
-      { gameId: GameId.of('hexa-fit'), levelId: LevelId.of('fit-01'), problem: 'inexact-witness' },
       {
-        gameId: GameId.of('hexa-lines'),
-        levelId: LevelId.of('a "b"'),
+        gameId: valueOf(GameId.of('hexa-fit')),
+        levelId: valueOf(LevelId.of('fit-01')),
+        problem: 'inexact-witness',
+      },
+      {
+        gameId: valueOf(GameId.of('hexa-lines')),
+        levelId: valueOf(LevelId.of('a "b"')),
         problem: 'game-without-levels',
       },
     ]);

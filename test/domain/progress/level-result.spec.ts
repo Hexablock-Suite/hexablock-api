@@ -8,6 +8,7 @@ import {
 import { Moves } from '../../../src/domain/progress/moves.js';
 import { Stars } from '../../../src/domain/progress/stars.js';
 import { levelResultOf } from '../../support/level-results.js';
+import { valueOf } from '../../support/result.js';
 
 const VALID = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45_000 };
 
@@ -30,10 +31,10 @@ describe('LevelResult', () => {
   // through one delivery to a receiver of the border.
   it('should_deliver_the_four_value_objects_when_the_factory_took_them', () => {
     const result = LevelResult.of(
-      LevelId.of('fit-01'),
-      Stars.of(3),
-      Moves.of(12),
-      ElapsedTime.ofMs(45_000),
+      valueOf(LevelId.of('fit-01')),
+      valueOf(Stars.of(3)),
+      valueOf(Moves.of(12)),
+      valueOf(ElapsedTime.ofMs(45_000)),
     );
     const receiver = new RecordingLevelResultReceiver();
 

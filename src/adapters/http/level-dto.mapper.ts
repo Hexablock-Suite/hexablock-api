@@ -3,16 +3,14 @@ import type {
   IncomingLevel,
   UpdateLevelsRequest,
 } from '../../application/levels/update-levels.use-case.js';
-import { withProgressRules } from '../../application/progress/progress-problem.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import { LevelOrder } from '../../domain/level/level-order.js';
 import { LevelVersion } from '../../domain/level/level-version.js';
 import { TopologyId } from '../../domain/level/topology-id.js';
-import { GameId } from '../../domain/progress/game-id.js';
-import { LevelId } from '../../domain/progress/level-id.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import { receiveJsonOf, receiveValueOf } from '../received.js';
 import type { LevelDto, LevelsDto } from './level.dto.js';
+import { gameIdFrom, levelIdFrom } from './progress-values.js';
 
 const SHAPE_PROBLEM = 'levels must be an array of objects';
 
@@ -86,14 +84,12 @@ function incomingLevel(
   level: Record<string, unknown>,
   index: number,
 ): Result<IncomingLevel, string> {
-  // GameId.of() and LevelId.of() still throw their ProgressError until #103.
-  const key = withProgressRules(() => ({
-    gameId: GameId.of(level.gameId as string),
-    levelId: LevelId.of(level.levelId as string),
-  }));
-  if (!key.ok) {
-    return err(`levels[${index}]: ${key.error.problems.join(' ')}`);
-  }
+  // Each factory checks the type and the rule of its value, and
+  // progress-values.ts writes the text of a broken rule.
+  const gameId = gameIdFrom(level.gameId);
+  if (!gameId.ok) return err(`levels[${index}]: ${gameId.error}`);
+  const levelId = levelIdFrom(level.levelId);
+  if (!levelId.ok) return err(`levels[${index}]: ${levelId.error}`);
   const name = nameOf(level.gameId as string, level.levelId as string);
   if (!hasLevelFields(level)) {
     return err(`${name}: ${FIELDS_PROBLEM}`);
@@ -106,7 +102,8 @@ function incomingLevel(
   const topology = TopologyId.of(level.topology as string);
   if (!topology.ok) return err(`${name}: ${topology.error}`);
   return ok({
-    ...key.value,
+    gameId: gameId.value,
+    levelId: levelId.value,
     order: order.value,
     version: version.value,
     topology: topology.value,

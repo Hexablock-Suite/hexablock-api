@@ -75,9 +75,14 @@ function levelValidators(): LevelValidators {
   if (!hex.ok) {
     throw new Error('The topology id hex must be valid.');
   }
+  const fit = GameId.of('hexa-fit');
+  const sort = GameId.of('hexa-sort');
+  if (!fit.ok || !sort.ok) {
+    throw new Error('The game ids hexa-fit and hexa-sort must be valid.');
+  }
   return LevelValidators.of([
-    [GameId.of('hexa-fit'), new FitLevelValidator(Topologies.of([[hex.value, new HexTopology()]]))],
-    [GameId.of('hexa-sort'), new SortLevelValidator()],
+    [fit.value, new FitLevelValidator(Topologies.of([[hex.value, new HexTopology()]]))],
+    [sort.value, new SortLevelValidator()],
   ]);
 }
 

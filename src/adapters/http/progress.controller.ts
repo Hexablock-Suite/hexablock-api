@@ -95,8 +95,11 @@ export class ProgressController {
   }
 }
 
+// A value that breaks its rule stops in ProgressDtoMapper, before any use
+// case. So the one expected failure of a use case is a missing progress.
 function httpErrorOf(problem: ProgressProblem, gameId: string): Error {
-  return problem.kind === 'progress-not-found'
-    ? new NotFoundException(`No progress for gameId ${gameId}`)
-    : new BadRequestException(problem.problems);
+  switch (problem.kind) {
+    case 'progress-not-found':
+      return new NotFoundException(`No progress for gameId ${gameId}`);
+  }
 }

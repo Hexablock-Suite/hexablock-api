@@ -1,23 +1,21 @@
 import type { GetProgressRequest } from '../../application/progress/get-progress.use-case.js';
-import { withProgressRules } from '../../application/progress/progress-problem.js';
 import type { SyncProgressRequest } from '../../application/progress/sync-progress.use-case.js';
-import { ElapsedTime } from '../../domain/progress/elapsed-time.js';
-import { GameId } from '../../domain/progress/game-id.js';
-import { LevelId } from '../../domain/progress/level-id.js';
-import { LevelResult } from '../../domain/progress/level-result.js';
-import { Moves } from '../../domain/progress/moves.js';
+import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
-import { Score } from '../../domain/progress/score.js';
-import { Stars } from '../../domain/progress/stars.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import { receiveProgressOf } from '../received.js';
 import type { ProgressDto } from './progress.dto.js';
+import { gameIdFrom, levelResultFrom, scoreFrom } from './progress-values.js';
+
+// The domain values of a sync body, without the userId of the token.
+type SyncValues = Omit<SyncProgressRequest, 'userId'>;
 
 // Translates between the progress DTOs and the progress entities
 // (decision 12). The controller holds no translation code. The mapper builds
 // the domain values of each request, so a use case gets them built. A value
-// that breaks its rule gives the message of the rule as the one problem.
+// that breaks its rule gives the text of the rule as the one problem: the
+// factory gives the code, and progress-values.ts writes the text.
 export const ProgressDtoMapper = {
   // The app has no validation pipe, so the mapper checks the body shape. The
   // domain checks the rules of each value. The userId comes from the token.
@@ -37,19 +35,15 @@ export const ProgressDtoMapper = {
     if (problems.length > 0) {
       return err(problems);
     }
-    const values = withProgressRules(() => ({
-      gameId: GameId.of(gameId as string),
-      // The shape check above makes each result an object.
-      results: (results as Record<string, unknown>[]).map(levelResultOf),
-      score: score === undefined || score === null ? undefined : Score.of(score as number),
-    }));
-    return values.ok ? ok({ userId, ...values.value }) : err(values.error.problems);
+    // The shape check above makes each result an object.
+    const values = syncValuesOf(gameId, results as Record<string, unknown>[], score);
+    return values.ok ? ok({ userId, ...values.value }) : err([values.error]);
   },
 
   // The gameId of a read comes from the path.
   toGetRequest(gameId: string, userId: UserId): Result<GetProgressRequest, string[]> {
-    const built = withProgressRules(() => GameId.of(gameId));
-    return built.ok ? ok({ userId, gameId: built.value }) : err(built.error.problems);
+    const built = gameIdFrom(gameId);
+    return built.ok ? ok({ userId, gameId: built.value }) : err([built.error]);
   },
 
   // The aggregate delivers its parts to the mapper. The mapper receives the
@@ -61,16 +55,29 @@ export const ProgressDtoMapper = {
   },
 };
 
-// Builds the four value objects of one result in the order of the fields:
-// the levelId, the stars, the moves, then the time. Each value object checks
-// the type and the rule of its field, so the first broken rule stops the build.
-function levelResultOf(result: Record<string, unknown>): LevelResult {
-  return LevelResult.of(
-    LevelId.of(result.levelId as string),
-    Stars.of(result.stars as number),
-    Moves.of(result.moves as number),
-    ElapsedTime.ofMs(result.elapsedMs as number),
-  );
+// Builds the values of a sync body in the order of decision 12: the gameId,
+// the results, then the score. Each result builds its four values in the
+// order of its fields. Each factory checks the type and the rule of its
+// value, so the first broken rule stops the build and gives its text.
+function syncValuesOf(
+  gameId: unknown,
+  results: readonly Record<string, unknown>[],
+  score: unknown,
+): Result<SyncValues, string> {
+  const builtGameId = gameIdFrom(gameId);
+  if (!builtGameId.ok) return builtGameId;
+  const builtResults: LevelResult[] = [];
+  for (const result of results) {
+    const builtResult = levelResultFrom(result);
+    if (!builtResult.ok) return builtResult;
+    builtResults.push(builtResult.value);
+  }
+  if (score === undefined || score === null) {
+    return ok({ gameId: builtGameId.value, results: builtResults, score: undefined });
+  }
+  const builtScore = scoreFrom(score);
+  if (!builtScore.ok) return builtScore;
+  return ok({ gameId: builtGameId.value, results: builtResults, score: builtScore.value });
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {

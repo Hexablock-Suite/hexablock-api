@@ -10,6 +10,7 @@ import {
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
 import { testUserId } from '../../support/user-ids.js';
+import { valueOf } from '../../support/result.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';
@@ -71,7 +72,7 @@ describe('LoginUseCase', () => {
     expect(verify).toHaveBeenCalledOnce();
     expect(verify).toHaveBeenCalledWith(
       'correct horse',
-      PasswordHash.from('hashed:unknown-user-dummy-password'),
+      valueOf(PasswordHash.from('hashed:unknown-user-dummy-password')),
     );
   });
 
@@ -160,7 +161,10 @@ describe('LoginUseCase', () => {
     await login.execute({ username: 'ada', password: 'wrong horse' });
 
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith('wrong horse', PasswordHash.from('hashed:correct horse'));
+    expect(verify).toHaveBeenCalledWith(
+      'wrong horse',
+      valueOf(PasswordHash.from('hashed:correct horse')),
+    );
   });
 
   // #90: the port carries domain types, so the use case reads no text.
@@ -192,7 +196,10 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith('short', PasswordHash.from('hashed:correct horse'));
+    expect(verify).toHaveBeenCalledWith(
+      'short',
+      valueOf(PasswordHash.from('hashed:correct horse')),
+    );
   });
 
   // #91: the use case never opens the user. The user checks the typed text
@@ -225,7 +232,10 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith('correct horse', PasswordHash.from('hashed:correct horse'));
+    expect(verify).toHaveBeenCalledWith(
+      'correct horse',
+      valueOf(PasswordHash.from('hashed:correct horse')),
+    );
   });
 
   it('should_issue_no_token_when_the_password_is_wrong_or_the_username_is_unknown', async () => {
@@ -268,9 +278,9 @@ describe('LoginUseCase', () => {
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
     expect(verify.mock.calls[0][0]).toBe('correct horse');
-    expect(verify.mock.calls[0][1]).not.toEqual(PasswordHash.from('hashed:correct horse'));
+    expect(verify.mock.calls[0][1]).not.toEqual(valueOf(PasswordHash.from('hashed:correct horse')));
     expect(verify.mock.calls[0][1]).toEqual(
-      PasswordHash.from('hashed:unknown-user-dummy-password'),
+      valueOf(PasswordHash.from('hashed:unknown-user-dummy-password')),
     );
   });
 });

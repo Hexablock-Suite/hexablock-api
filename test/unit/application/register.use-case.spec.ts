@@ -10,6 +10,7 @@ import {
 } from '../../support/auth/fakes.js';
 import { userPartsOf } from '../../support/recording-receiver.js';
 import { testUserId } from '../../support/user-ids.js';
+import { valueOf } from '../../support/result.js';
 
 describe('RegisterUseCase', () => {
   let users: InMemoryUserRepository;
@@ -25,7 +26,7 @@ describe('RegisterUseCase', () => {
   it('should_store_hashed_password_when_user_registers', async () => {
     const result = await register.execute({ username: 'ada', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: true, value: UserId.from(testUserId(1)) });
+    expect(result).toEqual({ ok: true, value: valueOf(UserId.from(testUserId(1))) });
     expect(users.users).toHaveLength(1);
     expect(receiveValueOf(userPartsOf(users.users[0]).id)).toBe(testUserId(1));
     expect(receiveValueOf(userPartsOf(users.users[0]).username)).toBe('ada');
@@ -73,7 +74,7 @@ describe('RegisterUseCase', () => {
   it('should_store_username_as_typed_when_it_has_capital_letters', async () => {
     const result = await register.execute({ username: 'AdaLovelace', password: 'correct horse' });
 
-    expect(result).toEqual({ ok: true, value: UserId.from(testUserId(1)) });
+    expect(result).toEqual({ ok: true, value: valueOf(UserId.from(testUserId(1))) });
     expect(users.users.map((user) => receiveValueOf(userPartsOf(user).username))).toEqual([
       'AdaLovelace',
     ]);

@@ -10,11 +10,15 @@ import {
   keyDeliveredBy,
   RecordingReceiver,
 } from '../../support/recording-receiver.js';
+import { valueOf } from '../../support/result.js';
 import { testUserId } from '../../support/user-ids.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';
 const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
+
+const userId = (value: string): UserId => valueOf(UserId.from(value));
+const passwordHash = (value: string): PasswordHash => valueOf(PasswordHash.from(value));
 
 describe('credential limits', () => {
   it('should_export_username_and_password_ranges_when_domain_sets_the_limits', () => {
@@ -145,15 +149,18 @@ describe('Password', () => {
 });
 
 describe('UserId', () => {
-  it('should_reject_user_id_when_value_is_empty', () => {
-    expect(() => UserId.from('')).toThrow('A UserId needs a value.');
-  });
-
-  // #39 rejected blank ids. A caller outside TypeScript can pass no string.
-  it('should_reject_user_id_when_value_is_blank_or_not_a_string', () => {
-    expect(() => UserId.from('   ')).toThrow('A UserId needs a value.');
-    expect(() => UserId.from(undefined as unknown as string)).toThrow('A UserId needs a value.');
-  });
+  // One failure mechanism (decision 11): a failed Result with the code of
+  // the rule, never an exception. #39 rejected blank ids, and a caller
+  // outside TypeScript can pass no string.
+  it.each(['', '   ', undefined])(
+    'should_give_the_code_of_the_rule_when_value_is_empty_blank_or_not_a_string',
+    (value) => {
+      expect(UserId.from(value as unknown as string)).toEqual({
+        ok: false,
+        error: 'invalid-user-id',
+      });
+    },
+  );
 
   // users.id and progress.user_id are uuid columns (#64).
   it.each([
@@ -165,72 +172,74 @@ describe('UserId', () => {
     ` ${ADA_ID}`,
     `${ADA_ID}\n`,
     ADA_ID.replace('6', 'g'),
-  ])('should_reject_user_id_when_value_is_not_a_uuid', (value) => {
-    expect(() => UserId.from(value)).toThrow('A UserId must be a UUID.');
+  ])('should_give_the_code_of_the_rule_when_value_is_not_a_uuid', (value) => {
+    expect(UserId.from(value)).toEqual({ ok: false, error: 'invalid-user-id' });
   });
 
   // RFC 9562 defines the nil UUID, and a uuid column stores it.
   it('should_accept_user_id_when_value_is_the_nil_uuid', () => {
     const nil = '00000000-0000-0000-0000-000000000000';
 
-    expect(deliveredBy(UserId.from(nil))).toEqual([nil]);
+    expect(deliveredBy(userId(nil))).toEqual([nil]);
   });
 
   // Postgres returns a uuid in lower case, so equals() matches a stored id.
   it('should_store_lower_case_value_when_uuid_has_upper_case_letters', () => {
-    const upper = UserId.from(ADA_ID.toUpperCase());
+    const upper = userId(ADA_ID.toUpperCase());
 
     expect(deliveredBy(upper)).toEqual([ADA_ID]);
-    expect(upper.equals(UserId.from(ADA_ID))).toBe(true);
+    expect(upper.equals(userId(ADA_ID))).toBe(true);
   });
 
   it('should_be_equal_when_two_user_ids_hold_the_same_value', () => {
-    expect(deliveredBy(UserId.from(testUserId(1)))).toEqual([testUserId(1)]);
-    expect(UserId.from(testUserId(1)).equals(UserId.from(testUserId(1)))).toBe(true);
-    expect(UserId.from(testUserId(1)).equals(UserId.from(testUserId(2)))).toBe(false);
+    expect(deliveredBy(userId(testUserId(1)))).toEqual([testUserId(1)]);
+    expect(userId(testUserId(1)).equals(userId(testUserId(1)))).toBe(true);
+    expect(userId(testUserId(1)).equals(userId(testUserId(2)))).toBe(false);
   });
 
   // A leaderboard lists full ties in one fixed order: the ids in ascending
   // order of their lower case text (decision of #83).
   it('should_come_before_another_id_when_its_lower_case_value_sorts_first', () => {
-    const first = UserId.from(testUserId(1));
-    const second = UserId.from(testUserId(2));
+    const first = userId(testUserId(1));
+    const second = userId(testUserId(2));
     // The raw text «F…» sorts before «a…», but the lower case text «f…» sorts after it.
-    const upperF = UserId.from('F0000000-0000-4000-8000-000000000000');
-    const lowerA = UserId.from('a0000000-0000-4000-8000-000000000000');
+    const upperF = userId('F0000000-0000-4000-8000-000000000000');
+    const lowerA = userId('a0000000-0000-4000-8000-000000000000');
 
     expect(first.comesBefore(second)).toBe(true);
     expect(second.comesBefore(first)).toBe(false);
-    expect(first.comesBefore(UserId.from(testUserId(1)))).toBe(false);
+    expect(first.comesBefore(userId(testUserId(1)))).toBe(false);
     expect(lowerA.comesBefore(upperF)).toBe(true);
     expect(upperF.comesBefore(lowerA)).toBe(false);
   });
 
   // #90: the id leaves only through a delivery to a receiver.
   it('should_have_no_public_value_field_when_the_user_id_leaves_through_a_delivery', () => {
-    const userId = UserId.from(ADA_ID);
+    const id = userId(ADA_ID);
     const receiver = new RecordingReceiver<string>();
 
     // @ts-expect-error -- #90 makes the value private.
-    void userId.value;
+    void id.value;
     // The delivery returns nothing: the receiver holds the id.
-    expect(userId.deliverTo(receiver)).toBeUndefined();
+    expect(id.deliverTo(receiver)).toBeUndefined();
     expect(receiver.received).toEqual([ADA_ID]);
   });
 });
 
 describe('PasswordHash', () => {
-  it('should_reject_password_hash_when_value_is_empty', () => {
-    expect(() => PasswordHash.from('')).toThrow('A PasswordHash needs a value.');
+  // One failure mechanism (decision 11): a failed Result with the code of
+  // the rule, never an exception.
+  it('should_give_the_code_of_the_rule_when_value_is_empty', () => {
+    expect(PasswordHash.from('')).toEqual({ ok: false, error: 'invalid-password-hash' });
   });
 
   it('should_deliver_the_text_to_the_receiver_when_the_factory_took_it', () => {
-    expect(deliveredBy(PasswordHash.from('$hash-one'))).toEqual(['$hash-one']);
+    expect(deliveredBy(passwordHash('$hash-one'))).toEqual(['$hash-one']);
   });
 
   // #90: the text leaves only through a delivery to a receiver.
   it('should_have_no_public_value_field_when_the_hash_leaves_through_a_delivery', () => {
-    const hash = PasswordHash.from('$hash-one');
+    const hash = passwordHash('$hash-one');
     const receiver = new RecordingReceiver<string>();
 
     // @ts-expect-error -- #90 makes the value private.
@@ -279,9 +288,9 @@ describe('credential values equals', () => {
   });
 
   it('should_be_equal_when_two_password_hashes_hold_the_same_text', () => {
-    const hash = PasswordHash.from('$hash-one');
-    const twin = PasswordHash.from('$hash-one');
-    const other = PasswordHash.from('$hash-two');
+    const hash = passwordHash('$hash-one');
+    const twin = passwordHash('$hash-one');
+    const other = passwordHash('$hash-two');
 
     expect(twin).not.toBe(hash);
     expect(hash.equals(twin)).toBe(true);

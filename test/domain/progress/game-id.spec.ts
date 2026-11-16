@@ -1,6 +1,8 @@
 import { GameId } from '../../../src/domain/progress/game-id.js';
-import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
+import { valueOf } from '../../support/result.js';
+
+const gameId = (value: string): GameId => valueOf(GameId.of(value));
 
 describe('GameId', () => {
   it.each(['lines', 'fit', 'sort', 'merge'])(
@@ -8,7 +10,7 @@ describe('GameId', () => {
     (value) => {
       const receiver = new RecordingReceiver<string>();
 
-      GameId.of(value).deliverTo(receiver);
+      gameId(value).deliverTo(receiver);
 
       expect(receiver.received).toEqual([value]);
     },
@@ -18,39 +20,44 @@ describe('GameId', () => {
   it('should_accept_a_new_variant_when_value_is_a_lowercase_slug', () => {
     const receiver = new RecordingReceiver<string>();
 
-    GameId.of('tri-fit2').deliverTo(receiver);
+    gameId('tri-fit2').deliverTo(receiver);
 
     expect(receiver.received).toEqual(['tri-fit2']);
   });
 
+  // One failure mechanism (decision 11): a failed Result with the code of
+  // the rule, never an exception. The border writes the message.
   it.each([undefined, null, '', '  ', 'Lines', 'fit sort', '-fit', 7])(
-    'should_reject_game_id_when_value_is_missing_empty_or_not_a_slug',
+    'should_give_the_code_of_the_rule_when_value_is_missing_empty_or_not_a_slug',
     (value) => {
-      expect(() => GameId.of(value as unknown as string)).toThrow(ProgressError);
+      expect(GameId.of(value as unknown as string)).toEqual({
+        ok: false,
+        error: 'invalid-game-id',
+      });
     },
   );
 
   it('should_be_equal_when_two_game_ids_hold_the_same_value', () => {
-    expect(GameId.of('fit').equals(GameId.of('fit'))).toBe(true);
-    expect(GameId.of('fit').equals(GameId.of('sort'))).toBe(false);
+    expect(gameId('fit').equals(gameId('fit'))).toBe(true);
+    expect(gameId('fit').equals(gameId('sort'))).toBe(false);
   });
 
   // #90: the value leaves only through a delivery to a receiver.
   it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
     const receiver = new RecordingReceiver<string>();
 
-    GameId.of('fit').deliverTo(receiver);
+    gameId('fit').deliverTo(receiver);
 
     expect(receiver.received).toEqual(['fit']);
   });
 
   it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
-    const gameId = GameId.of('fit');
+    const built = gameId('fit');
     const receiver = new RecordingReceiver<string>();
 
     // @ts-expect-error -- #90 makes the value private.
-    void gameId.value;
+    void built.value;
     // The delivery returns nothing: the receiver holds the value.
-    expect(gameId.deliverTo(receiver)).toBeUndefined();
+    expect(built.deliverTo(receiver)).toBeUndefined();
   });
 });
