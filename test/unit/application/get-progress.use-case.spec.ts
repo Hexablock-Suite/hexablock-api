@@ -3,12 +3,13 @@ import { GameId } from '../../../src/domain/progress/game-id.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
+import { syncInstantOf } from '../../support/sync-instants.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
 const ADA = valueOf(UserId.from(testUserId(1)));
 const GRACE = valueOf(UserId.from(testUserId(2)));
-const AT = new Date('2026-11-06T10:00:00.000Z');
+const AT = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
 
 describe('GetProgressUseCase (API-FR-02)', () => {
   let progress: InMemoryProgressRepository;

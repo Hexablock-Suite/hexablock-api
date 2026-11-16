@@ -33,7 +33,7 @@ interface DeliversLevelResult {
 
 // An aggregate that delivers the parts of a progress, such as PlayerProgress.
 interface DeliversProgress {
-  deliverTo(receiver: PlayerProgressReceiver<Date>): void;
+  deliverTo(receiver: PlayerProgressReceiver): void;
 }
 
 // An aggregate that delivers the parts of a user, such as User.
@@ -130,8 +130,9 @@ export function receiveLevelResultOf(source: DeliversLevelResult): LevelResultVa
 }
 
 // A progress delivers its parts in one call. The helper receives the datum of
-// each value object and the four values of each level result. The Date of
-// updatedAt is the new Date that the delivery gives.
+// each value object and the four values of each level result. The SyncInstant
+// of updatedAt delivers its milliseconds, and the helper builds a new Date
+// from them for the row and the JSON body.
 export function receiveProgressOf(source: DeliversProgress): ProgressValues {
   const slot = new Slot<ProgressValues>();
   source.deliverTo({
@@ -140,7 +141,7 @@ export function receiveProgressOf(source: DeliversProgress): ProgressValues {
         userId: receiveValueOf(userId),
         gameId: receiveValueOf(gameId),
         highScore: highScore === null ? null : receiveValueOf(highScore),
-        updatedAt,
+        updatedAt: new Date(receiveValueOf(updatedAt)),
         results: results.map((result) => receiveLevelResultOf(result)),
       });
     },

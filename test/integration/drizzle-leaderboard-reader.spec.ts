@@ -24,6 +24,7 @@ import type { Result } from '../../src/domain/shared/result.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { levelResultOf } from '../support/level-results.js';
 import { storeProgress } from '../support/progress-repository.contract.js';
+import { syncInstantOf } from '../support/sync-instants.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 import { testUserId } from '../support/user-ids.js';
 import { valueOf } from '../support/result.js';
@@ -35,7 +36,7 @@ const FIT = valueOf(GameId.of('fit'));
 const SORT = valueOf(GameId.of('sort'));
 const LINES = valueOf(GameId.of('lines'));
 const MERGE = valueOf(GameId.of('merge'));
-const AT = new Date('2026-11-15T10:00:00.000Z');
+const AT = syncInstantOf(new Date('2026-11-15T10:00:00.000Z'));
 const READER_SOURCE = resolve(
   import.meta.dirname,
   '../../src/adapters/persistence/drizzle-leaderboard-reader.ts',
@@ -106,7 +107,7 @@ async function openDatabase(progresses: readonly Played[]): Promise<TestDatabase
       progress.recordScore(valueOf(Score.of(score)), AT);
     }
     for (const result of results) {
-      progress.recordLevel(result);
+      progress.recordLevel(result, AT);
     }
     await storeProgress(repository, progress);
   }

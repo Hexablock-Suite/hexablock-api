@@ -1,26 +1,25 @@
 import type { Clock } from '../../src/application/ports/clock.js';
+import { SyncInstant } from '../../src/domain/progress/sync-instant.js';
 
 // Contract of the Clock port. The test double and the production adapter
 // run the same cases, so the double promises nothing that the adapter breaks.
+// The port gives a SyncInstant, an immutable value object, so a caller
+// cannot change a reading.
 export function describeClockContract(name: string, createClock: () => Clock): void {
   describe(`Clock contract: ${name}`, () => {
-    it('should_return_a_valid_date_when_now_is_read', () => {
+    it('should_return_a_sync_instant_when_now_is_read', () => {
       const clock = createClock();
 
-      const reading = clock.now();
-
-      expect(reading).toBeInstanceOf(Date);
-      expect(Number.isNaN(reading.getTime())).toBe(false);
+      expect(clock.now()).toBeInstanceOf(SyncInstant);
     });
 
-    it('should_keep_its_next_reading_when_caller_mutates_returned_date', () => {
+    it('should_not_go_back_when_now_is_read_again', () => {
       const clock = createClock();
       const first = clock.now();
-      const firstEpochMs = first.getTime();
 
-      first.setUTCFullYear(1999);
+      const second = clock.now();
 
-      expect(clock.now().getTime()).toBeGreaterThanOrEqual(firstEpochMs);
+      expect(first.isLaterThan(second)).toBe(false);
     });
   });
 }

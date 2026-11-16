@@ -2,6 +2,7 @@ import type { GameId } from '../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import type { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import type { Score } from '../../src/domain/progress/score.js';
+import type { SyncInstant } from '../../src/domain/progress/sync-instant.js';
 import type { BoundsReceiver } from '../../src/domain/shared/bounds-receiver.js';
 import type { ValueReceiver } from '../../src/domain/shared/value-receiver.js';
 import type { PasswordHash } from '../../src/domain/user/password-hash.js';
@@ -56,7 +57,7 @@ export interface ProgressParts {
   readonly userId: UserId;
   readonly gameId: GameId;
   readonly highScore: Score | null;
-  readonly updatedAt: Date;
+  readonly updatedAt: SyncInstant;
   readonly results: readonly LevelResult[];
 }
 
