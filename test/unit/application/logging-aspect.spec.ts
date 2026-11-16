@@ -18,6 +18,7 @@ import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
 import { levelValidators } from '../../support/level-format.js';
+import { syncInstantOf } from '../../support/sync-instants.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
@@ -374,7 +375,7 @@ describe('LoggingAspect', () => {
     const logger = recordingLogger();
     const sync = new SyncProgressUseCase(
       new InMemoryProgressRepository(),
-      new FixedClock(new Date('2026-11-06T10:00:00.000Z')),
+      new FixedClock(syncInstantOf(new Date('2026-11-06T10:00:00.000Z'))),
     );
     const aspect = new LoggingAspect(sync, 'SyncProgress', logger);
 

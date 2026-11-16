@@ -16,6 +16,7 @@ import {
   storeProgress,
 } from '../support/progress-repository.contract.js';
 import { progressPartsOf } from '../support/recording-receiver.js';
+import { syncInstantOf } from '../support/sync-instants.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 import { valueOf } from '../support/result.js';
 
@@ -24,8 +25,11 @@ const ADA_VALUE = CONTRACT_USER_IDS[0];
 const ADA = valueOf(UserId.from(ADA_VALUE));
 const UNKNOWN = valueOf(UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d'));
 const FIT = valueOf(GameId.of('fit'));
-const AT = new Date('2026-11-06T10:00:00.000Z');
-const LATER = new Date('2026-11-06T10:05:00.000Z');
+// Each instant of the domain, and its Date, as the updated_at column keeps it.
+const AT_TIME = new Date('2026-11-06T10:00:00.000Z');
+const LATER_TIME = new Date('2026-11-06T10:05:00.000Z');
+const AT = syncInstantOf(AT_TIME);
+const LATER = syncInstantOf(LATER_TIME);
 
 const openDatabases: TestDatabase[] = [];
 
@@ -161,7 +165,7 @@ describe('DrizzleProgressRepository', () => {
     expect(await countRows(database, 'progress')).toBe(1);
     const found = await repository.find(ADA, FIT);
     expect(progressPartsOf(found)?.highScore?.equals(valueOf(Score.of(300)))).toBe(true);
-    expect(progressPartsOf(found)?.updatedAt.toISOString()).toBe(LATER.toISOString());
+    expect(progressPartsOf(found)?.updatedAt).toEqual(LATER);
   });
 
   // The advisory lock makes the second sync read what the first one saved,
@@ -193,8 +197,8 @@ describe('DrizzleProgressRepository', () => {
     const progress = PlayerProgress.start(ADA, FIT, AT);
     const first = level('fit-01', 3, 9, 41_250);
     const second = level('fit-02', 1, 30, 3_000_000_000);
-    progress.recordLevel(first);
-    progress.recordLevel(second);
+    progress.recordLevel(first, AT);
+    progress.recordLevel(second, AT);
 
     await storeProgress(repository, progress);
     const found = await repository.find(ADA, FIT);
@@ -208,12 +212,12 @@ describe('DrizzleProgressRepository', () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
     const progress = PlayerProgress.start(ADA, FIT, AT);
-    progress.recordLevel(level('fit-01', 1, 20, 60_000));
+    progress.recordLevel(level('fit-01', 1, 20, 60_000), AT);
     await storeProgress(repository, progress);
     const retry = level('fit-01', 3, 9, 30_000);
 
-    progress.recordLevel(retry);
-    progress.recordLevel(level('fit-02', 2, 12, 45_000));
+    progress.recordLevel(retry, AT);
+    progress.recordLevel(level('fit-02', 2, 12, 45_000), AT);
     await storeProgress(repository, progress);
 
     expect(progressPartsOf(await repository.find(ADA, FIT))?.results).toEqual(
@@ -227,7 +231,7 @@ describe('DrizzleProgressRepository', () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
     const progress = PlayerProgress.start(UNKNOWN, FIT, AT);
-    progress.recordLevel(level('fit-01', 3, 9, 1_000));
+    progress.recordLevel(level('fit-01', 3, 9, 1_000), AT);
 
     // Postgres code 23503 is foreign_key_violation.
     await expect(storeProgress(repository, progress)).rejects.toMatchObject({
@@ -243,7 +247,7 @@ describe('DrizzleProgressRepository', () => {
   // row must pass the domain rules. A stored value that breaks its rule is a
   // server fault, so the mapper throws an Error with the code of the rule.
   it('should_throw_a_server_fault_with_the_code_of_the_rule_when_a_stored_game_id_is_not_a_slug', () => {
-    const row = { userId: ADA_VALUE, gameId: 'Hexa Lines', highScore: null, updatedAt: AT };
+    const row = { userId: ADA_VALUE, gameId: 'Hexa Lines', highScore: null, updatedAt: AT_TIME };
 
     expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
       new Error(
@@ -252,11 +256,28 @@ describe('DrizzleProgressRepository', () => {
     );
   });
 
+  // #97: the updated_at column also keeps the Postgres value 'infinity',
+  // which no SyncInstant holds. The stored instant is a server fault, as the
+  // other stored values are, so find() rejects with the code of the rule.
+  it('should_reject_find_with_the_code_of_the_rule_when_a_stored_updated_at_is_not_a_valid_instant', async () => {
+    const database = await openDatabase();
+    const repository = new DrizzleProgressRepository(database.db);
+    await database.db.execute(
+      sql`insert into progress (user_id, game_id, high_score, updated_at) values (${ADA_VALUE}, 'fit', null, 'infinity')`,
+    );
+
+    await expect(repository.find(ADA, FIT)).rejects.toThrow(
+      new Error(
+        `The progress rows of user ${ADA_VALUE} and game fit break the rule invalid-sync-instant.`,
+      ),
+    );
+  });
+
   // The column has no check constraint: Score checks the stored number again.
   it.each([-1, 2.5, 2 ** 53])(
     'should_throw_a_server_fault_with_the_code_of_the_rule_when_a_stored_high_score_breaks_its_rule',
     (highScore) => {
-      const row = { userId: ADA_VALUE, gameId: 'fit', highScore, updatedAt: AT };
+      const row = { userId: ADA_VALUE, gameId: 'fit', highScore, updatedAt: AT_TIME };
 
       expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
         new Error(
@@ -269,7 +290,7 @@ describe('DrizzleProgressRepository', () => {
   // The level_results columns keep text and numbers.
   it('should_write_level_results_as_text_and_numbers_when_aggregate_becomes_rows', () => {
     const played = PlayerProgress.start(ADA, FIT, AT);
-    played.recordLevel(level('fit-01', 3, 12, 45_000));
+    played.recordLevel(level('fit-01', 3, 12, 45_000), AT);
     const rows = [
       {
         userId: ADA_VALUE,
@@ -282,7 +303,7 @@ describe('DrizzleProgressRepository', () => {
     ];
 
     expect(ProgressRowMapper.toLevelResultRows(played)).toEqual(rows);
-    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT };
+    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT_TIME };
     expect(ProgressRowMapper.toLevelResultRows(ProgressRowMapper.toAggregate(row, rows))).toEqual(
       rows,
     );
@@ -298,7 +319,7 @@ describe('DrizzleProgressRepository', () => {
   ])(
     'should_throw_a_server_fault_with_the_first_broken_rule_when_a_stored_level_result_breaks_a_rule',
     (broken, code) => {
-      const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT };
+      const row = { userId: ADA_VALUE, gameId: 'fit', highScore: null, updatedAt: AT_TIME };
       const stored = {
         userId: ADA_VALUE,
         gameId: 'fit',
@@ -323,12 +344,12 @@ describe('DrizzleProgressRepository', () => {
       userId: ADA_VALUE,
       gameId: 'fit',
       highScore: 120,
-      updatedAt: LATER,
+      updatedAt: LATER_TIME,
     });
     expect(
       ProgressRowMapper.toProgressRow(PlayerProgress.start(ADA, FIT, AT)).highScore,
     ).toBeNull();
-    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: 120, updatedAt: LATER };
+    const row = { userId: ADA_VALUE, gameId: 'fit', highScore: 120, updatedAt: LATER_TIME };
     expect(ProgressRowMapper.toProgressRow(ProgressRowMapper.toAggregate(row, []))).toEqual(row);
   });
 });

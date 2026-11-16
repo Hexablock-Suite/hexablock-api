@@ -77,8 +77,9 @@
           Result. ProgressController gets a SyncProgressRequest from ProgressDtoMapper and calls
           SyncProgressUseCase through the SyncProgress input port. The use case finds the
           PlayerProgress through DrizzleProgressRepository, creates it when it is missing, reads the
-          instant from SystemClock, records the score and each LevelResult, and saves the aggregate.
-          The controller turns the PlayerProgress into a ProgressDto, which is the HTTP response.
+          SyncInstant from SystemClock, records the score and each LevelResult at that instant, and
+          saves the aggregate. The controller turns the PlayerProgress into a ProgressDto, which is
+          the HTTP response.
         </desc>
         <defs>
           <marker
@@ -1003,7 +1004,7 @@
         >
           Clock.now()
         </text>
-        <!-- Reply: at: Date -->
+        <!-- Reply: at: SyncInstant -->
         <line
           x1="1137"
           y1="628"
@@ -1014,7 +1015,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#seq1syncprogress-open)"
         />
-        <rect x="882.5" y="613" width="49" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="867" y="613" width="80" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="907"
           y="622"
@@ -1023,7 +1024,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          at: Date
+          at: SyncInstant
         </text>
         <!-- Message: recordScore(score, at) -->
         <line
@@ -1046,7 +1047,7 @@
         >
           recordScore(score, at)
         </text>
-        <!-- Message: recordLevel(result) -->
+        <!-- Message: recordLevel(result, at) -->
         <line
           x1="677"
           y1="738"
@@ -1056,7 +1057,7 @@
           stroke-width="1"
           marker-end="url(#seq1syncprogress-filled)"
         />
-        <rect x="705.5" y="723" width="103" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="695.5" y="723" width="123" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="757"
           y="732"
@@ -1065,7 +1066,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          recordLevel(result)
+          recordLevel(result, at)
         </text>
         <!-- Message: ProgressRepository.save(progress) -->
         <line

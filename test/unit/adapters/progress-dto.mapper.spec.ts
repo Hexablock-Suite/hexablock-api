@@ -4,6 +4,7 @@ import { PlayerProgress } from '../../../src/domain/progress/player-progress.js'
 import { Score } from '../../../src/domain/progress/score.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
+import { syncInstantOf } from '../../support/sync-instants.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
@@ -132,10 +133,10 @@ describe('ProgressDtoMapper.toGetRequest', () => {
 // The JSON body keeps numbers and strings: the wire format does not change.
 describe('ProgressDtoMapper.toDto', () => {
   it('should_write_plain_numbers_and_strings_when_progress_becomes_a_dto', () => {
-    const at = new Date('2026-11-06T10:00:00.000Z');
+    const at = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
     const progress = PlayerProgress.start(ADA, valueOf(GameId.of('hexa-fit')), at);
     progress.recordScore(valueOf(Score.of(120)), at);
-    progress.recordLevel(levelResultOf(LEVEL));
+    progress.recordLevel(levelResultOf(LEVEL), at);
 
     expect(ProgressDtoMapper.toDto(progress)).toEqual({
       gameId: 'hexa-fit',

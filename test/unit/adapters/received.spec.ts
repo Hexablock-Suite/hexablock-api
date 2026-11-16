@@ -23,6 +23,7 @@ import { Username } from '../../../src/domain/user/username.js';
 import { checkedLevel, levelExample } from '../../support/level-format.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { valueOf } from '../../support/result.js';
+import { syncInstantOf } from '../../support/sync-instants.js';
 
 // The helpers of the border (#90). An adapter needs the value as an
 // expression: a row field, an SQL filter, a lock key or a token claim.
@@ -74,16 +75,20 @@ describe('received values', () => {
   });
 
   // #96: an aggregate delivers its parts in one call. The helper gives the
-  // datum of each value object, as the rows and the JSON body keep it.
+  // datum of each value object, as the rows and the JSON body keep it. #97:
+  // the SyncInstant delivers its milliseconds, and the helper gives a Date.
   it('should_give_the_plain_values_of_the_progress_when_a_progress_delivers_its_parts', () => {
     const at = new Date('2026-11-06T10:05:00.000Z');
     const progress = PlayerProgress.start(
       valueOf(UserId.from('6F1C1D0E-2B7A-4C55-9A51-0D6C7A1E8F01')),
       valueOf(GameId.of('fit')),
-      at,
+      syncInstantOf(at),
     );
-    progress.recordScore(valueOf(Score.of(120)), at);
-    progress.recordLevel(levelResultOf({ levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45 }));
+    progress.recordScore(valueOf(Score.of(120)), syncInstantOf(at));
+    progress.recordLevel(
+      levelResultOf({ levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45 }),
+      syncInstantOf(at),
+    );
 
     expect(receiveProgressOf(progress)).toEqual({
       userId: '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01',
@@ -99,7 +104,7 @@ describe('received values', () => {
     const progress = PlayerProgress.start(
       valueOf(UserId.from('6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01')),
       valueOf(GameId.of('lines')),
-      at,
+      syncInstantOf(at),
     );
 
     expect(receiveProgressOf(progress)).toEqual({
@@ -129,7 +134,7 @@ describe('received values', () => {
   });
 
   it('should_throw_when_the_aggregate_delivers_no_parts', () => {
-    const silentProgress = { deliverTo(_receiver: PlayerProgressReceiver<Date>): void {} };
+    const silentProgress = { deliverTo(_receiver: PlayerProgressReceiver): void {} };
     const silentUser = { deliverTo(_receiver: UserReceiver): void {} };
 
     expect(() => receiveProgressOf(silentProgress)).toThrow('The source delivered no value.');
