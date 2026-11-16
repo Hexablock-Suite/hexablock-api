@@ -53,7 +53,11 @@ describe('Username', () => {
     },
   );
 
-  it.each(['ab', 'a'.repeat(33), 'ada lovelace', 'ada!', ''])(
+  // #100: the lower case of a letter outside ASCII, such as İ or ẞ, can
+  // differ between JavaScript and a database. The pattern rejects every such
+  // letter, so the rows of the UserRepository contract cover only ASCII names.
+  // A wider pattern needs new pairs in that contract.
+  it.each(['ab', 'a'.repeat(33), 'ada lovelace', 'ada!', '', 'İlker', 'STRAẞE'])(
     'should_reject_username_when_length_or_characters_break_the_rule',
     (raw) => {
       expect(Username.create(raw)).toEqual({ ok: false, error: 'invalid-username' });
@@ -73,6 +77,40 @@ describe('Username', () => {
       ]);
     },
   );
+
+  // #100: collidesWith() is the business name of the rule of #62. Two names
+  // collide when they differ at most in letter case. The answer is the same
+  // in both directions.
+  it.each(['ada', 'ADA', 'aDa'])(
+    'should_collide_when_two_usernames_differ_only_in_letter_case',
+    (raw) => {
+      const name = valueOf(Username.create('Ada'));
+      const other = valueOf(Username.create(raw));
+
+      expect(name.collidesWith(other)).toBe(true);
+      expect(other.collidesWith(name)).toBe(true);
+    },
+  );
+
+  it.each(['Adb', 'Ada1', 'grace'])(
+    'should_not_collide_when_two_usernames_differ_in_a_character',
+    (raw) => {
+      const name = valueOf(Username.create('Ada'));
+      const other = valueOf(Username.create(raw));
+
+      expect(name.collidesWith(other)).toBe(false);
+      expect(other.collidesWith(name)).toBe(false);
+    },
+  );
+
+  it('should_collide_when_a_username_is_compared_with_itself_or_its_twin', () => {
+    const name = valueOf(Username.create('Ada'));
+    const twin = valueOf(Username.create('Ada'));
+
+    expect(name.collidesWith(name)).toBe(true);
+    expect(name.collidesWith(twin)).toBe(true);
+    expect(twin.collidesWith(name)).toBe(true);
+  });
 
   // #90: the name and its key leave only through a delivery to a receiver.
   it('should_have_no_public_value_or_key_field_when_both_leave_through_a_delivery', () => {
