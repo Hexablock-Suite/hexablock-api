@@ -22,3 +22,6 @@ export interface LeaderboardReader {
   // each player of the game who completed at least one level (S3-03).
   standings(gameId: GameId): Promise<LeaderboardEntry<Standing>[]>;
 }
+
+// Nest injection token for the LeaderboardReader port.
+export const LEADERBOARD_READER = Symbol('LeaderboardReader');
