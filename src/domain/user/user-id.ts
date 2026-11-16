@@ -30,4 +30,11 @@ export class UserId {
   equals(other: UserId): boolean {
     return this.value === other.value;
   }
+
+  // Tells if this id comes first in one fixed order of the ids: the order of
+  // their lower case text. A leaderboard lists its full ties in this order,
+  // so equal entries always come out in the same order (decision of #83).
+  comesBefore(other: UserId): boolean {
+    return this.value < other.value;
+  }
 }
