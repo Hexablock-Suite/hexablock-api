@@ -75,7 +75,7 @@
           value object. The LevelValidators domain service holds one LevelValidator strategy per
           gameId in a list of entries, finds it with GameId.equals() and creates each level.
           FitLevelValidator and SortLevelValidator implement the LevelValidator interface and pick
-          their section type.
+          their section type. SortLevelValidator only picks SortSection, which holds its rules.
         </desc>
         <defs>
           <marker
@@ -191,6 +191,14 @@
           stroke-dasharray="5,4"
           marker-end="url(#domain2levels-triangle)"
         />
+        <!-- SortLevelValidator picks SortSection: it calls SortSection.of(), so a use with a verb -->
+        <path
+          d="M892 572 L892 736 Q892 744 884 744 L320 744"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain2levels-open)"
+        />
         <!-- Arrow labels and multiplicities -->
         <rect x="188" y="359" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
@@ -227,6 +235,18 @@
           letter-spacing="0.06em"
         >
           CREATES
+        </text>
+        <rect x="582" y="729" width="36" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="600"
+          y="738"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          PICKS
         </text>
         <rect x="784" y="259" width="72" height="12" rx="2" fill="#f9f4dc" />
         <text
@@ -758,14 +778,14 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-04 · #78
+          API-FR-04 · DS-6
         </text>
         <line x1="784" y1="516" x2="1000" y2="516" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="800" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + sectionOf(raw: unknown,
         </text>
         <text x="822" y="548" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          topology: TopologyId):
+          _topology: TopologyId):
         </text>
         <text
           textLength="172"
@@ -869,8 +889,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          SortLevelValidator (#78) and FitLevelValidator (#79), with the A5 check, are planned.
-          docs/level-format.md gives the shared level format.
+          FitLevelValidator (#79), with the A5 check, is planned. docs/level-format.md gives the
+          shared level format.
         </text>
         <!-- Legend -->
         <line x1="24" y1="936" x2="1016" y2="936" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
