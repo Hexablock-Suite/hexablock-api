@@ -1,9 +1,11 @@
 import type { INestApplication, Type } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { App } from 'supertest/types.js';
+import { DrizzleLeaderboardReader } from '../../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleProgressRepository } from '../../../src/adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../../../src/adapters/persistence/drizzle-user-repository.js';
 import { CLOCK, type Clock } from '../../../src/application/ports/clock.js';
+import { LEADERBOARD_READER } from '../../../src/application/ports/leaderboard-reader.js';
 import { PROGRESS_REPOSITORY } from '../../../src/application/ports/progress-repository.js';
 import { USER_REPOSITORY } from '../../../src/application/ports/user-repository.js';
 import { AppModule } from '../../../src/infrastructure/app.module.js';
@@ -14,7 +16,7 @@ import { createTestDatabase, type TestDatabase } from '../test-database.js';
 export { TEST_JWT_SECRET };
 
 // The pool connects only on the first query. The tests replace the user and
-// progress repositories, so no query reaches this URL.
+// progress repositories and the leaderboard reader, so no query reaches this URL.
 const UNUSED_DATABASE_URL = 'postgres://test:test@127.0.0.1:1/unused';
 
 // Sets the configuration that AppModule reads. Call vi.unstubAllEnvs() after the test.
@@ -35,8 +37,8 @@ export interface TestAppOptions {
 }
 
 // Starts AppModule with the test configuration. The user and progress
-// repositories run on the in-memory PGlite database, so a test can read the
-// stored rows.
+// repositories and the leaderboard reader run on the in-memory PGlite
+// database, so a test can read the stored rows.
 export async function createTestApp(
   controllers: Type<unknown>[] = [],
   options: TestAppOptions = {},
@@ -47,7 +49,9 @@ export async function createTestApp(
     .overrideProvider(USER_REPOSITORY)
     .useValue(new DrizzleUserRepository(database.db))
     .overrideProvider(PROGRESS_REPOSITORY)
-    .useValue(new DrizzleProgressRepository(database.db));
+    .useValue(new DrizzleProgressRepository(database.db))
+    .overrideProvider(LEADERBOARD_READER)
+    .useValue(new DrizzleLeaderboardReader(database.db));
   if (options.clock !== undefined) {
     builder = builder.overrideProvider(CLOCK).useValue(options.clock);
   }
