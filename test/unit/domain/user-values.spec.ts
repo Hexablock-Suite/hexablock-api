@@ -1,11 +1,14 @@
 import { inspect } from 'node:util';
 import type { Result } from '../../../src/domain/shared/result.js';
+import type { Range } from '../../../src/domain/shared/range.js';
+import type { CharacterCount } from '../../../src/domain/user/character-count.js';
 import * as passwordModule from '../../../src/domain/user/password.js';
 import { PASSWORD_LENGTH, Password } from '../../../src/domain/user/password.js';
 import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { USERNAME_LENGTH, USERNAME_PATTERN, Username } from '../../../src/domain/user/username.js';
+import * as usernameModule from '../../../src/domain/user/username.js';
+import { USERNAME_LENGTH, Username } from '../../../src/domain/user/username.js';
 import {
   boundsDeliveredBy,
   deliveredBy,
@@ -22,16 +25,21 @@ const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
 const userId = (value: string): UserId => valueOf(UserId.from(value));
 const passwordHash = (value: string): PasswordHash => valueOf(PasswordHash.from(value));
 
+// The numbers of the two CharacterCount bounds that a credential range delivers.
+const boundValuesOf = (range: Range<CharacterCount>): number[] =>
+  boundsDeliveredBy(range).flatMap(([min, max]) => [...deliveredBy(min), ...deliveredBy(max)]);
+
+// #99: each limit is a Range<CharacterCount>, so no Range<number> stays in the domain.
 describe('credential limits', () => {
   it('should_export_username_and_password_ranges_when_domain_sets_the_limits', () => {
-    expect(boundsDeliveredBy(USERNAME_LENGTH)).toEqual([[3, 32]]);
-    expect(boundsDeliveredBy(PASSWORD_LENGTH)).toEqual([[8, 128]]);
+    expect(boundValuesOf(USERNAME_LENGTH)).toEqual([3, 32]);
+    expect(boundValuesOf(PASSWORD_LENGTH)).toEqual([8, 128]);
   });
 
-  // The pattern and the range come from the same two limits, so the OpenAPI
-  // schema keeps the text that it had before #90.
-  it('should_keep_the_username_pattern_when_the_limits_build_it', () => {
-    expect(USERNAME_PATTERN).toBe('^[A-Za-z0-9._-]{3,32}$');
+  // The OpenAPI pattern of a username moved to the HTTP adapter (#99), so
+  // the module exports no string.
+  it('should_export_no_primitive_when_the_username_module_lists_its_exports', () => {
+    expect(Object.keys(usernameModule).sort()).toEqual(['USERNAME_LENGTH', 'Username']);
   });
 });
 

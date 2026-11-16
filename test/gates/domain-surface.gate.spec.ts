@@ -83,8 +83,8 @@ describe('domain surface gate', () => {
     });
 
     it('should_report_each_constant_when_a_module_exports_a_string_constant', () => {
-      // A template, a literal, a declared string and a Range<number> from a
-      // call. A constant that the module does not export passes.
+      // A template, a literal, a declared string and a list of numbers from
+      // a call. A constant that the module does not export passes.
       expect(sitesIn('exported-constant.ts')).toEqual([
         'NAME_PATTERN constant',
         'GREETING constant',

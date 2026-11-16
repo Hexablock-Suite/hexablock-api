@@ -1,18 +1,16 @@
-import type { Range } from '../../../src/domain/shared/range.js';
-
 // Wrong example: a number in three public return types. A private field may
 // hold a number.
 export class Counter {
   private constructor(
     private readonly total: number,
-    private readonly limits: Range<number>,
+    private readonly limits: ReadonlySet<number>,
   ) {}
 
   count(): number {
     return this.total;
   }
 
-  limitsOf(): Range<number> {
+  limitsOf(): ReadonlySet<number> {
     return this.limits;
   }
 }
