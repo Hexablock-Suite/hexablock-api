@@ -61,9 +61,9 @@
   <body>
     <div class="frame">
       <p class="eyebrow">Class diagram · Part 1 · View 1 of 5</p>
-      <h1>Progress: one aggregate per user and gameId, with its level results</h1>
+      <h1>Progress: one aggregate per user and gameId, and the values that rank a leaderboard</h1>
       <svg
-        viewBox="0 0 1040 862"
+        viewBox="0 0 1040 1086"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain1progress-title domain1progress-desc"
@@ -72,13 +72,15 @@
           HexaBlock API progress entities · UML class diagram
         </title>
         <desc id="domain1progress-desc">
-          Class diagram of layer 1 showing PlayerProgress, the aggregate root keyed by userId and
-          gameId, which refers to the User aggregate root by userId, holds a GameId, keeps its high
-          score as a Score value object, gives a copy of its state through snapshot() and keeps its
-          LevelResult values, each one a LevelId, a Stars, a Moves and an ElapsedTime value object
-          with the isBetterThan order of DS-4, and the LeaderboardEntry read model that holds a
-          LevelResult. View 4 details the four value objects. GameId, Score and UserId keep their
-          value private and deliver it to a receiver with deliverTo().
+          Class diagram of layers 2 and 1. In layer 1, PlayerProgress, the aggregate root keyed by
+          userId and gameId, holds a UserId and a GameId, keeps its high score as a Score value
+          object, gives a copy of its state through snapshot() and keeps its LevelResult values,
+          each one with the isBetterThan order of DS-4. The Standing value object holds the totals
+          of a player in one game, a Stars, a LevelsCompleted, a Moves and an ElapsedTime, and the
+          isBetterThan order of S3-03. In layer 2, the LeaderboardEntry response type names the
+          player by UserId and holds the value that ranks the player: a LevelResult, a Score or a
+          Standing. GameId, Score and UserId keep their value private and deliver it to a receiver
+          with deliverTo().
         </desc>
         <defs>
           <marker
@@ -110,7 +112,17 @@
           x="24"
           y="24"
           width="992"
-          height="620"
+          height="160"
+          rx="8"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="24"
+          y="200"
+          width="992"
+          height="628"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -119,9 +131,9 @@
         <!-- Pattern and group frames -->
         <rect
           x="376"
-          y="64"
+          y="236"
           width="328"
-          height="572"
+          height="576"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -130,7 +142,7 @@
         />
         <text
           x="388"
-          y="80"
+          y="252"
           fill="#5b6873"
           font-size="8"
           font-weight="500"
@@ -140,47 +152,29 @@
           PROGRESS · DS-5 · §5.2.2
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- PlayerProgress holds gameId: GameId: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
-        <line
-          x1="680"
-          y1="128"
-          x2="776"
-          y2="128"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#domain1progress-open)"
-        />
-        <!-- PlayerProgress holds levelResults: LevelResult[]: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <!-- PlayerProgress holds levelResults: LevelResult[]: use with role and multiplicity, no diamond, because LevelResult is a value object (decision 13) -->
         <line
           x1="540"
-          y1="388"
+          y1="504"
           x2="540"
-          y2="424"
+          y2="468"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
-        <!-- LeaderboardEntry holds result: LevelResult | null on a per-level board: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
+        <!-- PlayerProgress holds gameId: GameId: use with role and multiplicity -->
         <line
-          x1="776"
-          y1="520"
-          x2="680"
-          y2="520"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#domain1progress-open)"
-        />
-        <!-- User holds id: UserId: use with role and multiplicity -->
-        <path
-          d="M176 328 L176 376"
-          fill="none"
+          x1="400"
+          y1="700"
+          x2="288"
+          y2="700"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
         <!-- PlayerProgress holds userId: UserId: use with role and multiplicity -->
         <path
-          d="M400 348 L356 348 L356 400 L288 400"
+          d="M400 560 L356 560 L356 376 L288 376"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -188,53 +182,51 @@
         />
         <!-- PlayerProgress holds best: Score | null: use with role and multiplicity -->
         <path
-          d="M680 328 L760 328"
+          d="M680 668 L744 668"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain1progress-open)"
+        />
+        <!-- LeaderboardEntry holds userId: UserId across layers: use with role and multiplicity -->
+        <path
+          d="M400 140 L176 140 L176 248"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain1progress-open)"
+        />
+        <!-- LeaderboardEntry<LevelResult> holds result on the board of a level: use with role and multiplicity -->
+        <line
+          x1="540"
+          y1="164"
+          x2="540"
+          y2="264"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain1progress-open)"
+        />
+        <!-- LeaderboardEntry<Standing> holds result on the global board of Fit and Sort: use with role and multiplicity -->
+        <path
+          d="M680 100 L868 100 L868 248"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain1progress-open)"
+        />
+        <!-- LeaderboardEntry<Score> holds result on the global board of Lines and Merge: use with role and multiplicity -->
+        <path
+          d="M680 132 L724 132 L724 572 L744 572"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
         <!-- Arrow labels and multiplicities -->
-        <rect x="714" y="310" width="36" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="732"
-          y="319"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          best
-        </text>
-        <rect x="716" y="334" width="32" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="732"
-          y="343"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          0..1
-        </text>
-        <rect x="714" y="110" width="56" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="742"
-          y="119"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          gameId 1
-        </text>
-        <rect x="546" y="400" width="72" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="546" y="480" width="72" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="582"
-          y="409"
+          y="489"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -243,10 +235,10 @@
         >
           levelResults
         </text>
-        <rect x="502" y="400" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="502" y="480" width="32" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="518"
-          y="409"
+          y="489"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -255,46 +247,22 @@
         >
           0..*
         </text>
-        <rect x="714" y="502" width="44" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="316" y="682" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="736"
-          y="511"
+          x="344"
+          y="691"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          result
+          gameId 1
         </text>
-        <rect x="714" y="526" width="32" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="730"
-          y="535"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          0..1
-        </text>
-        <rect x="182" y="346" width="32" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="198"
-          y="355"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          id 1
-        </text>
-        <rect x="294" y="382" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="294" y="358" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="322"
-          y="391"
+          y="367"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -303,11 +271,95 @@
         >
           userId 1
         </text>
+        <rect x="694" y="650" width="36" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="712"
+          y="659"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          best
+        </text>
+        <rect x="696" y="674" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="712"
+          y="683"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          0..1
+        </text>
+        <rect x="240" y="122" width="56" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="268"
+          y="131"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          userId 1
+        </text>
+        <rect x="546" y="210" width="52" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="572"
+          y="219"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          result 1
+        </text>
+        <rect x="764" y="82" width="52" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="790"
+          y="91"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          result 1
+        </text>
+        <rect x="730" y="526" width="52" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="756"
+          y="535"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          result 1
+        </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
-        <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="35" width="296" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
           y="44"
+          fill="#7e22ce"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.18em"
+        >
+          LAYER 2 · USE CASES · src/application/ports/
+        </text>
+        <rect x="36" y="211" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="40"
+          y="220"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -316,110 +368,39 @@
         >
           LAYER 1 · ENTITIES · src/domain/
         </text>
-        <!-- Class: User («entity» «aggregate root») -->
+        <!-- Class: LeaderboardEntry (response type of layer 2, no tactical stereotype) -->
         <rect
-          x="64"
-          y="88"
-          width="224"
-          height="240"
+          x="400"
+          y="64"
+          width="280"
+          height="100"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="176"
-          y="106"
+          x="540"
+          y="82"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «entity» «aggregate root»
+          «interface»
         </text>
         <text
-          x="176"
-          y="124"
+          x="540"
+          y="100"
           fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          User
+          LeaderboardEntry
         </text>
-        <line x1="64" y1="136" x2="288" y2="136" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="152" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - id: UserId
-        </text>
-        <text x="80" y="168" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - username: Username
-        </text>
-        <text x="80" y="184" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - passwordHash: PasswordHash
-        </text>
-        <line x1="64" y1="192" x2="288" y2="192" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          textLength="202"
-          lengthAdjust="spacingAndGlyphs"
-          text-decoration="underline"
-          x="80"
-          y="208"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + register(id: UserId, username: Username,
-        </text>
-        <text
-          text-decoration="underline"
-          x="102"
-          y="224"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          hash: PasswordHash): User
-        </text>
-        <text
-          text-decoration="underline"
-          x="80"
-          y="240"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + restore(state: UserState): User
-        </text>
-        <text x="80" y="256" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: User): boolean
-        </text>
-        <text x="80" y="272" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + snapshot(): UserState
-        </text>
-        <text x="80" y="288" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + passwordMatches(typed: string,
-        </text>
-        <text x="102" y="304" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          verifier: PasswordVerifier):
-        </text>
-        <text x="102" y="320" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;boolean&gt;
-        </text>
-        <!-- Class: PlayerProgress (focal, «entity») -->
-        <rect
-          x="400"
-          y="96"
-          width="280"
-          height="292"
-          rx="6"
-          fill="rgba(15,111,116,0.05)"
-          stroke="#0f6f74"
-          stroke-width="1"
-        />
-        <rect x="400" y="96" width="280" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="400" y="148" width="280" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="540"
           y="114"
@@ -429,104 +410,76 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «entity» «aggregate root»
+          API-FR-03 · response type
         </text>
-        <text
-          x="540"
-          y="132"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          PlayerProgress
+        <line x1="400" y1="124" x2="680" y2="124" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="140" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + userId: UserId {readOnly}
         </text>
+        <text x="416" y="156" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + result: TResult {readOnly}
+        </text>
+        <!-- Class: UserId («value object») -->
+        <rect
+          x="64"
+          y="248"
+          width="224"
+          height="144"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
         <text
-          x="540"
-          y="146"
+          x="176"
+          y="266"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-02 · DS-5
-        </text>
-        <line x1="400" y1="156" x2="680" y2="156" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="416" y="172" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - userId: UserId
-        </text>
-        <text x="416" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - gameId: GameId
-        </text>
-        <line x1="400" y1="196" x2="680" y2="196" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="416" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - best: Score | null
-        </text>
-        <text x="416" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - updatedAtMs: number
-        </text>
-        <text x="416" y="244" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - levelResults: LevelResult[]
-        </text>
-        <line x1="400" y1="252" x2="680" y2="252" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text
-          x="416"
-          y="268"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          + start(userId: UserId, gameId: GameId,
+          «value object»
         </text>
         <text
-          x="438"
+          x="176"
           y="284"
           fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
         >
-          at: Date): PlayerProgress
+          UserId
         </text>
+        <line x1="64" y1="296" x2="288" y2="296" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="312" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - value: string
+        </text>
+        <line x1="64" y1="320" x2="288" y2="320" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
-          x="416"
-          y="300"
+          x="80"
+          y="336"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + restore(state: PlayerProgressState):
+          + from(value: string): UserId
         </text>
-        <text
-          x="438"
-          y="316"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          PlayerProgress
+        <text x="80" y="352" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: UserId): boolean
         </text>
-        <text x="416" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: PlayerProgress): boolean
+        <text x="80" y="368" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
         </text>
-        <text x="416" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + snapshot(): PlayerProgressState
-        </text>
-        <text x="416" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + recordScore(score: Score, at: Date): void
-        </text>
-        <text x="416" y="380" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + recordLevel(result: LevelResult): void
+        <text x="102" y="384" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: LevelResult («value object») -->
         <rect
           x="400"
-          y="424"
+          y="264"
           width="280"
           height="204"
           rx="6"
@@ -536,151 +489,6 @@
         />
         <text
           x="540"
-          y="442"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «value object»
-        </text>
-        <text
-          x="540"
-          y="460"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          LevelResult
-        </text>
-        <text
-          x="540"
-          y="474"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          API-FR-03 · DS-5
-        </text>
-        <line x1="400" y1="484" x2="680" y2="484" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="416" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + levelId: LevelId
-        </text>
-        <text x="416" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + stars: Stars
-        </text>
-        <text x="416" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + moves: Moves
-        </text>
-        <text x="416" y="548" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + elapsedTime: ElapsedTime
-        </text>
-        <line x1="400" y1="556" x2="680" y2="556" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          textLength="258"
-          lengthAdjust="spacingAndGlyphs"
-          x="416"
-          y="572"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          + of(values: LevelResultValues): LevelResult
-        </text>
-        <text x="416" y="588" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: LevelResult): boolean
-        </text>
-        <text
-          textLength="258"
-          lengthAdjust="spacingAndGlyphs"
-          x="416"
-          y="604"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + isForSameLevelAs(other: LevelResult): boolean
-        </text>
-        <text x="416" y="620" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + isBetterThan(other: LevelResult): boolean
-        </text>
-        <!-- Class: GameId («value object») -->
-        <rect
-          x="776"
-          y="96"
-          width="216"
-          height="144"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="884"
-          y="114"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «value object»
-        </text>
-        <text
-          x="884"
-          y="132"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          GameId
-        </text>
-        <line x1="776" y1="144" x2="992" y2="144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="792" y="160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - value: string
-        </text>
-        <line x1="776" y1="168" x2="992" y2="168" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          x="792"
-          y="184"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          + of(value: string): GameId
-        </text>
-        <text x="792" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: GameId): boolean
-        </text>
-        <text x="792" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + deliverTo(receiver:
-        </text>
-        <text x="814" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          ValueReceiver&lt;string&gt;): void
-        </text>
-
-        <!-- Class: Score («value object») -->
-        <rect
-          x="760"
-          y="264"
-          width="232"
-          height="160"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="876"
           y="282"
           fill="#5b6873"
           font-size="8"
@@ -691,8 +499,329 @@
           «value object»
         </text>
         <text
-          x="876"
+          x="540"
           y="300"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelResult
+        </text>
+        <text
+          x="540"
+          y="314"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · DS-5 · order: DS-4
+        </text>
+        <line x1="400" y1="324" x2="680" y2="324" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="340" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + levelId: LevelId
+        </text>
+        <text x="416" y="356" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + stars: Stars
+        </text>
+        <text x="416" y="372" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + moves: Moves
+        </text>
+        <text x="416" y="388" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + elapsedTime: ElapsedTime
+        </text>
+        <line x1="400" y1="396" x2="680" y2="396" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          textLength="258"
+          lengthAdjust="spacingAndGlyphs"
+          x="416"
+          y="412"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(values: LevelResultValues): LevelResult
+        </text>
+        <text x="416" y="428" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: LevelResult): boolean
+        </text>
+        <text
+          textLength="258"
+          lengthAdjust="spacingAndGlyphs"
+          x="416"
+          y="444"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + isForSameLevelAs(other: LevelResult): boolean
+        </text>
+        <text x="416" y="460" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isBetterThan(other: LevelResult): boolean
+        </text>
+        <!-- Class: Standing («value object») -->
+        <rect
+          x="744"
+          y="248"
+          width="248"
+          height="268"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="868"
+          y="266"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="868"
+          y="284"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Standing
+        </text>
+        <text
+          x="868"
+          y="298"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · order: S3-03
+        </text>
+        <line x1="744" y1="308" x2="992" y2="308" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="760" y="324" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - stars: Stars
+        </text>
+        <text x="760" y="340" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - levelsCompleted: LevelsCompleted
+        </text>
+        <text x="760" y="356" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - moves: Moves
+        </text>
+        <text x="760" y="372" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - elapsedTime: ElapsedTime
+        </text>
+        <line x1="744" y1="380" x2="992" y2="380" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="760"
+          y="396"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + of(stars: Stars, levelsCompleted:
+        </text>
+        <text
+          x="782"
+          y="412"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          LevelsCompleted, moves: Moves,
+        </text>
+        <text
+          x="782"
+          y="428"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          elapsedTime: ElapsedTime):
+        </text>
+        <text
+          x="782"
+          y="444"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;Standing, StandingProblem&gt;
+        </text>
+        <text x="760" y="460" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: Standing): boolean
+        </text>
+        <text
+          textLength="216"
+          lengthAdjust="spacingAndGlyphs"
+          x="760"
+          y="476"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + isBetterThan(other: Standing): boolean
+        </text>
+        <text x="760" y="492" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="782" y="508" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          StandingReceiver): void
+        </text>
+        <!-- Class: PlayerProgress (focal, «entity» «aggregate root») -->
+        <rect
+          x="400"
+          y="504"
+          width="280"
+          height="292"
+          rx="6"
+          fill="rgba(15,111,116,0.05)"
+          stroke="#0f6f74"
+          stroke-width="1"
+        />
+        <rect x="400" y="504" width="280" height="60" rx="6" fill="rgba(15,111,116,0.10)" />
+        <rect x="400" y="556" width="280" height="8" fill="rgba(15,111,116,0.10)" />
+        <text
+          x="540"
+          y="522"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «entity» «aggregate root»
+        </text>
+        <text
+          x="540"
+          y="540"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PlayerProgress
+        </text>
+        <text
+          x="540"
+          y="554"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-02 · DS-5
+        </text>
+        <line x1="400" y1="564" x2="680" y2="564" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - userId: UserId
+        </text>
+        <text x="416" y="596" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - gameId: GameId
+        </text>
+        <line x1="400" y1="604" x2="680" y2="604" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text x="416" y="620" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - best: Score | null
+        </text>
+        <text x="416" y="636" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - updatedAtMs: number
+        </text>
+        <text x="416" y="652" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - levelResults: LevelResult[]
+        </text>
+        <line x1="400" y1="660" x2="680" y2="660" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
+        <text
+          x="416"
+          y="676"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + start(userId: UserId, gameId: GameId,
+        </text>
+        <text
+          x="438"
+          y="692"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          at: Date): PlayerProgress
+        </text>
+        <text
+          x="416"
+          y="708"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + restore(state: PlayerProgressState):
+        </text>
+        <text
+          x="438"
+          y="724"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          PlayerProgress
+        </text>
+        <text x="416" y="740" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: PlayerProgress): boolean
+        </text>
+        <text x="416" y="756" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + snapshot(): PlayerProgressState
+        </text>
+        <text x="416" y="772" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + recordScore(score: Score, at: Date): void
+        </text>
+        <text x="416" y="788" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + recordLevel(result: LevelResult): void
+        </text>
+        <!-- Class: Score («value object») -->
+        <rect
+          x="744"
+          y="548"
+          width="248"
+          height="160"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="868"
+          y="566"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="868"
+          y="584"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -701,14 +830,14 @@
         >
           Score
         </text>
-        <line x1="760" y1="312" x2="992" y2="312" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="776" y="328" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="744" y1="596" x2="992" y2="596" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="760" y="612" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - value: number
         </text>
-        <line x1="760" y1="336" x2="992" y2="336" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="744" y1="620" x2="992" y2="620" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
-          x="776"
-          y="352"
+          x="760"
+          y="636"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -716,88 +845,30 @@
         >
           + of(value: number): Score
         </text>
-        <text x="776" y="368" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="760" y="652" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Score): boolean
         </text>
         <text
           textLength="210"
           lengthAdjust="spacingAndGlyphs"
-          x="776"
-          y="384"
+          x="760"
+          y="668"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           + isHigherThan(other: Score): boolean
         </text>
-        <text x="776" y="400" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="760" y="684" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="798" y="416" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="782" y="700" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;number&gt;): void
         </text>
-
-        <!-- Class: LeaderboardEntry («read model») -->
-        <rect
-          x="776"
-          y="448"
-          width="216"
-          height="132"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="884"
-          y="466"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «read model»
-        </text>
-        <text
-          x="884"
-          y="484"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          LeaderboardEntry
-        </text>
-        <text
-          x="884"
-          y="498"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          API-FR-03 · order: DS-4
-        </text>
-        <line x1="776" y1="508" x2="992" y2="508" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="792" y="524" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + position: number
-        </text>
-        <text x="792" y="540" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + username: string
-        </text>
-        <text x="792" y="556" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + highScore: number | null
-        </text>
-        <text x="792" y="572" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + result: LevelResult | null
-        </text>
-        <!-- Class: UserId («value object») -->
+        <!-- Class: GameId («value object») -->
         <rect
           x="64"
-          y="376"
+          y="628"
           width="224"
           height="144"
           rx="6"
@@ -807,7 +878,7 @@
         />
         <text
           x="176"
-          y="394"
+          y="646"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -818,43 +889,65 @@
         </text>
         <text
           x="176"
-          y="412"
+          y="664"
           fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          UserId
+          GameId
         </text>
-        <line x1="64" y1="424" x2="288" y2="424" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="440" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="676" x2="288" y2="676" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="692" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - value: string
         </text>
-        <line x1="64" y1="448" x2="288" y2="448" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="64" y1="700" x2="288" y2="700" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="80"
-          y="464"
+          y="716"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + from(value: string): UserId
+          + of(value: string): GameId
         </text>
-        <text x="80" y="480" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: UserId): boolean
+        <text x="80" y="732" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: GameId): boolean
         </text>
-        <text x="80" y="496" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="748" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="512" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
+        </text>
+        <!-- UML template box: the type parameter on the top-right corner -->
+        <rect
+          x="616"
+          y="55"
+          width="72"
+          height="18"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="652"
+          y="67"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+        >
+          TResult
         </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="660"
+          y="852"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -864,7 +957,7 @@
         </text>
         <text
           x="24"
-          y="676"
+          y="868"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -874,7 +967,7 @@
         </text>
         <text
           x="24"
-          y="692"
+          y="884"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -885,17 +978,17 @@
         </text>
         <text
           x="24"
-          y="708"
+          y="900"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          PlayerProgress refers to User by id: it holds a UserId, not a User. This is an assumption
-          for team review. View 3 details the values of User, and view 4 the values of LevelResult.
+          PlayerProgress refers to User by id: it holds a UserId, not a User. View 3 draws User and
+          its values, and view 4 draws the values of LevelResult.
         </text>
         <text
           x="24"
-          y="724"
+          y="916"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -906,7 +999,7 @@
         </text>
         <text
           x="24"
-          y="740"
+          y="932"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -916,19 +1009,46 @@
         </text>
         <text
           x="24"
-          y="756"
+          y="948"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          User is an aggregate root too (decision 16): it has no public field, snapshot() gives a
-          UserState, and passwordMatches() asks a PasswordVerifier. View 3 draws both.
+          Standing holds the totals of a player in one game. isBetterThan() ranks more stars, then
+          more levels completed, then fewer moves, then less time (S3-03).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="780" x2="1016" y2="780" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="798"
+          y="964"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LeaderboardEntry is a response type of layer 2 with no rule of its own. TResult is
+          LevelResult on a level board, Score for Lines and Merge, and Standing for Fit and Sort.
+        </text>
+        <text
+          x="24"
+          y="980"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LeaderboardReader only filters and sums. GetLeaderboardUseCase orders the entries with
+          these comparisons of the domain (decision 2).
+        </text>
+        <!-- Legend -->
+        <line
+          x1="24"
+          y1="1004"
+          x2="1016"
+          y2="1004"
+          stroke="rgba(23,33,42,0.10)"
+          stroke-width="0.8"
+        />
+        <text
+          x="24"
+          y="1022"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -938,16 +1058,16 @@
         </text>
         <line
           x1="24"
-          y1="816"
+          y1="1040"
           x2="52"
-          y2="816"
+          y2="1040"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
         <text
           x="60"
-          y="820"
+          y="1044"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -956,17 +1076,26 @@
         </text>
         <text
           x="299"
-          y="820"
+          y="1044"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Underlined member · static
         </text>
-
         <rect
           x="24"
-          y="836"
+          y="1060"
+          width="20"
+          height="12"
+          rx="2"
+          fill="#efe7f8"
+          stroke="rgba(126,34,206,0.40)"
+          stroke-width="1"
+        />
+        <rect
+          x="48"
+          y="1060"
           width="20"
           height="12"
           rx="2"
@@ -975,17 +1104,17 @@
           stroke-width="1"
         />
         <text
-          x="56"
-          y="845"
+          x="80"
+          y="1069"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Zone · Clean layer
+          Zones · Clean layers, outer on top
         </text>
         <rect
-          x="166"
-          y="836"
+          x="240"
+          y="1060"
           width="28"
           height="12"
           rx="2"
@@ -995,8 +1124,8 @@
           stroke-dasharray="4,4"
         />
         <text
-          x="202"
-          y="845"
+          x="276"
+          y="1069"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1004,8 +1133,8 @@
           Dashed frame · pattern or group
         </text>
         <rect
-          x="372"
-          y="836"
+          x="446"
+          y="1060"
           width="28"
           height="12"
           rx="2"
@@ -1014,13 +1143,33 @@
           stroke-width="1"
         />
         <text
-          x="408"
-          y="845"
+          x="482"
+          y="1069"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
+        </text>
+        <rect
+          x="592"
+          y="1060"
+          width="28"
+          height="12"
+          rx="2"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="0.8"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="628"
+          y="1069"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Corner box · type parameters
         </text>
       </svg>
     </div>

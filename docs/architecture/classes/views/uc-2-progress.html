@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 2 of 4</p>
       <h1>Progress and leaderboard: use cases over output ports</h1>
       <svg
-        viewBox="0 0 1040 806"
+        viewBox="0 0 1040 822"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc2progress-title uc2progress-desc"
@@ -72,7 +72,8 @@
         <desc id="uc2progress-desc">
           Class diagram of layer 2 showing SyncProgressUseCase, which holds the ProgressRepository
           port for the whole progress aggregate and the Clock port, and GetLeaderboardUseCase, which
-          holds the LeaderboardReader port, which ranks by the order of DS-4.
+          holds the LeaderboardReader port. The reader only filters and sums, and the use case
+          orders the entries with the comparisons of the domain.
         </desc>
         <defs>
           <marker
@@ -472,9 +473,9 @@
         <!-- Class: LeaderboardReader («interface» «port») -->
         <rect
           x="568"
-          y="528"
+          y="488"
           width="416"
-          height="84"
+          height="132"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -482,7 +483,7 @@
         />
         <text
           x="776"
-          y="546"
+          y="506"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -493,7 +494,7 @@
         </text>
         <text
           x="776"
-          y="564"
+          y="524"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -504,18 +505,27 @@
         </text>
         <text
           x="776"
-          y="578"
+          y="538"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          order: DS-4
+          API-FR-03 · DS-5 · filters and sums
         </text>
-        <line x1="568" y1="588" x2="984" y2="588" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="584" y="604" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + top(query: LeaderboardQuery): Promise&lt;LeaderboardEntry[]&gt;
+        <line x1="568" y1="548" x2="984" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="584" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + levelResults(gameId: GameId, levelId: LevelId):
+        </text>
+        <text x="606" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;LeaderboardEntry&lt;LevelResult&gt;[]&gt;
+        </text>
+        <text x="584" y="596" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + highScores(gameId: GameId): Promise&lt;LeaderboardEntry&lt;Score&gt;[]&gt;
+        </text>
+        <text x="584" y="612" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + standings(gameId: GameId): Promise&lt;LeaderboardEntry&lt;Standing&gt;[]&gt;
         </text>
         <!-- Class: GetProgressUseCase («use case») -->
         <rect
@@ -606,8 +616,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          records the score and each level result, and saves the whole aggregate (DS-5).
-          LeaderboardReader.top() ranks by DS-4: stars, then moves, then time.
+          records the score and each level result, and saves the whole aggregate (DS-5). The use
+          case reads the Clock instant inside ProgressRepository.update(),
         </text>
         <text
           x="24"
@@ -616,14 +626,24 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The use case reads the Clock instant inside ProgressRepository.update(), under a lock per
-          userId and gameId, and passes it to the domain.
+          under a lock per userId and gameId, and passes it to the domain. LeaderboardReader only
+          filters and sums: GetLeaderboardUseCase orders the entries
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="724" x2="1016" y2="724" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="742"
+          y="716"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          with the comparisons of the domain: LevelResult.isBetterThan() (DS-4),
+          Score.isHigherThan() and Standing.isBetterThan() (S3-03).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="740" x2="1016" y2="740" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="758"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -633,16 +653,16 @@
         </text>
         <line
           x1="24"
-          y1="760"
+          y1="776"
           x2="52"
-          y2="760"
+          y2="776"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
         <text
           x="60"
-          y="764"
+          y="780"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -651,7 +671,7 @@
         </text>
         <rect
           x="24"
-          y="780"
+          y="796"
           width="20"
           height="12"
           rx="2"
@@ -661,7 +681,7 @@
         />
         <text
           x="56"
-          y="789"
+          y="805"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -670,7 +690,7 @@
         </text>
         <rect
           x="166"
-          y="780"
+          y="796"
           width="28"
           height="12"
           rx="2"
@@ -681,7 +701,7 @@
         />
         <text
           x="202"
-          y="789"
+          y="805"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -690,7 +710,7 @@
         </text>
         <rect
           x="372"
-          y="780"
+          y="796"
           width="28"
           height="12"
           rx="2"
@@ -700,18 +720,18 @@
         />
         <text
           x="408"
-          y="789"
+          y="805"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
         </text>
-        <line x1="518" y1="786" x2="534" y2="786" stroke="#17212a" stroke-width="1" />
-        <circle cx="539" cy="786" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="518" y1="802" x2="534" y2="802" stroke="#17212a" stroke-width="1" />
+        <circle cx="539" cy="802" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="554"
-          y="789"
+          y="805"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
