@@ -1,20 +1,23 @@
 import type { INestApplication, Type } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { App } from 'supertest/types.js';
+import { DrizzleLevelRepository } from '../../../src/adapters/persistence/drizzle-level-repository.js';
 import { DrizzleProgressRepository } from '../../../src/adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../../../src/adapters/persistence/drizzle-user-repository.js';
 import { CLOCK, type Clock } from '../../../src/application/ports/clock.js';
+import { LEVEL_REPOSITORY } from '../../../src/application/ports/level-repository.js';
 import { PROGRESS_REPOSITORY } from '../../../src/application/ports/progress-repository.js';
 import { USER_REPOSITORY } from '../../../src/application/ports/user-repository.js';
-import { AppModule } from '../../../src/infrastructure/app.module.js';
+import type { LevelValidators } from '../../../src/domain/level/level-validators.js';
+import { AppModule, LEVEL_VALIDATORS } from '../../../src/infrastructure/app.module.js';
 import { configureHttpApp } from '../../../src/infrastructure/http-app.js';
 import { TEST_JWT_SECRET } from '../auth/test-jwt-secret.js';
 import { createTestDatabase, type TestDatabase } from '../test-database.js';
 
 export { TEST_JWT_SECRET };
 
-// The pool connects only on the first query. The tests replace the user and
-// progress repositories, so no query reaches this URL.
+// The pool connects only on the first query. The tests replace the user,
+// progress and level repositories, so no query reaches this URL.
 const UNUSED_DATABASE_URL = 'postgres://test:test@127.0.0.1:1/unused';
 
 // Sets the configuration that AppModule reads. Call vi.unstubAllEnvs() after the test.
@@ -34,9 +37,9 @@ export interface TestAppOptions {
   readonly clock?: Clock;
 }
 
-// Starts AppModule with the test configuration. The user and progress
+// Starts AppModule with the test configuration. The user, progress and level
 // repositories run on the in-memory PGlite database, so a test can read the
-// stored rows.
+// stored rows. The level repository keeps the LevelValidators of AppModule.
 export async function createTestApp(
   controllers: Type<unknown>[] = [],
   options: TestAppOptions = {},
@@ -47,7 +50,12 @@ export async function createTestApp(
     .overrideProvider(USER_REPOSITORY)
     .useValue(new DrizzleUserRepository(database.db))
     .overrideProvider(PROGRESS_REPOSITORY)
-    .useValue(new DrizzleProgressRepository(database.db));
+    .useValue(new DrizzleProgressRepository(database.db))
+    .overrideProvider(LEVEL_REPOSITORY)
+    .useFactory({
+      inject: [LEVEL_VALIDATORS],
+      factory: (validators: LevelValidators) => new DrizzleLevelRepository(database.db, validators),
+    });
   if (options.clock !== undefined) {
     builder = builder.overrideProvider(CLOCK).useValue(options.clock);
   }
