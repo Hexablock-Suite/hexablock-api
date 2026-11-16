@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 1 of 5</p>
       <h1>Progress: one aggregate per user and gameId, and the values that rank a leaderboard</h1>
       <svg
-        viewBox="0 0 1040 1346"
+        viewBox="0 0 1040 1362"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain1progress-title domain1progress-desc"
@@ -88,7 +88,9 @@
           broken rule. LevelResult keeps its four value objects private, takes them built in of(),
           and delivers all four to a LevelResultReceiver with deliverTo(). A dashed frame labelled
           Aggregate encloses PlayerProgress and the value objects that it holds: ProgressKey,
-          UserId, GameId, LevelResult, Score and SyncInstant.
+          UserId, GameId, LevelResult, Score and SyncInstant. A footnote gives the port signatures
+          find(key: ProgressKey) and update(key: ProgressKey, change: ProgressChange) of
+          ProgressRepository.
         </desc>
         <defs>
           <marker
@@ -785,7 +787,7 @@
           x="400"
           y="576"
           width="280"
-          height="356"
+          height="372"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -899,27 +901,37 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          results: LevelResult[]): PlayerProgress
+          results: readonly LevelResult[]):
         </text>
-        <text x="416" y="828" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: PlayerProgress): boolean
+        <text
+          x="438"
+          y="828"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          PlayerProgress
         </text>
         <text x="416" y="844" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: PlayerProgress): boolean
+        </text>
+        <text x="416" y="860" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="438" y="860" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="438" y="876" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           PlayerProgressReceiver): void
         </text>
-        <text x="416" y="876" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="892" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + recordScore(score: Score,
         </text>
-        <text x="438" y="892" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="438" y="908" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           at: SyncInstant): void
         </text>
-        <text x="416" y="908" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="416" y="924" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + recordLevel(result: LevelResult,
         </text>
-        <text x="438" y="924" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="438" y="940" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           at: SyncInstant): void
         </text>
         <!-- Class: Score («value object») -->
@@ -1375,18 +1387,28 @@
           LeaderboardReader only filters and sums. GetLeaderboardUseCase orders the entries with
           these comparisons of the domain (decision 2).
         </text>
+        <text
+          x="24"
+          y="1256"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          ProgressRepository finds the aggregate with find(key: ProgressKey) and changes it with
+          update(key: ProgressKey, change: ProgressChange) (#107).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1264"
+          y1="1280"
           x2="1016"
-          y2="1264"
+          y2="1280"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1282"
+          y="1298"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1396,16 +1418,16 @@
         </text>
         <line
           x1="24"
-          y1="1300"
+          y1="1316"
           x2="52"
-          y2="1300"
+          y2="1316"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
         <text
           x="60"
-          y="1304"
+          y="1320"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1414,7 +1436,7 @@
         </text>
         <text
           x="299"
-          y="1304"
+          y="1320"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1423,7 +1445,7 @@
         </text>
         <rect
           x="24"
-          y="1320"
+          y="1336"
           width="20"
           height="12"
           rx="2"
@@ -1433,7 +1455,7 @@
         />
         <rect
           x="48"
-          y="1320"
+          y="1336"
           width="20"
           height="12"
           rx="2"
@@ -1443,7 +1465,7 @@
         />
         <text
           x="80"
-          y="1329"
+          y="1345"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1452,7 +1474,7 @@
         </text>
         <rect
           x="240"
-          y="1320"
+          y="1336"
           width="28"
           height="12"
           rx="2"
@@ -1463,7 +1485,7 @@
         />
         <text
           x="276"
-          y="1329"
+          y="1345"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1472,7 +1494,7 @@
         </text>
         <rect
           x="446"
-          y="1320"
+          y="1336"
           width="28"
           height="12"
           rx="2"
@@ -1482,7 +1504,7 @@
         />
         <text
           x="482"
-          y="1329"
+          y="1345"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1491,7 +1513,7 @@
         </text>
         <rect
           x="592"
-          y="1320"
+          y="1336"
           width="28"
           height="12"
           rx="2"
@@ -1502,7 +1524,7 @@
         />
         <text
           x="628"
-          y="1329"
+          y="1345"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

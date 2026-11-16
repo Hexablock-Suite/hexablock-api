@@ -76,15 +76,15 @@
           the AuthenticateToken input port, ProgressController holds the SyncProgress input port and
           uses ProgressDtoMapper, and DrizzleProgressRepository implements ProgressRepository. In
           layer 4, SystemClock implements Clock. In layer 2, SyncProgressUseCase implements
-          SyncProgress, takes a SyncProgressRequest and holds the ProgressRepository and Clock
-          ports, and the Clock gives a SyncInstant. In layer 1, the use case creates the ProgressKey
-          of the userId and the gameId of the request, and updates the PlayerProgress aggregate of
-          that key at that instant. The aggregate keeps its LevelResult values and the SyncInstant
-          of its last sync. LevelResult keeps its four value objects private, takes them built in
-          of(), and delivers all four to a LevelResultReceiver with deliverTo(). ProgressDtoMapper
-          builds the GameId, the Score and each value of a LevelResult through factories that return
-          a Result. A dashed frame labelled Aggregate encloses PlayerProgress and the value objects
-          that it holds.
+          SyncProgress, takes a SyncProgressRequest, which holds its LevelResult values through a
+          use arrow results 0..*, and holds the ProgressRepository and Clock ports, and the Clock
+          gives a SyncInstant. In layer 1, the use case creates the ProgressKey of the userId and
+          the gameId of the request, and updates the PlayerProgress aggregate of that key at that
+          instant. The aggregate keeps its LevelResult values and the SyncInstant of its last sync.
+          LevelResult keeps its four value objects private, takes them built in of(), and delivers
+          all four to a LevelResultReceiver with deliverTo(). ProgressDtoMapper builds the GameId,
+          the Score and each value of a LevelResult through factories that return a Result. A dashed
+          frame labelled Aggregate encloses PlayerProgress and the value objects that it holds.
         </desc>
         <defs>
           <marker
@@ -221,7 +221,7 @@
         />
         <!-- SyncProgressUseCase takes a SyncProgressRequest: use -->
         <path
-          d="M936 848 L960 848 L960 720 L984 720"
+          d="M936 848 L950 848 L950 720 L964 720"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -311,6 +311,14 @@
           stroke-width="1"
           marker-end="url(#flow1syncprogress-open)"
         />
+        <!-- SyncProgressRequest holds results: LevelResult[]: use with role and multiplicity (decision 13) -->
+        <path
+          d="M1164 768 L1204 768 L1204 1166 L330 1166 L330 1232"
+          fill="none"
+          stroke-width="1"
+          stroke="#5b6873"
+          marker-end="url(#flow1syncprogress-open)"
+        />
         <!-- Arrow labels and multiplicities -->
         <rect x="78" y="398" width="85" height="12" rx="2" fill="#e2ebf8" />
         <text
@@ -360,10 +368,10 @@
         >
           returns
         </text>
-        <rect x="941" y="777" width="38" height="12" rx="2" fill="#efe7f8" />
+        <rect x="931" y="790" width="38" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="960"
-          y="786"
+          x="950"
+          y="799"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -479,6 +487,18 @@
           letter-spacing="0.06em"
         >
           key 1
+        </text>
+        <rect x="336" y="1206" width="76" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="374"
+          y="1215"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          results 0..*
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="327" height="12" rx="2" fill="#cfdcf3" />
@@ -882,9 +902,9 @@
 
         <!-- Class: SyncProgressRequest («request») -->
         <rect
-          x="984"
+          x="964"
           y="660"
-          width="168"
+          width="200"
           height="120"
           rx="6"
           fill="#ffffff"
@@ -892,7 +912,7 @@
           stroke-width="1"
         />
         <text
-          x="1068"
+          x="1064"
           y="678"
           fill="#5b6873"
           font-size="8"
@@ -903,7 +923,7 @@
           «request»
         </text>
         <text
-          x="1068"
+          x="1064"
           y="696"
           fill="#17212a"
           font-size="12"
@@ -913,42 +933,18 @@
         >
           SyncProgressRequest
         </text>
-        <line x1="984" y1="708" x2="1152" y2="708" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          x="1000"
-          y="724"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
+        <line x1="964" y1="708" x2="1164" y2="708" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="980" y="724" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + userId: UserId
         </text>
-        <text
-          x="1000"
-          y="740"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
+        <text x="980" y="740" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + gameId: GameId
         </text>
-        <text
-          x="1000"
-          y="756"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
+        <text x="980" y="756" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + score: Score [0..1]
         </text>
-        <text
-          x="1000"
-          y="772"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + results: LevelResult[]
+        <text x="980" y="772" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + results: readonly LevelResult[]
         </text>
         <!-- Class: SyncProgressUseCase (focal, «use case») -->
         <rect
@@ -1474,7 +1470,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          results: LevelResult[]): PlayerProgress
+          results: readonly LevelResult[]): PlayerProgress
         </text>
         <text
           x="776"
