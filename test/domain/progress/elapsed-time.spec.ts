@@ -3,19 +3,21 @@ import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The time that a player takes in one level, in whole milliseconds. Less time is better (DS-4).
+// The LevelResult spec pins that order, so this spec keeps the creation rules.
 describe('ElapsedTime', () => {
-  it('should_reject_the_value_when_it_is_negative_or_not_a_safe_integer', () => {
-    for (const bad of [
-      -1,
-      1.5,
-      Number.NaN,
-      Number.POSITIVE_INFINITY,
-      Number.NEGATIVE_INFINITY,
-      2 ** 53,
-      -(2 ** 53),
-    ]) {
-      expect(() => ElapsedTime.ofMs(bad)).toThrow(ProgressError);
-    }
+  it.each([
+    -1,
+    1.5,
+    Number.NaN,
+    Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+    2 ** 53,
+    -(2 ** 53),
+  ])('should_reject_the_value_when_it_is_negative_or_not_a_safe_integer', (bad) => {
+    expect(() => ElapsedTime.ofMs(bad)).toThrow(ProgressError);
+  });
+
+  it('should_name_the_field_and_the_value_when_the_value_is_rejected', () => {
     expect(() => ElapsedTime.ofMs(-1)).toThrow('elapsedMs must be a non-negative integer, got -1.');
     expect(() => ElapsedTime.ofMs('3' as unknown as number)).toThrow(
       'elapsedMs must be a non-negative integer, got 3.',
@@ -33,16 +35,6 @@ describe('ElapsedTime', () => {
     expect(value.equals(other)).toBe(false);
     expect(other.equals(value)).toBe(false);
     expect(ElapsedTime.ofMs(-0).equals(ElapsedTime.ofMs(0))).toBe(true);
-  });
-
-  // An equal time is not shorter, so a full tie keeps the stored result.
-  it('should_tell_which_time_is_shorter_when_two_times_are_compared', () => {
-    const better = ElapsedTime.ofMs(44_999);
-    const worse = ElapsedTime.ofMs(45_000);
-
-    expect(better.isShorterThan(worse)).toBe(true);
-    expect(worse.isShorterThan(better)).toBe(false);
-    expect(better.isShorterThan(ElapsedTime.ofMs(44_999))).toBe(false);
   });
 
   // #90: the value leaves only through a delivery to a receiver.

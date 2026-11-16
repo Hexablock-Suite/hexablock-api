@@ -74,13 +74,14 @@ describe('JwtTokenIssuer', () => {
     expect(issuer.verify(expired)).toBeNull();
   });
 
-  it('should_return_null_when_token_is_malformed_or_has_no_subject', () => {
-    const noSubject = new JwtService({ secret: TEST_JWT_SECRET }).sign({ role: 'player' });
-
-    for (const token of ['', 'not-a-jwt', noSubject]) {
+  // The right secret signs this token, but it has no subject.
+  const noSubject = new JwtService({ secret: TEST_JWT_SECRET }).sign({ role: 'player' });
+  it.each(['', 'not-a-jwt', noSubject])(
+    'should_return_null_when_token_is_malformed_or_has_no_subject',
+    (token) => {
       expect(issuer.verify(token)).toBeNull();
-    }
-  });
+    },
+  );
 
   // A sub that is not a UUID is one more bad token (#64).
   it('should_return_null_when_token_subject_is_not_a_uuid', () => {

@@ -3,15 +3,16 @@ import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 describe('GameId', () => {
-  it('should_accept_each_variant_when_value_names_lines_fit_sort_or_merge', () => {
-    const receiver = new RecordingReceiver<string>();
+  it.each(['lines', 'fit', 'sort', 'merge'])(
+    'should_accept_each_variant_when_value_names_lines_fit_sort_or_merge',
+    (value) => {
+      const receiver = new RecordingReceiver<string>();
 
-    for (const value of ['lines', 'fit', 'sort', 'merge']) {
       GameId.of(value).deliverTo(receiver);
-    }
 
-    expect(receiver.received).toEqual(['lines', 'fit', 'sort', 'merge']);
-  });
+      expect(receiver.received).toEqual([value]);
+    },
+  );
 
   // GameId is an open value (classes.md decision 5): a new variant needs no code change.
   it('should_accept_a_new_variant_when_value_is_a_lowercase_slug', () => {
@@ -22,11 +23,12 @@ describe('GameId', () => {
     expect(receiver.received).toEqual(['tri-fit2']);
   });
 
-  it('should_reject_game_id_when_value_is_missing_empty_or_not_a_slug', () => {
-    for (const value of [undefined, null, '', '  ', 'Lines', 'fit sort', '-fit', 7]) {
+  it.each([undefined, null, '', '  ', 'Lines', 'fit sort', '-fit', 7])(
+    'should_reject_game_id_when_value_is_missing_empty_or_not_a_slug',
+    (value) => {
       expect(() => GameId.of(value as unknown as string)).toThrow(ProgressError);
-    }
-  });
+    },
+  );
 
   it('should_be_equal_when_two_game_ids_hold_the_same_value', () => {
     expect(GameId.of('fit').equals(GameId.of('fit'))).toBe(true);

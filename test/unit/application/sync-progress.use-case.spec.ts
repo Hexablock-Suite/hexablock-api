@@ -136,87 +136,82 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
 
   // DS-12 check: a better result and then a worse one for the same level
   // keep the better one, and the opposite order stores the same row. DS-4
-  // gives the order: more stars, then fewer moves, then less time.
-  it('should_store_better_level_result_in_either_order_when_a_worse_result_of_same_level_syncs', async () => {
-    const better = { levelId: 'fit-01', stars: 3, moves: 30, elapsedMs: 90000 };
-    const worse = { levelId: 'fit-01', stars: 2, moves: 9, elapsedMs: 30000 };
-    const stored: unknown[] = [];
-    for (const levels of [
-      [better, worse],
-      [worse, better],
-    ]) {
-      const repository = new InMemoryProgressRepository();
-      const ordered = new SyncProgressUseCase(repository, clock);
+  // gives the order: more stars, then fewer moves, then less time. A row
+  // gives the two results in the order of the syncs. Both rows expect the
+  // same stored progress.
+  const betterResult = { levelId: 'fit-01', stars: 3, moves: 30, elapsedMs: 90000 };
+  const worseResult = { levelId: 'fit-01', stars: 2, moves: 9, elapsedMs: 30000 };
+  it.each([
+    [betterResult, worseResult],
+    [worseResult, betterResult],
+  ])(
+    'should_store_better_level_result_in_either_order_when_a_worse_result_of_same_level_syncs',
+    async (first, second) => {
+      await sync.execute(syncRequest({ gameId: 'hexa-fit', score: undefined, results: [first] }));
 
-      const results = [];
-      for (const level of levels) {
-        results.push(
-          await ordered.execute(
-            syncRequest({ gameId: 'hexa-fit', score: undefined, results: [level] }),
-          ),
-        );
-      }
+      const result = await sync.execute(
+        syncRequest({ gameId: 'hexa-fit', score: undefined, results: [second] }),
+      );
 
-      const found = await repository.find(ADA, GameId.of('hexa-fit'));
-      expect(found?.snapshot().results).toEqual([levelResultOf(better)]);
-      expect(results[1]?.ok && results[1].value).toEqual(found);
-      stored.push(found);
-    }
-    expect(stored[1]).toEqual(stored[0]);
-  });
+      const found = await progress.find(ADA, GameId.of('hexa-fit'));
+      expect(found?.snapshot()).toEqual({
+        userId: ADA,
+        gameId: GameId.of('hexa-fit'),
+        highScore: null,
+        updatedAt: AT,
+        results: [levelResultOf(betterResult)],
+      });
+      expect(result.ok && result.value).toEqual(found);
+    },
+  );
 
   // Two overlapping syncs run one after the other. The domain keeps the
   // highest score (API-FR-02, DS-12). The sync that runs last answers the
-  // stored progress.
-  it('should_store_highest_score_in_either_order_when_two_syncs_of_same_game_overlap', async () => {
-    for (const scores of [
-      [500, 100],
-      [100, 500],
-    ]) {
-      const repository = new InMemoryProgressRepository();
-      const overlapping = new SyncProgressUseCase(repository, clock);
-
+  // stored progress. A row gives the two scores in the order of the syncs.
+  it.each([
+    [500, 100],
+    [100, 500],
+  ])(
+    'should_store_highest_score_in_either_order_when_two_syncs_of_same_game_overlap',
+    async (firstScore, secondScore) => {
       const results = await Promise.all(
-        scores.map((score) => overlapping.execute(syncRequest({ score }))),
+        [firstScore, secondScore].map((score) => sync.execute(syncRequest({ score }))),
       );
 
-      const stored = await repository.find(ADA, GameId.of('hexa-lines'));
+      const stored = await progress.find(ADA, GameId.of('hexa-lines'));
       expect(stored?.snapshot().highScore?.equals(Score.of(500))).toBe(true);
       expect(results.map((result) => result.ok)).toEqual([true, true]);
       expect(results[1]?.ok && results[1].value).toEqual(stored);
-    }
-  });
+    },
+  );
 
   // Each sync reads the progress that the other one saved, so no level
-  // result is lost (DEF-02).
-  it('should_store_both_levels_in_either_order_when_two_syncs_add_different_levels', async () => {
-    const first = { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 };
-    const second = { levelId: 'fit-02', stars: 3, moves: 9, elapsedMs: 30000 };
-    for (const levels of [
-      [first, second],
-      [second, first],
-    ]) {
-      const repository = new InMemoryProgressRepository();
-      const overlapping = new SyncProgressUseCase(repository, clock);
-
+  // result is lost (DEF-02). A row gives the two levels in the order of the syncs.
+  const firstLevel = { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 };
+  const secondLevel = { levelId: 'fit-02', stars: 3, moves: 9, elapsedMs: 30000 };
+  it.each([
+    [firstLevel, secondLevel],
+    [secondLevel, firstLevel],
+  ])(
+    'should_store_both_levels_in_either_order_when_two_syncs_add_different_levels',
+    async (first, second) => {
       const results = await Promise.all(
-        levels.map((level) =>
-          overlapping.execute(
-            syncRequest({ gameId: 'hexa-fit', score: undefined, results: [level] }),
-          ),
+        [first, second].map((level) =>
+          sync.execute(syncRequest({ gameId: 'hexa-fit', score: undefined, results: [level] })),
         ),
       );
 
-      const stored = await repository.find(ADA, GameId.of('hexa-fit'));
+      const stored = await progress.find(ADA, GameId.of('hexa-fit'));
       // The port gives the results by levelId, whatever the sync order.
-      expect(stored?.snapshot().results).toEqual(
-        [first, second].map((level) => levelResultOf(level)),
-      );
+      expect(stored?.snapshot().results).toEqual([
+        levelResultOf(firstLevel),
+        levelResultOf(secondLevel),
+      ]);
       // The answer of the last sync keeps the stored result first, then the new one.
       const last = results[1]?.ok ? results[1].value : null;
-      expect(last?.snapshot().results).toEqual(levels.map((level) => levelResultOf(level)));
-    }
-  });
+      expect(last?.snapshot().results).toEqual([levelResultOf(first), levelResultOf(second)]);
+    },
+  );
 
   // The stale sync starts first, but reaches the repository only after the
   // other sync saved. It reads the Clock under the lock, so updatedAt does

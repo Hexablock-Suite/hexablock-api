@@ -67,31 +67,37 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(response.body).toEqual({ userId: userId.toLowerCase() });
   });
 
-  it('should_return_signed_in_user_when_scheme_name_is_not_capitalized', async () => {
-    const { token, userId } = await signIn(server(), USERNAME);
-    // RFC 7235: the scheme name is case-insensitive (review comment 6683774229).
-    for (const scheme of ['bearer', 'BEARER']) {
+  // RFC 7235: the scheme name is case-insensitive (review comment 6683774229).
+  it.each(['bearer', 'BEARER', 'BeArEr'])(
+    'should_return_signed_in_user_when_scheme_name_is_not_capitalized',
+    async (scheme) => {
+      const { token, userId } = await signIn(server(), USERNAME);
+
       const response = await callProtected(`${scheme} ${token}`);
+
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ userId });
-    }
-  });
+    },
+  );
 
   // Only the scheme name ignores case. A header without the space after the
-  // scheme, or with no token, still gets the missing-token error.
-  it('should_accept_mixed_case_scheme_and_keep_rejections_when_header_varies', async () => {
-    const { token, userId } = await signIn(server(), USERNAME);
+  // scheme, or with no token, still gets the missing-token error. A row
+  // writes the header from the token of the signed-in user.
+  it.each([
+    (_token: string) => 'Bearer ',
+    (token: string) => `Bearer${token}`,
+    (token: string) => `Bearer\t${token}`,
+  ])(
+    'should_reject_as_missing_token_when_the_header_has_no_space_or_no_token_after_the_scheme',
+    async (headerWith) => {
+      const { token } = await signIn(server(), USERNAME);
 
-    const accepted = await callProtected(`BeArEr ${token}`);
+      const response = await callProtected(headerWith(token));
 
-    expect(accepted.status).toBe(200);
-    expect(accepted.body).toEqual({ userId });
-    for (const authorization of ['Bearer ', `Bearer${token}`, `Bearer\t${token}`]) {
-      const response = await callProtected(authorization);
       expect(response.status).toBe(401);
       expect(response.body).toEqual(unauthorizedBody('Missing bearer token'));
-    }
-  });
+    },
+  );
 
   it('should_return_unauthorized_error_body_when_token_is_missing', async () => {
     const response = await callProtected();

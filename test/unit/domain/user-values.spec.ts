@@ -30,32 +30,35 @@ describe('credential limits', () => {
 });
 
 describe('Username', () => {
-  it('should_accept_username_when_it_has_3_to_32_allowed_characters', () => {
-    for (const raw of ['ada', 'grace.hopper', 'player_01-x', 'a'.repeat(32)]) {
+  it.each(['ada', 'grace.hopper', 'player_01-x', 'a'.repeat(32)])(
+    'should_accept_username_when_it_has_3_to_32_allowed_characters',
+    (raw) => {
       const result = Username.create(raw);
 
       expect(result.ok && deliveredBy(result.value)).toEqual([raw]);
-    }
-  });
+    },
+  );
 
-  it('should_reject_username_when_length_or_characters_break_the_rule', () => {
-    for (const raw of ['ab', 'a'.repeat(33), 'ada lovelace', 'ada!', '']) {
+  it.each(['ab', 'a'.repeat(33), 'ada lovelace', 'ada!', ''])(
+    'should_reject_username_when_length_or_characters_break_the_rule',
+    (raw) => {
       expect(Username.create(raw)).toEqual({ ok: false, error: 'invalid-username' });
-    }
-  });
+    },
+  );
 
   // #73: the key is the name in lower case. Two names with the same key
   // are the same name for uniqueness. The value keeps the typed case.
-  it('should_give_the_same_key_when_usernames_differ_only_in_letter_case', () => {
-    for (const raw of ['ada', 'Ada', 'ADA']) {
+  it.each(['ada', 'Ada', 'ADA'])(
+    'should_give_the_same_key_when_usernames_differ_only_in_letter_case',
+    (raw) => {
       const result = Username.create(raw);
 
       expect(result.ok && [...deliveredBy(result.value), ...keyDeliveredBy(result.value)]).toEqual([
         raw,
         'ada',
       ]);
-    }
-  });
+    },
+  );
 
   // #90: the name and its key leave only through a delivery to a receiver.
   it('should_have_no_public_value_or_key_field_when_both_leave_through_a_delivery', () => {
@@ -76,43 +79,50 @@ describe('Username', () => {
 });
 
 describe('Password', () => {
-  it('should_accept_password_when_it_has_8_to_128_characters', () => {
-    for (const raw of ['12345678', 'correct horse battery', 'x'.repeat(128)]) {
+  it.each(['12345678', 'correct horse battery', 'x'.repeat(128)])(
+    'should_accept_password_when_it_has_8_to_128_characters',
+    (raw) => {
       const result = Password.create(raw);
 
       expect(result.ok && deliveredBy(result.value)).toEqual([raw]);
-    }
-  });
+    },
+  );
 
-  it('should_reject_password_when_it_has_fewer_than_8_or_more_than_128_characters', () => {
-    for (const raw of ['', '1234567', 'x'.repeat(129)]) {
+  it.each(['', '1234567', 'x'.repeat(129)])(
+    'should_reject_password_when_it_has_fewer_than_8_or_more_than_128_characters',
+    (raw) => {
       expect(Password.create(raw)).toEqual({ ok: false, error: 'invalid-password' });
-    }
-  });
+    },
+  );
 
   // The length counts code points, not UTF-16 units (#60).
-  it('should_reject_password_when_it_has_fewer_than_8_or_more_than_128_code_points', () => {
-    for (const raw of [EMOJI.repeat(4), EMOJI.repeat(129)]) {
+  it.each([EMOJI.repeat(4), EMOJI.repeat(129)])(
+    'should_reject_password_when_it_has_fewer_than_8_or_more_than_128_code_points',
+    (raw) => {
       expect(Password.create(raw)).toEqual({ ok: false, error: 'invalid-password' });
-    }
-  });
+    },
+  );
 
-  it('should_accept_password_when_it_has_8_to_128_code_points_in_more_utf16_units', () => {
-    for (const raw of [EMOJI.repeat(8), EMOJI.repeat(128)]) {
+  it.each([EMOJI.repeat(8), EMOJI.repeat(128)])(
+    'should_accept_password_when_it_has_8_to_128_code_points_in_more_utf16_units',
+    (raw) => {
       const result = Password.create(raw);
 
       expect(result.ok && deliveredBy(result.value)).toEqual([raw]);
-    }
-  });
+    },
+  );
 
   // Sign-in checks a text that is not a Password yet, so the operation takes the raw text.
-  it('should_tell_that_text_is_too_long_when_it_has_more_than_128_code_points', () => {
-    for (const raw of ['x'.repeat(129), EMOJI.repeat(129)]) {
-      expect(Password.isTooLong(raw)).toBe(true);
-    }
-    for (const raw of ['', '1234567', 'x'.repeat(128), EMOJI.repeat(128)]) {
-      expect(Password.isTooLong(raw)).toBe(false);
-    }
+  // A row gives the text and the answer.
+  it.each([
+    ['x'.repeat(129), true],
+    [EMOJI.repeat(129), true],
+    ['', false],
+    ['1234567', false],
+    ['x'.repeat(128), false],
+    [EMOJI.repeat(128), false],
+  ])('should_tell_that_text_is_too_long_when_it_has_more_than_128_code_points', (raw, tooLong) => {
+    expect(Password.isTooLong(raw)).toBe(tooLong);
   });
 
   // #90: the text leaves only through a delivery to a receiver.
@@ -146,21 +156,17 @@ describe('UserId', () => {
   });
 
   // users.id and progress.user_id are uuid columns (#64).
-  it('should_reject_user_id_when_value_is_not_a_uuid', () => {
-    const invalid = [
-      'not-a-uuid',
-      'user-1',
-      `{${ADA_ID}}`,
-      ADA_ID.replace('-', ''),
-      `${ADA_ID}0`,
-      ` ${ADA_ID}`,
-      `${ADA_ID}\n`,
-      ADA_ID.replace('6', 'g'),
-    ];
-
-    for (const value of invalid) {
-      expect(() => UserId.from(value)).toThrow('A UserId must be a UUID.');
-    }
+  it.each([
+    'not-a-uuid',
+    'user-1',
+    `{${ADA_ID}}`,
+    ADA_ID.replace('-', ''),
+    `${ADA_ID}0`,
+    ` ${ADA_ID}`,
+    `${ADA_ID}\n`,
+    ADA_ID.replace('6', 'g'),
+  ])('should_reject_user_id_when_value_is_not_a_uuid', (value) => {
+    expect(() => UserId.from(value)).toThrow('A UserId must be a UUID.');
   });
 
   // RFC 9562 defines the nil UUID, and a uuid column stores it.
@@ -243,17 +249,22 @@ describe('credential values equals', () => {
   it('should_be_equal_when_two_usernames_have_the_same_letters_and_case', () => {
     const name = created(Username.create('Ada'));
     const twin = created(Username.create('Ada'));
-    const lowerCase = created(Username.create('ada'));
-    const other = created(Username.create('Grace'));
 
     expect(twin).not.toBe(name);
     expect(name.equals(twin)).toBe(true);
     expect(twin.equals(name)).toBe(true);
-    for (const different of [lowerCase, other]) {
+  });
+
+  it.each(['ada', 'Grace'])(
+    'should_not_be_equal_when_two_usernames_differ_in_letters_or_case',
+    (raw) => {
+      const name = created(Username.create('Ada'));
+      const different = created(Username.create(raw));
+
       expect(name.equals(different)).toBe(false);
       expect(different.equals(name)).toBe(false);
-    }
-  });
+    },
+  );
 
   it('should_be_equal_when_two_passwords_hold_the_same_text', () => {
     const password = created(Password.create('correct-horse'));

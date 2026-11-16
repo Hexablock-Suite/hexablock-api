@@ -11,12 +11,12 @@ function httpContext(request: object): ExecutionContext {
 }
 
 describe('JwtAuthGuard', () => {
-  it('should_reject_as_missing_token_when_bearer_is_followed_only_by_whitespace', async () => {
-    const authenticate = new AuthenticateTokenUseCase(new PrefixTokenIssuer());
-    const execute = vi.spyOn(authenticate, 'execute');
-    const guard = new JwtAuthGuard(authenticate);
-
-    for (const authorization of ['Bearer ', 'Bearer    ', 'Bearer \t ']) {
+  it.each(['Bearer ', 'Bearer    ', 'Bearer \t '])(
+    'should_reject_as_missing_token_when_bearer_is_followed_only_by_whitespace',
+    async (authorization) => {
+      const authenticate = new AuthenticateTokenUseCase(new PrefixTokenIssuer());
+      const execute = vi.spyOn(authenticate, 'execute');
+      const guard = new JwtAuthGuard(authenticate);
       const request = { headers: { authorization } };
 
       const allowed = guard.canActivate(httpContext(request));
@@ -24,7 +24,7 @@ describe('JwtAuthGuard', () => {
       await expect(allowed).rejects.toBeInstanceOf(UnauthorizedException);
       await expect(allowed).rejects.toThrow('Missing bearer token');
       expect(request).not.toHaveProperty('userId');
-    }
-    expect(execute).not.toHaveBeenCalled();
-  });
+      expect(execute).not.toHaveBeenCalled();
+    },
+  );
 });

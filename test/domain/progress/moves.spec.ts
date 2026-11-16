@@ -3,19 +3,21 @@ import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The moves that a player uses in one level. Fewer moves is better (DS-4).
+// The LevelResult spec pins that order, so this spec keeps the creation rules.
 describe('Moves', () => {
-  it('should_reject_the_value_when_it_is_negative_or_not_a_safe_integer', () => {
-    for (const bad of [
-      -1,
-      1.5,
-      Number.NaN,
-      Number.POSITIVE_INFINITY,
-      Number.NEGATIVE_INFINITY,
-      2 ** 53,
-      -(2 ** 53),
-    ]) {
-      expect(() => Moves.of(bad)).toThrow(ProgressError);
-    }
+  it.each([
+    -1,
+    1.5,
+    Number.NaN,
+    Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+    2 ** 53,
+    -(2 ** 53),
+  ])('should_reject_the_value_when_it_is_negative_or_not_a_safe_integer', (bad) => {
+    expect(() => Moves.of(bad)).toThrow(ProgressError);
+  });
+
+  it('should_name_the_field_and_the_value_when_the_value_is_rejected', () => {
     expect(() => Moves.of(-1)).toThrow('moves must be a non-negative integer, got -1.');
     expect(() => Moves.of('3' as unknown as number)).toThrow(
       'moves must be a non-negative integer, got 3.',
@@ -33,16 +35,6 @@ describe('Moves', () => {
     expect(value.equals(other)).toBe(false);
     expect(other.equals(value)).toBe(false);
     expect(Moves.of(-0).equals(Moves.of(0))).toBe(true);
-  });
-
-  // An equal count is not fewer, so a tie goes on to the time.
-  it('should_tell_which_count_has_fewer_moves_when_two_counts_are_compared', () => {
-    const better = Moves.of(12);
-    const worse = Moves.of(13);
-
-    expect(better.isFewerThan(worse)).toBe(true);
-    expect(worse.isFewerThan(better)).toBe(false);
-    expect(better.isFewerThan(Moves.of(12))).toBe(false);
   });
 
   // #90: the value leaves only through a delivery to a receiver.

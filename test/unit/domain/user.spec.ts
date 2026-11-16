@@ -109,19 +109,18 @@ describe('User state', () => {
 
   // The value objects already guard their rules, so the factories add none:
   // every valid id, name and hash builds a user.
-  it('should_build_the_user_when_register_and_restore_take_any_valid_values', () => {
-    const cases = [
-      { id: UserId.from('00000000-0000-0000-0000-000000000000'), name: 'abc', hash: 'x' },
-      { id: UserId.from(testUserId(2).toUpperCase()), name: 'A'.repeat(32), hash: '$' },
-    ];
-
-    for (const { id, name, hash } of cases) {
+  it.each([
+    { id: UserId.from('00000000-0000-0000-0000-000000000000'), name: 'abc', hash: 'x' },
+    { id: UserId.from(testUserId(2).toUpperCase()), name: 'A'.repeat(32), hash: '$' },
+  ])(
+    'should_build_the_user_when_register_and_restore_take_any_valid_values',
+    ({ id, name, hash }) => {
       const state = { id, username: nameOf(name), passwordHash: PasswordHash.from(hash) };
 
       expect(User.register(state.id, state.username, state.passwordHash).snapshot()).toEqual(state);
       expect(User.restore(state).snapshot()).toEqual(state);
-    }
-  });
+    },
+  );
 });
 
 // #91: the user checks a typed password, so no caller reads its hash.

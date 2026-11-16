@@ -3,33 +3,40 @@ import { Score } from '../../../src/domain/progress/score.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 describe('Score', () => {
-  it('should_accept_the_score_when_value_is_a_non_negative_safe_integer', () => {
-    for (const value of [0, 1, 120, Number.MAX_SAFE_INTEGER]) {
+  it.each([0, 1, 120, Number.MAX_SAFE_INTEGER])(
+    'should_accept_the_score_when_value_is_a_non_negative_safe_integer',
+    (value) => {
       expect(Score.of(value).equals(Score.of(value))).toBe(true);
-    }
-  });
+    },
+  );
 
-  it('should_reject_the_score_when_value_is_negative_or_not_an_integer', () => {
-    for (const value of [-1, 2.5, Number.NaN]) {
+  it.each([-1, 2.5, Number.NaN])(
+    'should_reject_the_score_when_value_is_negative_or_not_an_integer',
+    (value) => {
       expect(() => Score.of(value)).toThrow(ProgressError);
-    }
+    },
+  );
+
+  it.each([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, 2 ** 53, -(2 ** 53)])(
+    'should_reject_the_score_when_value_is_infinite_or_an_unsafe_integer',
+    (value) => {
+      expect(() => Score.of(value)).toThrow(ProgressError);
+    },
+  );
+
+  it('should_name_the_field_and_the_value_when_the_score_is_rejected', () => {
     expect(() => Score.of(-1)).toThrow('score must be a non-negative integer, got -1.');
-  });
-
-  it('should_reject_the_score_when_value_is_infinite_or_an_unsafe_integer', () => {
-    for (const value of [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, 2 ** 53, -(2 ** 53)]) {
-      expect(() => Score.of(value)).toThrow(ProgressError);
-    }
     expect(() => Score.of(2 ** 53)).toThrow(
       'score must be a non-negative integer, got 9007199254740992.',
     );
   });
 
-  it('should_reject_the_score_when_value_is_not_a_number', () => {
-    for (const value of [undefined, null, '120', true, {}]) {
+  it.each([undefined, null, '120', true, {}])(
+    'should_reject_the_score_when_value_is_not_a_number',
+    (value) => {
       expect(() => Score.of(value as unknown as number)).toThrow(ProgressError);
-    }
-  });
+    },
+  );
 
   it('should_be_equal_when_two_scores_hold_the_same_value', () => {
     expect(Score.of(120).equals(Score.of(120))).toBe(true);

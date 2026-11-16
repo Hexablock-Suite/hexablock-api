@@ -90,18 +90,23 @@ describe('PlayerProgress', () => {
   });
 
   // Score guards the rule of a valid score. The aggregate takes only a Score.
-  it('should_reject_score_and_keep_state_when_score_is_not_a_score_or_instant_is_invalid', () => {
-    const progress = PlayerProgress.start(USER, FIT, START);
-    progress.recordScore(Score.of(50), START);
+  it.each([
+    [60 as unknown as Score, LATER],
+    [undefined as unknown as Score, LATER],
+    [null as unknown as Score, LATER],
+    [Score.of(60), new Date(Number.NaN)],
+  ])(
+    'should_reject_score_and_keep_state_when_score_is_not_a_score_or_instant_is_invalid',
+    (score, at) => {
+      const progress = PlayerProgress.start(USER, FIT, START);
+      progress.recordScore(Score.of(50), START);
 
-    for (const bad of [60, undefined, null]) {
-      expect(() => progress.recordScore(bad as unknown as Score, LATER)).toThrow(ProgressError);
-    }
-    expect(() => progress.recordScore(Score.of(60), new Date(Number.NaN))).toThrow(ProgressError);
+      expect(() => progress.recordScore(score, at)).toThrow(ProgressError);
 
-    expect(progress.snapshot().highScore?.equals(Score.of(50))).toBe(true);
-    expect(progress.snapshot().updatedAt.toISOString()).toBe(START.toISOString());
-  });
+      expect(progress.snapshot().highScore?.equals(Score.of(50))).toBe(true);
+      expect(progress.snapshot().updatedAt.toISOString()).toBe(START.toISOString());
+    },
+  );
 
   it('should_take_the_higher_score_when_a_higher_score_is_recorded', () => {
     const progress = PlayerProgress.start(USER, FIT, START);
@@ -159,42 +164,32 @@ describe('PlayerProgress', () => {
 
   // DS-4 orders the results of one level: more stars, then fewer moves, then
   // less time. DS-12 keeps the best one, so the order of the records does
-  // not change what stays.
-  it('should_keep_the_result_with_more_stars_when_it_has_more_moves_and_time', () => {
-    const better = attempt(3, 25, 90_000);
-    const worse = attempt(2, 10, 30_000);
-
-    for (const [first, second] of [
-      [better, worse],
-      [worse, better],
-    ] as const) {
+  // not change what stays. Each step of the order has two rows, one per
+  // order of the records. This test is the one place that pins the order
+  // through the aggregate. A row gives the first record, the second record
+  // and the result that stays.
+  const moreStars = attempt(3, 25, 90_000);
+  const fewerStars = attempt(2, 10, 30_000);
+  const fewerMoves = attempt(2, 12, 90_000);
+  const moreMoves = attempt(2, 13, 30_000);
+  const lessTime = attempt(2, 12, 44_999);
+  const moreTime = attempt(2, 12, 45_000);
+  it.each([
+    // More stars wins over more moves and more time.
+    [moreStars, fewerStars, moreStars],
+    [fewerStars, moreStars, moreStars],
+    // On equal stars, fewer moves wins over more time.
+    [fewerMoves, moreMoves, fewerMoves],
+    [moreMoves, fewerMoves, fewerMoves],
+    // On equal stars and moves, less time wins.
+    [lessTime, moreTime, lessTime],
+    [moreTime, lessTime, lessTime],
+  ])(
+    'should_keep_the_result_with_more_stars_then_fewer_moves_then_less_time_when_a_level_is_recorded_twice',
+    (first, second, better) => {
       expect(keptAfter(first, second)).toEqual([level('fit-02', 1), better]);
-    }
-  });
-
-  it('should_keep_the_result_with_fewer_moves_when_stars_are_equal_and_it_has_more_time', () => {
-    const better = attempt(2, 12, 90_000);
-    const worse = attempt(2, 13, 30_000);
-
-    for (const [first, second] of [
-      [better, worse],
-      [worse, better],
-    ] as const) {
-      expect(keptAfter(first, second)).toEqual([level('fit-02', 1), better]);
-    }
-  });
-
-  it('should_keep_the_result_with_less_time_when_stars_and_moves_are_equal', () => {
-    const better = attempt(2, 12, 44_999);
-    const worse = attempt(2, 12, 45_000);
-
-    for (const [first, second] of [
-      [better, worse],
-      [worse, better],
-    ] as const) {
-      expect(keptAfter(first, second)).toEqual([level('fit-02', 1), better]);
-    }
-  });
+    },
+  );
 
   it('should_keep_the_stored_result_when_a_new_result_ties_on_stars_moves_and_time', () => {
     const stored = attempt(2, 12, 45_000);
@@ -271,7 +266,13 @@ describe('PlayerProgress', () => {
     expect(progress.snapshot().results).toEqual([]);
   });
 
-  it('should_reject_restore_when_stored_state_breaks_a_rule', () => {
+  it.each<Partial<PlayerProgressState>>([
+    { highScore: 1 as unknown as Score },
+    { highScore: undefined as unknown as Score },
+    { updatedAt: new Date(Number.NaN) },
+    { gameId: 'fit' as unknown as GameId },
+    { results: [undefined as unknown as LevelResult] },
+  ])('should_reject_restore_when_stored_state_breaks_a_rule', (broken) => {
     const valid = {
       userId: USER,
       gameId: FIT,
@@ -280,20 +281,7 @@ describe('PlayerProgress', () => {
       results: [],
     };
 
-    for (const highScore of [1, undefined]) {
-      expect(() =>
-        PlayerProgress.restore({ ...valid, highScore: highScore as unknown as Score }),
-      ).toThrow(ProgressError);
-    }
-    expect(() => PlayerProgress.restore({ ...valid, updatedAt: new Date(Number.NaN) })).toThrow(
-      ProgressError,
-    );
-    expect(() => PlayerProgress.restore({ ...valid, gameId: 'fit' as unknown as GameId })).toThrow(
-      ProgressError,
-    );
-    expect(() =>
-      PlayerProgress.restore({ ...valid, results: [undefined as unknown as LevelResult] }),
-    ).toThrow(ProgressError);
+    expect(() => PlayerProgress.restore({ ...valid, ...broken })).toThrow(ProgressError);
   });
 
   // Score counts -0 as a zero score, and restore() keeps it.
@@ -434,15 +422,20 @@ describe('PlayerProgress identity', () => {
       results: [level('fit-01', 3)],
     });
     const fresh = PlayerProgress.start(UserId.from(testUserId(1)), GameId.of('fit'), START);
-    const otherUser = PlayerProgress.start(UserId.from(testUserId(2)), FIT, START);
-    const otherGame = PlayerProgress.start(USER, GameId.of('sort'), START);
 
     expect(fresh).not.toBe(played);
     expect(played.equals(fresh)).toBe(true);
     expect(fresh.equals(played)).toBe(true);
-    for (const other of [otherUser, otherGame]) {
-      expect(fresh.equals(other)).toBe(false);
-      expect(other.equals(fresh)).toBe(false);
-    }
+  });
+
+  it.each([
+    [UserId.from(testUserId(2)), FIT],
+    [USER, GameId.of('sort')],
+  ])('should_not_be_the_same_progress_when_the_user_or_the_game_differs', (userId, gameId) => {
+    const progress = PlayerProgress.start(USER, FIT, START);
+    const other = PlayerProgress.start(userId, gameId, START);
+
+    expect(progress.equals(other)).toBe(false);
+    expect(other.equals(progress)).toBe(false);
   });
 });

@@ -251,13 +251,18 @@ describe('DrizzleProgressRepository', () => {
 
   // The check constraint of the column is not the only guard: Score checks
   // the stored number again.
-  it('should_reject_stored_row_when_high_score_breaks_its_rule', () => {
-    for (const highScore of [-1, 2.5, 2 ** 53]) {
+  it.each([-1, 2.5, 2 ** 53])(
+    'should_reject_stored_row_when_high_score_breaks_its_rule',
+    (highScore) => {
       const row = { userId: ADA_VALUE, gameId: 'fit', highScore, updatedAt: AT };
 
       expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(ProgressError);
-    }
+    },
+  );
+
+  it('should_name_the_rule_and_the_value_when_a_stored_high_score_is_rejected', () => {
     const row = { userId: ADA_VALUE, gameId: 'fit', highScore: -1, updatedAt: AT };
+
     expect(() => ProgressRowMapper.toAggregate(row, [])).toThrow(
       'score must be a non-negative integer, got -1.',
     );

@@ -88,13 +88,16 @@ async function boardOf(
 // API-FR-03. The reader only filters and sums. The use case orders each board
 // with the comparison of the domain and gives each row its rank (decision of #83).
 describe('GetLeaderboardUseCase (API-FR-03)', () => {
-  // DS-4: more stars, then fewer moves, then less time.
-  it('should_order_the_level_board_by_stars_then_moves_then_time_when_the_reader_gives_entries_in_no_order', async () => {
-    const lessTime = entry(1, levelResult(3, 10, 40_000));
-    const moreTime = entry(2, levelResult(3, 10, 50_000));
-    const moreMoves = entry(3, levelResult(3, 12, 30_000));
-    const fewerStars = entry(4, levelResult(2, 5, 10_000));
-    const reader = readerOf({ levelResults: [fewerStars, moreTime, moreMoves, lessTime] });
+  // The use case orders the board with LevelResult.isBetterThan(). The
+  // LevelResult spec pins each step of DS-4, so these entries differ only in
+  // stars. The userId order differs from the board order, so the tie order
+  // cannot make the test pass.
+  it('should_order_the_level_board_by_the_level_result_comparison_when_the_reader_gives_entries_in_no_order', async () => {
+    const threeStars = entry(2, levelResult(3, 10, 40_000));
+    const twoStars = entry(4, levelResult(2, 10, 40_000));
+    const oneStar = entry(1, levelResult(1, 10, 40_000));
+    const noStars = entry(3, levelResult(0, 10, 40_000));
+    const reader = readerOf({ levelResults: [twoStars, noStars, oneStar, threeStars] });
 
     const board = await boardOf(reader, { board: 'level', gameId: FIT, levelId: LEVEL });
 
@@ -102,12 +105,7 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
       board: 'level',
       gameId: FIT,
       levelId: LEVEL,
-      entries: [
-        ranked(1, lessTime),
-        ranked(2, moreTime),
-        ranked(3, moreMoves),
-        ranked(4, fewerStars),
-      ],
+      entries: [ranked(1, threeStars), ranked(2, twoStars), ranked(3, oneStar), ranked(4, noStars)],
     });
     expect(reader.levelResults).toHaveBeenCalledExactlyOnceWith(FIT, LEVEL);
     expect(reader.highScores).not.toHaveBeenCalled();

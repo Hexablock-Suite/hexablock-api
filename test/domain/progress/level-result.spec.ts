@@ -70,30 +70,35 @@ describe('LevelResult', () => {
     expect(next.isForSameLevelAs(result)).toBe(false);
   });
 
-  // DS-4: more stars first, then fewer moves, then less time.
-  it('should_rank_more_stars_then_fewer_moves_then_less_time_first_when_results_are_compared', () => {
-    const pairs = [
-      [
-        { stars: 3, moves: 25, elapsedMs: 90_000 },
-        { stars: 2, moves: 10, elapsedMs: 30_000 },
-      ],
-      [
-        { stars: 2, moves: 12, elapsedMs: 90_000 },
-        { stars: 2, moves: 13, elapsedMs: 30_000 },
-      ],
-      [
-        { stars: 2, moves: 12, elapsedMs: 44_999 },
-        { stars: 2, moves: 12, elapsedMs: 45_000 },
-      ],
-    ];
-
-    for (const [better, worse] of pairs) {
+  // DS-4: more stars first, then fewer moves, then less time. Each row is one
+  // step of the order. The better result loses on every later field. This
+  // test is the one place that pins each step of the order of a result.
+  it.each([
+    // More stars wins over more moves and more time.
+    [
+      { stars: 3, moves: 25, elapsedMs: 90_000 },
+      { stars: 2, moves: 10, elapsedMs: 30_000 },
+    ],
+    // On equal stars, fewer moves wins over more time.
+    [
+      { stars: 2, moves: 12, elapsedMs: 90_000 },
+      { stars: 2, moves: 13, elapsedMs: 30_000 },
+    ],
+    // On equal stars and moves, less time wins.
+    [
+      { stars: 2, moves: 12, elapsedMs: 44_999 },
+      { stars: 2, moves: 12, elapsedMs: 45_000 },
+    ],
+  ])(
+    'should_rank_more_stars_then_fewer_moves_then_less_time_first_when_results_are_compared',
+    (better, worse) => {
       const first = levelResultOf({ ...VALID, ...better });
       const second = levelResultOf({ ...VALID, ...worse });
+
       expect(first.isBetterThan(second)).toBe(true);
       expect(second.isBetterThan(first)).toBe(false);
-    }
-  });
+    },
+  );
 
   it('should_not_rank_either_result_first_when_stars_moves_and_time_are_equal', () => {
     const first = levelResultOf(VALID);
@@ -112,16 +117,16 @@ describe('LevelResult equals', () => {
     expect(twin).not.toBe(result);
     expect(result.equals(twin)).toBe(true);
     expect(twin.equals(result)).toBe(true);
-    for (const change of [
-      { levelId: 'fit-02' },
-      { stars: 2 },
-      { moves: 13 },
-      { elapsedMs: 45_001 },
-    ]) {
+  });
+
+  it.each([{ levelId: 'fit-02' }, { stars: 2 }, { moves: 13 }, { elapsedMs: 45_001 }])(
+    'should_not_be_equal_when_one_field_of_the_two_results_differs',
+    (change) => {
+      const result = levelResultOf(VALID);
       const other = levelResultOf({ ...VALID, ...change });
 
       expect(result.equals(other)).toBe(false);
       expect(other.equals(result)).toBe(false);
-    }
-  });
+    },
+  );
 });

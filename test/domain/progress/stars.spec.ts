@@ -3,19 +3,21 @@ import { ProgressError } from '../../../src/domain/progress/progress-error.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
 
 // The stars that a player earns in one level. More stars is better (DS-4).
+// The LevelResult spec pins that order, so this spec keeps the creation rules.
 describe('Stars', () => {
-  it('should_reject_the_value_when_it_is_negative_or_not_a_safe_integer', () => {
-    for (const bad of [
-      -1,
-      1.5,
-      Number.NaN,
-      Number.POSITIVE_INFINITY,
-      Number.NEGATIVE_INFINITY,
-      2 ** 53,
-      -(2 ** 53),
-    ]) {
-      expect(() => Stars.of(bad)).toThrow(ProgressError);
-    }
+  it.each([
+    -1,
+    1.5,
+    Number.NaN,
+    Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+    2 ** 53,
+    -(2 ** 53),
+  ])('should_reject_the_value_when_it_is_negative_or_not_a_safe_integer', (bad) => {
+    expect(() => Stars.of(bad)).toThrow(ProgressError);
+  });
+
+  it('should_name_the_field_and_the_value_when_the_value_is_rejected', () => {
     expect(() => Stars.of(-1)).toThrow('stars must be a non-negative integer, got -1.');
     expect(() => Stars.of('3' as unknown as number)).toThrow(
       'stars must be a non-negative integer, got 3.',
@@ -33,16 +35,6 @@ describe('Stars', () => {
     expect(value.equals(other)).toBe(false);
     expect(other.equals(value)).toBe(false);
     expect(Stars.of(-0).equals(Stars.of(0))).toBe(true);
-  });
-
-  // An equal count is not more, so a tie goes on to the moves.
-  it('should_tell_which_count_has_more_stars_when_two_counts_are_compared', () => {
-    const better = Stars.of(3);
-    const worse = Stars.of(2);
-
-    expect(better.isMoreThan(worse)).toBe(true);
-    expect(worse.isMoreThan(better)).toBe(false);
-    expect(better.isMoreThan(Stars.of(3))).toBe(false);
   });
 
   // #90: the value leaves only through a delivery to a receiver.

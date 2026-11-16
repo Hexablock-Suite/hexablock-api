@@ -272,20 +272,21 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
 
   // The checks run in one order: the game id, then the results, then the
   // score. The answer names only the first broken rule.
-  it('should_name_only_the_first_broken_rule_when_several_request_values_break_their_rules', async () => {
-    const { token, userId } = await signIn('ada');
-    const badGame = { gameId: 'Hexa Lines' };
-    const badLevel = { results: [{ ...FIT_LEVEL, stars: -2 }] };
-    const badScore = { score: -1 };
-    const gameProblem = 'gameId must be a lowercase slug, got "Hexa Lines".';
-    const levelProblem = 'stars must be a non-negative integer, got -2.';
+  const badGame = { gameId: 'Hexa Lines' };
+  const badLevel = { results: [{ ...FIT_LEVEL, stars: -2 }] };
+  const badScore = { score: -1 };
+  const gameProblem = 'gameId must be a lowercase slug, got "Hexa Lines".';
+  const levelProblem = 'stars must be a non-negative integer, got -2.';
+  it.each([
+    [{ ...badGame, ...badLevel }, gameProblem],
+    [{ ...badGame, ...badScore }, gameProblem],
+    [{ gameId: 'hexa-fit', ...badLevel, ...badScore }, levelProblem],
+    [{ ...badGame, ...badLevel, ...badScore }, gameProblem],
+  ])(
+    'should_name_only_the_first_broken_rule_when_several_request_values_break_their_rules',
+    async (body, problem) => {
+      const { token, userId } = await signIn('ada');
 
-    for (const [body, problem] of [
-      [{ ...badGame, ...badLevel }, gameProblem],
-      [{ ...badGame, ...badScore }, gameProblem],
-      [{ gameId: 'hexa-fit', ...badLevel, ...badScore }, levelProblem],
-      [{ ...badGame, ...badLevel, ...badScore }, gameProblem],
-    ] as const) {
       const response = await sync(token, body);
 
       expect(response.status).toBe(400);
@@ -296,9 +297,9 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
         details: [problem],
         path: '/progress',
       });
-    }
-    expect(await storedRows(userId)).toEqual([]);
-  });
+      expect(await storedRows(userId)).toEqual([]);
+    },
+  );
 
   // The mapper of the border builds the domain values. A value that breaks
   // its rule stops there, so the request reaches no repository method.

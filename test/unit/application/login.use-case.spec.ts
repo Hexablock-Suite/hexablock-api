@@ -129,28 +129,30 @@ describe('LoginUseCase', () => {
   });
 
   // The maximum bounds the hash work of one request (#60).
-  it('should_fail_with_invalid_credentials_without_hashing_when_password_has_more_than_128_characters', async () => {
-    const verify = vi.spyOn(hasher, 'verify');
-    const hash = vi.spyOn(hasher, 'hash');
+  it.each(['x'.repeat(129), EMOJI.repeat(129)])(
+    'should_fail_with_invalid_credentials_without_hashing_when_password_has_more_than_128_characters',
+    async (password) => {
+      const verify = vi.spyOn(hasher, 'verify');
+      const hash = vi.spyOn(hasher, 'hash');
 
-    for (const password of ['x'.repeat(129), EMOJI.repeat(129)]) {
       const result = await login.execute({ username: 'ada', password });
 
       expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
-    }
-    expect(verify).not.toHaveBeenCalled();
-    expect(hash).not.toHaveBeenCalled();
-  });
+      expect(verify).not.toHaveBeenCalled();
+      expect(hash).not.toHaveBeenCalled();
+    },
+  );
 
-  it('should_verify_password_when_it_has_128_code_points', async () => {
-    const verify = vi.spyOn(hasher, 'verify');
+  it.each(['x'.repeat(128), EMOJI.repeat(128)])(
+    'should_verify_password_when_it_has_128_code_points',
+    async (password) => {
+      const verify = vi.spyOn(hasher, 'verify');
 
-    for (const password of ['x'.repeat(128), EMOJI.repeat(128)]) {
       await login.execute({ username: 'ada', password });
-    }
 
-    expect(verify).toHaveBeenCalledTimes(2);
-  });
+      expect(verify).toHaveBeenCalledOnce();
+    },
+  );
 
   it('should_verify_password_once_when_password_is_wrong', async () => {
     const verify = vi.spyOn(hasher, 'verify');

@@ -274,9 +274,10 @@ describe('auth endpoints (API-FR-01)', () => {
     });
   });
 
-  it('should_return_validation_error_body_when_body_is_not_a_json_object', async () => {
-    const server = testApp.app.getHttpServer();
-    for (const path of ['/auth/register', '/auth/login']) {
+  it.each(['/auth/register', '/auth/login'])(
+    'should_return_validation_error_body_when_body_is_not_a_json_object',
+    async (path) => {
+      const server = testApp.app.getHttpServer();
       const responses = [
         await request(server).post(path).send([]),
         await request(server).post(path).set('Content-Type', 'text/plain').send('ada'),
@@ -292,9 +293,9 @@ describe('auth endpoints (API-FR-01)', () => {
           path,
         });
       }
-    }
-    expect(await testApp.database.db.select().from(users)).toHaveLength(0);
-  });
+      expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+    },
+  );
 
   it('should_return_bad_request_error_body_when_json_body_is_null', async () => {
     const response = await request(testApp.app.getHttpServer())

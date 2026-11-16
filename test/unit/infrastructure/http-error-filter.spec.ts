@@ -53,13 +53,13 @@ describe('HttpErrorFilter', () => {
     vi.restoreAllMocks();
   });
 
-  it('should_hide_thrown_value_and_log_it_when_handler_throws_a_value_that_is_not_an_error', () => {
-    for (const [thrown, logged] of [
-      ['disk quota exceeded', 'error=string'],
-      [undefined, 'error=undefined'],
-    ] as const) {
+  it.each([
+    ['disk quota exceeded', 'error=string'],
+    [undefined, 'error=undefined'],
+  ])(
+    'should_hide_thrown_value_and_log_it_when_handler_throws_a_value_that_is_not_an_error',
+    (thrown, logged) => {
       const { host, sent } = httpHost();
-      logError.mockClear();
 
       filter.catch(thrown, host);
 
@@ -73,8 +73,8 @@ describe('HttpErrorFilter', () => {
       });
       expect(logError).toHaveBeenCalledOnce();
       expect(logError).toHaveBeenCalledWith(logged, undefined);
-    }
-  });
+    },
+  );
 
   it('should_keep_own_message_when_http_exception_has_a_5xx_status', () => {
     const { host, sent } = httpHost();
@@ -138,14 +138,12 @@ describe('HttpErrorFilter', () => {
   });
 
   // An exception can quote the request URL. The query of that URL can hold a
-  // secret, so the body keeps no part of it.
-  it('should_remove_the_query_from_message_and_details_when_an_http_exception_quotes_the_url', () => {
-    const url = `${PATH}?token=secret-value&next=1`;
-    const quoted = [
-      new ConflictException(`Level ${url} is locked`),
-      new BadRequestException([`Cannot read ${url}`, 'name must be a string']),
-    ];
-    const expected = [
+  // secret, so the body keeps no part of it. A row gives the exception and
+  // the body that the filter sends.
+  const urlWithQuery = `${PATH}?token=secret-value&next=1`;
+  it.each([
+    [
+      new ConflictException(`Level ${urlWithQuery} is locked`),
       {
         statusCode: 409,
         error: 'Conflict',
@@ -153,6 +151,9 @@ describe('HttpErrorFilter', () => {
         details: [],
         path: PATH,
       },
+    ],
+    [
+      new BadRequestException([`Cannot read ${urlWithQuery}`, 'name must be a string']),
       {
         statusCode: 400,
         error: 'Bad Request',
@@ -160,28 +161,27 @@ describe('HttpErrorFilter', () => {
         details: [`Cannot read ${PATH}`, 'name must be a string'],
         path: PATH,
       },
-    ];
-
-    quoted.forEach((error, index) => {
-      const { host, sent } = httpHost(url);
+    ],
+  ])(
+    'should_remove_the_query_from_message_and_details_when_an_http_exception_quotes_the_url',
+    (error, expected) => {
+      const { host, sent } = httpHost(urlWithQuery);
 
       filter.catch(error, host);
 
-      expect(sent.body).toEqual(expected[index]);
+      expect(sent.body).toEqual(expected);
       expect(JSON.stringify(sent.body)).not.toContain('token');
-    });
-  });
+    },
+  );
 
   // A message or a detail can quote the URL more than once. The body keeps no
   // copy of the query. One exception fills the message only, and a validation
-  // exception fills the details only, so the test uses one of each.
-  it('should_remove_every_copy_of_the_query_when_the_message_quotes_the_url_twice', () => {
-    const url = `${PATH}?token=secret-value`;
-    const quoted = [
-      new ConflictException(`Move ${url} to ${url}`),
-      new BadRequestException([`Cannot read ${url} or ${url}`]),
-    ];
-    const expected = [
+  // exception fills the details only, so the test uses one of each. A row
+  // gives the exception and the body that the filter sends.
+  const urlWithSecret = `${PATH}?token=secret-value`;
+  it.each([
+    [
+      new ConflictException(`Move ${urlWithSecret} to ${urlWithSecret}`),
       {
         statusCode: 409,
         error: 'Conflict',
@@ -189,6 +189,9 @@ describe('HttpErrorFilter', () => {
         details: [],
         path: PATH,
       },
+    ],
+    [
+      new BadRequestException([`Cannot read ${urlWithSecret} or ${urlWithSecret}`]),
       {
         statusCode: 400,
         error: 'Bad Request',
@@ -196,15 +199,16 @@ describe('HttpErrorFilter', () => {
         details: [`Cannot read ${PATH} or ${PATH}`],
         path: PATH,
       },
-    ];
-
-    quoted.forEach((error, index) => {
-      const { host, sent } = httpHost(url);
+    ],
+  ])(
+    'should_remove_every_copy_of_the_query_when_the_message_quotes_the_url_twice',
+    (error, expected) => {
+      const { host, sent } = httpHost(urlWithSecret);
 
       filter.catch(error, host);
 
-      expect(sent.body).toEqual(expected[index]);
+      expect(sent.body).toEqual(expected);
       expect(JSON.stringify(sent.body)).not.toContain('secret-value');
-    });
-  });
+    },
+  );
 });
