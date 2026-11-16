@@ -9,7 +9,8 @@ export const PASSWORD_LENGTH = Range.ofNumbers(8, 128);
 
 export type PasswordProblem = 'invalid-password';
 
-// A plain password that a new user chooses. Only the hash is stored.
+// A plain password that a new user chooses. Only the hash is stored. The
+// text that a player types at sign-in is a PasswordAttempt, not a Password.
 export class Password {
   private constructor(private readonly value: string) {}
 
@@ -17,12 +18,6 @@ export class Password {
     return PASSWORD_LENGTH.contains(Password.codePoints(raw))
       ? ok(new Password(raw))
       : err('invalid-password');
-  }
-
-  // Tells if a text is longer than any password. Sign-in asks this before it
-  // hashes. It takes the raw text, because create() rejects a text this long.
-  static isTooLong(raw: string): boolean {
-    return PASSWORD_LENGTH.isExceededBy(Password.codePoints(raw));
   }
 
   // Counts Unicode code points, not UTF-16 units: an emoji is one character

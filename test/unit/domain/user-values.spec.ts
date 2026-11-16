@@ -1,6 +1,8 @@
+import { inspect } from 'node:util';
 import type { Result } from '../../../src/domain/shared/result.js';
 import * as passwordModule from '../../../src/domain/user/password.js';
 import { PASSWORD_LENGTH, Password } from '../../../src/domain/user/password.js';
+import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { USERNAME_LENGTH, USERNAME_PATTERN, Username } from '../../../src/domain/user/username.js';
@@ -116,19 +118,6 @@ describe('Password', () => {
     },
   );
 
-  // Sign-in checks a text that is not a Password yet, so the operation takes the raw text.
-  // A row gives the text and the answer.
-  it.each([
-    ['x'.repeat(129), true],
-    [EMOJI.repeat(129), true],
-    ['', false],
-    ['1234567', false],
-    ['x'.repeat(128), false],
-    [EMOJI.repeat(128), false],
-  ])('should_tell_that_text_is_too_long_when_it_has_more_than_128_code_points', (raw, tooLong) => {
-    expect(Password.isTooLong(raw)).toBe(tooLong);
-  });
-
   // #90: the text leaves only through a delivery to a receiver.
   it('should_have_no_public_value_field_when_the_password_leaves_through_a_delivery', () => {
     const result = Password.create('correct horse');
@@ -145,6 +134,50 @@ describe('Password', () => {
 
   it('should_keep_the_length_count_inside_password_when_module_lists_its_exports', () => {
     expect(Object.keys(passwordModule).sort()).toEqual(['PASSWORD_LENGTH', 'Password']);
+  });
+});
+
+// #98: the text that a player types at sign-in. A wrong password can have
+// any length, so the attempt has no length rule and its factory cannot fail.
+describe('PasswordAttempt', () => {
+  it.each(['', 'short', '1234567', 'correct horse', 'x'.repeat(129), EMOJI.repeat(129)])(
+    'should_deliver_the_text_as_typed_when_the_attempt_has_any_length',
+    (typed) => {
+      const attempt = PasswordAttempt.of(typed);
+
+      expect(attempt).toBeInstanceOf(PasswordAttempt);
+      expect(deliveredBy(attempt)).toEqual([typed]);
+    },
+  );
+
+  // Sign-in asks this before any hash work. A row gives the text and the answer.
+  it.each([
+    ['x'.repeat(129), true],
+    [EMOJI.repeat(129), true],
+    ['', false],
+    ['1234567', false],
+    ['x'.repeat(128), false],
+    [EMOJI.repeat(128), false],
+  ])(
+    'should_tell_that_the_attempt_is_longer_than_any_password_when_it_has_more_than_128_code_points',
+    (typed, longer) => {
+      expect(PasswordAttempt.of(typed).isLongerThanAnyPassword()).toBe(longer);
+    },
+  );
+
+  // A logger writes an object with util.inspect() or JSON.stringify(). Neither
+  // one sees the text, and the text leaves only through a delivery.
+  it('should_show_no_typed_text_when_a_logger_or_json_receives_the_attempt', () => {
+    const attempt = PasswordAttempt.of('correct horse');
+    // A logger can get any value, so the test passes the attempt as unknown.
+    const logged: unknown = attempt;
+
+    expect(JSON.stringify(attempt)).toBe('{}');
+    expect(JSON.stringify({ attempt })).toBe('{"attempt":{}}');
+    expect(inspect(attempt, { showHidden: true, depth: null })).not.toContain('correct horse');
+    expect(String(logged)).toBe('[object Object]');
+    expect(Object.getOwnPropertyNames(attempt)).toEqual([]);
+    expect(deliveredBy(attempt)).toEqual(['correct horse']);
   });
 });
 

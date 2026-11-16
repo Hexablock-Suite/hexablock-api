@@ -42,8 +42,8 @@ describe('Range', () => {
     expect(range.deliverBoundsTo(new RecordingBoundsReceiver<number>())).toBeUndefined();
   });
 
-  // Password.isTooLong() asks this, so it reads no bound. A row gives the
-  // value and the answer.
+  // PasswordAttempt.isLongerThanAnyPassword() asks this, so it reads no
+  // bound. A row gives the value and the answer.
   it.each([
     [129, true],
     [Infinity, true],

@@ -1,3 +1,4 @@
+import type { PasswordAttempt } from './password-attempt.js';
 import type { PasswordHash } from './password-hash.js';
 import type { PasswordVerifier } from './password-verifier.js';
 import type { UserId } from './user-id.js';
@@ -44,10 +45,10 @@ export class User {
     receiver.receive(this.id, this.username, this.passwordHash);
   }
 
-  // Tells if a typed text is the password of this user. The user passes its
-  // own hash to the verifier, so the caller reads no hash. The domain knows
-  // no hash algorithm: the verifier does the check.
-  passwordMatches(typed: string, verifier: PasswordVerifier): Promise<boolean> {
-    return verifier.verify(typed, this.passwordHash);
+  // Tells if a typed attempt is the password of this user. The user passes
+  // its own hash to the verifier, so the caller reads no hash. The domain
+  // knows no hash algorithm: the verifier does the check.
+  passwordMatches(attempt: PasswordAttempt, verifier: PasswordVerifier): Promise<boolean> {
+    return verifier.verify(attempt, this.passwordHash);
   }
 }

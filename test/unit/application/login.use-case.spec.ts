@@ -1,7 +1,9 @@
+import { receiveValueOf } from '../../../src/adapters/received.js';
 import { LoginUseCase } from '../../../src/application/auth/login.use-case.js';
 import { RegisterUseCase } from '../../../src/application/auth/register.use-case.js';
 import type { PasswordHasher } from '../../../src/application/ports/password-hasher.js';
 import { Password } from '../../../src/domain/user/password.js';
+import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import {
   InMemoryUserRepository,
@@ -14,6 +16,15 @@ import { valueOf } from '../../support/result.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';
+
+// The checks that the PasswordHasher port saw: the typed text and the hash
+// of each call. The port is the boundary of the hexagon, so a test counts
+// its calls. A test double of a port is border code, so it receives the text.
+function checksOf(
+  calls: readonly (readonly [PasswordAttempt, PasswordHash])[],
+): (readonly [string, PasswordHash])[] {
+  return calls.map(([attempt, hash]) => [receiveValueOf(attempt), hash] as const);
+}
 
 describe('LoginUseCase', () => {
   let login: LoginUseCase;
@@ -70,10 +81,9 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith(
-      'correct horse',
-      valueOf(PasswordHash.from('hashed:unknown-user-dummy-password')),
-    );
+    expect(checksOf(verify.mock.calls)).toEqual([
+      ['correct horse', valueOf(PasswordHash.from('hashed:unknown-user-dummy-password'))],
+    ]);
   });
 
   // The typed text can be shorter than any Password. The unknown username
@@ -88,7 +98,7 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify.mock.calls[0][0]).toBe('short');
+    expect(receiveValueOf(verify.mock.calls[0][0])).toBe('short');
     expect(verify.mock.calls[0][1]).toBe(dummy);
   });
 
@@ -158,23 +168,25 @@ describe('LoginUseCase', () => {
   it('should_verify_password_once_when_password_is_wrong', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
-    await login.execute({ username: 'ada', password: 'wrong horse' });
+    const result = await login.execute({ username: 'ada', password: 'wrong horse' });
 
+    expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith(
-      'wrong horse',
-      valueOf(PasswordHash.from('hashed:correct horse')),
-    );
+    expect(checksOf(verify.mock.calls)).toEqual([
+      ['wrong horse', valueOf(PasswordHash.from('hashed:correct horse'))],
+    ]);
   });
 
   // #90: the port carries domain types, so the use case reads no text.
+  // #98: the typed text reaches the port as a PasswordAttempt.
   it('should_pass_the_typed_text_and_the_stored_password_hash_to_the_hasher_when_user_signs_in', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
     await login.execute({ username: 'ada', password: 'correct horse' });
 
-    const [typed, hash] = verify.mock.calls[0];
-    expect(typed).toBe('correct horse');
+    const [attempt, hash] = verify.mock.calls[0];
+    expect(attempt).toBeInstanceOf(PasswordAttempt);
+    expect(receiveValueOf(attempt)).toBe('correct horse');
     expect(hash).toBeInstanceOf(PasswordHash);
   });
 
@@ -188,7 +200,8 @@ describe('LoginUseCase', () => {
   });
 
   // The trap of #90: a wrong password can be shorter than any Password, and
-  // it still costs one hash check. So verify() takes the typed text.
+  // it still costs one hash check. So verify() takes a PasswordAttempt, which
+  // has no length rule (#98).
   it('should_verify_the_typed_text_once_when_it_is_shorter_than_any_password', async () => {
     const verify = vi.spyOn(hasher, 'verify');
 
@@ -196,25 +209,14 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith(
-      'short',
-      valueOf(PasswordHash.from('hashed:correct horse')),
-    );
+    expect(checksOf(verify.mock.calls)).toEqual([
+      ['short', valueOf(PasswordHash.from('hashed:correct horse'))],
+    ]);
   });
 
-  // #91: the use case never opens the user. The user checks the typed text
-  // with the hasher, and the token issuer takes the user.
-  it('should_ask_the_found_user_to_check_the_typed_text_with_the_hasher_when_user_signs_in', async () => {
-    const [ada] = users.users;
-    const passwordMatches = vi.spyOn(ada, 'passwordMatches');
-
-    await login.execute({ username: 'ada', password: 'wrong horse' });
-
-    expect(passwordMatches).toHaveBeenCalledOnce();
-    expect(passwordMatches.mock.calls[0][0]).toBe('wrong horse');
-    expect(passwordMatches.mock.calls[0][1]).toBe(hasher);
-  });
-
+  // #91: the token issuer takes the user. #98: no test spies on the user. The
+  // check of the stored hash through the port shows that the user checks
+  // the typed text.
   it('should_pass_the_found_user_to_the_token_issuer_when_credentials_are_valid', async () => {
     const issue = vi.spyOn(tokens, 'issue');
 
@@ -232,10 +234,9 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify).toHaveBeenCalledWith(
-      'correct horse',
-      valueOf(PasswordHash.from('hashed:correct horse')),
-    );
+    expect(checksOf(verify.mock.calls)).toEqual([
+      ['correct horse', valueOf(PasswordHash.from('hashed:correct horse'))],
+    ]);
   });
 
   it('should_issue_no_token_when_the_password_is_wrong_or_the_username_is_unknown', async () => {
@@ -277,10 +278,9 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: 'invalid-credentials' });
     expect(verify).toHaveBeenCalledOnce();
-    expect(verify.mock.calls[0][0]).toBe('correct horse');
     expect(verify.mock.calls[0][1]).not.toEqual(valueOf(PasswordHash.from('hashed:correct horse')));
-    expect(verify.mock.calls[0][1]).toEqual(
-      valueOf(PasswordHash.from('hashed:unknown-user-dummy-password')),
-    );
+    expect(checksOf(verify.mock.calls)).toEqual([
+      ['correct horse', valueOf(PasswordHash.from('hashed:unknown-user-dummy-password'))],
+    ]);
   });
 });

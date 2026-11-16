@@ -1,5 +1,6 @@
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import { Password } from '../../domain/user/password.js';
+import { PasswordAttempt } from '../../domain/user/password-attempt.js';
 import type { PasswordHash } from '../../domain/user/password-hash.js';
 import type { User } from '../../domain/user/user.js';
 import { Username } from '../../domain/user/username.js';
@@ -50,30 +51,31 @@ export class LoginUseCase implements Login {
   }
 
   async execute(request: Credentials): Promise<Result<SessionToken, LoginProblem>> {
+    const attempt = PasswordAttempt.of(request.password);
     // No stored password is longer than the maximum. This check bounds the
     // hash work of one request and gives the same failure as a wrong password.
-    if (Password.isTooLong(request.password)) {
+    if (attempt.isLongerThanAnyPassword()) {
       return err('invalid-credentials');
     }
     const username = Username.create(request.username);
     const user = username.ok ? await this.users.findByUsername(username.value) : null;
     // The check runs before the test of the user, so an unknown username costs it too.
-    const matches = await this.passwordMatches(user, request.password);
+    const matches = await this.passwordMatches(user, attempt);
     if (user === null || !matches) {
       return err('invalid-credentials');
     }
     return ok(this.tokens.issue(user));
   }
 
-  // Runs exactly one hash check. The typed text is not a Password: a wrong
+  // Runs exactly one hash check. The attempt is not a Password: a wrong
   // password can be shorter than any Password, and it still costs one check.
-  // A found user checks the text against its own hash. An unknown username
+  // A found user checks the attempt against its own hash. An unknown username
   // costs the same check, against the dummy hash, and never matches.
-  private async passwordMatches(user: User | null, typed: string): Promise<boolean> {
+  private async passwordMatches(user: User | null, attempt: PasswordAttempt): Promise<boolean> {
     if (user !== null) {
-      return user.passwordMatches(typed, this.hasher);
+      return user.passwordMatches(attempt, this.hasher);
     }
-    await this.hasher.verify(typed, await this.dummyHash);
+    await this.hasher.verify(attempt, await this.dummyHash);
     return false;
   }
 }
