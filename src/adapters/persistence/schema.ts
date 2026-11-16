@@ -6,6 +6,7 @@ import {
   bigint,
   foreignKey,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -68,4 +69,23 @@ export const levelResults = pgTable(
       foreignColumns: [progress.userId, progress.gameId],
     }).onDelete('cascade'),
   ],
+);
+
+// API-FR-04 and DS-6: one row per gameId and levelId, the identity of a
+// LevelDefinition. The common part has one column per field, and the typed
+// section is one JSON column, so a new variant with level files changes no
+// column. The bigint columns hold any safe integer of the domain. The table
+// applies no level rule: LevelRowMapper builds each stored section again
+// through the strategy of its gameId.
+export const levels = pgTable(
+  'levels',
+  {
+    gameId: text('game_id').notNull(),
+    levelId: text('level_id').notNull(),
+    order: bigint('order', { mode: 'number' }).notNull(),
+    version: bigint('version', { mode: 'number' }).notNull(),
+    topology: text('topology').notNull(),
+    section: jsonb('section').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.gameId, table.levelId] })],
 );

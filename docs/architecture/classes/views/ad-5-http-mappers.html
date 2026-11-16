@@ -73,8 +73,9 @@
           Class diagram of layers 3 and 1 showing ProgressDtoMapper and LevelDtoMapper in
           src/adapters/http: ProgressController uses ProgressDtoMapper to turn PlayerProgress into
           the response DTO through the parts that the aggregate delivers to a
-          PlayerProgressReceiver, and LevelsController uses LevelDtoMapper to turn each LevelDto
-          into a level and a failed Result into the error body.
+          PlayerProgressReceiver, and LevelsController uses LevelDtoMapper to build the update
+          request from the body, to turn each LevelDefinition into a LevelDto and to write the error
+          details of a failed Result.
         </desc>
         <defs>
           <marker
@@ -190,10 +191,10 @@
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
-        <!-- LevelDtoMapper returns a LevelDefinition: use -->
+        <!-- LevelDtoMapper takes a LevelDefinition: use -->
         <line
           x1="640"
-          y1="296"
+          y1="312"
           x2="640"
           y2="488"
           stroke="#5b6873"
@@ -249,9 +250,9 @@
         >
           TAKES
         </text>
-        <rect x="646" y="392" width="48" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="646" y="392" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
-          x="670"
+          x="666"
           y="401"
           fill="#7d8a94"
           font-size="8"
@@ -259,7 +260,7 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          RETURNS
+          TAKES
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="316" height="12" rx="2" fill="#e2ebf8" />
@@ -421,7 +422,7 @@
           x="560"
           y="176"
           width="424"
-          height="120"
+          height="136"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -462,13 +463,24 @@
         </text>
         <line x1="560" y1="236" x2="984" y2="236" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="576" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toLevel(dto: LevelDto): AnyLevel
+          + toRequest(body: unknown): Result&lt;UpdateLevelsRequest, string[]&gt;
         </text>
         <text x="576" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toDto(level: AnyLevel): LevelDto
+          + toDto(level: LevelDefinition&lt;unknown&gt;): LevelDto
         </text>
-        <text x="576" y="284" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toErrorBody(problems: LevelProblem[]): ErrorDto
+        <text
+          textLength="390"
+          lengthAdjust="spacingAndGlyphs"
+          x="576"
+          y="284"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + toLevelsDto(levels: readonly LevelDefinition&lt;unknown&gt;[]): LevelsDto
+        </text>
+        <text x="576" y="300" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toDetails(problems: readonly LevelProblemReport[]): string[]
         </text>
         <!-- Class: PlayerProgress (PART 1 · VIEW 1) -->
         <rect
@@ -654,8 +666,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          A failed Result of UpdateLevels becomes the error body of API-FR-06 through toErrorBody().
-          The mappers hold no state.
+          A failed Result of UpdateLevels becomes the details of the 400 body of API-FR-06 through
+          toDetails(). The mappers hold no state.
         </text>
         <!-- Legend -->
         <line x1="24" y1="656" x2="1016" y2="656" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
