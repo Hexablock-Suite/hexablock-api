@@ -81,8 +81,9 @@
           order of S3-03. In layer 2, the LeaderboardEntry response type names the player by UserId
           and holds the value that ranks the player: a LevelResult, a Score or a Standing. GameId,
           Score and UserId keep their value private and deliver it to a receiver with deliverTo().
-          LevelResult keeps its four value objects private, takes them built in of(), and delivers
-          all four to a LevelResultReceiver with deliverTo().
+          Each of their factories returns a Result with the code of a broken rule. LevelResult keeps
+          its four value objects private, takes them built in of(), and delivers all four to a
+          LevelResultReceiver with deliverTo().
         </desc>
         <defs>
           <marker
@@ -426,7 +427,7 @@
           x="64"
           y="248"
           width="224"
-          height="144"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -467,15 +468,25 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + from(value: string): UserId
+          + from(value: string):
         </text>
-        <text x="80" y="352" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: UserId): boolean
+        <text
+          x="102"
+          y="352"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;UserId, UserIdProblem&gt;
         </text>
         <text x="80" y="368" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: UserId): boolean
+        </text>
+        <text x="80" y="384" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="384" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="400" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: LevelResult («value object») -->
@@ -846,7 +857,7 @@
           x="744"
           y="596"
           width="248"
-          height="160"
+          height="176"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -887,26 +898,36 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + of(value: number): Score
+          + of(value: number):
         </text>
-        <text x="760" y="700" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          x="782"
+          y="700"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;Score, ScoreProblem&gt;
+        </text>
+        <text x="760" y="716" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Score): boolean
         </text>
         <text
           textLength="210"
           lengthAdjust="spacingAndGlyphs"
           x="760"
-          y="716"
+          y="732"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           + isHigherThan(other: Score): boolean
         </text>
-        <text x="760" y="732" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="760" y="748" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="782" y="748" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="782" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;number&gt;): void
         </text>
         <!-- Class: GameId («value object») -->
@@ -914,7 +935,7 @@
           x="64"
           y="676"
           width="224"
-          height="144"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -955,15 +976,25 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + of(value: string): GameId
+          + of(value: string):
         </text>
-        <text x="80" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: GameId): boolean
+        <text
+          x="102"
+          y="780"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;GameId, GameIdProblem&gt;
         </text>
         <text x="80" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: GameId): boolean
+        </text>
+        <text x="80" y="812" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="812" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="828" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- UML template box: the type parameter on the top-right corner -->
@@ -1049,7 +1080,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           GameId, Score and UserId keep their value private (decision 15): deliverTo() delivers it
-          to a receiver of layers 3 and 4, and no operation returns it.
+          to layers 3 and 4. Each factory returns a Result with the code of a broken rule.
         </text>
         <text
           x="24"

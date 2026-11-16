@@ -71,10 +71,11 @@
         <title id="domain4levelresult-title">HexaBlock API level result · UML class diagram</title>
         <desc id="domain4levelresult-desc">
           Class diagram of layer 1 showing the LevelResult value object, which holds a LevelId, a
-          Stars, a Moves and an ElapsedTime value object. Each one guards its own rule and compares
-          by value, and LevelResult asks them which of two results of one level is better. Each one
-          keeps its value private and delivers it to a receiver with deliverTo(). LevelResult keeps
-          the four value objects private, takes them built in of(), and delivers all four to a
+          Stars, a Moves and an ElapsedTime value object. Each one guards its own rule in a factory
+          that returns a Result with the code of a broken rule, and compares by value, and
+          LevelResult asks them which of two results of one level is better. Each one keeps its
+          value private and delivers it to a receiver with deliverTo(). LevelResult keeps the four
+          value objects private, takes them built in of(), and delivers all four to a
           LevelResultReceiver with deliverTo().
         </desc>
         <defs>
@@ -320,7 +321,7 @@
           x="64"
           y="96"
           width="256"
-          height="144"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -361,15 +362,25 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + of(value: string): LevelId
+          + of(value: string):
         </text>
-        <text x="80" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: LevelId): boolean
+        <text
+          x="102"
+          y="200"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;LevelId, LevelIdProblem&gt;
         </text>
         <text x="80" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: LevelId): boolean
+        </text>
+        <text x="80" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: Stars («value object») -->
@@ -377,7 +388,7 @@
           x="720"
           y="96"
           width="280"
-          height="144"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -418,19 +429,29 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + of(value: number): Stars
+          + of(value: number):
         </text>
-        <text x="736" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: Stars): boolean
+        <text
+          x="758"
+          y="200"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;Stars, StarsProblem&gt;
         </text>
         <text x="736" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: Stars): boolean
+        </text>
+        <text x="736" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isMoreThan(other: Stars): boolean
         </text>
         <text
           textLength="258"
           lengthAdjust="spacingAndGlyphs"
           x="736"
-          y="232"
+          y="248"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -442,7 +463,7 @@
           x="64"
           y="332"
           width="256"
-          height="160"
+          height="176"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -483,18 +504,28 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + of(value: number): Moves
+          + of(value: number):
         </text>
-        <text x="80" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: Moves): boolean
+        <text
+          x="102"
+          y="436"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;Moves, MovesProblem&gt;
         </text>
         <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + isFewerThan(other: Moves): boolean
+          + equals(other: Moves): boolean
         </text>
         <text x="80" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isFewerThan(other: Moves): boolean
+        </text>
+        <text x="80" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;number&gt;): void
         </text>
         <!-- Class: ElapsedTime («value object») -->
@@ -502,7 +533,7 @@
           x="720"
           y="332"
           width="280"
-          height="144"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -543,16 +574,26 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + ofMs(value: number): ElapsedTime
+          + ofMs(value: number):
         </text>
-        <text x="736" y="436" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          x="758"
+          y="436"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;ElapsedTime, ElapsedTimeProblem&gt;
+        </text>
+        <text x="736" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: ElapsedTime): boolean
         </text>
         <text
           textLength="258"
           lengthAdjust="spacingAndGlyphs"
           x="736"
-          y="452"
+          y="468"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -563,7 +604,7 @@
           textLength="258"
           lengthAdjust="spacingAndGlyphs"
           x="736"
-          y="468"
+          y="484"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -579,7 +620,8 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           LevelResult is the result of one level. Its four attributes are private value objects:
-          each one checks its own rule in its factory method and is equal by value.
+          each one checks its own rule in its factory method, which returns a Result, and is equal
+          by value.
         </text>
         <text
           x="24"
@@ -588,7 +630,7 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          An adapter of layer 3 builds the four values, so a broken rule stops there, and
+          An adapter of layer 3 builds the four values, so a failed Result stops there, and
           LevelResult.of() takes them built. LevelId is a non-blank text.
         </text>
         <text
