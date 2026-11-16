@@ -1,41 +1,34 @@
 import type { BoundsReceiver } from './bounds-receiver.js';
+import type { Ordered } from './ordered.js';
 
-// Orders two values as Array.prototype.sort does: a negative number, zero or
-// a positive number. NaN means that the two values have no order.
-export type Compare<T> = (left: T, right: T) => number;
-
-// A closed interval [min, max] over any ordered type. The bounds are
-// private and never change. contains() tells if a value lies inside the
-// bounds, and isExceededBy() tells if it lies above them. The bounds leave
-// only through deliverBoundsTo().
-export class Range<T> {
+// A closed interval [min, max] over a value that orders itself, such as the
+// Range<CharacterCount> of a credential length. The bounds are private and
+// never change. contains() tells if a value lies inside the bounds, and
+// isExceededBy() tells if it lies above them. Each answer asks the values
+// with isAfter(), so the order lives in T and no number order crosses the
+// range (#99). The bounds leave only through deliverBoundsTo().
+export class Range<T extends Ordered<T>> {
   private constructor(
     private readonly min: T,
     private readonly max: T,
-    private readonly compare: Compare<T>,
   ) {}
 
-  // Throws RangeError when min comes after max or the bounds have no order.
-  static of<T>(min: T, max: T, compare: Compare<T>): Range<T> {
-    if (!(compare(min, max) <= 0)) {
+  // Throws RangeError when min comes after max. The code builds each range
+  // from fixed bounds, so that is a defect of the code (decision 11).
+  static of<T extends Ordered<T>>(min: T, max: T): Range<T> {
+    if (min.isAfter(max)) {
       throw new RangeError('A Range needs min <= max.');
     }
-    return new Range(min, max, compare);
+    return new Range(min, max);
   }
 
-  static ofNumbers(min: number, max: number): Range<number> {
-    return Range.of(min, max, compareNumbers);
-  }
-
-  // A value without an order, such as NaN, is never inside the range.
   contains(value: T): boolean {
-    return this.compare(this.min, value) <= 0 && this.compare(value, this.max) <= 0;
+    return !this.min.isAfter(value) && !value.isAfter(this.max);
   }
 
-  // Tells if a value lies above the upper bound. A value without an order,
-  // such as NaN, is not above the range.
+  // Tells if a value lies above the upper bound.
   isExceededBy(value: T): boolean {
-    return this.compare(value, this.max) > 0;
+    return value.isAfter(this.max);
   }
 
   // Delivers both bounds to a receiver of the border, for the OpenAPI limits
@@ -44,21 +37,8 @@ export class Range<T> {
     receiver.receive(this.min, this.max);
   }
 
-  // Two ranges are equal when each one reads the bounds of both as the same bounds.
-  // The order of the range compares the bounds, so T needs no equals().
-  // Each range asks its own order, so the answer is the same in both directions.
+  // Two ranges are equal when their bounds are equal values.
   equals(other: Range<T>): boolean {
-    return this.hasBoundsOf(other) && other.hasBoundsOf(this);
+    return this.min.equals(other.min) && this.max.equals(other.max);
   }
-
-  private hasBoundsOf(other: Range<T>): boolean {
-    return this.compare(this.min, other.min) === 0 && this.compare(this.max, other.max) === 0;
-  }
-}
-
-// Subtraction gives NaN for two equal infinities, so this function compares.
-function compareNumbers(left: number, right: number): number {
-  if (left < right) return -1;
-  if (left > right) return 1;
-  return left === right ? 0 : Number.NaN;
 }

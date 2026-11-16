@@ -1,19 +1,26 @@
 import { Range } from '../shared/range.js';
 import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
+import { CharacterCount } from './character-count.js';
+
+// The value of a limit of this file. A limit is a fixed count, so a failed
+// Result is a defect of the code.
+function limit(count: number): CharacterCount {
+  const result = CharacterCount.of(count);
+  if (!result.ok) {
+    throw new RangeError(`A username limit breaks the rule ${result.error}.`);
+  }
+  return result.value;
+}
 
 // 3 to 32 letters, digits, dots, hyphens or underscores. A proposal for
-// team review: API-FR-01 sets no length or character rule.
-const MIN_LENGTH = 3;
-const MAX_LENGTH = 32;
-export const USERNAME_LENGTH = Range.ofNumbers(MIN_LENGTH, MAX_LENGTH);
+// team review: API-FR-01 sets no length or character rule. The range
+// delivers its bounds to the OpenAPI limits and the messages of the border.
+// The OpenAPI pattern lives in the HTTP adapter, so this module exports no
+// string (#99).
+export const USERNAME_LENGTH = Range.of(limit(3), limit(32));
 
-const ALLOWED_CHARACTERS = 'A-Za-z0-9._-';
-const ONLY_ALLOWED_CHARACTERS = new RegExp(`^[${ALLOWED_CHARACTERS}]*$`);
-
-// The same rule as one pattern, for the OpenAPI schema of the request body.
-// It uses the two limits that build USERNAME_LENGTH, so it reads no bound of the range.
-export const USERNAME_PATTERN = `^[${ALLOWED_CHARACTERS}]{${MIN_LENGTH},${MAX_LENGTH}}$`;
+const ONLY_ALLOWED_CHARACTERS = /^[A-Za-z0-9._-]*$/;
 
 export type UsernameProblem = 'invalid-username';
 
@@ -31,10 +38,10 @@ export class Username {
     this.key = value.toLowerCase();
   }
 
-  // Every allowed character is ASCII, so the UTF-16 length of an accepted
-  // name equals its code point count.
+  // The name counts its characters through CharacterCount, as a password
+  // does. Every allowed character is ASCII, so one character is one UTF-16 unit.
   static create(raw: string): Result<Username, UsernameProblem> {
-    return ONLY_ALLOWED_CHARACTERS.test(raw) && USERNAME_LENGTH.contains(raw.length)
+    return ONLY_ALLOWED_CHARACTERS.test(raw) && USERNAME_LENGTH.contains(CharacterCount.ofText(raw))
       ? ok(new Username(raw))
       : err('invalid-username');
   }
