@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -39,5 +39,19 @@ describe('CI contract', () => {
     expect(workflow).toContain('pnpm exec commitlint --from');
     expect(read('.vite-hooks/pre-push')).toContain('pnpm lint && pnpm typecheck && pnpm arch');
     expect(read('.vite-hooks/pre-commit')).toContain('vp staged');
+  });
+
+  // PGlite runs one session, so only the postgres-lock job proves an advisory
+  // lock (rule R-database-harness). A lock spec that the job does not list
+  // would pass every other job without a test of its lock.
+  it('should_run_every_lock_spec_when_postgres_lock_job_runs', () => {
+    const job = /^ {2}postgres-lock:\n[\s\S]*?(?=^ {2}[a-z-]+:$)/m.exec(workflow)?.[0] ?? '';
+    const lockSpecs = readdirSync(resolve(ROOT, 'test/integration'))
+      .filter((file) => file.endsWith('.concurrency.spec.ts'))
+      .map((file) => `test/integration/${file}`);
+
+    expect(lockSpecs.length).toBeGreaterThan(0);
+    expect(lockSpecs.filter((spec) => !job.includes(spec))).toEqual([]);
+    expect(job).toContain('--no-file-parallelism');
   });
 });
