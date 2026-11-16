@@ -2,6 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import { sql } from 'drizzle-orm';
 import request from 'supertest';
 import { users } from '../src/adapters/persistence/schema.js';
+import { PASSWORD_HASHER, type PasswordHasher } from '../src/application/ports/password-hasher.js';
 import { createTestApp, TEST_JWT_SECRET, type TestApp } from './support/http/test-app.js';
 
 // API-FR-01: sign-up and sign-in with JWT. API-FR-06: errors use ErrorDto.
@@ -273,6 +274,69 @@ describe('auth endpoints (API-FR-01)', () => {
       path: '/auth/login',
     });
   });
+
+  // Each sign-in path costs the same hash work, so the answer time does not
+  // tell which usernames exist (#96 keeps it). An unknown username runs one
+  // verify() against the dummy hash. Only a text longer than any password
+  // skips the check. No sign-in path calls hash(). The spies count the calls
+  // of the hasher that the app holds, after the sign-up of the row.
+  it.each([
+    { path: 'valid', username: USERNAME, password: PASSWORD, status: 200, verify: 1, hash: 0 },
+    {
+      path: 'other letter case',
+      username: 'ADA',
+      password: PASSWORD,
+      status: 401,
+      verify: 1,
+      hash: 0,
+    },
+    {
+      path: 'wrong password',
+      username: USERNAME,
+      password: 'wrong password',
+      status: 401,
+      verify: 1,
+      hash: 0,
+    },
+    {
+      path: 'unknown username',
+      username: 'nobody',
+      password: PASSWORD,
+      status: 401,
+      verify: 1,
+      hash: 0,
+    },
+    {
+      path: 'password too short',
+      username: USERNAME,
+      password: 'abc',
+      status: 401,
+      verify: 1,
+      hash: 0,
+    },
+    {
+      path: 'password too long',
+      username: USERNAME,
+      password: 'x'.repeat(129),
+      status: 401,
+      verify: 0,
+      hash: 0,
+    },
+  ])(
+    'should_call_verify_and_hash_the_counted_number_of_times_when_a_sign_in_path_runs',
+    async ({ username, password, status, verify, hash }) => {
+      await post('/auth/register', { username: USERNAME, password: PASSWORD });
+      const hasher = testApp.app.get<PasswordHasher>(PASSWORD_HASHER);
+      const verifyCalls = vi.spyOn(hasher, 'verify');
+      const hashCalls = vi.spyOn(hasher, 'hash');
+
+      const response = await post('/auth/login', { username, password });
+
+      expect(response.status).toBe(status);
+      expect(verifyCalls).toHaveBeenCalledTimes(verify);
+      expect(hashCalls).toHaveBeenCalledTimes(hash);
+    },
+  );
 
   it.each(['/auth/register', '/auth/login'])(
     'should_return_validation_error_body_when_body_is_not_a_json_object',

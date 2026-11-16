@@ -310,6 +310,16 @@ describe('PlayerProgress', () => {
     },
   );
 
+  it('should_keep_started_unchanged_and_reject_a_non_progress_when_restore_runs', () => {
+    const started = PlayerProgress.start(USER, GameId.of('hexa-lines'), new Date(0));
+    const before = JSON.stringify(progressPartsOf(started));
+    PlayerProgress.restore(started, Score.of(9), []);
+    expect(JSON.stringify(progressPartsOf(started))).toBe(before);
+    expect(() => PlayerProgress.restore({} as PlayerProgress, null, [])).toThrow(
+      'restore needs a progress that start() made.',
+    );
+  });
+
   // restore() takes the key and the instant of the started progress, and
   // records the stored values. The records of the started progress do not count.
   it('should_keep_the_key_and_the_instant_and_the_stored_values_when_restore_builds_on_a_started_progress', () => {
