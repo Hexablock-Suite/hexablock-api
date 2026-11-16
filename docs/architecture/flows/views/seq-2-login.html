@@ -63,7 +63,7 @@
       <p class="eyebrow">Sequence diagram · Use case 2 of 3</p>
       <h1>Login: one sign-in request through the four layers</h1>
       <svg
-        viewBox="0 0 1420 1032"
+        viewBox="0 0 1420 1048"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="seq2login-title seq2login-desc"
@@ -77,8 +77,8 @@
           controller answers 401. Otherwise the use case asks the User if the password matches, and
           the User passes its own hash to ScryptPasswordHasher. When the password does not match,
           the use case returns a failure and the controller answers 401. Otherwise JwtTokenIssuer
-          issues a SessionToken, and the controller answers with a TokenDto. The typed password
-          travels as a PasswordAttempt value object.
+          issues a SessionToken, and the controller answers with a TokenDto. AuthDtoMapper builds
+          the LoginRequest, so the typed password travels as a PasswordAttempt value object.
         </desc>
         <defs>
           <marker
@@ -632,7 +632,7 @@
         <text x="36" y="176" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           Nest calls signIn(body); no guard
         </text>
-        <!-- Message: Login.execute(credentials) -->
+        <!-- Message: Login.execute(request) -->
         <line
           x1="255"
           y1="200"
@@ -651,7 +651,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          Login.execute(credentials)
+          Login.execute(request)
         </text>
         <!-- Message: UserRepository.findByUsername(username) -->
         <line
@@ -1088,14 +1088,24 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LoginUseCase creates it first, and a text longer than any password fails before any hash
-          work, so the view draws no call for that check.
+          AuthDtoMapper builds it and the Username of the LoginRequest (#105). A username that
+          breaks its rule stops in the mapper with the 401 of a wrong password.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="952" x2="1396" y2="952" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="970"
+          y="940"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LoginUseCase fails a text longer than any password before any hash work. The view draws
+          neither the call to the mapper nor these two checks.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="968" x2="1396" y2="968" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="986"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1105,16 +1115,16 @@
         </text>
         <line
           x1="24"
-          y1="988"
+          y1="1004"
           x2="52"
-          y2="988"
+          y2="1004"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq2login-filled)"
         />
         <text
           x="60"
-          y="992"
+          y="1008"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1123,9 +1133,9 @@
         </text>
         <line
           x1="196"
-          y1="988"
+          y1="1004"
           x2="224"
-          y2="988"
+          y2="1004"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1133,7 +1143,7 @@
         />
         <text
           x="232"
-          y="992"
+          y="1008"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1142,7 +1152,7 @@
         </text>
         <rect
           x="392"
-          y="980"
+          y="996"
           width="10"
           height="16"
           fill="#ffffff"
@@ -1151,7 +1161,7 @@
         />
         <text
           x="410"
-          y="992"
+          y="1008"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1160,7 +1170,7 @@
         </text>
         <rect
           x="548"
-          y="982"
+          y="998"
           width="28"
           height="12"
           rx="2"
@@ -1170,7 +1180,7 @@
         />
         <text
           x="584"
-          y="992"
+          y="1008"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1179,7 +1189,7 @@
         </text>
         <rect
           x="24"
-          y="1008"
+          y="1024"
           width="20"
           height="12"
           rx="2"
@@ -1189,7 +1199,7 @@
         />
         <rect
           x="48"
-          y="1008"
+          y="1024"
           width="20"
           height="12"
           rx="2"
@@ -1199,7 +1209,7 @@
         />
         <rect
           x="72"
-          y="1008"
+          y="1024"
           width="20"
           height="12"
           rx="2"
@@ -1209,7 +1219,7 @@
         />
         <rect
           x="96"
-          y="1008"
+          y="1024"
           width="20"
           height="12"
           rx="2"
@@ -1219,7 +1229,7 @@
         />
         <text
           x="128"
-          y="1017"
+          y="1033"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1228,7 +1238,7 @@
         </text>
         <rect
           x="352"
-          y="1008"
+          y="1024"
           width="28"
           height="12"
           rx="1"
@@ -1238,7 +1248,7 @@
         />
         <text
           x="388"
-          y="1017"
+          y="1033"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
