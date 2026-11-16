@@ -26,9 +26,10 @@ export type UsernameProblem = 'invalid-username';
 
 // The name a player signs in with. It keeps the letter case that the player
 // typed. Sign-in compares the name as typed.
-// The key is the name in lower case. Two users never have the same key, so
-// `Ada` cannot register after `ada` (#62). The key is the one definition of
-// that rule: the persistence adapter stores it and compares it, and the
+// The key is the name in lower case. Two names collide when their keys are
+// equal, and no two users have names that collide, so `Ada` cannot register
+// after `ada` (#62). collidesWith() is the business name of that rule (#100).
+// The persistence adapter stores the key and compares it in SQL, and the
 // database only keeps it unique (#73).
 export class Username {
   private readonly key: string;
@@ -61,5 +62,12 @@ export class Username {
   // `Ada` and `ada` are two names with one key.
   equals(other: Username): boolean {
     return this.value === other.value;
+  }
+
+  // Tells if two names collide: they differ at most in letter case. `Ada`
+  // and `ada` collide, `Ada` and `Adb` do not, and a name collides with itself.
+  // The UserRepository contract checks that the SQL of the adapter agrees.
+  collidesWith(other: Username): boolean {
+    return this.key === other.key;
   }
 }
