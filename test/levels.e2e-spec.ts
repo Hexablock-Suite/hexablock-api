@@ -1,3 +1,4 @@
+import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
 import { levels } from '../src/adapters/persistence/schema.js';
 import { signIn as signInTo } from './support/http/sign-in.js';
@@ -95,6 +96,73 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     expect(read.body).toEqual({ levels: [levelJson('hexa-fit', 'fit-01', 2)] });
   });
 
+  // A lower version fails in the save of its own level. Each level is its
+  // own aggregate, so the new level of the same batch is saved.
+  it('should_answer_bad_request_for_the_stale_level_and_save_the_new_level_when_a_batch_mixes_a_lower_version_and_a_new_level', async () => {
+    const token = await tokenOf('ada');
+    await update(token, { levels: [levelJson('hexa-fit', 'fit-01', 2)] });
+
+    const mixed = await update(token, {
+      levels: [levelJson('hexa-fit', 'fit-01', 1), levelJson('hexa-sort')],
+    });
+    const read = await list();
+
+    expect(mixed.status).toBe(400);
+    expect(mixed.body).toEqual(badRequest('gameId "hexa-fit", levelId "fit-01": older-version'));
+    expect(read.body).toEqual({
+      levels: [levelJson('hexa-fit', 'fit-01', 2), levelJson('hexa-sort')],
+    });
+  });
+
+  // The strategy of the gameId reads the section. A section that is no Fit
+  // section gives a level problem, never a server error: a value that is no
+  // object gives invalid-section, and a missing field gives the problem of
+  // that field.
+  it.each([
+    [null, 'invalid-section'],
+    [42, 'invalid-section'],
+    [{ figure: [[0, 0]] }, 'invalid-pieces'],
+  ])(
+    'should_answer_bad_request_and_save_nothing_when_the_section_is_not_a_fit_section',
+    async (section, problem) => {
+      const token = await tokenOf('ada');
+
+      const rejected = await update(token, { levels: [{ ...levelJson('hexa-fit'), section }] });
+      const read = await list();
+
+      expect(rejected.status).toBe(400);
+      expect(rejected.body).toEqual(badRequest(`gameId "hexa-fit", levelId "fit-01": ${problem}`));
+      expect(read.body).toEqual({ levels: [] });
+    },
+  );
+
+  // A gameId or a levelId that is not a string has no name, so its problem
+  // names its place in the list, as for a string that breaks the rule.
+  const GAME_ID_PROBLEM = 'levels[0]: gameId must be a lowercase slug, got';
+  const LEVEL_ID_PROBLEM = 'levels[0]: levelId must be a non-blank string.';
+  it.each([
+    ['gameId', 5, `${GAME_ID_PROBLEM} 5.`],
+    ['gameId', null, `${GAME_ID_PROBLEM} null.`],
+    ['gameId', { name: 'hexa-fit' }, `${GAME_ID_PROBLEM} {"name":"hexa-fit"}.`],
+    ['levelId', 5, LEVEL_ID_PROBLEM],
+    ['levelId', null, LEVEL_ID_PROBLEM],
+    ['levelId', { name: 'fit-01' }, LEVEL_ID_PROBLEM],
+  ])(
+    'should_answer_bad_request_and_save_nothing_when_the_game_id_or_the_level_id_is_not_a_string',
+    async (field, value, detail) => {
+      const token = await tokenOf('ada');
+
+      const rejected = await update(token, {
+        levels: [{ ...levelJson('hexa-fit'), [field]: value }],
+      });
+      const read = await list();
+
+      expect(rejected.status).toBe(400);
+      expect(rejected.body).toEqual(badRequest(detail));
+      expect(read.body).toEqual({ levels: [] });
+    },
+  );
+
   it('should_answer_unauthorized_and_save_nothing_when_the_update_has_no_token', async () => {
     const rejected = await request(server())
       .put(LEVELS_PATH)
@@ -109,6 +177,42 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
       details: [],
       path: LEVELS_PATH,
     });
+    expect(read.body).toEqual({ levels: [] });
+  });
+
+  // A token that another key signed is no token of this API.
+  it('should_answer_unauthorized_and_save_nothing_when_the_token_is_signed_with_another_secret', async () => {
+    const { userId } = await signInTo(server(), 'ada');
+    const foreign = new JwtService({ secret: 'another-secret' }).sign({ sub: userId });
+
+    const rejected = await update(foreign, { levels: [levelJson('hexa-fit')] });
+
+    expect(rejected.status).toBe(401);
+    expect(rejected.body.message).toBe('Invalid or expired token');
+    expect((await list()).body).toEqual({ levels: [] });
+  });
+
+  // The update checks a batch in two steps. LevelDtoMapper first checks the
+  // fields and the common values of every level. Only when every level
+  // passes, UpdateLevelsUseCase checks the rules of each level, A5 included.
+  // So a wrong field hides the A5 problem of another level, and no level is
+  // saved.
+  it('should_name_only_the_level_with_an_extra_field_and_save_nothing_when_another_level_of_the_batch_fails_a5', async () => {
+    const token = await tokenOf('ada');
+    const extraField = { ...levelJson('hexa-fit', 'fit-02'), extra: true };
+
+    const rejected = await update(token, {
+      levels: [levelJson('hexa-sort'), extraField, a5FailingFitJson('fit-03')],
+    });
+    const read = await list();
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.body).toEqual(
+      badRequest(
+        'gameId "hexa-fit", levelId "fit-02": a level holds exactly the fields gameId, levelId, order, version, topology and section',
+      ),
+    );
+    expect(JSON.stringify(rejected.body.details)).not.toContain('fit-03');
     expect(read.body).toEqual({ levels: [] });
   });
 
