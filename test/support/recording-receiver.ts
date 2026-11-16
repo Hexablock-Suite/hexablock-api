@@ -1,6 +1,6 @@
-import type { GameId } from '../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import type { PlayerProgress } from '../../src/domain/progress/player-progress.js';
+import type { ProgressKey } from '../../src/domain/progress/progress-key.js';
 import type { Score } from '../../src/domain/progress/score.js';
 import type { SyncInstant } from '../../src/domain/progress/sync-instant.js';
 import type { BoundsReceiver } from '../../src/domain/shared/bounds-receiver.js';
@@ -54,8 +54,7 @@ export function boundsDeliveredBy<T>(source: {
 
 // The parts that one delivery of a PlayerProgress gives, as domain values.
 export interface ProgressParts {
-  readonly userId: UserId;
-  readonly gameId: GameId;
+  readonly key: ProgressKey;
   readonly highScore: Score | null;
   readonly updatedAt: SyncInstant;
   readonly results: readonly LevelResult[];
@@ -82,8 +81,8 @@ export function progressPartsOf(
   }
   const received: ProgressParts[] = [];
   progress.deliverTo({
-    receive(userId, gameId, highScore, updatedAt, results) {
-      received.push({ userId, gameId, highScore, updatedAt, results });
+    receive(key, highScore, updatedAt, results) {
+      received.push({ key, highScore, updatedAt, results });
     },
   });
   return onlyDelivery(received);

@@ -1,5 +1,6 @@
 import type { LevelResultReceiver } from '../domain/progress/level-result.js';
 import type { PlayerProgressReceiver } from '../domain/progress/player-progress.js';
+import type { ProgressKeyReceiver } from '../domain/progress/progress-key.js';
 import type { BoundsReceiver } from '../domain/shared/bounds-receiver.js';
 import type { ValueReceiver } from '../domain/shared/value-receiver.js';
 import type { UserReceiver } from '../domain/user/user.js';
@@ -31,6 +32,12 @@ interface DeliversLevelResult {
   deliverTo(receiver: LevelResultReceiver): void;
 }
 
+// A domain object that delivers the userId and the gameId of a progress,
+// such as ProgressKey.
+interface DeliversProgressKey {
+  deliverTo(receiver: ProgressKeyReceiver): void;
+}
+
 // An aggregate that delivers the parts of a progress, such as PlayerProgress.
 interface DeliversProgress {
   deliverTo(receiver: PlayerProgressReceiver): void;
@@ -54,11 +61,16 @@ export interface LevelResultValues {
   readonly elapsedMs: number;
 }
 
-// The plain values of one progress, as its rows or a JSON body keep them.
-// The list is new for each delivery.
-export interface ProgressValues {
+// The plain values of the key of one progress, as the lock key and the SQL
+// filters keep them.
+export interface ProgressKeyValues {
   readonly userId: string;
   readonly gameId: string;
+}
+
+// The plain values of one progress, as its rows or a JSON body keep them.
+// The list is new for each delivery.
+export interface ProgressValues extends ProgressKeyValues {
   readonly highScore: number | null;
   readonly updatedAt: Date;
   readonly results: LevelResultValues[];
@@ -137,17 +149,28 @@ export function receiveLevelResultOf(source: DeliversLevelResult): LevelResultVa
   return slot.take();
 }
 
-// A progress delivers its parts in one call. The helper receives the datum of
-// each value object and the four values of each level result. The SyncInstant
-// of updatedAt delivers its milliseconds, and the helper builds a new Date
-// from them for the row and the JSON body.
+// The key of a progress delivers its UserId and its GameId in one call. The
+// helper receives the datum of each one.
+export function receiveProgressKeyOf(source: DeliversProgressKey): ProgressKeyValues {
+  const slot = new Slot<ProgressKeyValues>();
+  source.deliverTo({
+    receive(userId, gameId) {
+      slot.receive({ userId: receiveValueOf(userId), gameId: receiveValueOf(gameId) });
+    },
+  });
+  return slot.take();
+}
+
+// A progress delivers its parts in one call. The helper receives the two
+// values of its key, the datum of each value object and the four values of
+// each level result. The SyncInstant of updatedAt delivers its milliseconds,
+// and the helper builds a new Date from them for the row and the JSON body.
 export function receiveProgressOf(source: DeliversProgress): ProgressValues {
   const slot = new Slot<ProgressValues>();
   source.deliverTo({
-    receive(userId, gameId, highScore, updatedAt, results) {
+    receive(key, highScore, updatedAt, results) {
       slot.receive({
-        userId: receiveValueOf(userId),
-        gameId: receiveValueOf(gameId),
+        ...receiveProgressKeyOf(key),
         highScore: highScore === null ? null : receiveValueOf(highScore),
         updatedAt: new Date(receiveValueOf(updatedAt)),
         results: results.map((result) => receiveLevelResultOf(result)),

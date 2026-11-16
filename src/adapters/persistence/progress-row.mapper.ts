@@ -1,5 +1,6 @@
 import { GameId } from '../../domain/progress/game-id.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
+import { ProgressKey } from '../../domain/progress/progress-key.js';
 import { Score } from '../../domain/progress/score.js';
 import { SyncInstant } from '../../domain/progress/sync-instant.js';
 import { UserId } from '../../domain/user/user-id.js';
@@ -15,9 +16,9 @@ export type LevelResultRow = typeof levelResults.$inferSelect;
 // level_results rows, and joins them back (classes.md decision 2).
 export const ProgressRowMapper = {
   // The mapper builds the value objects of the row and of each stored result,
-  // and restore() takes them in the order of PlayerProgressReceiver. The
-  // updated_at column gives a Date, and its milliseconds build the
-  // SyncInstant. A stored value that breaks its rule is a server fault, so
+  // joins the UserId and the GameId in the ProgressKey, and restore() takes
+  // them in the order of PlayerProgressReceiver. The updated_at column gives
+  // a Date, and its milliseconds build the SyncInstant. A stored value that breaks its rule is a server fault, so
   // the mapper throws. Postgres keeps 'infinity', for example: it reads as an
   // invalid Date, and SyncInstant.of() rejects it.
   toAggregate(row: ProgressRow, resultRows: readonly LevelResultRow[]): PlayerProgress {
@@ -27,11 +28,11 @@ export const ProgressRowMapper = {
     const highScore = row.highScore === null ? null : storedValue(Score.of(row.highScore), rows);
     const updatedAt = storedValue(SyncInstant.of(row.updatedAt.getTime()), rows);
     const results = resultRows.map((result) => storedValue(buildLevelResult(result), rows));
-    return PlayerProgress.restore(userId, gameId, highScore, updatedAt, results);
+    return PlayerProgress.restore(ProgressKey.of(userId, gameId), highScore, updatedAt, results);
   },
 
   // The aggregate delivers its parts to the mapper. The mapper receives the
-  // value that each value object delivers.
+  // value that each value object delivers, and the two values of the key.
   toProgressRow(aggregate: PlayerProgress): ProgressRow {
     const { userId, gameId, highScore, updatedAt } = receiveProgressOf(aggregate);
     // The high_score column keeps a number.

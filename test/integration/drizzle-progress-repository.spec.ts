@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { type Logger, sql } from 'drizzle-orm';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import { ProgressRowMapper } from '../../src/adapters/persistence/progress-row.mapper.js';
 import { users } from '../../src/adapters/persistence/schema.js';
@@ -6,6 +6,7 @@ import { SyncProgressUseCase } from '../../src/application/progress/sync-progres
 import { GameId } from '../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
+import { ProgressKey } from '../../src/domain/progress/progress-key.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
@@ -25,6 +26,7 @@ const ADA_VALUE = CONTRACT_USER_IDS[0];
 const ADA = valueOf(UserId.from(ADA_VALUE));
 const UNKNOWN = valueOf(UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d'));
 const FIT = valueOf(GameId.of('fit'));
+const ADA_FIT = ProgressKey.of(ADA, FIT);
 // Each instant of the domain, and its Date, as the updated_at column keeps it.
 const AT_TIME = new Date('2026-11-06T10:00:00.000Z');
 const LATER_TIME = new Date('2026-11-06T10:05:00.000Z');
@@ -34,9 +36,9 @@ const LATER = syncInstantOf(LATER_TIME);
 const openDatabases: TestDatabase[] = [];
 
 // Opens a PGlite database with the contract users, so the progress foreign
-// key to users.id holds (R-database-harness).
-async function openDatabase(): Promise<TestDatabase> {
-  const database = await createTestDatabase();
+// key to users.id holds (R-database-harness). The logger sees every query.
+async function openDatabase(logger?: Logger): Promise<TestDatabase> {
+  const database = await createTestDatabase(logger);
   openDatabases.push(database);
   await database.db.insert(users).values(
     CONTRACT_USER_IDS.map((id, index) => ({
@@ -153,17 +155,72 @@ describe('DrizzleProgressRepository', () => {
     ]);
   });
 
+  // #107: the ProgressKey delivers the userId and the gameId to the lock
+  // key and to the SQL filters. The text stays as it was before the key:
+  // the lock key is "<userId>:<gameId>", and each query filters on both
+  // columns. Two sessions that change one progress must take one lock, so
+  // an instance with another lock key text would not wait for an old one.
+  it('should_send_the_lock_key_and_the_filters_of_both_columns_when_update_and_find_run_with_a_key', async () => {
+    const sent: { query: string; params: unknown[] }[] = [];
+    const database = await openDatabase({
+      logQuery(query, params) {
+        sent.push({ query, params });
+      },
+    });
+    const repository = new DrizzleProgressRepository(database.db);
+    sent.length = 0;
+    const progress = PlayerProgress.start(ADA_FIT, AT);
+    progress.recordLevel(level('fit-01', 3, 9, 5), AT);
+
+    await repository.update(ADA_FIT, () => progress);
+    const sentByUpdate = sent.splice(0);
+    await repository.find(ADA_FIT);
+
+    const filterProgress =
+      'select "user_id", "game_id", "high_score", "updated_at" from "progress" where ("progress"."user_id" = $1 and "progress"."game_id" = $2) limit $3';
+    expect(sentByUpdate).toEqual([
+      {
+        query: 'select pg_advisory_xact_lock(hashtextextended($1, 0))',
+        params: [`${ADA_VALUE}:fit`],
+      },
+      { query: filterProgress, params: [ADA_VALUE, 'fit', 1] },
+      {
+        query:
+          'insert into "progress" ("user_id", "game_id", "high_score", "updated_at") values ($1, $2, $3, $4) on conflict ("user_id","game_id") do update set "high_score" = $5, "updated_at" = $6',
+        params: [ADA_VALUE, 'fit', null, AT_TIME.toISOString(), null, AT_TIME.toISOString()],
+      },
+      {
+        query:
+          'delete from "level_results" where ("level_results"."user_id" = $1 and "level_results"."game_id" = $2)',
+        params: [ADA_VALUE, 'fit'],
+      },
+      {
+        query:
+          'insert into "level_results" ("user_id", "game_id", "level_id", "stars", "moves", "elapsed_ms") values ($1, $2, $3, $4, $5, $6)',
+        params: [ADA_VALUE, 'fit', 'fit-01', 3, 9, 5],
+      },
+    ]);
+    expect(sent).toEqual([
+      { query: filterProgress, params: [ADA_VALUE, 'fit', 1] },
+      {
+        query:
+          'select "user_id", "game_id", "level_id", "stars", "moves", "elapsed_ms" from "level_results" where ("level_results"."user_id" = $1 and "level_results"."game_id" = $2) order by "level_results"."level_id" asc',
+        params: [ADA_VALUE, 'fit'],
+      },
+    ]);
+  });
+
   it('should_keep_one_progress_row_when_same_user_and_game_is_saved_twice', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    await storeProgress(repository, PlayerProgress.start(ADA, FIT, AT));
-    const second = PlayerProgress.start(ADA, FIT, AT);
+    await storeProgress(repository, PlayerProgress.start(ADA_FIT, AT));
+    const second = PlayerProgress.start(ADA_FIT, AT);
     second.recordScore(valueOf(Score.of(300)), LATER);
 
     await storeProgress(repository, second);
 
     expect(await countRows(database, 'progress')).toBe(1);
-    const found = await repository.find(ADA, FIT);
+    const found = await repository.find(ADA_FIT);
     expect(progressPartsOf(found)?.highScore?.equals(valueOf(Score.of(300)))).toBe(true);
     expect(progressPartsOf(found)?.updatedAt).toEqual(LATER);
   });
@@ -186,7 +243,7 @@ describe('DrizzleProgressRepository', () => {
     await Promise.all([sync.execute(syncRequest(500)), sync.execute(syncRequest(100))]);
 
     expect(
-      progressPartsOf(await repository.find(ADA, FIT))?.highScore?.equals(valueOf(Score.of(500))),
+      progressPartsOf(await repository.find(ADA_FIT))?.highScore?.equals(valueOf(Score.of(500))),
     ).toBe(true);
     expect(await countRows(database, 'progress')).toBe(1);
   });
@@ -194,14 +251,14 @@ describe('DrizzleProgressRepository', () => {
   it('should_read_back_every_level_result_when_aggregate_is_saved_and_found', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    const progress = PlayerProgress.start(ADA, FIT, AT);
+    const progress = PlayerProgress.start(ADA_FIT, AT);
     const first = level('fit-01', 3, 9, 41_250);
     const second = level('fit-02', 1, 30, 3_000_000_000);
     progress.recordLevel(first, AT);
     progress.recordLevel(second, AT);
 
     await storeProgress(repository, progress);
-    const found = await repository.find(ADA, FIT);
+    const found = await repository.find(ADA_FIT);
 
     expect(progressPartsOf(found)?.results).toEqual([first, second]);
     expect(progressPartsOf(found)?.highScore).toBeNull();
@@ -211,7 +268,7 @@ describe('DrizzleProgressRepository', () => {
   it('should_replace_level_results_when_same_user_and_game_is_saved_again', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    const progress = PlayerProgress.start(ADA, FIT, AT);
+    const progress = PlayerProgress.start(ADA_FIT, AT);
     progress.recordLevel(level('fit-01', 1, 20, 60_000), AT);
     await storeProgress(repository, progress);
     const retry = level('fit-01', 3, 9, 30_000);
@@ -220,17 +277,17 @@ describe('DrizzleProgressRepository', () => {
     progress.recordLevel(level('fit-02', 2, 12, 45_000), AT);
     await storeProgress(repository, progress);
 
-    expect(progressPartsOf(await repository.find(ADA, FIT))?.results).toEqual(
+    expect(progressPartsOf(await repository.find(ADA_FIT))?.results).toEqual(
       progressPartsOf(progress).results,
     );
-    expect(progressPartsOf(await repository.find(ADA, FIT))?.results[0]).toEqual(retry);
+    expect(progressPartsOf(await repository.find(ADA_FIT))?.results[0]).toEqual(retry);
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 
   it('should_reject_save_and_write_no_row_when_user_is_unknown', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    const progress = PlayerProgress.start(UNKNOWN, FIT, AT);
+    const progress = PlayerProgress.start(ProgressKey.of(UNKNOWN, FIT), AT);
     progress.recordLevel(level('fit-01', 3, 9, 1_000), AT);
 
     // Postgres code 23503 is foreign_key_violation.
@@ -266,7 +323,7 @@ describe('DrizzleProgressRepository', () => {
       sql`insert into progress (user_id, game_id, high_score, updated_at) values (${ADA_VALUE}, 'fit', null, 'infinity')`,
     );
 
-    await expect(repository.find(ADA, FIT)).rejects.toThrow(
+    await expect(repository.find(ADA_FIT)).rejects.toThrow(
       new Error(
         `The progress rows of user ${ADA_VALUE} and game fit break the rule invalid-sync-instant.`,
       ),
@@ -289,7 +346,7 @@ describe('DrizzleProgressRepository', () => {
 
   // The level_results columns keep text and numbers.
   it('should_write_level_results_as_text_and_numbers_when_aggregate_becomes_rows', () => {
-    const played = PlayerProgress.start(ADA, FIT, AT);
+    const played = PlayerProgress.start(ADA_FIT, AT);
     played.recordLevel(level('fit-01', 3, 12, 45_000), AT);
     const rows = [
       {
@@ -337,7 +394,7 @@ describe('DrizzleProgressRepository', () => {
 
   // The row keeps a number: the high_score column does not change.
   it('should_write_the_high_score_as_a_number_or_null_when_aggregate_becomes_a_row', () => {
-    const scored = PlayerProgress.start(ADA, FIT, AT);
+    const scored = PlayerProgress.start(ADA_FIT, AT);
     scored.recordScore(valueOf(Score.of(120)), LATER);
 
     expect(ProgressRowMapper.toProgressRow(scored)).toEqual({
@@ -346,9 +403,7 @@ describe('DrizzleProgressRepository', () => {
       highScore: 120,
       updatedAt: LATER_TIME,
     });
-    expect(
-      ProgressRowMapper.toProgressRow(PlayerProgress.start(ADA, FIT, AT)).highScore,
-    ).toBeNull();
+    expect(ProgressRowMapper.toProgressRow(PlayerProgress.start(ADA_FIT, AT)).highScore).toBeNull();
     const row = { userId: ADA_VALUE, gameId: 'fit', highScore: 120, updatedAt: LATER_TIME };
     expect(ProgressRowMapper.toProgressRow(ProgressRowMapper.toAggregate(row, []))).toEqual(row);
   });
