@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 1 of 3</p>
       <h1>Sync progress: one request through the four layers</h1>
       <svg
-        viewBox="0 0 1240 1670"
+        viewBox="0 0 1240 1686"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow1syncprogress-title flow1syncprogress-desc"
@@ -141,7 +141,7 @@
           x="24"
           y="1148"
           width="1192"
-          height="324"
+          height="340"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -1179,7 +1179,7 @@
           x="760"
           y="1180"
           width="320"
-          height="284"
+          height="300"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1307,7 +1307,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          + restore(state: PlayerProgressState):
+          + restore(started: PlayerProgress,
         </text>
         <text
           x="798"
@@ -1317,16 +1317,17 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          PlayerProgress
+          highScore: Score | null,
         </text>
         <text
-          x="776"
+          x="798"
           y="1408"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
         >
-          + equals(other: PlayerProgress): boolean
+          results: LevelResult[]): PlayerProgress
         </text>
         <text
           x="776"
@@ -1335,11 +1336,22 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + snapshot(): PlayerProgressState
+          + equals(other: PlayerProgress): boolean
+        </text>
+        <text
+          textLength="288"
+          lengthAdjust="spacingAndGlyphs"
+          x="776"
+          y="1440"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + deliverTo(receiver: PlayerProgressReceiver&lt;Date&gt;): void
         </text>
         <text
           x="776"
-          y="1440"
+          y="1456"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1348,7 +1360,7 @@
         </text>
         <text
           x="776"
-          y="1456"
+          y="1472"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1358,7 +1370,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="1496"
+          y="1512"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1368,7 +1380,7 @@
         </text>
         <text
           x="24"
-          y="1512"
+          y="1528"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1378,7 +1390,7 @@
         </text>
         <text
           x="24"
-          y="1528"
+          y="1544"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1388,7 +1400,7 @@
         </text>
         <text
           x="24"
-          y="1544"
+          y="1560"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1399,26 +1411,27 @@
         </text>
         <text
           x="24"
-          y="1560"
+          y="1576"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          of this use case is in flows.md. toDto() reads PlayerProgress.snapshot(), and the
-          levelResults field uses LevelResult; the view draws no extra line for them.
+          of this use case is in flows.md. toDto() receives the parts of PlayerProgress through
+          deliverTo(), and the levelResults field uses LevelResult; the view draws no extra line for
+          them.
         </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1588"
+          y1="1604"
           x2="1216"
-          y2="1588"
+          y2="1604"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1606"
+          y="1622"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1428,9 +1441,9 @@
         </text>
         <line
           x1="24"
-          y1="1624"
+          y1="1640"
           x2="52"
-          y2="1624"
+          y2="1640"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1438,7 +1451,7 @@
         />
         <text
           x="60"
-          y="1628"
+          y="1644"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1447,16 +1460,16 @@
         </text>
         <line
           x1="128"
-          y1="1624"
+          y1="1640"
           x2="156"
-          y2="1624"
+          y2="1640"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#flow1syncprogress-open)"
         />
         <text
           x="164"
-          y="1628"
+          y="1644"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1465,7 +1478,7 @@
         </text>
         <text
           x="403"
-          y="1628"
+          y="1644"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1475,7 +1488,7 @@
 
         <rect
           x="24"
-          y="1644"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1485,7 +1498,7 @@
         />
         <rect
           x="48"
-          y="1644"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1495,7 +1508,7 @@
         />
         <rect
           x="72"
-          y="1644"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1505,7 +1518,7 @@
         />
         <rect
           x="96"
-          y="1644"
+          y="1660"
           width="20"
           height="12"
           rx="2"
@@ -1515,7 +1528,7 @@
         />
         <text
           x="128"
-          y="1653"
+          y="1669"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1524,7 +1537,7 @@
         </text>
         <rect
           x="352"
-          y="1644"
+          y="1660"
           width="28"
           height="12"
           rx="2"
@@ -1534,7 +1547,7 @@
         />
         <text
           x="388"
-          y="1653"
+          y="1669"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
