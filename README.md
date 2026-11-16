@@ -64,14 +64,14 @@ The table shows the design. Most of these pieces are not code yet; their code st
   repository ports of users, progress and levels.
 - **`AppModule` is the composition root.** [src/infrastructure/app.module.ts](src/infrastructure/app.module.ts)
   binds each port to one adapter. `src/main.ts` only starts the app.
-- **The domain hides its state.** `PlayerProgress` has no getter: its mappers read a
-  `snapshot()` (decision 2 of `classes.md`). A value object keeps its value private and
+- **The domain hides its state.** `PlayerProgress` has no getter: it delivers its parts to the
+  border with `deliverTo()` (decision 2 of `classes.md`). A value object keeps its value private and
   delivers it to a receiver with `deliverTo()`; no operation returns it, and only the adapters
   of layers 3 and 4 receive it (decision 15 of `classes.md`,
   [#90](https://github.com/Hexablock-Suite/hexablock-api/issues/90)). `User` has no public
-  field and no public constructor: `User.register()` and `User.restore()` build it, its
-  mapper reads a `snapshot()`, and `User.passwordMatches()` checks a typed password through
-  `PasswordVerifier`, an interface of the domain that the `PasswordHasher` port extends
+  field and no public constructor: `User.register()` and `User.restore()` build it, it delivers
+  its parts to the border with `deliverTo()`, and `User.passwordMatches()` checks a typed password
+  through `PasswordVerifier`, an interface of the domain that the `PasswordHasher` port extends
   (decision 16 of `classes.md`,
   [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91)).
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
@@ -121,7 +121,7 @@ points to the design doc; links move to the source files as code lands.
 | Decorator                          | `UseCaseAspect`, `LoggingAspect`, `TimingAspect`                                  | Separation: no cross-cutting code inside a use case | The aspects of §3.5 wrap any use case and add no code to it (API-NFR-07, A2). Q12 put them in layer 2. | [classes.md, view 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)                                                   |
 | Adapter                            | The Drizzle repositories; `SystemClock`, `ScryptPasswordHasher`, `JwtTokenIssuer` | Replaceability: a new database engine or driver     | A new database engine means new adapters, and the use cases do not change (§3.3, §3.4, §8).            | [classes.md, views 3.1, 3.2, 3.4](docs/architecture/classes.md#part-3-adapters-and-drivers); [SystemClock](src/infrastructure/clock/system-clock.ts) |
 | Singleton (single-scope injection) | `AppModule` and its providers                                                     | Consistency: one shared instance of each adapter    | One instance of each adapter for the whole API (§3.3).                                                 | [classes.md, view 3.4](docs/architecture/classes.md#view-34-wiring); [AppModule](src/infrastructure/app.module.ts)                                   |
-| Memento                            | `PlayerProgress` and its `PlayerProgressState`                                    | Encapsulation: the aggregate hides its state        | The aggregate has no getter: the mappers read a copy of its state, and `restore()` builds it again.    | [classes.md, view 1.1](docs/architecture/classes.md#view-11-progress-and-level-results); [PlayerProgress](src/domain/progress/player-progress.ts)    |
+| Memento                            | `PlayerProgress`, `User` and their receivers                                      | Encapsulation: the aggregate hides its state        | The aggregate has no getter: it delivers its parts to the border, and `restore()` builds it again.     | [classes.md, view 1.1](docs/architecture/classes.md#view-11-progress-and-level-results); [PlayerProgress](src/domain/progress/player-progress.ts)    |
 
 Abstract Factory is also mandatory in §3.3. The app holds it, one factory per variant. The API
 does not use it: a variant has one product, its level validator (decision 8 of `classes.md`).

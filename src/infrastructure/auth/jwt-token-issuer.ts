@@ -1,18 +1,18 @@
 import type { JwtService } from '@nestjs/jwt';
-import { receiveValueOf } from '../../adapters/received.js';
+import { receiveUserOf } from '../../adapters/received.js';
 import type { SessionToken, TokenIssuer } from '../../application/ports/token-issuer.js';
 import type { User } from '../../domain/user/user.js';
 import { UserId } from '../../domain/user/user-id.js';
 
 // Adapter of the TokenIssuer port with @nestjs/jwt. It gets a configured
 // JwtService through its constructor and reads no configuration itself.
-// AppModule builds that service from the configuration. issue() reads the id
-// from the snapshot of the user and receives its text for the subject.
+// AppModule builds that service from the configuration. issue() receives the
+// parts that the user delivers and signs the text of its id as the subject.
 export class JwtTokenIssuer implements TokenIssuer {
   constructor(private readonly jwt: JwtService) {}
 
   issue(user: User): SessionToken {
-    return this.jwt.sign({ sub: receiveValueOf(user.snapshot().id) });
+    return this.jwt.sign({ sub: receiveUserOf(user).id });
   }
 
   verify(token: SessionToken): UserId | null {

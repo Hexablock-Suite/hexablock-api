@@ -33,7 +33,7 @@ function dummyPassword(): Password {
 }
 
 // Asks the user to check the password and issues a SessionToken. It reads
-// no field and no snapshot of the user.
+// no field and no part of the user.
 export class LoginUseCase implements Login {
   // The constructor starts the dummy hash, so no sign-in pays for it. A
   // failed hash does not throw here. Each unknown username gets the failure.

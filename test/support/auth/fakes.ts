@@ -9,27 +9,28 @@ import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import type { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import type { Username } from '../../../src/domain/user/username.js';
+import { userPartsOf } from '../recording-receiver.js';
 import { testUserId } from '../user-ids.js';
 
 // Test doubles for the account ports. Each one is plain and predictable,
 // so a use case test can read the stored state. A double is border code, as
-// an adapter is: it reads the snapshot of a User.
+// an adapter is: it receives the parts that a User delivers.
 
 export class InMemoryUserRepository implements UserRepository {
   readonly users: User[] = [];
 
   async findByUsername(username: Username): Promise<User | null> {
-    return this.users.find((user) => user.snapshot().username.equals(username)) ?? null;
+    return this.users.find((user) => userPartsOf(user).username.equals(username)) ?? null;
   }
 
   // Compares the key of the Username, as the Drizzle adapter does.
   async isUsernameTaken(username: Username): Promise<boolean> {
     const key = receiveKeyOf(username);
-    return this.users.some((user) => receiveKeyOf(user.snapshot().username) === key);
+    return this.users.some((user) => receiveKeyOf(userPartsOf(user).username) === key);
   }
 
   async add(user: User): Promise<Result<void, 'username-taken'>> {
-    if (await this.isUsernameTaken(user.snapshot().username)) {
+    if (await this.isUsernameTaken(userPartsOf(user).username)) {
       return err('username-taken');
     }
     this.users.push(user);
@@ -54,7 +55,7 @@ const TOKEN_PREFIX = 'token-for:';
 
 export class PrefixTokenIssuer implements TokenIssuer {
   issue(user: User): SessionToken {
-    return `${TOKEN_PREFIX}${receiveValueOf(user.snapshot().id)}`;
+    return `${TOKEN_PREFIX}${receiveValueOf(userPartsOf(user).id)}`;
   }
 
   // Like JwtTokenIssuer, it returns null for a subject that is not a UUID.

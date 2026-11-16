@@ -1,6 +1,8 @@
 import type { LevelResultReceiver } from '../domain/progress/level-result.js';
+import type { PlayerProgressReceiver } from '../domain/progress/player-progress.js';
 import type { BoundsReceiver } from '../domain/shared/bounds-receiver.js';
 import type { ValueReceiver } from '../domain/shared/value-receiver.js';
+import type { UserReceiver } from '../domain/user/user.js';
 
 // The helpers of the border. A value object keeps its datum private and
 // delivers it to a receiver. An adapter often needs the datum as an
@@ -29,6 +31,16 @@ interface DeliversLevelResult {
   deliverTo(receiver: LevelResultReceiver): void;
 }
 
+// An aggregate that delivers the parts of a progress, such as PlayerProgress.
+interface DeliversProgress {
+  deliverTo(receiver: PlayerProgressReceiver<Date>): void;
+}
+
+// An aggregate that delivers the parts of a user, such as User.
+interface DeliversUser {
+  deliverTo(receiver: UserReceiver): void;
+}
+
 export interface Bounds<T> {
   readonly min: T;
   readonly max: T;
@@ -40,6 +52,25 @@ export interface LevelResultValues {
   readonly stars: number;
   readonly moves: number;
   readonly elapsedMs: number;
+}
+
+// The plain values of one progress, as its rows or a JSON body keep them.
+// The list is new for each delivery.
+export interface ProgressValues {
+  readonly userId: string;
+  readonly gameId: string;
+  readonly highScore: number | null;
+  readonly updatedAt: Date;
+  readonly results: LevelResultValues[];
+}
+
+// The plain values of one user, as its row keeps them. usernameKey is the
+// key that the Username delivers.
+export interface UserValues {
+  readonly id: string;
+  readonly username: string;
+  readonly usernameKey: string;
+  readonly passwordHash: string;
 }
 
 // A receiver that keeps the one value of a delivery.
@@ -92,6 +123,42 @@ export function receiveLevelResultOf(source: DeliversLevelResult): LevelResultVa
         stars: receiveValueOf(stars),
         moves: receiveValueOf(moves),
         elapsedMs: receiveValueOf(elapsedTime),
+      });
+    },
+  });
+  return slot.take();
+}
+
+// A progress delivers its parts in one call. The helper receives the datum of
+// each value object and the four values of each level result. The Date of
+// updatedAt is the new Date that the delivery gives.
+export function receiveProgressOf(source: DeliversProgress): ProgressValues {
+  const slot = new Slot<ProgressValues>();
+  source.deliverTo({
+    receive(userId, gameId, highScore, updatedAt, results) {
+      slot.receive({
+        userId: receiveValueOf(userId),
+        gameId: receiveValueOf(gameId),
+        highScore: highScore === null ? null : receiveValueOf(highScore),
+        updatedAt,
+        results: results.map((result) => receiveLevelResultOf(result)),
+      });
+    },
+  });
+  return slot.take();
+}
+
+// A user delivers its parts in one call. The helper receives the datum of
+// each value object and the key of the Username.
+export function receiveUserOf(source: DeliversUser): UserValues {
+  const slot = new Slot<UserValues>();
+  source.deliverTo({
+    receive(id, username, passwordHash) {
+      slot.receive({
+        id: receiveValueOf(id),
+        username: receiveValueOf(username),
+        usernameKey: receiveKeyOf(username),
+        passwordHash: receiveValueOf(passwordHash),
       });
     },
   });

@@ -1,8 +1,9 @@
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import type { PasswordVerifier } from '../../../src/domain/user/password-verifier.js';
-import { User, type UserState } from '../../../src/domain/user/user.js';
+import { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
+import { type UserParts, userPartsOf } from '../../support/recording-receiver.js';
 import { testUserId } from '../../support/user-ids.js';
 
 function nameOf(raw: string): Username {
@@ -43,15 +44,16 @@ describe('User identity', () => {
 });
 
 // #91: User is an aggregate root that hides its state. Only its factories
-// build it, and snapshot() gives a copy of the state.
-describe('User state', () => {
+// build it. #96: it delivers its parts to a receiver of the border, as a
+// value object delivers its datum (decision 15).
+describe('User delivery', () => {
   const ID = UserId.from(testUserId(1));
   const NAME = nameOf('Ada');
   const HASH = PasswordHash.from('$one');
 
   // Vitest does not check types. `pnpm typecheck` fails on a directive below
-  // when its field or the constructor is public.
-  it('should_have_no_public_field_and_no_public_constructor_when_the_state_is_read_through_the_snapshot', () => {
+  // when its field, the constructor or the snapshot is public.
+  it('should_have_no_public_field_and_no_public_constructor_when_the_state_is_read_through_the_delivery', () => {
     const user = User.register(ID, NAME, HASH);
 
     // @ts-expect-error -- #91 makes the id field private.
@@ -63,48 +65,58 @@ describe('User state', () => {
     // @ts-expect-error -- #91 makes the constructor private, so no public constructor type takes it.
     const open: new (...values: never[]) => User = User;
     void open;
-    expect(user.snapshot()).not.toBe(user);
+    // @ts-expect-error -- #96 replaces snapshot() with deliverTo().
+    void user.snapshot;
+    expect('snapshot' in user).toBe(false);
   });
 
-  it('should_give_the_id_the_name_and_the_hash_as_domain_values_when_the_snapshot_is_read', () => {
+  it('should_deliver_the_id_the_name_and_the_hash_once_as_domain_values_when_it_delivers_to_a_receiver', () => {
     const user = User.register(ID, NAME, HASH);
+    const calls: unknown[][] = [];
 
-    const state = user.snapshot();
+    user.deliverTo({
+      receive(...parts) {
+        calls.push(parts);
+      },
+    });
 
-    expect(Object.keys(state).sort()).toEqual(['id', 'passwordHash', 'username']);
-    expect(state.id).toBe(ID);
-    expect(state.username).toBe(NAME);
-    expect(state.passwordHash).toBe(HASH);
+    expect(calls).toEqual([[ID, NAME, HASH]]);
+    expect(calls[0][0]).toBe(ID);
+    expect(calls[0][1]).toBe(NAME);
+    expect(calls[0][2]).toBe(HASH);
   });
 
-  it('should_keep_the_user_unchanged_when_the_copy_of_the_state_changes', () => {
+  // The values are immutable, and the receiver keeps them in a record of its
+  // own. A change to that record does not change the user.
+  it('should_keep_the_user_unchanged_when_the_receiver_changes_the_record_of_what_it_received', () => {
     const user = User.register(ID, NAME, HASH);
-    const copy = user.snapshot() as { -readonly [K in keyof UserState]: UserState[K] };
+    const copy = userPartsOf(user) as { -readonly [K in keyof UserParts]: UserParts[K] };
 
     copy.id = UserId.from(testUserId(2));
     copy.username = nameOf('grace');
     copy.passwordHash = PasswordHash.from('$two');
 
-    const state = user.snapshot();
-    expect(state).not.toBe(copy);
-    expect(state.id).toBe(ID);
-    expect(state.username).toBe(NAME);
-    expect(state.passwordHash).toBe(HASH);
+    const parts = userPartsOf(user);
+    expect(parts).not.toBe(copy);
+    expect(parts.id).toBe(ID);
+    expect(parts.username).toBe(NAME);
+    expect(parts.passwordHash).toBe(HASH);
     expect(user.equals(User.register(ID, NAME, HASH))).toBe(true);
   });
 
-  it('should_give_an_equal_user_with_the_same_data_when_a_snapshot_is_restored', () => {
+  it('should_give_an_equal_user_with_the_same_data_when_restored_from_the_values_that_it_delivered', () => {
     const user = User.register(ID, NAME, HASH);
+    const { id, username, passwordHash } = userPartsOf(user);
 
-    const restored = User.restore(user.snapshot());
+    const restored = User.restore(id, username, passwordHash);
 
     expect(restored).not.toBe(user);
     expect(restored.equals(user)).toBe(true);
     expect(user.equals(restored)).toBe(true);
-    const state = restored.snapshot();
-    expect(state.id).toBe(ID);
-    expect(state.username).toBe(NAME);
-    expect(state.passwordHash).toBe(HASH);
+    const parts = userPartsOf(restored);
+    expect(parts.id).toBe(ID);
+    expect(parts.username).toBe(NAME);
+    expect(parts.passwordHash).toBe(HASH);
   });
 
   // The value objects already guard their rules, so the factories add none:
@@ -115,10 +127,14 @@ describe('User state', () => {
   ])(
     'should_build_the_user_when_register_and_restore_take_any_valid_values',
     ({ id, name, hash }) => {
-      const state = { id, username: nameOf(name), passwordHash: PasswordHash.from(hash) };
+      const parts = { id, username: nameOf(name), passwordHash: PasswordHash.from(hash) };
 
-      expect(User.register(state.id, state.username, state.passwordHash).snapshot()).toEqual(state);
-      expect(User.restore(state).snapshot()).toEqual(state);
+      expect(userPartsOf(User.register(parts.id, parts.username, parts.passwordHash))).toEqual(
+        parts,
+      );
+      expect(userPartsOf(User.restore(parts.id, parts.username, parts.passwordHash))).toEqual(
+        parts,
+      );
     },
   );
 });

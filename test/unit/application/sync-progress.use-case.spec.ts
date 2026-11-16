@@ -10,6 +10,7 @@ import { UserId } from '../../../src/domain/user/user-id.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
 import { levelResultOf } from '../../support/level-results.js';
+import { progressPartsOf } from '../../support/recording-receiver.js';
 import { testUserId } from '../../support/user-ids.js';
 
 const ADA = UserId.from(testUserId(1));
@@ -69,9 +70,9 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(result.ok).toBe(true);
     const stored = await progress.find(ADA, GameId.of('hexa-lines'));
     expect(stored).not.toBeNull();
-    expect(stored?.snapshot().highScore?.equals(Score.of(120))).toBe(true);
-    expect(stored?.snapshot().updatedAt).toEqual(AT);
-    expect(stored?.snapshot().results).toEqual([]);
+    expect(progressPartsOf(stored)?.highScore?.equals(Score.of(120))).toBe(true);
+    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
+    expect(progressPartsOf(stored)?.results).toEqual([]);
     expect(result.ok && result.value).toEqual(stored);
   });
 
@@ -83,8 +84,8 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
 
     const stored = await progress.find(ADA, GameId.of('hexa-lines'));
     expect(result.ok && result.value).toEqual(stored);
-    expect(stored?.snapshot().highScore?.equals(Score.of(120))).toBe(true);
-    expect(stored?.snapshot().updatedAt).toEqual(LATER);
+    expect(progressPartsOf(stored)?.highScore?.equals(Score.of(120))).toBe(true);
+    expect(progressPartsOf(stored)?.updatedAt).toEqual(LATER);
   });
 
   it('should_keep_separate_progress_when_user_syncs_two_games', async () => {
@@ -92,14 +93,14 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     await sync.execute(syncRequest({ gameId: 'hexa-merge', score: 300 }));
 
     expect(
-      (await progress.find(ADA, GameId.of('hexa-lines')))
-        ?.snapshot()
-        .highScore?.equals(Score.of(120)),
+      progressPartsOf(await progress.find(ADA, GameId.of('hexa-lines')))?.highScore?.equals(
+        Score.of(120),
+      ),
     ).toBe(true);
     expect(
-      (await progress.find(ADA, GameId.of('hexa-merge')))
-        ?.snapshot()
-        .highScore?.equals(Score.of(300)),
+      progressPartsOf(await progress.find(ADA, GameId.of('hexa-merge')))?.highScore?.equals(
+        Score.of(300),
+      ),
     ).toBe(true);
   });
 
@@ -112,9 +113,9 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
 
     expect(result.ok).toBe(true);
     const stored = await progress.find(ADA, GameId.of('hexa-fit'));
-    expect(stored?.snapshot().highScore).toBeNull();
-    expect(stored?.snapshot().updatedAt).toEqual(AT);
-    expect(stored?.snapshot().results).toEqual([levelResultOf(level)]);
+    expect(progressPartsOf(stored)?.highScore).toBeNull();
+    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
+    expect(progressPartsOf(stored)?.results).toEqual([levelResultOf(level)]);
   });
 
   // A better result for a stored levelId takes its place (DS-4, DS-12).
@@ -130,8 +131,8 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
 
     const stored = await progress.find(ADA, GameId.of('hexa-fit'));
     expect(result.ok && result.value).toEqual(stored);
-    expect(stored?.snapshot().highScore).toBeNull();
-    expect(stored?.snapshot().results).toEqual([levelResultOf(retry), levelResultOf(next)]);
+    expect(progressPartsOf(stored)?.highScore).toBeNull();
+    expect(progressPartsOf(stored)?.results).toEqual([levelResultOf(retry), levelResultOf(next)]);
   });
 
   // DS-12 check: a better result and then a worse one for the same level
@@ -154,7 +155,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
       );
 
       const found = await progress.find(ADA, GameId.of('hexa-fit'));
-      expect(found?.snapshot()).toEqual({
+      expect(progressPartsOf(found)).toEqual({
         userId: ADA,
         gameId: GameId.of('hexa-fit'),
         highScore: null,
@@ -179,7 +180,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
       );
 
       const stored = await progress.find(ADA, GameId.of('hexa-lines'));
-      expect(stored?.snapshot().highScore?.equals(Score.of(500))).toBe(true);
+      expect(progressPartsOf(stored)?.highScore?.equals(Score.of(500))).toBe(true);
       expect(results.map((result) => result.ok)).toEqual([true, true]);
       expect(results[1]?.ok && results[1].value).toEqual(stored);
     },
@@ -203,13 +204,13 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
 
       const stored = await progress.find(ADA, GameId.of('hexa-fit'));
       // The port gives the results by levelId, whatever the sync order.
-      expect(stored?.snapshot().results).toEqual([
+      expect(progressPartsOf(stored)?.results).toEqual([
         levelResultOf(firstLevel),
         levelResultOf(secondLevel),
       ]);
       // The answer of the last sync keeps the stored result first, then the new one.
       const last = results[1]?.ok ? results[1].value : null;
-      expect(last?.snapshot().results).toEqual([levelResultOf(first), levelResultOf(second)]);
+      expect(progressPartsOf(last)?.results).toEqual([levelResultOf(first), levelResultOf(second)]);
     },
   );
 
@@ -233,8 +234,8 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     const result = await stale;
 
     const stored = await progress.find(ADA, GameId.of('hexa-lines'));
-    expect(stored?.snapshot().highScore?.equals(Score.of(500))).toBe(true);
-    expect(stored?.snapshot().updatedAt).toEqual(LATER);
+    expect(progressPartsOf(stored)?.highScore?.equals(Score.of(500))).toBe(true);
+    expect(progressPartsOf(stored)?.updatedAt).toEqual(LATER);
     expect(result.ok && result.value).toEqual(stored);
   });
 
@@ -253,9 +254,9 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     ).rejects.toThrow('The Clock must return a valid Date.');
     expect(await progress.find(ADA, GameId.of('hexa-lines'))).toBeNull();
     const stored = await progress.find(ADA, GameId.of('hexa-fit'));
-    expect(stored?.snapshot().highScore?.equals(Score.of(120))).toBe(true);
-    expect(stored?.snapshot().updatedAt).toEqual(AT);
-    expect(stored?.snapshot().results).toEqual([]);
+    expect(progressPartsOf(stored)?.highScore?.equals(Score.of(120))).toBe(true);
+    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
+    expect(progressPartsOf(stored)?.results).toEqual([]);
   });
 
   // The request types forbid this value. The aggregate still guards its
@@ -274,7 +275,7 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
       error: { kind: 'invalid-progress', problems: ['A high score must be a Score.'] },
     });
     const stored = await progress.find(ADA, GameId.of('hexa-lines'));
-    expect(stored?.snapshot().highScore?.equals(Score.of(120))).toBe(true);
-    expect(stored?.snapshot().updatedAt).toEqual(AT);
+    expect(progressPartsOf(stored)?.highScore?.equals(Score.of(120))).toBe(true);
+    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
   });
 });

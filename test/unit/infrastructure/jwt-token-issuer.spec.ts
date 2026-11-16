@@ -11,7 +11,7 @@ import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';
 const USER_ID_VALUE = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
 const USER_ID = UserId.from(USER_ID_VALUE);
 
-// The issuer takes the User and reads the id of its snapshot (#91).
+// The issuer takes the User and receives the id that it delivers (#91, #96).
 function userWithId(id: UserId): User {
   const username = Username.create('ada');
   if (!username.ok) throw new Error(username.error);

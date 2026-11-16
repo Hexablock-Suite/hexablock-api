@@ -5,12 +5,6 @@
 // longer has, so the list only shrinks. Each comment names the issue that
 // removes the entries below it.
 export const DOMAIN_SURFACE_BASELINE: readonly string[] = [
-  // #96: the public fields of PlayerProgressState.
-  'src/domain/progress/player-progress.ts PlayerProgressState.userId field',
-  'src/domain/progress/player-progress.ts PlayerProgressState.gameId field',
-  'src/domain/progress/player-progress.ts PlayerProgressState.highScore field',
-  'src/domain/progress/player-progress.ts PlayerProgressState.updatedAt field',
-  'src/domain/progress/player-progress.ts PlayerProgressState.results field',
   // #97: the Date parameters of PlayerProgress.
   'src/domain/progress/player-progress.ts PlayerProgress.start(at) parameter',
   'src/domain/progress/player-progress.ts PlayerProgress.recordScore(at) parameter',
@@ -26,8 +20,4 @@ export const DOMAIN_SURFACE_BASELINE: readonly string[] = [
   'src/domain/user/password.ts Password.isTooLong(raw) parameter',
   'src/domain/user/password-verifier.ts PasswordVerifier.verify(typed) parameter',
   'src/domain/user/user.ts User.passwordMatches(typed) parameter',
-  // #96: the public fields of UserState.
-  'src/domain/user/user.ts UserState.id field',
-  'src/domain/user/user.ts UserState.username field',
-  'src/domain/user/user.ts UserState.passwordHash field',
 ];

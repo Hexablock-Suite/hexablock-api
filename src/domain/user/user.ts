@@ -3,21 +3,18 @@ import type { PasswordVerifier } from './password-verifier.js';
 import type { UserId } from './user-id.js';
 import type { Username } from './username.js';
 
-// The state of one user, as domain values. User.snapshot() gives it, and
-// User.restore() builds the aggregate again from it. It is the Memento of
-// the aggregate (Millett and Tune): a mapper reads it and maps it to a row.
-// It has no rule and no behavior.
-export interface UserState {
-  readonly id: UserId;
-  readonly username: Username;
-  readonly passwordHash: PasswordHash;
+// The receiver of the parts of a User. User.deliverTo() calls it once. Only
+// the border implements it, for example the row mapper or the token issuer.
+export interface UserReceiver {
+  receive(id: UserId, username: Username, passwordHash: PasswordHash): void;
 }
 
 // Aggregate root: a player account (API-FR-01, classes.md decision 16). It
-// has its own repository, which sign-up and sign-in use. It keeps the
-// password hash, never the plain password. The aggregate has no getter and
-// no public field: snapshot() gives a copy of its state. The value objects
-// guard their own rules, so the factories check nothing more.
+// keeps the credentials of one account together and checks a typed password
+// against its own hash, so no caller reads the hash. It keeps the password
+// hash, never the plain password. The aggregate has no getter and no public
+// field: deliverTo() gives its parts to a receiver of the border. The value
+// objects guard their own rules, so the factories check nothing more.
 export class User {
   private constructor(
     private readonly id: UserId,
@@ -30,9 +27,9 @@ export class User {
     return new User(id, username, passwordHash);
   }
 
-  // Rebuilds a stored user from its state.
-  static restore(state: UserState): User {
-    return new User(state.id, state.username, state.passwordHash);
+  // Rebuilds a stored user from the values that it delivered.
+  static restore(id: UserId, username: Username, passwordHash: PasswordHash): User {
+    return new User(id, username, passwordHash);
   }
 
   // Two users are the same user when they have the same id. The other data does not count.
@@ -40,10 +37,11 @@ export class User {
     return this.id.equals(other.id);
   }
 
-  // Gives a copy of the state. A change to the copy does not change the
-  // aggregate: the object is new, and the values are immutable.
-  snapshot(): UserState {
-    return { id: this.id, username: this.username, passwordHash: this.passwordHash };
+  // Delivers the parts to a receiver of the border in one call. No operation
+  // returns them. The values are immutable, so the receiver cannot change
+  // the user through them.
+  deliverTo(receiver: UserReceiver): void {
+    receiver.receive(this.id, this.username, this.passwordHash);
   }
 
   // Tells if a typed text is the password of this user. The user passes its
