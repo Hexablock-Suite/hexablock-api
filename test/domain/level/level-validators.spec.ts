@@ -1,4 +1,5 @@
-import { FitSection } from '../../../src/domain/level/fit/fit-section.js';
+import { FitLevelValidator } from '../../../src/domain/level/fit/fit-level-validator.js';
+import { HexTopology } from '../../../src/domain/level/hex-topology.js';
 import { LevelDefinition } from '../../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../../src/domain/level/level-order.js';
 import type { LevelProblem } from '../../../src/domain/level/level-problem.js';
@@ -6,6 +7,7 @@ import type { LevelValidator } from '../../../src/domain/level/level-validator.j
 import { LevelValidators } from '../../../src/domain/level/level-validators.js';
 import { LevelVersion } from '../../../src/domain/level/level-version.js';
 import { SortLevelValidator } from '../../../src/domain/level/sort/sort-level-validator.js';
+import { Topologies } from '../../../src/domain/level/topologies.js';
 import { TopologyId } from '../../../src/domain/level/topology-id.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
@@ -97,12 +99,11 @@ describe('LevelValidators', () => {
     });
   });
 
-  // SortLevelValidator (#78) picks the Sort section. The strategy of #79
-  // picks the Fit section. Here the test picks it, so the format document
-  // reaches the registry today.
+  // FitLevelValidator (#79) picks the Fit section, and SortLevelValidator
+  // (#78) picks the Sort section. The composition root registers both.
   it('should_build_each_example_when_the_strategies_pick_the_fit_and_the_sort_section', () => {
     const validators = LevelValidators.of([
-      [GameId.of('fit'), { sectionOf: (raw) => FitSection.of(raw) }],
+      [GameId.of('fit'), new FitLevelValidator(Topologies.of([[HEX, new HexTopology()]]))],
       [GameId.of('sort'), new SortLevelValidator()],
     ]);
 

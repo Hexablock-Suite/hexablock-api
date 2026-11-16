@@ -41,11 +41,11 @@ A signed-in client calls this endpoint to publish new levels without an app upda
 
 ### Class view
 
-![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and the LevelValidators domain service with its LevelValidator strategies FitLevelValidator and SortLevelValidator and the LevelDefinition aggregate root in layer 1](classes/views/flow-3-update-levels.png)
+![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and the LevelValidators domain service with its LevelValidator strategies FitLevelValidator, which holds Topologies, and SortLevelValidator and the LevelDefinition aggregate root in layer 1](classes/views/flow-3-update-levels.png)
 
 ### Sequence diagram
 
-![Update levels sequence: JwtAuthGuard verifies the token, LevelsController builds the request with LevelDtoMapper and calls UpdateLevels, the use case asks LevelValidators to check each level, the LevelValidator strategy of its gameId picks the section type and LevelValidators builds the level, and then the use case saves the levels or returns the problems as an error body](flows/views/seq-3-update-levels.png)
+![Update levels sequence: JwtAuthGuard verifies the token, LevelsController builds the request with LevelDtoMapper and calls UpdateLevels, the use case asks LevelValidators to check each level, the LevelValidator strategy of its gameId picks the section type and LevelValidators builds the level, a note gives the Fit path through Topologies and FitSection, and then the use case saves the levels or returns the problems as an error body](flows/views/seq-3-update-levels.png)
 
 ## Other use cases
 
@@ -75,7 +75,7 @@ The other four use cases follow a path that one of the three flows already draws
 - A white bar on a lifeline is an activation: the object runs.
 - A call through a port names the port, for example `ProgressRepository.find()`. The caller holds only the port. `AppModule` binds the port to the adapter, so the lifeline is the adapter that runs.
 - An `alt` or `loop` fragment shows a choice or a repetition. Its guard, in square brackets, says when it runs. Fragments can nest: in flow 2 the wrong-password `alt` sits inside the `[else]` of the unknown-user `alt`. A `ref` box stands for a flow that another view details: in flows 1 and 3, the token check of Part 2, view 4.
-- In flow 3, the `LevelValidator` lifeline is the strategy that `LevelValidators` finds for the `gameId` of the level: `FitLevelValidator` or `SortLevelValidator`. A lifeline of the interface shows that the domain service knows only the Strategy interface. `LevelValidators` then builds the level with `LevelDefinition.of()`; the diagram writes that step as an action on its lifeline.
+- In flow 3, the `LevelValidator` lifeline is the strategy that `LevelValidators` finds for the `gameId` of the level: `FitLevelValidator` or `SortLevelValidator`. A lifeline of the interface shows that the domain service knows only the Strategy interface. `LevelValidators` then builds the level with `LevelDefinition.of()`; the diagram writes that step as an action on its lifeline. A note, a box with a folded corner, gives the Fit path of the strategy: `FitLevelValidator` finds the `Topology` of the level in `Topologies`, and `FitSection` checks A5 on it. A topology with no entry gives `unknown-topology`.
 
 ## Proposals in these views
 

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1450"
+        viewBox="0 0 1240 1466"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow3updatelevels-title flow3updatelevels-desc"
@@ -79,7 +79,7 @@
           LevelValidators. In layer 1, the LevelValidators domain service holds one LevelValidator
           strategy per gameId in a list of entries and creates each LevelDefinition aggregate root;
           FitLevelValidator and SortLevelValidator implement LevelValidator and pick their section
-          type.
+          type. FitLevelValidator holds Topologies and gives FitSection the Topology of the level.
         </desc>
         <defs>
           <marker
@@ -935,7 +935,7 @@
           x="140"
           y="1016"
           width="280"
-          height="116"
+          height="140"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -961,7 +961,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          A5 · API-FR-04 · #79
+          A5 · API-FR-04 · decision 6
         </text>
         <line x1="140" y1="1076" x2="420" y2="1076" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
@@ -971,11 +971,21 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
+          - topologies: Topologies
+        </text>
+        <line x1="140" y1="1100" x2="420" y2="1100" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="156"
+          y="1116"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
           + sectionOf(raw: unknown,
         </text>
         <text
           x="178"
-          y="1108"
+          y="1132"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -984,7 +994,7 @@
         </text>
         <text
           x="178"
-          y="1124"
+          y="1148"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1272,18 +1282,28 @@
           LevelDefinition&lt;unknown&gt; is a valid level whose section type only its strategy
           knows. #80 and #81 fix the port and the request; flows.md holds the sequence.
         </text>
+        <text
+          x="24"
+          y="1356"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          FitLevelValidator finds the Topology of the level in Topologies with TopologyId.equals(),
+          and FitSection checks A5 on it (decision 6).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1368"
+          y1="1384"
           x2="1216"
-          y2="1368"
+          y2="1384"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1386"
+          y="1402"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1293,9 +1313,9 @@
         </text>
         <line
           x1="24"
-          y1="1404"
+          y1="1420"
           x2="52"
-          y2="1404"
+          y2="1420"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1303,7 +1323,7 @@
         />
         <text
           x="60"
-          y="1408"
+          y="1424"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1312,16 +1332,16 @@
         </text>
         <line
           x1="128"
-          y1="1404"
+          y1="1420"
           x2="156"
-          y2="1404"
+          y2="1420"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#flow3updatelevels-open)"
         />
         <text
           x="164"
-          y="1408"
+          y="1424"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1330,7 +1350,7 @@
         </text>
         <rect
           x="24"
-          y="1424"
+          y="1440"
           width="20"
           height="12"
           rx="2"
@@ -1340,7 +1360,7 @@
         />
         <rect
           x="48"
-          y="1424"
+          y="1440"
           width="20"
           height="12"
           rx="2"
@@ -1350,7 +1370,7 @@
         />
         <rect
           x="72"
-          y="1424"
+          y="1440"
           width="20"
           height="12"
           rx="2"
@@ -1360,7 +1380,7 @@
         />
         <text
           x="104"
-          y="1433"
+          y="1449"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1369,7 +1389,7 @@
         </text>
         <rect
           x="352"
-          y="1424"
+          y="1440"
           width="28"
           height="12"
           rx="2"
@@ -1379,7 +1399,7 @@
         />
         <text
           x="388"
-          y="1433"
+          y="1449"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1388,7 +1408,7 @@
         </text>
         <rect
           x="512"
-          y="1424"
+          y="1440"
           width="28"
           height="12"
           rx="2"
@@ -1399,7 +1419,7 @@
         />
         <text
           x="548"
-          y="1433"
+          y="1449"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

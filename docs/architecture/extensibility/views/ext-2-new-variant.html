@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 2 of 3</p>
       <h1>A new variant: one section type and one validator</h1>
       <svg
-        viewBox="0 0 1040 752"
+        viewBox="0 0 1040 768"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext2variant-title ext2variant-desc"
@@ -75,7 +75,8 @@
           shape and holds its rules, and a LevelValidator strategy that only picks that section
           type. The composition root registers the strategy for its gameId in the LevelValidators
           domain service, which creates each level. FitSection and SortSection are the existing
-          cases, and the declared Fill section and validator are placeholders.
+          cases, and the declared Fill section and validator are placeholders. FitLevelValidator
+          finds the Topology of the level in Topologies, so a new topology adds one Topology class.
         </desc>
         <defs>
           <marker
@@ -598,7 +599,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          A5 · #79
+          A5 · decision 6
         </text>
         <text
           x="532"
@@ -772,11 +773,21 @@
           A cell is a Coordinate value object, and topology says how to read it, so a square,
           triangular or 3D level needs no new schema (decision 6).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="652" x2="1016" y2="652" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="670"
+          y="644"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          FitLevelValidator finds the Topology of the level in Topologies with TopologyId.equals().
+          A new topology adds one Topology class and one entry of Topologies.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="668" x2="1016" y2="668" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="686"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -786,9 +797,9 @@
         </text>
         <line
           x1="24"
-          y1="688"
+          y1="704"
           x2="52"
-          y2="688"
+          y2="704"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -796,7 +807,7 @@
         />
         <text
           x="60"
-          y="692"
+          y="708"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -805,16 +816,16 @@
         </text>
         <line
           x1="128"
-          y1="688"
+          y1="704"
           x2="156"
-          y2="688"
+          y2="704"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext2variant-open)"
         />
         <text
           x="164"
-          y="692"
+          y="708"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -823,7 +834,7 @@
         </text>
         <rect
           x="24"
-          y="704"
+          y="720"
           width="12"
           height="12"
           rx="2"
@@ -833,7 +844,7 @@
         />
         <text
           x="44"
-          y="714"
+          y="730"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -842,7 +853,7 @@
         </text>
         <rect
           x="272"
-          y="704"
+          y="720"
           width="28"
           height="12"
           rx="2"
@@ -853,7 +864,7 @@
         />
         <text
           x="308"
-          y="714"
+          y="730"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -862,7 +873,7 @@
         </text>
         <rect
           x="520"
-          y="704"
+          y="720"
           width="28"
           height="12"
           rx="2"
@@ -872,7 +883,7 @@
         />
         <text
           x="556"
-          y="714"
+          y="730"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -881,7 +892,7 @@
         </text>
         <rect
           x="768"
-          y="704"
+          y="720"
           width="28"
           height="12"
           rx="2"
@@ -892,7 +903,7 @@
         />
         <text
           x="804"
-          y="714"
+          y="730"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -901,7 +912,7 @@
         </text>
         <rect
           x="24"
-          y="726"
+          y="742"
           width="28"
           height="12"
           rx="2"
@@ -912,7 +923,7 @@
         />
         <text
           x="60"
-          y="736"
+          y="752"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

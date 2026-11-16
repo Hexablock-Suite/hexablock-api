@@ -80,7 +80,9 @@
           the section type, the section checks its own shape and rules, and LevelValidators builds
           the level. With no problem, the use case saves the levels through DrizzleLevelRepository;
           otherwise it returns a failed Result, and the controller answers with the error body that
-          LevelDtoMapper builds.
+          LevelDtoMapper builds. A note on the strategy gives the Fit path: FitLevelValidator finds
+          the Topology of the level in Topologies, and FitSection checks A5 on it; a topology with
+          no entry gives unknown-topology.
         </desc>
         <defs>
           <marker
@@ -1018,6 +1020,68 @@
         >
           Result&lt;TSection, …&gt;
         </text>
+        <!-- Note: the Fit path of the strategy, anchored to its activation -->
+        <line
+          x1="987"
+          y1="580"
+          x2="1076"
+          y2="580"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="2,3"
+        />
+        <path
+          d="M1076 542 L1200 542 L1210 552 L1210 610 L1076 610 Z"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+        />
+        <path d="M1200 542 L1200 552 L1210 552" fill="none" stroke="#5b6873" stroke-width="1" />
+        <text
+          x="1082"
+          y="556"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          FitLevelValidator:
+        </text>
+        <text
+          x="1082"
+          y="567"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Topologies.find(topology),
+        </text>
+        <text
+          x="1082"
+          y="578"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          then FitSection.of(raw,
+        </text>
+        <text
+          x="1082"
+          y="589"
+          fill="#17212a"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          topology) checks A5.
+        </text>
+        <text
+          x="1082"
+          y="600"
+          fill="#5b6873"
+          font-size="7.5"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          no entry: unknown-topology
+        </text>
         <!-- Action: LevelValidators builds the level with the section that the strategy gave -->
         <text x="842" y="626" fill="#5b6873" font-size="8" font-family="'IBM Plex Mono', monospace">
           LevelDefinition.of(…, section)
@@ -1422,6 +1486,21 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           Frame · sd names the interaction; a message on its left edge enters or leaves the API
+        </text>
+        <path
+          d="M788 1194 L804 1194 L808 1198 L808 1206 L788 1206 Z"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+        />
+        <text
+          x="816"
+          y="1203"
+          fill="#5b6873"
+          font-size="8.5"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Note · a comment on a lifeline
         </text>
       </svg>
     </div>
