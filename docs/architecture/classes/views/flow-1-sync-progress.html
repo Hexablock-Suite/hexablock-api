@@ -83,7 +83,7 @@
           of its last sync. LevelResult keeps its four value objects private, takes them built in
           of(), and delivers all four to a LevelResultReceiver with deliverTo(). ProgressDtoMapper
           builds the GameId, the Score and each value of a LevelResult through factories that return
-          a Result. A dashed frame labelled AGGREGATE encloses PlayerProgress and the value objects
+          a Result. A dashed frame labelled Aggregate encloses PlayerProgress and the value objects
           that it holds.
         </desc>
         <defs>
@@ -152,7 +152,7 @@
           stroke="rgba(180,83,9,0.45)"
           stroke-width="1"
         />
-        <!-- Group frame: the AGGREGATE frame of PlayerProgress encloses the root and the value objects that it holds. -->
+        <!-- Group frame: the Aggregate frame of PlayerProgress encloses the root and the value objects that it holds. -->
         <rect
           x="48"
           y="1184"
@@ -173,7 +173,7 @@
           font-family="'IBM Plex Mono', monospace"
           letter-spacing="0.14em"
         >
-          AGGREGATE · PlayerProgress · decision 2
+          Aggregate · PlayerProgress · decision 2
         </text>
         <!-- Relationships (drawn before boxes) -->
         <!-- JwtAuthGuard holds AuthenticateToken: use -->
@@ -1599,7 +1599,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          ProgressKey
+          Result&lt;ProgressKey, never&gt;
         </text>
         <text
           x="796"
@@ -1854,7 +1854,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          AGGREGATE frame · root and its members
+          Aggregate frame · root and its members
         </text>
       </svg>
     </div>

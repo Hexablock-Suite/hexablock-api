@@ -15,7 +15,7 @@ The app calls this endpoint when it syncs its progress and its leaderboard: `Sav
 
 ### Class view
 
-![Sync progress class view: JwtAuthGuard, ProgressController, ProgressDtoMapper and DrizzleProgressRepository in layer 3, SystemClock in layer 4, SyncProgressUseCase with the SyncProgress and AuthenticateToken input ports, SyncProgressRequest and the ProgressRepository and Clock ports in layer 2, and PlayerProgress, ProgressKey, LevelResult and SyncInstant in one dashed AGGREGATE frame in layer 1](classes/views/flow-1-sync-progress.png)
+![Sync progress class view: JwtAuthGuard, ProgressController, ProgressDtoMapper and DrizzleProgressRepository in layer 3, SystemClock in layer 4, SyncProgressUseCase with the SyncProgress and AuthenticateToken input ports, SyncProgressRequest and the ProgressRepository and Clock ports in layer 2, and PlayerProgress, ProgressKey, LevelResult and SyncInstant in one dashed Aggregate frame in layer 1](classes/views/flow-1-sync-progress.png)
 
 ### Sequence diagram
 
@@ -29,7 +29,7 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ### Class view
 
-![Login class view: ScryptPasswordHasher and JwtTokenIssuer in layer 4, AuthController, AuthDtoMapper and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port, the LoginRequest that AuthDtoMapper builds and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User aggregate root in a dashed AGGREGATE frame, the PasswordAttempt value object of the request and the PasswordVerifier interface in layer 1](classes/views/flow-2-login.png)
+![Login class view: ScryptPasswordHasher and JwtTokenIssuer in layer 4, AuthController, AuthDtoMapper and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port, the LoginRequest that AuthDtoMapper builds and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User aggregate root in a dashed Aggregate frame, the PasswordAttempt value object of the request and the PasswordVerifier interface in layer 1](classes/views/flow-2-login.png)
 
 ### Sequence diagram
 
@@ -41,7 +41,7 @@ A signed-in client calls this endpoint to publish new levels without an app upda
 
 ### Class view
 
-![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and the LevelValidators domain service with its LevelValidator strategies FitLevelValidator, which holds Topologies, and SortLevelValidator and the LevelDefinition aggregate root in a dashed AGGREGATE frame in layer 1](classes/views/flow-3-update-levels.png)
+![Update levels class view: JwtAuthGuard, LevelsController, LevelDtoMapper and DrizzleLevelRepository in layer 3, UpdateLevelsUseCase with the AuthenticateToken and UpdateLevels input ports and the LevelRepository port in layer 2, and the LevelValidators domain service with its LevelValidator strategies FitLevelValidator, which holds Topologies, and SortLevelValidator and the LevelDefinition aggregate root in a dashed Aggregate frame in layer 1](classes/views/flow-3-update-levels.png)
 
 ### Sequence diagram
 
@@ -172,7 +172,7 @@ Example answer of `GET /leaderboard/hexa-fit/levels/fit-01`:
 
 - The zones are the Clean layers, with the colors of [layers.md](layers.md): dark blue for layer 4, light blue for layer 3, purple for layer 2 and yellow for layer 1. The outer layer is at the top, so every dependency between layers points down.
 - The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A filled diamond joins the root of an aggregate to each internal entity, and every other attribute, a GoF pattern included, is a use arrow (decision 13 of [classes.md](classes.md)). The flows draw no internal entity, so they draw no diamond: `PlayerProgress` keeps its `LevelResult` values through a use arrow labelled `levelResults 0..*`. Flow 3 draws a use arrow `entries 0..*` from `LevelValidators` to `LevelValidator`.
-- A dashed frame labelled `AGGREGATE` marks the boundary of an aggregate, as in [classes.md](classes.md). Flow 1 frames `PlayerProgress` with `ProgressKey`, `LevelResult` and `SyncInstant`. Flows 2 and 3 draw the root of their aggregate, `User` or `LevelDefinition`, as a full class with no member, so the frame encloses the root alone. Views 1.3, 1.2 and 1.5 of [classes.md](classes.md) draw the members.
+- A dashed frame labelled `Aggregate` marks the boundary of an aggregate, as in [classes.md](classes.md). Flow 1 frames `PlayerProgress` with `ProgressKey`, `LevelResult` and `SyncInstant`. Flows 2 and 3 draw the root of their aggregate, `User` or `LevelDefinition`, as a full class with no member, so the frame encloses the root alone. Views 1.3, 1.2 and 1.5 of [classes.md](classes.md) draw the members.
 - The views draw the input ports, such as `SyncProgress`, `Login`, `UpdateLevels` and `AuthenticateToken`, as interface boxes, not as lollipops. A box lets the controller and the guard point at the port they hold. The `execute()` member of each input port is the one of its use case: every input port binds `UseCase` (decision 7).
 - The teal class is the focal class: the use case.
 - A flow view shows more than the seven classes of the other views, because it follows one request through every layer.

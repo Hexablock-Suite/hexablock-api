@@ -81,13 +81,14 @@
           game, a Stars, a LevelsCompleted, a Moves and an ElapsedTime, and the isBetterThan order
           of S3-03. In layer 2, the LeaderboardEntry response type names the player by UserId and
           holds the value that ranks the player: a LevelResult, a Score or a Standing. ProgressKey
-          takes the UserId and the GameId built, compares them in equals() and delivers both to a
-          ProgressKeyReceiver with deliverTo(). GameId, Score, SyncInstant and UserId keep their
-          value private and deliver it to a receiver with deliverTo(). Each of their factories
-          returns a Result with the code of a broken rule. LevelResult keeps its four value objects
-          private, takes them built in of(), and delivers all four to a LevelResultReceiver with
-          deliverTo(). A dashed frame labelled AGGREGATE encloses PlayerProgress and the value
-          objects that it holds: ProgressKey, UserId, GameId, LevelResult, Score and SyncInstant.
+          takes the UserId and the GameId built in of(), which returns a Result that cannot fail,
+          compares them in equals() and delivers both to a ProgressKeyReceiver with deliverTo().
+          GameId, Score, SyncInstant and UserId keep their value private and deliver it to a
+          receiver with deliverTo(). Each of their factories returns a Result with the code of a
+          broken rule. LevelResult keeps its four value objects private, takes them built in of(),
+          and delivers all four to a LevelResultReceiver with deliverTo(). A dashed frame labelled
+          Aggregate encloses PlayerProgress and the value objects that it holds: ProgressKey,
+          UserId, GameId, LevelResult, Score and SyncInstant.
         </desc>
         <defs>
           <marker
@@ -135,7 +136,7 @@
           stroke="rgba(180,83,9,0.45)"
           stroke-width="1"
         />
-        <!-- Pattern and group frames: the AGGREGATE frame of PlayerProgress encloses the root and the value objects that it holds. Standing and LeaderboardEntry stay outside. -->
+        <!-- Pattern and group frames: the Aggregate frame of PlayerProgress encloses the root and the value objects that it holds. Standing and LeaderboardEntry stay outside. -->
         <path
           d="M56 236 L700 236 Q708 236 708 244 L708 556 Q708 564 716 564 L996 564 Q1004 564 1004 572 L1004 1008 Q1004 1016 996 1016 L56 1016 Q48 1016 48 1008 L48 244 Q48 236 56 236 Z"
           fill="none"
@@ -152,7 +153,7 @@
           font-family="'IBM Plex Mono', monospace"
           letter-spacing="0.14em"
         >
-          AGGREGATE · PlayerProgress · decision 2
+          Aggregate · PlayerProgress · decision 2
         </text>
         <!-- Relationships (drawn before boxes) -->
         <!-- PlayerProgress holds levelResults: LevelResult[]: use with role and multiplicity, no diamond, because LevelResult is a value object (decision 13) -->
@@ -178,7 +179,7 @@
         <!-- ProgressKey holds userId: UserId: use with role and multiplicity (#107) -->
         <line
           x1="176"
-          y1="470"
+          y1="462"
           x2="176"
           y2="432"
           stroke="#5b6873"
@@ -188,7 +189,7 @@
         <!-- ProgressKey holds gameId: GameId: use with role and multiplicity (#107) -->
         <line
           x1="176"
-          y1="662"
+          y1="670"
           x2="176"
           y2="700"
           stroke="#5b6873"
@@ -270,10 +271,10 @@
         >
           0..*
         </text>
-        <rect x="182" y="675" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="182" y="679" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="210"
-          y="684"
+          y="688"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -282,10 +283,10 @@
         >
           gameId 1
         </text>
-        <rect x="182" y="445" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="182" y="441" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="210"
-          y="454"
+          y="450"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1082,9 +1083,9 @@
         <!-- Class: ProgressKey («value object», #107) -->
         <rect
           x="64"
-          y="470"
+          y="462"
           width="224"
-          height="192"
+          height="208"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1092,7 +1093,7 @@
         />
         <text
           x="176"
-          y="488"
+          y="480"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1103,7 +1104,7 @@
         </text>
         <text
           x="176"
-          y="506"
+          y="498"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1112,17 +1113,17 @@
         >
           ProgressKey
         </text>
-        <line x1="64" y1="518" x2="288" y2="518" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="534" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="510" x2="288" y2="510" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="526" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - userId: UserId
         </text>
-        <text x="80" y="550" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="542" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - gameId: GameId
         </text>
-        <line x1="64" y1="558" x2="288" y2="558" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="64" y1="550" x2="288" y2="550" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="80"
-          y="574"
+          y="566"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1132,24 +1133,34 @@
         </text>
         <text
           x="102"
-          y="590"
+          y="582"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          gameId: GameId): ProgressKey
+          gameId: GameId):
         </text>
-        <text x="80" y="606" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          x="102"
+          y="598"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          Result&lt;ProgressKey, never&gt;
+        </text>
+        <text x="80" y="614" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: ProgressKey):
         </text>
-        <text x="102" y="622" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="630" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           boolean
         </text>
-        <text x="80" y="638" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="646" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="654" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="662" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ProgressKeyReceiver): void
         </text>
         <!-- Class: GameId («value object») -->
@@ -1322,7 +1333,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           ProgressKey holds the UserId and the GameId of a progress (#107). of() takes both built
-          and cannot fail, so it returns the key; deliverTo() gives both to a ProgressKeyReceiver.
+          and returns a Result that cannot fail; deliverTo() gives both to a ProgressKeyReceiver.
         </text>
         <text
           x="24"
@@ -1457,7 +1468,7 @@
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          AGGREGATE frame · root and its members
+          Aggregate frame · root and its members
         </text>
         <rect
           x="446"
