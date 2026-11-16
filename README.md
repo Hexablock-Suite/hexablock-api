@@ -98,10 +98,11 @@ definitions that the engine plays, with generic types (decision D6):
 - **`UseCase<TRequest, TResponse>`** is the one generic input port. Every use case binds it, and
   every failure type has a `kind`, so one aspect class wraps any use case.
 - **`Result<T, E>`** carries an expected failure as a value, never as an exception.
-- **[`Range<T>`](src/domain/shared/range.ts)** is a closed interval over any ordered type, with
-  `contains(value: T): boolean`. The username (3 to 32) and password (8 to 128) length limits are
-  the `Range<number>` values `USERNAME_LENGTH` and `PASSWORD_LENGTH` in `src/domain/user`. The value
-  objects ask them, and they deliver their bounds to the HTTP error messages and `CredentialsDto`. The professor modeled the limits
+- **[`Range<T>`](src/domain/shared/range.ts)** is a closed interval over a value that orders itself
+  (`T extends Ordered<T>`), with `contains(value: T): boolean`. The username (3 to 32) and password
+  (8 to 128) length limits are the `Range<CharacterCount>` values `USERNAME_LENGTH` and
+  `PASSWORD_LENGTH` in `src/domain/user`. `CharacterCount` counts code points, so an emoji is one
+  character. The value objects ask the ranges, and the ranges deliver their bounds to the HTTP error messages and `CredentialsDto`. The professor modeled the limits
   of the statement as a generic range with a contains method in the session of 2026-11-06.
 
 These types are the design. Their code starts in Sprint 1.

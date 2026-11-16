@@ -1,4 +1,5 @@
 import type { ValueReceiver } from '../shared/value-receiver.js';
+import { CharacterCount } from './character-count.js';
 import { PASSWORD_LENGTH } from './password.js';
 
 // The text that a player types as the password at sign-in. It is not a
@@ -23,15 +24,11 @@ export class PasswordAttempt {
   }
 
   // Tells if the attempt is longer than any password. Sign-in asks this
-  // before any hash work, so the hash work of one request stays bounded.
+  // before any hash work, so the hash work of one request stays bounded. The
+  // attempt counts its characters through CharacterCount, as Password.create()
+  // does: an emoji is one character.
   isLongerThanAnyPassword(): boolean {
-    return PASSWORD_LENGTH.isExceededBy(PasswordAttempt.codePoints(this.#typed));
-  }
-
-  // Counts Unicode code points, as Password.create() does: an emoji is one
-  // character. The lint rule no-misused-spread forbids the spread of a string.
-  private static codePoints(text: string): number {
-    return Array.from(text).length;
+    return PASSWORD_LENGTH.isExceededBy(CharacterCount.ofText(this.#typed));
   }
 
   // Delivers the typed text to a receiver. Only the adapter of the

@@ -1,139 +1,143 @@
+import type { Ordered } from '../../../src/domain/shared/ordered.js';
 import { Range } from '../../../src/domain/shared/range.js';
-import { boundsDeliveredBy, RecordingBoundsReceiver } from '../../support/recording-receiver.js';
+import { CharacterCount } from '../../../src/domain/user/character-count.js';
+import {
+  boundsDeliveredBy,
+  deliveredBy,
+  RecordingBoundsReceiver,
+} from '../../support/recording-receiver.js';
+import { valueOf } from '../../support/result.js';
 
+const count = (value: number): CharacterCount => valueOf(CharacterCount.of(value));
+const counts = (min: number, max: number): Range<CharacterCount> =>
+  Range.of(count(min), count(max));
+
+// A test value that orders itself: a day of one month.
+class Day implements Ordered<Day> {
+  private constructor(private readonly number: number) {}
+
+  static of(number: number): Day {
+    return new Day(number);
+  }
+
+  isAfter(other: Day): boolean {
+    return this.number > other.number;
+  }
+
+  equals(other: Day): boolean {
+    return this.number === other.number;
+  }
+}
+
+// The values of the two bounds that a range of counts delivers.
+const boundValuesOf = (range: Range<CharacterCount>): number[] =>
+  boundsDeliveredBy(range).flatMap(([min, max]) => [...deliveredBy(min), ...deliveredBy(max)]);
+
+// #99: the value orders itself, so the range asks it with booleans and no
+// number order crosses the range.
 describe('Range', () => {
   it('should_contain_value_when_it_lies_between_the_bounds_inclusive', () => {
-    const range = Range.ofNumbers(3, 32);
+    const range = counts(3, 32);
 
-    expect([3, 4, 31, 32].map((value) => range.contains(value))).toEqual([true, true, true, true]);
+    expect([3, 4, 31, 32].map((value) => range.contains(count(value)))).toEqual([
+      true,
+      true,
+      true,
+      true,
+    ]);
   });
 
-  it.each([2, 33, -Infinity, Infinity, Number.NaN])(
-    'should_not_contain_value_when_it_lies_outside_the_bounds_or_is_not_a_number',
+  it.each([0, 2, 33, Number.MAX_SAFE_INTEGER])(
+    'should_not_contain_value_when_it_lies_outside_the_bounds',
     (value) => {
-      const range = Range.ofNumbers(3, 32);
-
-      expect(range.contains(value)).toBe(false);
+      expect(counts(3, 32).contains(count(value))).toBe(false);
     },
   );
 
-  it('should_contain_infinite_value_when_upper_bound_is_infinite', () => {
-    const range = Range.ofNumbers(0, Infinity);
+  it('should_contain_only_the_bound_when_min_equals_max', () => {
+    const range = counts(5, 5);
 
-    expect(range.contains(Infinity)).toBe(true);
-    expect(range.contains(-1)).toBe(false);
-  });
-
-  // #90: the bounds leave only through a delivery to a receiver.
-  it('should_deliver_both_bounds_to_the_receiver_when_range_is_created', () => {
-    const range = Range.ofNumbers(8, 128);
-
-    expect(boundsDeliveredBy(range)).toEqual([[8, 128]]);
-  });
-
-  it('should_have_no_public_bound_field_when_the_bounds_leave_through_a_delivery', () => {
-    const range = Range.ofNumbers(8, 128);
-
-    // @ts-expect-error -- #90 makes the lower bound private.
-    void range.min;
-    // @ts-expect-error -- #90 makes the upper bound private.
-    void range.max;
-    // The delivery returns nothing: the receiver holds the bounds.
-    expect(range.deliverBoundsTo(new RecordingBoundsReceiver<number>())).toBeUndefined();
+    expect([4, 5, 6].map((value) => range.contains(count(value)))).toEqual([false, true, false]);
   });
 
   // PasswordAttempt.isLongerThanAnyPassword() asks this, so it reads no
   // bound. A row gives the value and the answer.
   it.each([
     [129, true],
-    [Infinity, true],
+    [Number.MAX_SAFE_INTEGER, true],
     [128, false],
     [8, false],
     [7, false],
-    [-Infinity, false],
+    [0, false],
   ])('should_be_exceeded_only_when_value_is_above_the_upper_bound', (value, exceeded) => {
-    const range = Range.ofNumbers(8, 128);
-
-    expect(range.isExceededBy(value)).toBe(exceeded);
+    expect(counts(8, 128).isExceededBy(count(value))).toBe(exceeded);
   });
 
-  // A value without an order, such as NaN, is not above the range.
-  it('should_not_be_exceeded_when_value_has_no_order', () => {
-    expect(Range.ofNumbers(8, 128).isExceededBy(Number.NaN)).toBe(false);
+  it('should_throw_range_error_when_min_comes_after_max', () => {
+    expect(() => counts(5, 4)).toThrow(new RangeError('A Range needs min <= max.'));
   });
 
-  it('should_ask_the_compare_function_when_bounds_are_not_numbers', () => {
-    const byTime = (left: Date, right: Date) => left.getTime() - right.getTime();
-    const range = Range.of(new Date('2026-11-01'), new Date('2026-11-30'), byTime);
+  // #90: the bounds leave only through a delivery to a receiver.
+  it('should_deliver_both_bounds_to_the_receiver_when_range_is_created', () => {
+    const range = counts(8, 128);
+    const delivered = boundsDeliveredBy(range);
 
-    expect(range.isExceededBy(new Date('2026-12-01'))).toBe(true);
-    expect(range.isExceededBy(new Date('2026-11-30'))).toBe(false);
+    expect(delivered).toHaveLength(1);
+    expect(delivered[0][0].equals(count(8))).toBe(true);
+    expect(delivered[0][1].equals(count(128))).toBe(true);
+    expect(boundValuesOf(range)).toEqual([8, 128]);
   });
 
-  it('should_contain_only_the_bound_when_min_equals_max', () => {
-    const range = Range.ofNumbers(5, 5);
+  it('should_have_no_public_bound_field_when_the_bounds_leave_through_a_delivery', () => {
+    const range = counts(8, 128);
 
-    expect([4, 5, 6].map((value) => range.contains(value))).toEqual([false, true, false]);
+    // @ts-expect-error -- #90 makes the lower bound private.
+    void range.min;
+    // @ts-expect-error -- #90 makes the upper bound private.
+    void range.max;
+    // The delivery returns nothing: the receiver holds the bounds.
+    expect(range.deliverBoundsTo(new RecordingBoundsReceiver<CharacterCount>())).toBeUndefined();
   });
 
-  it.each([
-    [5, 4],
-    [Number.NaN, 4],
-    [1, Number.NaN],
-  ])(
-    'should_throw_range_error_when_min_is_greater_than_max_or_a_bound_is_not_a_number',
-    (min, max) => {
-      expect(() => Range.ofNumbers(min, max)).toThrow(new RangeError('A Range needs min <= max.'));
-    },
-  );
+  // The order lives in the value, so a range of any value that orders itself works.
+  it('should_ask_the_value_for_its_order_when_the_bounds_are_another_ordered_type', () => {
+    const range = Range.of(Day.of(1), Day.of(30));
 
-  it('should_order_values_with_the_compare_function_when_bounds_are_not_numbers', () => {
-    const byTime = (left: Date, right: Date) => left.getTime() - right.getTime();
-    const range = Range.of(new Date('2026-11-01'), new Date('2026-11-30'), byTime);
+    expect(range.contains(Day.of(6))).toBe(true);
+    expect(range.contains(Day.of(31))).toBe(false);
+    expect(range.isExceededBy(Day.of(31))).toBe(true);
+    expect(() => Range.of(Day.of(30), Day.of(1))).toThrow(RangeError);
+  });
 
-    expect(range.contains(new Date('2026-11-06'))).toBe(true);
-    expect(range.contains(new Date('2026-12-01'))).toBe(false);
-    expect(() => Range.of(new Date('2026-11-30'), new Date('2026-11-01'), byTime)).toThrow(
-      RangeError,
-    );
+  // #99: no number order crosses the factory. A range takes only its two bounds.
+  it('should_take_only_the_two_bounds_when_the_factory_builds_a_range', () => {
+    // @ts-expect-error -- #99: the factory takes no order function. The order lives in T.
+    const range = Range.of(count(1), count(2), () => 0);
+
+    expect(range.contains(count(2))).toBe(true);
+    expect(range.contains(count(3))).toBe(false);
+    expect('ofNumbers' in Range).toBe(false);
   });
 });
 
 describe('Range equals', () => {
-  it('should_be_equal_when_two_ranges_have_bounds_of_the_same_order', () => {
-    type Bound = { readonly n: number };
-    const byN = (left: Bound, right: Bound): number => left.n - right.n;
-    const range = Range.ofNumbers(1, 5);
-    const twin = Range.ofNumbers(1, 5);
+  it('should_be_equal_when_two_ranges_have_equal_bounds', () => {
+    const range = counts(1, 5);
+    const twin = counts(1, 5);
 
     expect(twin).not.toBe(range);
     expect(range.equals(twin)).toBe(true);
     expect(twin.equals(range)).toBe(true);
-    expect(Range.of({ n: 1 }, { n: 5 }, byN).equals(Range.of({ n: 1 }, { n: 5 }, byN))).toBe(true);
   });
 
   it.each([
     [2, 5],
     [1, 6],
   ])('should_not_be_equal_when_one_bound_of_the_two_ranges_differs', (min, max) => {
-    const range = Range.ofNumbers(1, 5);
-    const other = Range.ofNumbers(min, max);
+    const range = counts(1, 5);
+    const other = counts(min, max);
 
     expect(range.equals(other)).toBe(false);
     expect(other.equals(range)).toBe(false);
-  });
-
-  it('should_give_one_answer_in_both_directions_when_two_ranges_use_different_orders', () => {
-    const exact = (left: string, right: string): number => {
-      if (left === right) return 0;
-      return left < right ? -1 : 1;
-    };
-    const anyCase = (left: string, right: string): number =>
-      exact(left.toLowerCase(), right.toLowerCase());
-    const lower = Range.of<string>('a', 'z', exact);
-    const upper = Range.of<string>('A', 'Z', anyCase);
-
-    expect(lower.equals(upper)).toBe(false);
-    expect(upper.equals(lower)).toBe(false);
   });
 });

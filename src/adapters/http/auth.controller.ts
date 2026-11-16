@@ -26,7 +26,7 @@ import { LOGIN, type Login } from '../../application/auth/login.use-case.js';
 import { REGISTER_USER, type RegisterUser } from '../../application/auth/register.use-case.js';
 import { PASSWORD_LENGTH } from '../../domain/user/password.js';
 import { USERNAME_LENGTH } from '../../domain/user/username.js';
-import { receiveBoundsOf, receiveValueOf } from '../received.js';
+import { receiveBoundValuesOf, receiveValueOf } from '../received.js';
 import { CredentialsDto } from './credentials.dto.js';
 import { CurrentUserDto } from './current-user.dto.js';
 import { ErrorDto } from './error.dto.js';
@@ -35,8 +35,8 @@ import { LoginDto } from './login.dto.js';
 import { TokenDto } from './token.dto.js';
 
 // The messages name the limits that the domain ranges deliver.
-const USERNAME_BOUNDS = receiveBoundsOf(USERNAME_LENGTH);
-const PASSWORD_BOUNDS = receiveBoundsOf(PASSWORD_LENGTH);
+const USERNAME_BOUNDS = receiveBoundValuesOf(USERNAME_LENGTH);
+const PASSWORD_BOUNDS = receiveBoundValuesOf(PASSWORD_LENGTH);
 
 const RULES: Record<CredentialField, string> = {
   username: `username must have ${USERNAME_BOUNDS.min} to ${USERNAME_BOUNDS.max} characters: letters, digits, dots, hyphens or underscores`,

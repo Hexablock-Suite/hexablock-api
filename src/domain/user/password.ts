@@ -1,11 +1,22 @@
 import { Range } from '../shared/range.js';
 import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
+import { CharacterCount } from './character-count.js';
 
-// The length of a password in code points. The upper limit keeps the hash
-// work of one request bounded. Both limits are a proposal for team review:
-// API-FR-01 sets no rule.
-export const PASSWORD_LENGTH = Range.ofNumbers(8, 128);
+// The value of a limit of this file. A limit is a fixed count, so a failed
+// Result is a defect of the code.
+function limit(count: number): CharacterCount {
+  const result = CharacterCount.of(count);
+  if (!result.ok) {
+    throw new RangeError(`A password limit breaks the rule ${result.error}.`);
+  }
+  return result.value;
+}
+
+// The length of a password in characters: 8 to 128 code points. The upper
+// limit keeps the hash work of one request bounded. Both limits are a
+// proposal for team review: API-FR-01 sets no rule.
+export const PASSWORD_LENGTH = Range.of(limit(8), limit(128));
 
 export type PasswordProblem = 'invalid-password';
 
@@ -14,17 +25,11 @@ export type PasswordProblem = 'invalid-password';
 export class Password {
   private constructor(private readonly value: string) {}
 
+  // CharacterCount counts code points, not UTF-16 units: an emoji is one character.
   static create(raw: string): Result<Password, PasswordProblem> {
-    return PASSWORD_LENGTH.contains(Password.codePoints(raw))
+    return PASSWORD_LENGTH.contains(CharacterCount.ofText(raw))
       ? ok(new Password(raw))
       : err('invalid-password');
-  }
-
-  // Counts Unicode code points, not UTF-16 units: an emoji is one character
-  // (NIST SP 800-63B §5.1.1.2). Array.from gives the same code points as
-  // [...raw]. The lint rule no-misused-spread forbids the spread of a string.
-  private static codePoints(raw: string): number {
-    return Array.from(raw).length;
   }
 
   // Delivers the plain text to a receiver. Only the adapter of the
