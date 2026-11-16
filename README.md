@@ -95,8 +95,8 @@ definitions that the engine plays, with generic types (decision D6):
   `SortSection`. Lines and Merge have no level files.
 - **`LevelValidator<TSection>`** checks the shape and the rules of one section, for example the
   A5 check of a Fit level. `LevelValidators` registers one validator per `gameId`.
-- **`UseCase<TRequest, TResponse>`** is the one generic input port. Every use case binds it, so
-  one aspect class wraps any use case.
+- **`UseCase<TRequest, TResponse>`** is the one generic input port. Every use case binds it, and
+  every failure type has a `kind`, so one aspect class wraps any use case.
 - **`Result<T, E>`** carries an expected failure as a value, never as an exception.
 - **[`Range<T>`](src/domain/shared/range.ts)** is a closed interval over a value that orders itself
   (`T extends Ordered<T>`), with `contains(value: T): boolean`. The username (3 to 32) and password

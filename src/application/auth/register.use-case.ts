@@ -6,16 +6,16 @@ import { Username } from '../../domain/user/username.js';
 import type { PasswordHasher } from '../ports/password-hasher.js';
 import type { UserIdGenerator } from '../ports/user-id-generator.js';
 import type { UserRepository } from '../ports/user-repository.js';
+import type { UseCase } from '../use-case.js';
 import type { CredentialField, Credentials } from './credentials.js';
 
 export type RegisterProblem =
   | { readonly kind: 'invalid-credentials'; readonly fields: CredentialField[] }
   | { readonly kind: 'username-taken' };
 
-// Input port of sign-up (API-FR-01).
-export interface RegisterUser {
-  execute(request: Credentials): Promise<Result<UserId, RegisterProblem>>;
-}
+// Input port of sign-up (API-FR-01). It binds UseCase, so one aspect can
+// wrap it (decision 7).
+export type RegisterUser = UseCase<Credentials, Result<UserId, RegisterProblem>>;
 
 export const REGISTER_USER = Symbol('RegisterUser');
 
