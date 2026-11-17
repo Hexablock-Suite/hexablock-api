@@ -1,5 +1,6 @@
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import type { ProgressKey } from '../../domain/progress/progress-key.js';
+import type { Result } from '../../domain/shared/result.js';
 
 // One change of one progress. It gets the stored aggregate, or null when
 // none is stored. It returns the aggregate to save, or null to save nothing.
@@ -18,8 +19,14 @@ export interface ProgressRepository {
   // results in the order of find(). Two updates of one key run one after
   // the other, so each change reads what the previous one saved. The
   // promise resolves to the value that the change returns. When the change
-  // throws, the repository saves nothing and rejects with that error.
-  update(key: ProgressKey, change: ProgressChange): Promise<PlayerProgress | null>;
+  // throws, the repository saves nothing and rejects with that error. When
+  // no user has the userId of the key, a save fails with unknown-user and
+  // saves nothing (#137). A change that returns null saves nothing, so it
+  // does not fail.
+  update(
+    key: ProgressKey,
+    change: ProgressChange,
+  ): Promise<Result<PlayerProgress | null, 'unknown-user'>>;
 }
 
 // Nest injection token for the ProgressRepository port.

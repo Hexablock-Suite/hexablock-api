@@ -41,6 +41,30 @@ describe('CharacterCount', () => {
     expect(deliveredBy(counted)).toEqual([value]);
   });
 
+  // #142: a limit of the code is a fixed count, such as a bound of
+  // USERNAME_LENGTH. Username and Password build their limits here.
+  it.each([0, 3, 128])('should_deliver_the_count_when_a_limit_is_a_valid_count', (value) => {
+    const limit = CharacterCount.ofLimit(value, 'username');
+
+    expect(limit).toBeInstanceOf(CharacterCount);
+    expect(deliveredBy(limit)).toEqual([value]);
+  });
+
+  // A limit that breaks the rule is a defect of the code (decision 11), so
+  // the factory throws. The message names the owner of the limit.
+  it.each([
+    [-1, 'username'],
+    [1.5, 'password'],
+  ])(
+    'should_throw_a_range_error_that_names_the_owner_when_a_limit_breaks_the_rule',
+    (value, owner) => {
+      const build = () => CharacterCount.ofLimit(value, owner);
+
+      expect(build).toThrow(RangeError);
+      expect(build).toThrow(`A ${owner} limit breaks the rule invalid-character-count.`);
+    },
+  );
+
   it('should_be_after_another_count_only_when_it_is_greater', () => {
     expect(count(9).isAfter(count(8))).toBe(true);
     expect(count(8).isAfter(count(9))).toBe(false);

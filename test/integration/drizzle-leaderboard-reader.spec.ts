@@ -103,10 +103,7 @@ async function openDatabase(progresses: readonly Played[]): Promise<TestDatabase
   );
   const repository = new DrizzleProgressRepository(database.db);
   for (const { userId, gameId, score, results = [] } of progresses) {
-    const progress = PlayerProgress.start(
-      valueOf(ProgressKey.of(valueOf(UserId.from(userId)), gameId)),
-      AT,
-    );
+    const progress = PlayerProgress.start(ProgressKey.of(valueOf(UserId.from(userId)), gameId), AT);
     if (score !== undefined) {
       progress.recordScore(valueOf(Score.of(score)), AT);
     }

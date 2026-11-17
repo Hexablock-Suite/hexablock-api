@@ -31,7 +31,7 @@ const LEVELS = heldLevels([['hexa-fit', ['fit-01', 'fit-02']]]);
 
 // The key of the progress of ADA in one game (#107).
 function keyOf(gameId: string): ProgressKey {
-  return valueOf(ProgressKey.of(ADA, valueOf(GameId.of(gameId))));
+  return ProgressKey.of(ADA, valueOf(GameId.of(gameId)));
 }
 
 // Builds the request as the mapper of the border does: the use case gets
@@ -278,6 +278,18 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(120)))).toBe(true);
     expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
     expect(progressPartsOf(stored)?.results).toEqual([]);
+  });
+
+  // The repository fails with unknown-user when no user has the id of the
+  // key (#137). The use case returns it as a ProgressProblem.
+  it('should_fail_with_unknown_user_and_store_nothing_when_the_repository_knows_no_such_user', async () => {
+    const strangers = new InMemoryProgressRepository([]);
+    const stranger = new SyncProgressUseCase(strangers, LEVELS, clock);
+
+    const result = await stranger.execute(syncRequest({ score: 120 }));
+
+    expect(result).toEqual({ ok: false, error: { kind: 'unknown-user' } });
+    expect(await strangers.find(keyOf('hexa-lines'))).toBeNull();
   });
 
   // The request types forbid this value. The mapper of the border builds

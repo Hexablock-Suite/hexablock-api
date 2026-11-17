@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -37,7 +38,8 @@ import { ProgressDto, SyncProgressDto } from './progress.dto.js';
 
 const UNAUTHORIZED = {
   type: ErrorDto,
-  description: 'The bearer token is missing, malformed, expired or signed with another key.',
+  description:
+    'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
 };
 
 // Progress sync and read, one entry per user and gameId (API-FR-02). Both
@@ -101,13 +103,17 @@ export class ProgressController {
 }
 
 // A value that breaks its rule stops in ProgressDtoMapper, before any use
-// case. The use cases fail on a missing progress, or on a result that its
-// level does not admit (#135). A result of the wrong level breaks the body,
-// not the route, so it answers 400 with one detail, as a broken value does.
+// case. The use cases fail on a missing progress, on a user that went after
+// the guard, or on a result that its level does not admit (#135). The gone
+// user gets the 401 of a bad token, with the same message as JwtAuthGuard
+// (#137). A result of the wrong level breaks the body, not the route, so it
+// answers 400 with one detail, as a broken value does.
 function httpErrorOf(problem: ProgressProblem, gameId: string): Error {
   switch (problem.kind) {
     case 'progress-not-found':
       return new NotFoundException(`No progress for gameId ${gameId}`);
+    case 'unknown-user':
+      return new UnauthorizedException('Invalid or expired token');
     case 'unknown-level': {
       const { levelId } = receiveLevelResultOf(problem.result);
       return new BadRequestException([`No level ${levelId} for gameId ${gameId}.`]);

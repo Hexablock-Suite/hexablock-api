@@ -37,11 +37,13 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // guards the rule of a valid instant, so the use case checks no instant. A
 // guard of the aggregate that throws is a defect of the caller, and a Clock
 // that throws is a fault of the server. In both cases the use case throws
-// and saves nothing (decision 11). Before the lock, the use case checks each
-// result against its level (DS-6, #135): the API must hold a valid level of
-// the result, and the result carries no more stars than the level has star
-// thresholds. A broken rule returns its problem and saves nothing. The
-// levels are other aggregates, so the use case reads them and changes none.
+// and saves nothing (decision 11). When the repository knows no user with
+// the userId, the sync fails with unknown-user and saves nothing (#137).
+// Before the lock, the use case checks each result against its level
+// (DS-6, #135): the API must hold a valid level of the result, and the
+// result carries no more stars than the level has star thresholds. A broken
+// rule returns its problem and saves nothing. The levels are other
+// aggregates, so the use case reads them and changes none.
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
@@ -52,34 +54,32 @@ export class SyncProgressUseCase implements SyncProgress {
   async execute(request: SyncProgressRequest): Promise<Result<PlayerProgress, ProgressProblem>> {
     const { score, results } = request;
     const key = ProgressKey.of(request.userId, request.gameId);
-    // ProgressKey.of() has no expected failure: its error type is never.
-    if (!key.ok) {
-      return key.error;
-    }
     const levelProblem = await this.levelProblemOf(request.gameId, results);
     if (levelProblem !== undefined) {
       return err(levelProblem);
     }
-    let outcome: Result<PlayerProgress, ProgressProblem> | undefined;
-    await this.progress.update(key.value, (stored) => {
+    const saved = await this.progress.update(key, (stored) => {
       // The use case reads the Clock under the lock, so the instants follow
       // the order of the saves. The aggregate keeps updatedAt from moving
       // back in any case.
       const at = this.clock.now();
-      const progress = stored ?? PlayerProgress.start(key.value, at);
+      const progress = stored ?? PlayerProgress.start(key, at);
       if (score !== undefined) {
         progress.recordScore(score, at);
       }
       for (const result of results) {
         progress.recordLevel(result, at);
       }
-      outcome = ok(progress);
       return progress;
     });
-    if (outcome === undefined) {
-      throw new Error('ProgressRepository.update() must run the change.');
+    if (!saved.ok) {
+      return err({ kind: saved.error });
     }
-    return outcome;
+    // The change never returns null, so a saved progress is always there.
+    if (saved.value === null) {
+      throw new Error('ProgressRepository.update() must save the change.');
+    }
+    return ok(saved.value);
   }
 
   // The first result, in the order of the request, that no valid level

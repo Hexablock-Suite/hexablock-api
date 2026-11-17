@@ -22,10 +22,7 @@ describe('GetProgressUseCase (API-FR-02)', () => {
   });
 
   it('should_return_stored_progress_when_user_has_progress_for_game', async () => {
-    const stored = PlayerProgress.start(
-      valueOf(ProgressKey.of(ADA, valueOf(GameId.of('hexa-lines')))),
-      AT,
-    );
+    const stored = PlayerProgress.start(ProgressKey.of(ADA, valueOf(GameId.of('hexa-lines'))), AT);
     await progress.save(stored);
 
     const result = await getProgress.execute({
@@ -38,7 +35,7 @@ describe('GetProgressUseCase (API-FR-02)', () => {
 
   it('should_fail_with_progress_not_found_when_only_another_user_has_progress_for_game', async () => {
     await progress.save(
-      PlayerProgress.start(valueOf(ProgressKey.of(GRACE, valueOf(GameId.of('hexa-lines')))), AT),
+      PlayerProgress.start(ProgressKey.of(GRACE, valueOf(GameId.of('hexa-lines'))), AT),
     );
 
     const result = await getProgress.execute({
