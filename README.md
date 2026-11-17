@@ -54,8 +54,6 @@ points toward the domain.
 | 3. Interface adapters      | `src/adapters/http`, `src/adapters/persistence` | Nest controllers, DTOs and mappers; Drizzle repositories and the schema.       |
 | 4. Frameworks and drivers  | `src/infrastructure`                            | Nest modules, the database connection and system adapters such as the clock.   |
 
-The table shows the design. Most of these pieces are not code yet; their code starts in Sprint 1.
-
 - **Ports live in the application layer (Q10).** For example, the `Clock` port is in
   [src/application/ports/clock.ts](src/application/ports/clock.ts). The domain never imports a
   port: a use case reads the instant and passes it to the domain as a parameter.
@@ -106,7 +104,10 @@ definitions that the engine plays, with generic types (decision D6):
   character. The value objects ask the ranges, and the ranges deliver their bounds to the HTTP error messages and `CredentialsDto`. The professor modeled the limits
   of the statement as a generic range with a contains method in the session of 2026-11-06.
 
-These types are the design. Their code starts in Sprint 1.
+Each of these types is code: [LevelDefinition](src/domain/level/level-definition.ts),
+[LevelValidator](src/domain/level/level-validator.ts),
+[LevelValidators](src/domain/level/level-validators.ts), [UseCase](src/application/use-case.ts)
+and [Result](src/domain/shared/result.ts).
 
 A new variant with level files adds a section type, a validator and one entry in the composition
 root. No existing class changes. See [docs/architecture/extensibility.md](docs/architecture/extensibility.md)
