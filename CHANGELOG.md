@@ -9,6 +9,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 ### Fixed
 
 - A request body that the body parser rejects keeps its client status ([#136](https://github.com/Hexablock-Suite/hexablock-api/issues/136)). `HttpErrorFilter` keeps the status of an error that is not an `HttpException` and carries an integer `status` or `statusCode` from 400 to 499, with the `ErrorDto` body of API-FR-06 and the reason phrase of the status as its message, and writes no error log line for it. So a JSON body over 100 kB answers 413 on every route that takes a body, and a JSON body in a charset other than UTF answers 415, in place of 500. A malformed JSON body still answers 400, and any other error still answers 500 with the generic message and its log line. `openapi/openapi.json` does not change.
+
 ### Changed
 
 - The allowed characters of a username have one home, in the domain ([#149](https://github.com/Hexablock-Suite/hexablock-api/issues/149)), as decided on 2026-11-16 on [#139](https://github.com/Hexablock-Suite/hexablock-api/issues/139). A private constant of `src/domain/user/username.ts` holds them, `Username.create()` checks it, and the new `USERNAME_CHARACTERS` value delivers it to `CredentialsDto`, which builds the OpenAPI pattern from it and from the limits of `USERNAME_LENGTH`. The published pattern stays `^[A-Za-z0-9._-]{3,32}$`, and `openapi/openapi.json` does not change. Decision 17 of `docs/architecture/classes.md` records the change.
