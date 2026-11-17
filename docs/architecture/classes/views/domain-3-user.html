@@ -1119,7 +1119,7 @@
           x="56"
           y="836"
           width="264"
-          height="192"
+          height="224"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1184,16 +1184,36 @@
         >
           + ofText(text: string): CharacterCount
         </text>
-        <text x="72" y="972" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + isAfter(other: CharacterCount): boolean
+        <text
+          x="72"
+          y="972"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          + ofLimit(count: number, owner: string):
         </text>
-        <text x="72" y="988" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + equals(other: CharacterCount): boolean
+        <text
+          x="94"
+          y="988"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+          text-decoration="underline"
+        >
+          CharacterCount
         </text>
         <text x="72" y="1004" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isAfter(other: CharacterCount): boolean
+        </text>
+        <text x="72" y="1020" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: CharacterCount): boolean
+        </text>
+        <text x="72" y="1036" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="94" y="1020" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="94" y="1052" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;number&gt;): void
         </text>
         <!-- UML template box: the type parameter on the top-right corner -->

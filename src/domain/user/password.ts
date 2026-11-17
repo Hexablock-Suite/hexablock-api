@@ -3,20 +3,13 @@ import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
 import { CharacterCount } from './character-count.js';
 
-// The value of a limit of this file. A limit is a fixed count, so a failed
-// Result is a defect of the code.
-function limit(count: number): CharacterCount {
-  const result = CharacterCount.of(count);
-  if (!result.ok) {
-    throw new RangeError(`A password limit breaks the rule ${result.error}.`);
-  }
-  return result.value;
-}
-
 // The length of a password in characters: 8 to 128 code points. The upper
 // limit keeps the hash work of one request bounded. Both limits are a
 // proposal for team review: API-FR-01 sets no rule.
-export const PASSWORD_LENGTH = Range.of(limit(8), limit(128));
+export const PASSWORD_LENGTH = Range.of(
+  CharacterCount.ofLimit(8, 'password'),
+  CharacterCount.ofLimit(128, 'password'),
+);
 
 export type PasswordProblem = 'invalid-password';
 

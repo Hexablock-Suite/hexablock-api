@@ -21,6 +21,19 @@ export class CharacterCount implements Ordered<CharacterCount> {
       : err('invalid-character-count');
   }
 
+  // The count of a limit of the code, such as a bound of USERNAME_LENGTH. A
+  // limit is a fixed count, so a count that breaks the rule is a defect of
+  // the code, and the factory throws a RangeError (decision 11). The message
+  // names the owner of the limit. Username and Password build their limits
+  // here, so the check has one home (#142).
+  static ofLimit(count: number, owner: string): CharacterCount {
+    const result = CharacterCount.of(count);
+    if (!result.ok) {
+      throw new RangeError(`A ${owner} limit breaks the rule ${result.error}.`);
+    }
+    return result.value;
+  }
+
   // Counts the code points of a text, not its UTF-16 units. Every text has a
   // count, so this factory cannot fail and returns the count itself.
   // Array.from gives the same code points as [...text]. The lint rule

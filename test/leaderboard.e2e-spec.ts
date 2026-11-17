@@ -100,6 +100,29 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     });
   });
 
+  // #142: DS-4 ranks a level by stars, then moves, then time. Two results
+  // with the same stars and moves rank by time through the wiring: the
+  // faster player ranks first, and the two players share no rank.
+  it('should_rank_the_faster_player_first_when_two_level_results_tie_on_stars_and_moves', async () => {
+    const ada = await signIn('ada');
+    const grace = await signIn('grace');
+    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
+    await sync(ada, { gameId: 'hexa-fit', results: [{ ...FIT_01, elapsedMs: 50000 }] });
+    await sync(grace, { gameId: 'hexa-fit', results: [{ ...FIT_01, elapsedMs: 40000 }] });
+
+    const level = await board(ada, '/leaderboard/hexa-fit/levels/fit-01');
+
+    expect(level.status).toBe(200);
+    expect(level.body).toEqual({
+      gameId: 'hexa-fit',
+      levelId: 'fit-01',
+      entries: [
+        { rank: 1, userId: grace.userId, stars: 3, moves: 12, elapsedMs: 40000 },
+        { rank: 2, userId: ada.userId, stars: 3, moves: 12, elapsedMs: 50000 },
+      ],
+    });
+  });
+
   // A board lists only the players who have a result to rank (decision of
   // #82). Fit gives no score, so nothing ranks Fit by score (S3-03).
   it('should_leave_the_fit_high_scores_empty_when_fit_players_sync_only_level_results', async () => {

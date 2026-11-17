@@ -3,23 +3,16 @@ import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
 import { CharacterCount } from './character-count.js';
 
-// The value of a limit of this file. A limit is a fixed count, so a failed
-// Result is a defect of the code.
-function limit(count: number): CharacterCount {
-  const result = CharacterCount.of(count);
-  if (!result.ok) {
-    throw new RangeError(`A username limit breaks the rule ${result.error}.`);
-  }
-  return result.value;
-}
-
 // 3 to 32 letters, digits, dots, hyphens or underscores. A proposal for
 // team review: API-FR-01 sets no length or character rule. The range
 // delivers its bounds to the OpenAPI limits and the messages of the border.
 // USERNAME_CHARACTERS delivers the allowed characters to the OpenAPI pattern.
 // The HTTP adapter builds the pattern from both, so this module exports no
 // string (#99, #149).
-export const USERNAME_LENGTH = Range.of(limit(3), limit(32));
+export const USERNAME_LENGTH = Range.of(
+  CharacterCount.ofLimit(3, 'username'),
+  CharacterCount.ofLimit(32, 'username'),
+);
 
 // The allowed characters, as one character class of a regular expression.
 // This text is their only home: Username.create() checks it, and
