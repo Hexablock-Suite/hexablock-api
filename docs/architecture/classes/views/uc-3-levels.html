@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 3 of 4</p>
       <h1>Levels: read them, and check every level before an update</h1>
       <svg
-        viewBox="0 0 1040 816"
+        viewBox="0 0 1040 1044"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc3levels-title uc3levels-desc"
@@ -76,8 +76,11 @@
           service and returns a Result whose InvalidLevels failure holds one problem per broken
           level with its gameId and levelId, so a level that fails its check is never saved and no
           exception reaches the HTTP layer. GetLevelsUseCase takes no request and has no expected
-          failure. A footnote names LevelDtoMapper, which builds the UpdateLevelsRequest, and
-          LevelRowMapper, which restores each stored row through LevelValidators.
+          failure. AuthorizeLevelEditorUseCase holds the LevelEditors value object of layer 1, the
+          user ids of the configuration, and fails with not-a-level-editor for any other id, so an
+          empty list lets no account update (#145). A footnote names LevelDtoMapper, which builds
+          the UpdateLevelsRequest, and LevelRowMapper, which restores each stored row through
+          LevelValidators.
         </desc>
         <defs>
           <marker
@@ -136,7 +139,7 @@
           x="24"
           y="24"
           width="992"
-          height="444"
+          height="604"
           rx="8"
           fill="#efe7f8"
           stroke="rgba(126,34,206,0.40)"
@@ -144,9 +147,9 @@
         />
         <rect
           x="24"
-          y="484"
+          y="644"
           width="992"
-          height="116"
+          height="184"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -209,19 +212,63 @@
           x1="232"
           y1="428"
           x2="232"
-          y2="528"
+          y2="688"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
         <!-- LevelRepository returns LevelDefinition values: use -->
         <path
-          d="M912 212 Q920 212 920 220 L920 528"
+          d="M912 212 Q920 212 920 220 L920 688"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
+        <!-- AuthorizeLevelEditorUseCase holds LevelEditors: use (#145) -->
+        <line
+          x1="600"
+          y1="608"
+          x2="600"
+          y2="688"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#uc3levels-open)"
+        />
+        <!-- LevelEditors holds UserId values: use (#145) -->
+        <line
+          x1="688"
+          y1="784"
+          x2="736"
+          y2="784"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#uc3levels-open)"
+        />
+        <rect x="606" y="614" width="56" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="634"
+          y="623"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          editors 1
+        </text>
+        <rect x="690" y="766" width="44" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="712"
+          y="775"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          ids 0..*
+        </text>
         <!-- Arrow labels and multiplicities -->
         <rect x="536" y="382" width="48" height="12" rx="2" fill="#efe7f8" />
         <text
@@ -271,10 +318,10 @@
         >
           levels 1
         </text>
-        <rect x="238" y="510" width="48" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="238" y="670" width="48" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="262"
-          y="519"
+          y="679"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -296,10 +343,10 @@
         >
           LAYER 2 · USE CASES · src/application/
         </text>
-        <rect x="36" y="495" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="655" width="208" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="504"
+          y="664"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -560,7 +607,7 @@
         <!-- Class: LevelValidators (PART 1 · VIEW 2) -->
         <rect
           x="96"
-          y="528"
+          y="688"
           width="240"
           height="48"
           rx="6"
@@ -571,7 +618,7 @@
         />
         <text
           x="216"
-          y="546"
+          y="706"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -582,7 +629,7 @@
         </text>
         <text
           x="216"
-          y="564"
+          y="724"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -594,7 +641,7 @@
         <!-- Class: LevelDefinition (PART 1 · VIEW 2) -->
         <rect
           x="736"
-          y="528"
+          y="688"
           width="240"
           height="48"
           rx="6"
@@ -605,7 +652,7 @@
         />
         <text
           x="856"
-          y="546"
+          y="706"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -616,7 +663,7 @@
         </text>
         <text
           x="856"
-          y="564"
+          y="724"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -625,10 +672,166 @@
         >
           LevelDefinition
         </text>
+        <!-- Class: AuthorizeLevelEditorUseCase («use case», #145) -->
+        <rect
+          x="560"
+          y="500"
+          width="340"
+          height="108"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="730"
+          y="518"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «use case»
+        </text>
+        <text
+          x="730"
+          y="536"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AuthorizeLevelEditorUseCase
+        </text>
+        <text
+          x="730"
+          y="550"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          #145 · after JwtAuthGuard
+        </text>
+        <line x1="560" y1="560" x2="900" y2="560" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="576" y="576" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - editors: LevelEditors
+        </text>
+        <line x1="560" y1="584" x2="900" y2="584" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          textLength="316"
+          lengthAdjust="spacingAndGlyphs"
+          x="576"
+          y="600"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + execute(userId: UserId): Promise&lt;Result&lt;void, NotALevelEditor&gt;&gt;
+        </text>
+        <!-- Class: LevelEditors («value object», #145) -->
+        <rect
+          x="416"
+          y="688"
+          width="272"
+          height="124"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="552"
+          y="706"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="552"
+          y="724"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelEditors
+        </text>
+        <text
+          x="552"
+          y="738"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          #145 · Q4
+        </text>
+        <line x1="416" y1="748" x2="688" y2="748" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="432" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - ids: readonly UserId[]
+        </text>
+        <line x1="416" y1="772" x2="688" y2="772" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          text-decoration="underline"
+          x="432"
+          y="788"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + of(ids: readonly UserId[]): LevelEditors
+        </text>
+        <text x="432" y="804" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + includes(id: UserId): boolean
+        </text>
+        <!-- Class: UserId (PART 1 · VIEW 3) -->
+        <rect
+          x="736"
+          y="760"
+          width="240"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="856"
+          y="778"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 1 · VIEW 3
+        </text>
+        <text
+          x="856"
+          y="796"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          UserId
+        </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
           x="928"
-          y="518"
+          y="678"
           width="56"
           height="18"
           rx="2"
@@ -639,7 +842,7 @@
         />
         <text
           x="956"
-          y="530"
+          y="690"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -658,10 +861,15 @@
         <text x="91" y="286" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           UpdateLevels
         </text>
+        <line x1="576" y1="500" x2="576" y2="484" stroke="#17212a" stroke-width="1" />
+        <circle cx="576" cy="479" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <text x="587" y="482" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          AuthorizeLevelEditor
+        </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="624"
+          y="852"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -671,7 +879,7 @@
         </text>
         <text
           x="24"
-          y="640"
+          y="868"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -681,17 +889,18 @@
         </text>
         <text
           x="24"
-          y="656"
+          y="884"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The HTTP error filter handles only unexpected errors. Q4 is answered (2026-11-03): the
-          token guard is the only check, with no roles.
+          The HTTP error filter handles only unexpected errors. Q4 (#145): LevelEditorGuard asks
+          AuthorizeLevelEditor, and only a user id in LevelEditors may update; an empty list lets no
+          one.
         </text>
         <text
           x="24"
-          y="672"
+          y="900"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -701,7 +910,7 @@
         </text>
         <text
           x="24"
-          y="688"
+          y="916"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -710,10 +919,10 @@
           LevelRowMapper restores each stored row through LevelValidators (Part 3, view 2).
         </text>
         <!-- Legend -->
-        <line x1="24" y1="712" x2="1016" y2="712" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="940" x2="1016" y2="940" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="730"
+          y="958"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -723,16 +932,16 @@
         </text>
         <line
           x1="24"
-          y1="748"
+          y1="976"
           x2="52"
-          y2="748"
+          y2="976"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
         <text
           x="60"
-          y="752"
+          y="980"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -741,7 +950,7 @@
         </text>
         <rect
           x="24"
-          y="768"
+          y="996"
           width="20"
           height="12"
           rx="2"
@@ -751,7 +960,7 @@
         />
         <rect
           x="48"
-          y="768"
+          y="996"
           width="20"
           height="12"
           rx="2"
@@ -761,7 +970,7 @@
         />
         <text
           x="80"
-          y="777"
+          y="1005"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -770,7 +979,7 @@
         </text>
         <rect
           x="264"
-          y="768"
+          y="996"
           width="28"
           height="12"
           rx="2"
@@ -781,7 +990,7 @@
         />
         <text
           x="300"
-          y="777"
+          y="1005"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -790,7 +999,7 @@
         </text>
         <rect
           x="470"
-          y="768"
+          y="996"
           width="28"
           height="12"
           rx="2"
@@ -800,7 +1009,7 @@
         />
         <text
           x="506"
-          y="777"
+          y="1005"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -809,7 +1018,7 @@
         </text>
         <rect
           x="616"
-          y="768"
+          y="996"
           width="28"
           height="12"
           rx="2"
@@ -820,18 +1029,18 @@
         />
         <text
           x="652"
-          y="777"
+          y="1005"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Corner box · type parameters
         </text>
-        <line x1="808" y1="774" x2="824" y2="774" stroke="#17212a" stroke-width="1" />
-        <circle cx="829" cy="774" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="808" y1="1002" x2="824" y2="1002" stroke="#17212a" stroke-width="1" />
+        <circle cx="829" cy="1002" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="844"
-          y="777"
+          y="1005"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -840,7 +1049,7 @@
         </text>
         <rect
           x="24"
-          y="790"
+          y="1018"
           width="28"
           height="12"
           rx="2"
@@ -851,7 +1060,7 @@
         />
         <text
           x="60"
-          y="799"
+          y="1027"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

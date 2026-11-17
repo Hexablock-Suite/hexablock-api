@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 4 of 5</p>
       <h1>Wiring: the composition root binds each port to one driver</h1>
       <svg
-        viewBox="0 0 1040 878"
+        viewBox="0 0 1040 894"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad4wiring-title ad4wiring-desc"
@@ -72,7 +72,9 @@
         <desc id="ad4wiring-desc">
           Class diagram of layers 4 and 2 showing AppModule, the composition root, binding the
           Clock, PasswordHasher and TokenIssuer ports to SystemClock, ScryptPasswordHasher and
-          JwtTokenIssuer in its bindings compartment; the Nest container creates each adapter once.
+          JwtTokenIssuer in its bindings compartment, which also binds the AuthorizeLevelEditor
+          input port to AuthorizeLevelEditorUseCase with the LevelEditors of LEVEL_EDITOR_IDS
+          (#145); the Nest container creates each adapter once.
         </desc>
         <defs>
           <marker
@@ -234,7 +236,7 @@
           x="352"
           y="72"
           width="336"
-          height="284"
+          height="300"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -310,12 +312,15 @@
           AUTHENTICATE_TOKEN → AuthenticateTokenUseCase
         </text>
         <text x="368" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          SYNC_PROGRESS → LoggingAspect(SyncProgressUseCase)
+          AUTHORIZE_LEVEL_EDITOR → AuthorizeLevelEditorUseCase
         </text>
         <text x="368" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GET_PROGRESS → GetProgressUseCase
+          SYNC_PROGRESS → LoggingAspect(SyncProgressUseCase)
         </text>
         <text x="368" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          GET_PROGRESS → GetProgressUseCase
+        </text>
+        <text x="368" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           APP_FILTER → HttpErrorFilter
         </text>
 
@@ -598,11 +603,22 @@
           src/main.ts is only the bootstrap: it creates the Nest app from AppModule and starts the
           HTTP server.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="796" x2="1016" y2="796" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="814"
+          y="788"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          readLevelEditors() reads LEVEL_EDITOR_IDS next to readJwtSecret(), and AppModule builds
+          AuthorizeLevelEditorUseCase with that LevelEditors; an empty list lets no one update
+          (#145).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="812" x2="1016" y2="812" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="830"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -612,9 +628,9 @@
         </text>
         <line
           x1="24"
-          y1="832"
+          y1="848"
           x2="52"
-          y2="832"
+          y2="848"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -622,7 +638,7 @@
         />
         <text
           x="60"
-          y="836"
+          y="852"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -631,7 +647,7 @@
         </text>
         <rect
           x="24"
-          y="852"
+          y="868"
           width="20"
           height="12"
           rx="2"
@@ -641,7 +657,7 @@
         />
         <rect
           x="48"
-          y="852"
+          y="868"
           width="20"
           height="12"
           rx="2"
@@ -651,7 +667,7 @@
         />
         <text
           x="80"
-          y="861"
+          y="877"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -660,7 +676,7 @@
         </text>
         <rect
           x="264"
-          y="852"
+          y="868"
           width="28"
           height="12"
           rx="2"
@@ -671,7 +687,7 @@
         />
         <text
           x="300"
-          y="861"
+          y="877"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -680,7 +696,7 @@
         </text>
         <rect
           x="470"
-          y="852"
+          y="868"
           width="28"
           height="12"
           rx="2"
@@ -690,7 +706,7 @@
         />
         <text
           x="506"
-          y="861"
+          y="877"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -699,7 +715,7 @@
         </text>
         <rect
           x="616"
-          y="852"
+          y="868"
           width="28"
           height="12"
           rx="2"
@@ -710,7 +726,7 @@
         />
         <text
           x="652"
-          y="861"
+          y="877"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
