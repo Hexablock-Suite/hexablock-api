@@ -26,9 +26,9 @@ export function storeLevel(
   );
 }
 
-// The JSON of each level that list() gives, in its order.
+// The JSON of each valid level that list() gives, in its order.
 export async function listedJson(repository: LevelRepository): Promise<unknown[]> {
-  return (await repository.list()).map((level) => receiveJsonOf(level));
+  return (await repository.list()).levels.map((level) => receiveJsonOf(level));
 }
 
 // Writes one levels row as it is, with no check, as a manual change of the
@@ -37,7 +37,7 @@ export async function listedJson(repository: LevelRepository): Promise<unknown[]
 export type StoreRow = (repository: LevelRepository, row: LevelRow) => Promise<void>;
 
 // The levels row of a level of the format, with a Fit section that breaks
-// its rule (#147). It is the row of the e2e tests of a broken level.
+// its rule (#147). It is the row of the e2e test of GET /levels.
 export function brokenRow(json: LevelJson, version = json.version): LevelRow {
   const { gameId, levelId, order, topology } = json;
   return { gameId, levelId, order, version, topology, section: { figure: [] } };
@@ -66,7 +66,7 @@ export function describeLevelRepositoryContract(
     it('should_list_no_level_when_no_level_is_stored', async () => {
       const repository = await createRepository();
 
-      await expect(repository.list()).resolves.toEqual([]);
+      await expect(repository.list()).resolves.toEqual({ levels: [], unavailable: [] });
     });
 
     // The port promises the levels by gameId, then by levelId, compared as
@@ -239,6 +239,25 @@ export function describeLevelRepositoryContract(
 
       expect(saved.ok && saved.value).toBe(level);
       await expect(listedJson(repository)).resolves.toEqual([levelJson('hexa-fit', 'fit-01', 2)]);
+      expect((await repository.list()).unavailable).toEqual([]);
+    });
+
+    // list() gives the valid levels and the broken rows apart, each by
+    // gameId and then by levelId. A broken row names its key as the row
+    // holds it and the code of its first broken rule.
+    it('should_list_the_valid_levels_and_each_broken_row_apart_when_a_stored_row_breaks_a_rule', async () => {
+      const repository = await createRepository();
+      await storeRow(repository, brokenRow(levelJson('hexa-fit', 'fit-02')));
+      await storeLevel(repository, levelJson('hexa-sort'));
+      await storeRow(repository, { ...brokenRow(levelJson('hexa-fit')), version: 0 });
+
+      const listed = await repository.list();
+
+      expect(listed.levels.map((level) => receiveJsonOf(level))).toEqual([levelJson('hexa-sort')]);
+      expect(listed.unavailable).toEqual([
+        { gameId: 'hexa-fit', levelId: 'fit-01', reason: 'invalid-version' },
+        { gameId: 'hexa-fit', levelId: 'fit-02', reason: 'invalid-figure' },
+      ]);
     });
   });
 }

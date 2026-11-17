@@ -153,7 +153,7 @@ describe('DrizzleLevelRepository', () => {
       .insert(levels)
       .values([rowOf(levelExample('hexa-sort')), rowOf(levelExample('hexa-fit'))]);
 
-    const listed = await new DrizzleLevelRepository(database.db, validators).list();
+    const { levels: listed } = await new DrizzleLevelRepository(database.db, validators).list();
 
     expect(fit.read).toEqual([levelExample('hexa-fit').section]);
     expect(sort.read).toEqual([levelExample('hexa-sort').section]);
@@ -163,29 +163,33 @@ describe('DrizzleLevelRepository', () => {
     ]);
   });
 
-  // A stored row that no strategy accepts is a server fault, not a level
-  // problem of a client. The strategy is the one of the row's gameId. Each
-  // case starts with an empty levels table (beforeEach).
+  // A stored row that no strategy accepts is not a level (#147). list()
+  // gives it apart from the valid levels, with the code of its first broken
+  // rule, so one broken row hides no other level. The strategy is the one
+  // of the row's gameId. Each case starts with an empty levels table
+  // (beforeEach).
   it.each<[ReturnType<typeof rowOf>, string]>([
     [
       { ...rowOf(levelExample('hexa-sort')), gameId: 'hexa-lines', levelId: 'lines-01' },
-      'The levels row hexa-lines/lines-01 breaks the level rule game-without-levels.',
+      'game-without-levels',
     ],
     [
       { ...rowOf(levelExample('hexa-fit')), gameId: 'hexa-sort', levelId: 'sort-01' },
-      'The levels row hexa-sort/sort-01 breaks the level rule invalid-section.',
+      'invalid-section',
     ],
-    [
-      { ...rowOf(levelExample('hexa-fit')), version: 0 },
-      'The levels row hexa-fit/fit-01 breaks the level rule invalid-version.',
-    ],
-  ])('should_reject_the_read_when_no_strategy_accepts_a_stored_row', async (row, message) => {
-    await database.db.insert(levels).values(row);
+    [{ ...rowOf(levelExample('hexa-fit')), version: 0 }, 'invalid-version'],
+  ])(
+    'should_list_the_row_as_unavailable_with_its_reason_when_no_strategy_accepts_a_stored_row',
+    async (row, reason) => {
+      const valid = levelJson('hexa-fit', 'fit-99');
+      await database.db.insert(levels).values([row, rowOf(valid)]);
 
-    await expect(new DrizzleLevelRepository(database.db, levelValidators()).list()).rejects.toThrow(
-      message,
-    );
-  });
+      const listed = await new DrizzleLevelRepository(database.db, levelValidators()).list();
+
+      expect(listed.levels.map((level) => receiveJsonOf(level))).toEqual([valid]);
+      expect(listed.unavailable).toEqual([{ gameId: row.gameId, levelId: row.levelId, reason }]);
+    },
+  );
 
   // The row keeps the common part as text and numbers and the section as
   // the JSON of the shared level format.

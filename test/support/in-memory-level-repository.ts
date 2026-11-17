@@ -1,6 +1,10 @@
 import { type LevelRow, LevelRowMapper } from '../../src/adapters/persistence/level-row.mapper.js';
 import { receiveValueOf } from '../../src/adapters/received.js';
-import type { LevelChange, LevelRepository } from '../../src/application/ports/level-repository.js';
+import type {
+  LevelChange,
+  LevelRepository,
+  ListedLevels,
+} from '../../src/application/ports/level-repository.js';
 import type { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import type { LevelProblem } from '../../src/domain/level/level-problem.js';
 import type { LevelValidators } from '../../src/domain/level/level-validators.js';
@@ -20,9 +24,9 @@ export class InMemoryLevelRepository implements LevelRepository {
 
   constructor(private readonly validators: LevelValidators) {}
 
-  list(): Promise<readonly LevelDefinition<unknown>[]> {
+  list(): Promise<ListedLevels> {
     const rows = [...this.rowsByKey.values()].toSorted(byGameAndLevelId);
-    return Promise.resolve(rows.map((row) => LevelRowMapper.toLevel(row, this.validators)));
+    return Promise.resolve(LevelRowMapper.toListedLevels(rows, this.validators));
   }
 
   // Writes one row as it is, with no check, as a manual change of the

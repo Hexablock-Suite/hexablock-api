@@ -2,6 +2,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 import type {
   LevelChange,
   LevelRepository,
+  ListedLevels,
   StoredLevel,
 } from '../../application/ports/level-repository.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
@@ -21,8 +22,8 @@ type Queries = Pick<PersistenceDatabase, 'select'>;
 // Adapter of the LevelRepository port over the levels table of DS-6
 // (API-FR-04). LevelRowMapper restores each row through the strategy that
 // LevelValidators finds for its gameId, so every level that it gives is valid.
-// A row that no strategy accepts is a broken row: update() passes it to the
-// change as the broken state (#147), and list() throws for it.
+// A row that no strategy accepts is a broken row: list() gives it apart, and
+// update() passes it to the change as the broken state (#147).
 export class DrizzleLevelRepository implements LevelRepository {
   constructor(
     private readonly db: PersistenceDatabase,
@@ -31,12 +32,12 @@ export class DrizzleLevelRepository implements LevelRepository {
 
   // The tables keep no record order, so the rows come back by gameId and
   // then by levelId, as the port promises.
-  async list(): Promise<readonly LevelDefinition<unknown>[]> {
+  async list(): Promise<ListedLevels> {
     const rows = await this.db
       .select()
       .from(levels)
       .orderBy(asc(levels.gameId), asc(levels.levelId));
-    return rows.map((row) => LevelRowMapper.toLevel(row, this.validators));
+    return LevelRowMapper.toListedLevels(rows, this.validators);
   }
 
   // The lock pattern of DrizzleProgressRepository.update() (decision 2). One

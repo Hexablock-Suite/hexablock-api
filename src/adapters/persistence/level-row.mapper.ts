@@ -1,4 +1,9 @@
-import type { StoredLevel, StoredLevelProblem } from '../../application/ports/level-repository.js';
+import type {
+  ListedLevels,
+  StoredLevel,
+  StoredLevelProblem,
+  UnavailableLevel,
+} from '../../application/ports/level-repository.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import { LevelOrder } from '../../domain/level/level-order.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';
@@ -20,8 +25,7 @@ export type LevelRow = typeof levels.$inferSelect;
 // level files changes no code here. A row that no strategy accepts is a
 // broken row, not a level (#147): it keeps the code of its first broken rule
 // and its version when the version column passes the rule of LevelVersion.
-// toLevel() reads a row for list(), where a broken row is still a server
-// fault, so toLevel() throws. toRow() receives the value of each part, and the section delivers its
+// toRow() receives the value of each part, and the section delivers its
 // parts as the JSON of the shared level format.
 export const LevelRowMapper = {
   toStoredLevel(
@@ -36,14 +40,19 @@ export const LevelRowMapper = {
     return { state: 'broken', reason: level.error, version: version.ok ? version.value : null };
   },
 
-  toLevel(row: LevelRow, validators: LevelValidators): LevelDefinition<unknown> {
-    const stored = LevelRowMapper.toStoredLevel(row, validators);
-    if (stored.state === 'broken') {
-      throw new Error(
-        `The levels row ${row.gameId}/${row.levelId} breaks the level rule ${stored.reason}.`,
-      );
+  // Sorts nothing: the rows come in the order of the port.
+  toListedLevels(rows: readonly LevelRow[], validators: LevelValidators): ListedLevels {
+    const levels: LevelDefinition<unknown>[] = [];
+    const unavailable: UnavailableLevel[] = [];
+    for (const row of rows) {
+      const stored = LevelRowMapper.toStoredLevel(row, validators);
+      if (stored.state === 'valid') {
+        levels.push(stored.level);
+      } else {
+        unavailable.push({ gameId: row.gameId, levelId: row.levelId, reason: stored.reason });
+      }
     }
-    return stored.level;
+    return { levels, unavailable };
   },
 
   toRow(level: LevelDefinition<unknown>): LevelRow {

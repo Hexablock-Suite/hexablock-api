@@ -327,26 +327,23 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     expect(oldId.body).toEqual(badRequest('gameId "fit", levelId "fit-01": game-without-levels'));
   });
 
-  // A stored row that no strategy accepts is a server fault: list() throws
-  // for every level. The client gets the body of an unexpected failure, with
-  // no stack, no SQL and no rule of the row.
-  it('should_answer_the_unexpected_error_body_without_internal_data_when_a_stored_row_breaks_a_rule', async () => {
-    await testApp.database.db.insert(levels).values({
-      ...levelJson('hexa-fit'),
-      section: { figure: [] },
-    });
+  // #147: a stored row that no strategy accepts hides no other level. The
+  // read answers 200 with the valid levels, and names the broken row in
+  // unavailable, with its key and the code of its rule. The body holds no
+  // stack, no SQL and no section of the row.
+  it('should_answer_the_valid_levels_and_name_the_broken_row_in_unavailable_when_a_stored_row_breaks_a_rule', async () => {
+    await testApp.database.db
+      .insert(levels)
+      .values([{ ...levelJson('hexa-fit'), section: { figure: [] } }, levelJson('hexa-sort')]);
 
     const read = await list();
 
-    expect(read.status).toBe(500);
+    expect(read.status).toBe(200);
     expect(read.body).toEqual({
-      statusCode: 500,
-      error: 'Internal Server Error',
-      message: 'Internal server error',
-      details: [],
-      path: LEVELS_PATH,
+      levels: [levelJson('hexa-sort')],
+      unavailable: [{ gameId: 'hexa-fit', levelId: 'fit-01', reason: 'invalid-figure' }],
     });
-    expect(read.text).not.toMatch(/levels row|invalid-section|select|\bat /);
+    expect(read.text).not.toMatch(/levels row|"figure"|select|\bat /);
   });
 
   // #147: an update of the level replaces the broken row (decision of
@@ -374,11 +371,14 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
       .values({ ...levelJson('hexa-fit', 'fit-01', 3), section: { figure: [] } });
 
     const rejected = await update(token, { levels: [levelJson('hexa-fit', 'fit-01', 2)] });
-    const stored = await testApp.database.db.select().from(levels);
+    const read = await list();
 
     expect(rejected.status).toBe(400);
     expect(rejected.body).toEqual(badRequest('gameId "hexa-fit", levelId "fit-01": older-version'));
-    expect(stored).toEqual([{ ...levelJson('hexa-fit', 'fit-01', 3), section: { figure: [] } }]);
+    expect(read.body).toEqual({
+      levels: [],
+      unavailable: [{ gameId: 'hexa-fit', levelId: 'fit-01', reason: 'invalid-figure' }],
+    });
   });
 });
 

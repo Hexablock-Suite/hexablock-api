@@ -35,14 +35,31 @@ export type StoredLevel =
 // no I/O.
 export type LevelChange = (stored: StoredLevel) => Result<LevelDefinition<unknown>, LevelProblem>;
 
+// A stored level row that breaks a rule (#147). The key is the text of the
+// row, because a broken row can hold a gameId or a levelId that breaks its
+// own rule. The reason is the code of the first broken rule.
+export interface UnavailableLevel {
+  readonly gameId: string;
+  readonly levelId: string;
+  readonly reason: StoredLevelProblem;
+}
+
+// Every stored level row, by gameId and then by levelId: the valid levels
+// and the broken rows apart. One broken row hides no other level (#147).
+export interface ListedLevels {
+  readonly levels: readonly LevelDefinition<unknown>[];
+  readonly unavailable: readonly UnavailableLevel[];
+}
+
 // Port. It lists and changes the LevelDefinition aggregates, one per gameId
 // and levelId (API-FR-04, DS-6). Each level is the root of its own aggregate,
 // so one update() changes one level. It names no table and no library type.
 export interface LevelRepository {
-  // Gives every stored level, by gameId and then by levelId. It compares the
-  // values as text, not as numbers: fit-10 comes before fit-9. Each level is
-  // valid: its section passed the strategy of its gameId.
-  list(): Promise<readonly LevelDefinition<unknown>[]>;
+  // Gives every stored row, by gameId and then by levelId. It compares the
+  // values as text, not as numbers: fit-10 comes before fit-9. A row whose
+  // section passed the strategy of its gameId is a valid level. Any other
+  // row is an unavailable level.
+  list(): Promise<ListedLevels>;
 
   // Runs the change while it holds a lock for the gameId and the levelId,
   // and saves the level that the change returns. Two updates of one level

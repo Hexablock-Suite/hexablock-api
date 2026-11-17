@@ -168,7 +168,8 @@ belong there, built as decorators with one interface common to the use cases, wi
 [src/infrastructure/logging](src/infrastructure/logging) implements it and writes the text.
 `AppModule` wraps `SyncProgressUseCase`, `UpdateLevelsUseCase` and `GetLeaderboardUseCase` in
 `LoggingAspect`. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
-value that the client sent never reaches the log. A request value that breaks its rule stops in its
+value that the client sent never reaches the log. `GetLevelsUseCase` also writes one entry per stored level
+row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section. A request value that breaks its rule stops in its
 DTO mapper, such as `ProgressDtoMapper`, before the use case, so the aspect writes no entry for that
 request. `TimingAspect` is not built yet.
 

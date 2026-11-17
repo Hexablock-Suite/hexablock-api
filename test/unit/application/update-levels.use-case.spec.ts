@@ -6,11 +6,8 @@ import {
   type UpdateLevelsRequest,
   UpdateLevelsUseCase,
 } from '../../../src/application/levels/update-levels.use-case.js';
-import { receiveJsonOf } from '../../../src/adapters/received.js';
-import { LevelVersion } from '../../../src/domain/level/level-version.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
-import { err } from '../../../src/domain/shared/result.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { levelJson, levelValidators, type LevelJson } from '../../support/level-format.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
@@ -50,18 +47,6 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     levels = new InMemoryLevelRepository(levelValidators());
     update = new UpdateLevelsUseCase(levels, levelValidators());
   });
-
-  // The stored state of one level, read under its lock by a change that
-  // saves nothing. A valid level compares by its JSON.
-  async function storedStateOf(gameId: string, levelId: string): Promise<unknown> {
-    let seen: unknown;
-    await levels.update(valueOf(GameId.of(gameId)), valueOf(LevelId.of(levelId)), (stored) => {
-      seen =
-        stored.state === 'valid' ? { state: 'valid', json: receiveJsonOf(stored.level) } : stored;
-      return err('invalid-section');
-    });
-    return seen;
-  }
 
   it('should_save_every_level_when_each_level_of_the_batch_passes_its_check', async () => {
     const result = await update.execute(batchOf(levelJson('hexa-sort'), levelJson('hexa-fit')));
@@ -132,15 +117,10 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     );
 
     expect(result).toEqual(invalidLevels(['hexa-fit', 'fit-01', 'older-version']));
-    expect(await storedStateOf('hexa-fit', 'fit-01')).toEqual({
-      state: 'broken',
-      reason: 'invalid-figure',
-      version: valueOf(LevelVersion.of(3)),
+    expect(await levels.list()).toMatchObject({
+      unavailable: [{ gameId: 'hexa-fit', levelId: 'fit-01', reason: 'invalid-figure' }],
     });
-    expect(await storedStateOf('hexa-sort', 'sort-01')).toEqual({
-      state: 'valid',
-      json: levelJson('hexa-sort'),
-    });
+    expect(await listedJson(levels)).toEqual([levelJson('hexa-sort')]);
   });
 
   // An equal version passes, so the same packaged level replaces its broken row.
@@ -150,6 +130,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     const result = await update.execute(batchOf(levelJson('hexa-fit', 'fit-01', 3)));
 
     expect(result).toEqual({ ok: true, value: undefined });
+    expect(await levels.list()).toMatchObject({ unavailable: [] });
     expect(await listedJson(levels)).toEqual([levelJson('hexa-fit', 'fit-01', 3)]);
   });
 
@@ -161,6 +142,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     const result = await update.execute(batchOf(levelJson('hexa-fit', 'fit-01', 1)));
 
     expect(result).toEqual({ ok: true, value: undefined });
+    expect(await levels.list()).toMatchObject({ unavailable: [] });
     expect(await listedJson(levels)).toEqual([levelJson('hexa-fit', 'fit-01', 1)]);
   });
 

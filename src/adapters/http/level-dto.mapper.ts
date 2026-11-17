@@ -1,4 +1,5 @@
 import type { LevelProblemReport } from '../../application/levels/invalid-levels.js';
+import type { ListedLevels } from '../../application/ports/level-repository.js';
 import type {
   IncomingLevel,
   UpdateLevelsRequest,
@@ -62,8 +63,18 @@ export const LevelDtoMapper = {
     };
   },
 
-  toLevelsDto(levels: readonly LevelDefinition<unknown>[]): LevelsDto {
-    return { levels: levels.map((level) => LevelDtoMapper.toDto(level)) };
+  // The answer of the read. It gives unavailable only when a stored level
+  // breaks a rule, so an answer with no broken level keeps its old shape
+  // (#147). The key of a broken level is the text of its row.
+  toLevelsDto({ levels, unavailable }: ListedLevels): LevelsDto {
+    const dto = { levels: levels.map((level) => LevelDtoMapper.toDto(level)) };
+    if (unavailable.length === 0) {
+      return dto;
+    }
+    return {
+      ...dto,
+      unavailable: unavailable.map(({ gameId, levelId, reason }) => ({ gameId, levelId, reason })),
+    };
   },
 
   // The details of the ErrorDto of a failed update: one line per problem.
