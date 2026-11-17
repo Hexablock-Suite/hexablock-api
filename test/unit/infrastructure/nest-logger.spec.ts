@@ -41,6 +41,26 @@ describe('NestLogger', () => {
     expect(nest.error).not.toHaveBeenCalled();
   });
 
+  // #147: a stored level row that breaks a rule. The line quotes each key
+  // as JSON, so a row value cannot break the line.
+  it('should_write_the_key_and_the_reason_at_warn_level_when_entry_is_an_unavailable_level', () => {
+    const nest = recordingNestLogger();
+
+    new NestLogger(nest).log({
+      useCase: 'GetLevels',
+      outcome: 'unavailable-level',
+      gameId: 'hexa-fit',
+      levelId: 'fit-01\nforged',
+      reason: 'invalid-section',
+    });
+
+    expect(nest.warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=GetLevels outcome=unavailable-level gameId="hexa-fit" levelId="fit-01\\nforged" reason=invalid-section',
+    );
+    expect(nest.log).not.toHaveBeenCalled();
+    expect(nest.error).not.toHaveBeenCalled();
+  });
+
   // The entry of a thrown error holds no message, so the line holds the name
   // and the code of the error, and the frames go to the stack argument.
   it('should_write_name_code_and_frames_and_no_message_at_error_level_when_entry_is_an_error', () => {

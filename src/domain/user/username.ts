@@ -16,16 +16,35 @@ function limit(count: number): CharacterCount {
 // 3 to 32 letters, digits, dots, hyphens or underscores. A proposal for
 // team review: API-FR-01 sets no length or character rule. The range
 // delivers its bounds to the OpenAPI limits and the messages of the border.
-// The OpenAPI pattern lives in the HTTP adapter, so this module exports no
-// string (#99).
+// USERNAME_CHARACTERS delivers the allowed characters to the OpenAPI pattern.
+// The HTTP adapter builds the pattern from both, so this module exports no
+// string (#99, #149).
 export const USERNAME_LENGTH = Range.of(limit(3), limit(32));
 
-const ONLY_ALLOWED_CHARACTERS = /^[A-Za-z0-9._-]*$/;
+// The allowed characters, as one character class of a regular expression.
+// This text is their only home: Username.create() checks it, and
+// USERNAME_CHARACTERS delivers it to the border (#149).
+const ALLOWED_CHARACTERS = '[A-Za-z0-9._-]';
+
+const ONLY_ALLOWED_CHARACTERS = new RegExp(`^${ALLOWED_CHARACTERS}*$`);
+
+// The allowed characters of a username. The object delivers them as a
+// character class, and no operation returns them. The OpenAPI pattern of the
+// HTTP adapter receives them, as it receives the bounds of USERNAME_LENGTH.
+// A Username delivers a name, so the characters have their own object: a
+// typo cannot store the characters as a name (decision 17).
+export class UsernameCharacters {
+  deliverTo(receiver: ValueReceiver<string>): void {
+    receiver.receive(ALLOWED_CHARACTERS);
+  }
+}
+
+export const USERNAME_CHARACTERS = new UsernameCharacters();
 
 export type UsernameProblem = 'invalid-username';
 
 // The name a player signs in with. It keeps the letter case that the player
-// typed. Sign-in compares the name as typed.
+// typed at sign-up. Sign-in compares the key, as sign-up does (#144).
 // The key is the name in lower case. Two names collide when their keys are
 // equal, and no two users have names that collide, so `Ada` cannot register
 // after `ada` (#62). collidesWith() is the business name of that rule (#100).

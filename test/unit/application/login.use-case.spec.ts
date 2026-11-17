@@ -13,7 +13,6 @@ import {
 } from '../../support/auth/fakes.js';
 import { loginRequest, registerRequest } from '../../support/auth/requests.js';
 import { testUserId } from '../../support/user-ids.js';
-import { valueOf } from '../../support/result.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';
@@ -21,10 +20,12 @@ const EMOJI = '\u{1F600}';
 // The checks that the PasswordHasher port saw: the typed text and the hash
 // of each call. The port is the boundary of the hexagon, so a test counts
 // its calls. A test double of a port is border code, so it receives the text.
+// It receives the hash text too: a structural comparison ignores the
+// ECMAScript private field of a PasswordHash (#138).
 function checksOf(
   calls: readonly (readonly [PasswordAttempt, PasswordHash])[],
-): (readonly [string, PasswordHash])[] {
-  return calls.map(([attempt, hash]) => [receiveValueOf(attempt), hash] as const);
+): (readonly [string, string])[] {
+  return calls.map(([attempt, hash]) => [receiveValueOf(attempt), receiveValueOf(hash)] as const);
 }
 
 describe('LoginUseCase', () => {
@@ -61,9 +62,18 @@ describe('LoginUseCase', () => {
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
-  // Login finds the user by the name as typed (#62).
-  it('should_fail_with_invalid_credentials_when_username_differs_only_in_case', async () => {
-    const result = await login.execute(loginRequest('ADA', 'correct horse'));
+  // Login finds the user by the lower-case key that sign-up uses (#144).
+  it.each(['ADA', 'Ada'])(
+    'should_return_token_for_user_when_username_differs_only_in_case',
+    async (typed) => {
+      const result = await login.execute(loginRequest(typed, 'correct horse'));
+
+      expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
+    },
+  );
+
+  it('should_fail_with_invalid_credentials_when_username_differs_only_in_case_and_password_is_wrong', async () => {
+    const result = await login.execute(loginRequest('ADA', 'wrong horse'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
@@ -76,7 +86,7 @@ describe('LoginUseCase', () => {
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
     expect(checksOf(verify.mock.calls)).toEqual([
-      ['correct horse', valueOf(PasswordHash.from('hashed:unknown-user-dummy-password'))],
+      ['correct horse', 'hashed:unknown-user-dummy-password'],
     ]);
   });
 
@@ -164,9 +174,7 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
-    expect(checksOf(verify.mock.calls)).toEqual([
-      ['wrong horse', valueOf(PasswordHash.from('hashed:correct horse'))],
-    ]);
+    expect(checksOf(verify.mock.calls)).toEqual([['wrong horse', 'hashed:correct horse']]);
   });
 
   // #90: the port carries domain types, so the use case reads no text.
@@ -201,9 +209,7 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
     expect(verify).toHaveBeenCalledOnce();
-    expect(checksOf(verify.mock.calls)).toEqual([
-      ['short', valueOf(PasswordHash.from('hashed:correct horse'))],
-    ]);
+    expect(checksOf(verify.mock.calls)).toEqual([['short', 'hashed:correct horse']]);
   });
 
   // #91: the token issuer takes the user. #98: no test spies on the user. The
@@ -226,9 +232,7 @@ describe('LoginUseCase', () => {
 
     expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
     expect(verify).toHaveBeenCalledOnce();
-    expect(checksOf(verify.mock.calls)).toEqual([
-      ['correct horse', valueOf(PasswordHash.from('hashed:correct horse'))],
-    ]);
+    expect(checksOf(verify.mock.calls)).toEqual([['correct horse', 'hashed:correct horse']]);
   });
 
   it('should_issue_no_token_when_the_password_is_wrong_or_the_username_is_unknown', async () => {

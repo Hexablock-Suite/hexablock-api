@@ -20,7 +20,7 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 
 - **Accounts (API-FR-01):** sign-up and sign-in with JWT. A username is stored as typed. Sign-up
   rejects a username that differs from a stored one only in letter case (`Ada` after `ada`) with
-  the same 409 as an exact duplicate, and sign-in compares the name as typed.
+  the same 409 as an exact duplicate, and sign-in ignores letter case the same way, so `ADA` signs in the stored `ada`.
 - **Progress (API-FR-02):** progress sync, one entry per user and per `gameId`.
 - **Leaderboard (API-FR-03):** a global leaderboard per `gameId`, and a per-level leaderboard for
   Fit and Sort. The per-level leaderboard ranks more stars first, then fewer moves, then less
@@ -170,7 +170,8 @@ belong there, built as decorators with one interface common to the use cases, wi
 [src/infrastructure/logging](src/infrastructure/logging) implements it and writes the text.
 `AppModule` wraps `SyncProgressUseCase`, `UpdateLevelsUseCase` and `GetLeaderboardUseCase` in
 `LoggingAspect`. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
-value that the client sent never reaches the log. A request value that breaks its rule stops in its
+value that the client sent never reaches the log. `GetLevelsUseCase` also writes one entry per stored level
+row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section. A request value that breaks its rule stops in its
 DTO mapper, such as `ProgressDtoMapper`, before the use case, so the aspect writes no entry for that
 request. `TimingAspect` is not built yet.
 
@@ -200,6 +201,22 @@ Sign-up and sign-in (`POST /auth/register`, `POST /auth/login`) need the databas
 `GET /auth/me`, `POST /progress` and `GET /progress/{gameId}` need the header
 `Authorization: Bearer <accessToken>` from `POST /auth/login`.
 Without a valid token it answers 401 with the `ErrorDto` body.
+
+`PUT /levels` also needs an account in the list of level editors
+([#145](https://github.com/Hexablock-Suite/hexablock-api/issues/145)). `LEVEL_EDITOR_IDS` holds
+the user ids of those accounts, separated by commas; the API trims each entry and skips an empty
+one. The list holds ids, not usernames, because another person can sign up a name first. To find
+the id of an account, sign up and sign in, then call `GET /auth/me` with its token: the answer gives
+the `userId`, the same value as the `sub` claim of the token. Then restart the API with the id:
+
+```bash
+export LEVEL_EDITOR_IDS=0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b,6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01
+pnpm start:dev
+```
+
+An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /levels` gets
+403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
+does. The account that a deploy uses to send the levels must be in the list.
 
 For database work, start the local Postgres from `compose.yaml` and point `DATABASE_URL` at it:
 

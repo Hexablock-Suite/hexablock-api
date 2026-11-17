@@ -4,7 +4,7 @@ import type { UserRepository } from '../../application/ports/user-repository.js'
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { User } from '../../domain/user/user.js';
 import type { Username } from '../../domain/user/username.js';
-import { receiveKeyOf, receiveValueOf } from '../received.js';
+import { receiveKeyOf } from '../received.js';
 import { users } from './schema.js';
 import type * as schema from './schema.js';
 import { UserRowMapper } from './user-row.mapper.js';
@@ -16,11 +16,14 @@ export type PersistenceDatabase = PgDatabase<PgQueryResultHKT, typeof schema>;
 export class DrizzleUserRepository implements UserRepository {
   constructor(private readonly db: PersistenceDatabase) {}
 
+  // Compares the key that the domain computed, as isUsernameTaken() does
+  // (#144). The unique index on username_key keeps one user per key, so the
+  // lookup finds one user at most. The found user keeps the stored name.
   async findByUsername(username: Username): Promise<User | null> {
     const [row] = await this.db
       .select()
       .from(users)
-      .where(eq(users.username, receiveValueOf(username)))
+      .where(eq(users.usernameKey, receiveKeyOf(username)))
       .limit(1);
     return row === undefined ? null : UserRowMapper.toEntity(row);
   }

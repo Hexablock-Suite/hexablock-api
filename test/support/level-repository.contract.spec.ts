@@ -5,4 +5,7 @@ import { describeLevelRepositoryContract } from './level-repository.contract.js'
 describeLevelRepositoryContract(
   'InMemoryLevelRepository',
   () => new InMemoryLevelRepository(levelValidators()),
+  async (repository, row) => {
+    (repository as InMemoryLevelRepository).storeRow(row);
+  },
 );
