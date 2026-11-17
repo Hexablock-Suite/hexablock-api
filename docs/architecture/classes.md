@@ -70,7 +70,7 @@ The file is generated from the code at `3a3b45a` plus the views of this page. A 
 
 ### View 2.2: progress and leaderboard
 
-![Progress and leaderboard: SyncProgressUseCase, GetProgressUseCase and GetLeaderboardUseCase over the ProgressRepository, Clock, LevelRepository and LeaderboardReader ports; GetLeaderboardUseCase asks LevelRepository.holds() before the board of a level and fails with UnknownLevel when the definitions do not hold the level (decision 20); the Clock gives a SyncInstant; ProgressRepository finds and updates one progress by its ProgressKey; LeaderboardReader only filters and sums, and the use case orders the entries with the comparisons of the domain; a note names LeaderboardController and LeaderboardDtoMapper of layer 3, which call GetLeaderboard and translate its query and answer, and says that LeaderboardEntry is a response type of layer 2 with no tactical stereotype](classes/views/uc-2-progress.png)
+![Progress and leaderboard: SyncProgressUseCase, GetProgressUseCase and GetLeaderboardUseCase over the ProgressRepository, Clock, LevelRepository and LeaderboardReader ports; GetLeaderboardUseCase asks LevelRepository.holds() before the board of a level and fails with UnknownLevel when the definitions do not hold the level (decision 20); SyncProgressUseCase holds LevelRepository too and reads list() to check the stars of each result against its level (decision 22); the Clock gives a SyncInstant; ProgressRepository finds and updates one progress by its ProgressKey; LeaderboardReader only filters and sums, and the use case orders the entries with the comparisons of the domain; a note names LeaderboardController and LeaderboardDtoMapper of layer 3, which call GetLeaderboard and translate its query and answer, and says that LeaderboardEntry is a response type of layer 2 with no tactical stereotype](classes/views/uc-2-progress.png)
 
 ### View 2.3: levels
 
@@ -110,7 +110,7 @@ One use case can cross every layer. [flows.md](flows.md) follows one request thr
 
 ### Slice 1: sync progress
 
-![Sync progress slice: JwtAuthGuard, ProgressController and ProgressDtoMapper in layer 3 call the SyncProgress input port; SyncProgressRequest holds its LevelResult values through a use arrow results 0..*; SyncProgressUseCase holds the ProgressRepository and Clock ports, which DrizzleProgressRepository and SystemClock implement, creates the ProgressKey of the request, and updates the PlayerProgress aggregate of that key at the SyncInstant that the Clock gives; a dashed Aggregate frame encloses PlayerProgress, ProgressKey, LevelResult and SyncInstant](classes/views/flow-1-sync-progress.png)
+![Sync progress slice: JwtAuthGuard, ProgressController and ProgressDtoMapper in layer 3 call the SyncProgress input port; SyncProgressRequest holds its LevelResult values through a use arrow results 0..*; SyncProgressUseCase holds the ProgressRepository and Clock ports, which DrizzleProgressRepository and SystemClock implement, and the LevelRepository port that view 2.2 draws (decision 22), creates the ProgressKey of the request, and updates the PlayerProgress aggregate of that key at the SyncInstant that the Clock gives; a dashed Aggregate frame encloses PlayerProgress, ProgressKey, LevelResult and SyncInstant](classes/views/flow-1-sync-progress.png)
 
 ### Slice 2: login
 
@@ -257,6 +257,14 @@ These rules say how the domain model must be. They apply to every class of `src/
     - **The border.** `progress-values.ts` builds each `gameId` and `levelId` of a request with `ofIncoming()`: the sync body, the progress path, the leaderboard paths and the level update. `levelResultFrom()` checks the incoming bounds of the `levelId`, the stars and the moves first, in the order of the fields, and then `buildLevelResult()` builds the result. The texts of the rules name the bounds, and `openapi/openapi.json` lists them as `minLength`, `maxLength` and `maximum`.
 
     Views 1.1 and 1.4 draw `ofIncoming()`.
+
+22. **The stars of a result against its level (built, [#135](https://github.com/Hexablock-Suite/hexablock-api/issues/135)).** Decided by Oscar on 2026-11-16 on [#134](https://github.com/Hexablock-Suite/hexablock-api/issues/134) (question 3, DS-6): the most stars that a result can carry is the number of star thresholds of its level.
+    - **The rule lives in the level.** `LevelSection` is the interface of every section: `mostStars()` gives the count of its star thresholds as a `Stars` value. `FitSection` and `SortSection` implement it, `LevelValidator<TSection extends LevelSection>` builds one, and `LevelDefinition.of()` takes only such a section. `LevelDefinition.isLevelOf(gameId, result)` tells if a result is a play of that level, `mostStars()` gives the count of its section, and `admits(result)` tells if the result carries no more stars than that count. `LevelResult` answers two boolean questions for them: `isFor(levelId)` and `hasMoreStarsThan(most)`. No getter leaves either aggregate.
+    - **The use case reads the levels and changes none.** `SyncProgressUseCase` holds `LevelRepository` and reuses `list()`; the port gains no query. Before the lock of the progress, it finds the valid level of each result. A result with no valid level fails with `unknown-level`: no row, a row of another game, or a broken row (decision 19), which holds no star thresholds. A result over the count fails with `too-many-stars`, which carries the result and the most stars. The first failure in the order of the results returns, and the use case saves nothing. A sync with no result reads no level, so Lines and Merge need none. A new variant with level results needs its strategy and its stored levels first.
+    - **The border answers 400.** The body is wrong, not the route, so `ProgressController` turns both failures into a 400 with one detail: `No level <levelId> for gameId <gameId>.` and `stars of level <levelId> must be at most <most>, the count of its star thresholds, got <stars>.` The tests that sync a level result store the level first.
+    - **Cost.** `list()` restores every stored level on each sync with results. The API holds tens of levels, so the cost is small; a query of the levels of one game is the next step if the count grows.
+
+    Views 1.4, 2.2 and slice 1 draw the change. View 1.2 draws a selection of the members of `LevelDefinition`, so it stays as it is; `classes.drawio` holds `LevelSection` and every new member.
 
 ## Render the images
 

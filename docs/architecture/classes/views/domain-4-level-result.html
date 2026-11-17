@@ -75,9 +75,10 @@
           that returns a Result with the code of a broken rule, and compares by value, and
           LevelResult asks them which of two results of one level is better. Each one keeps its
           value private and delivers it to a receiver with deliverTo(). LevelId, Stars and Moves
-          also build an incoming value with ofIncoming(), which adds the bounds of #135. LevelResult
-          keeps the four value objects private, takes them built in of(), and delivers all four to a
-          LevelResultReceiver with deliverTo().
+          also build an incoming value with ofIncoming(), which adds the bounds of #135. A
+          LevelDefinition asks a LevelResult isFor() and hasMoreStarsThan() to check its stars
+          (DS-6). LevelResult keeps the four value objects private, takes them built in of(), and
+          delivers all four to a LevelResultReceiver with deliverTo().
         </desc>
         <defs>
           <marker
@@ -134,7 +135,7 @@
         />
         <!-- LevelResult holds moves: Moves: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <path
-          d="M440 336 L440 388 L320 388"
+          d="M440 368 L440 388 L320 388"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -142,7 +143,7 @@
         />
         <!-- LevelResult holds elapsedTime: ElapsedTime: use with role and multiplicity, no diamond, because the attribute shows no GoF pattern (class of 2026-11-02) -->
         <path
-          d="M600 336 L600 388 L720 388"
+          d="M600 368 L600 388 L720 388"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -215,7 +216,7 @@
           x="372"
           y="96"
           width="296"
-          height="240"
+          height="272"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -317,6 +318,13 @@
         <text x="388" y="328" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isBetterThan(other: LevelResult): boolean
         </text>
+        <text x="388" y="344" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + isFor(levelId: LevelId): boolean
+        </text>
+        <text x="388" y="360" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + hasMoreStarsThan(most: Stars): boolean
+        </text>
+
         <!-- Class: LevelId («value object») -->
         <rect
           x="64"
