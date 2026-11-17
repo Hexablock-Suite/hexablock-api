@@ -158,8 +158,8 @@ function levelValidators(): LevelValidators {
     },
     {
       provide: GET_LEVELS,
-      inject: [LEVEL_REPOSITORY],
-      useFactory: (levels: LevelRepository) => new GetLevelsUseCase(levels),
+      inject: [LEVEL_REPOSITORY, LOGGER],
+      useFactory: (levels: LevelRepository, logger: Logger) => new GetLevelsUseCase(levels, logger),
     },
     {
       provide: UPDATE_LEVELS,

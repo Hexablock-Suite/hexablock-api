@@ -76,11 +76,12 @@
           service and returns a Result whose InvalidLevels failure holds one problem per broken
           level with its gameId and levelId, so a level that fails its check is never saved and no
           exception reaches the HTTP layer. GetLevelsUseCase takes no request and has no expected
-          failure. AuthorizeLevelEditorUseCase holds the LevelEditors value object of layer 1, the
-          user ids of the configuration, and fails with not-a-level-editor for any other id, so an
-          empty list lets no account update (#145). A footnote names LevelDtoMapper, which builds
-          the UpdateLevelsRequest, and LevelRowMapper, which restores each stored row through
-          LevelValidators.
+          failure; it gives the valid levels and the broken rows apart, and logs each broken row
+          through the Logger port (#147). AuthorizeLevelEditorUseCase holds the LevelEditors value
+          object of layer 1, the user ids of the configuration, and fails with not-a-level-editor
+          for any other id, so an empty list lets no account update (#145). A footnote names
+          LevelDtoMapper, which builds the UpdateLevelsRequest, and LevelRowMapper, which restores
+          each stored row through LevelValidators.
         </desc>
         <defs>
           <marker
@@ -403,20 +404,12 @@
         <text x="80" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - levels: LevelRepository
         </text>
-        <line x1="64" y1="204" x2="440" y2="204" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute():
+        <text x="80" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - logger: Logger
         </text>
-        <text
-          textLength="330"
-          lengthAdjust="spacingAndGlyphs"
-          x="102"
-          y="236"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          Promise&lt;Result&lt;readonly LevelDefinition&lt;unknown&gt;[], never&gt;&gt;
+        <line x1="64" y1="220" x2="440" y2="220" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(): Promise&lt;Result&lt;ListedLevels, never&gt;&gt;
         </text>
         <!-- Class: UpdateLevelsUseCase (focal, «use case») -->
         <rect
@@ -518,7 +511,7 @@
         </text>
         <line x1="536" y1="216" x2="912" y2="216" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="552" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(): Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
+          + list(): Promise&lt;ListedLevels&gt;
         </text>
         <text x="552" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId,
@@ -906,7 +899,8 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           LevelRepository.update() saves one level per transaction, under a lock of its gameId and
-          levelId. Its LevelChange runs LevelDefinition.accepts(), the version rule of S3-10.
+          levelId. Its LevelChange gets the stored level, absent, valid or broken (#147), and runs
+          the version rule of S3-10.
         </text>
         <text
           x="24"
