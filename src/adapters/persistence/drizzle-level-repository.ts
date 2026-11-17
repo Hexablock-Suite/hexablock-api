@@ -40,6 +40,18 @@ export class DrizzleLevelRepository implements LevelRepository {
     return LevelRowMapper.toListedLevels(rows, this.validators);
   }
 
+  // One row per key, so the query asks for one key column of at most one
+  // row. A broken row counts: the query reads no section and restores no
+  // level (#146).
+  async holds(gameId: GameId, levelId: LevelId): Promise<boolean> {
+    const rows = await this.db
+      .select({ levelId: levels.levelId })
+      .from(levels)
+      .where(keyOf(gameId, levelId))
+      .limit(1);
+    return rows.length > 0;
+  }
+
   // The lock pattern of DrizzleProgressRepository.update() (decision 2). One
   // transaction holds an advisory lock for the gameId and the levelId. A row
   // lock is not enough: the first update of a level has no row to lock. A
@@ -70,17 +82,19 @@ export class DrizzleLevelRepository implements LevelRepository {
   }
 
   private async read(db: Queries, gameId: GameId, levelId: LevelId): Promise<StoredLevel> {
-    const [row] = await db
-      .select()
-      .from(levels)
-      .where(
-        and(eq(levels.gameId, receiveValueOf(gameId)), eq(levels.levelId, receiveValueOf(levelId))),
-      )
-      .limit(1);
+    const [row] = await db.select().from(levels).where(keyOf(gameId, levelId)).limit(1);
     return row === undefined
       ? { state: 'absent' }
       : LevelRowMapper.toStoredLevel(row, this.validators);
   }
+}
+
+// The condition that selects the row of one gameId and levelId.
+function keyOf(gameId: GameId, levelId: LevelId) {
+  return and(
+    eq(levels.gameId, receiveValueOf(gameId)),
+    eq(levels.levelId, receiveValueOf(levelId)),
+  );
 }
 
 // The primary key on gameId and levelId keeps one row per level: a second

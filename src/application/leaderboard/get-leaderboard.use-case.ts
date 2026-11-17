@@ -3,10 +3,11 @@ import type { LevelId } from '../../domain/progress/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { Score } from '../../domain/progress/score.js';
 import type { Standing } from '../../domain/progress/standing.js';
-import { ok, type Result } from '../../domain/shared/result.js';
+import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UseCase } from '../use-case.js';
 import type { LeaderboardEntry } from '../ports/leaderboard-entry.js';
 import type { LeaderboardReader } from '../ports/leaderboard-reader.js';
+import type { LevelRepository } from '../ports/level-repository.js';
 
 // The input of GetLeaderboard. The global query asks for both global boards
 // of a game. The level query asks for the board of one level of a game. The
@@ -43,23 +44,36 @@ export interface LevelLeaderboard {
 
 export type Leaderboard = GlobalLeaderboard | LevelLeaderboard;
 
+// The one expected failure of GetLeaderboard: the level definitions do not
+// hold the level of a level query (#146). The API holds every level, so
+// that level has no board. The global board of a game never fails.
+export interface UnknownLevel {
+  readonly kind: 'unknown-level';
+}
+
 // Input port of the leaderboard read (API-FR-03). It binds UseCase, so one
-// aspect can wrap it (decision 7). It has no expected failure, so its error
-// type is never: LoggingAspect always logs a success or a thrown error.
-export type GetLeaderboard = UseCase<LeaderboardQuery, Result<Leaderboard, never>>;
+// aspect can wrap it (decision 7). LoggingAspect logs the kind of a failure.
+export type GetLeaderboard = UseCase<LeaderboardQuery, Result<Leaderboard, UnknownLevel>>;
 
 export const GET_LEADERBOARD = Symbol('GetLeaderboard');
 
 // Reads the entries of a board through the LeaderboardReader port, which
 // only filters and sums. The use case orders the entries with the comparison
-// of the domain and gives each one its rank (classes.md decision 2). It
-// reads no Clock and saves nothing.
+// of the domain and gives each one its rank (classes.md decision 2). Before
+// it reads the board of a level, it asks the LevelRepository port whether
+// the definitions hold that level (#146). It reads no Clock and saves nothing.
 export class GetLeaderboardUseCase implements GetLeaderboard {
-  constructor(private readonly leaderboard: LeaderboardReader) {}
+  constructor(
+    private readonly leaderboard: LeaderboardReader,
+    private readonly levels: LevelRepository,
+  ) {}
 
-  async execute(query: LeaderboardQuery): Promise<Result<Leaderboard, never>> {
+  async execute(query: LeaderboardQuery): Promise<Result<Leaderboard, UnknownLevel>> {
     const { gameId } = query;
     if (query.board === 'level') {
+      if (!(await this.levels.holds(gameId, query.levelId))) {
+        return err({ kind: 'unknown-level' });
+      }
       const entries = await this.leaderboard.levelResults(gameId, query.levelId);
       return ok({
         board: 'level',

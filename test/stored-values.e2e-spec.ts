@@ -2,7 +2,9 @@ import { eq } from 'drizzle-orm';
 import request from 'supertest';
 import { levelResults, progress, users } from '../src/adapters/persistence/schema.js';
 import { signIn as signInTo, TEST_PASSWORD } from './support/http/sign-in.js';
+import { storeLevels } from './support/http/stored-levels.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { levelJson } from './support/level-format.js';
 import { testUserId } from './support/user-ids.js';
 
 // #103: the factory of a value object returns a failed Result for a value
@@ -70,6 +72,8 @@ describe('stored values that break a rule (API-FR-06)', () => {
     'should_answer_internal_error_when_a_stored_level_result_breaks_its_rule',
     async (path) => {
       const { token, userId } = await signInTo(server(), 'ada');
+      // The board of a level needs the stored level (#146).
+      await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
       await request(server())
         .post('/progress')
         .set('Authorization', `Bearer ${token}`)

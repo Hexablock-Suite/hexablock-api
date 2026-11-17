@@ -179,9 +179,9 @@ function levelValidators(): LevelValidators {
     },
     {
       provide: GET_LEADERBOARD,
-      inject: [LEADERBOARD_READER, LOGGER],
-      useFactory: (leaderboard: LeaderboardReader, logger: Logger) =>
-        new LoggingAspect(new GetLeaderboardUseCase(leaderboard), 'GetLeaderboard', logger),
+      inject: [LEADERBOARD_READER, LEVEL_REPOSITORY, LOGGER],
+      useFactory: (leaderboard: LeaderboardReader, levels: LevelRepository, logger: Logger) =>
+        new LoggingAspect(new GetLeaderboardUseCase(leaderboard, levels), 'GetLeaderboard', logger),
     },
     // Every route, also the routes of later modules, answers errors with ErrorDto.
     { provide: APP_FILTER, useClass: HttpErrorFilter },

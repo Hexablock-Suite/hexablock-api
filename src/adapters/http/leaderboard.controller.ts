@@ -1,7 +1,16 @@
-import { BadRequestException, Controller, Get, Inject, Param, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Inject,
+  NotFoundException,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -10,8 +19,10 @@ import {
   GET_LEADERBOARD,
   type GetLeaderboard,
   type LeaderboardQuery,
+  type UnknownLevel,
 } from '../../application/leaderboard/get-leaderboard.use-case.js';
 import type { Result } from '../../domain/shared/result.js';
+import { receiveValueOf } from '../received.js';
 import { ErrorDto } from './error.dto.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { LeaderboardDtoMapper } from './leaderboard-dto.mapper.js';
@@ -29,7 +40,8 @@ const UNAUTHORIZED = {
 // The leaderboards of one gameId (API-FR-03): both global boards, and the
 // board of one level. Both routes are behind JwtAuthGuard (S3-09, a proposal
 // on #76). LeaderboardDtoMapper builds the query and the answer. A path value
-// that the mapper rejects becomes a 400, and HttpErrorFilter answers it with
+// that the mapper rejects becomes a 400, and a level that the definitions
+// do not hold becomes a 404 (#146). HttpErrorFilter answers both with
 // ErrorDto (API-FR-06). A board has no page size (decision of #83).
 @ApiTags('leaderboard')
 @ApiBearerAuth()
@@ -56,6 +68,10 @@ export class LeaderboardController {
     description: 'The gameId or the levelId breaks its rule.',
   })
   @ApiUnauthorizedResponse(UNAUTHORIZED)
+  @ApiNotFoundResponse({
+    type: ErrorDto,
+    description: 'The level definitions do not hold the levelId for the gameId.',
+  })
   topOfLevel(
     @Param('gameId') gameId: string,
     @Param('levelId') levelId: string,
@@ -68,10 +84,23 @@ export class LeaderboardController {
       throw new BadRequestException(query.error);
     }
     const result = await this.getLeaderboard.execute(query.value);
-    // GetLeaderboard has no expected failure: its error type is never.
     if (!result.ok) {
-      return result.error;
+      throw httpErrorOf(result.error, query.value);
     }
     return LeaderboardDtoMapper.toDto(result.value);
+  }
+}
+
+// A path value that breaks its rule stops in LeaderboardDtoMapper, before
+// the use case. So the one expected failure of the use case is a level that
+// the definitions do not hold (#146). Only a level query fails so, but the
+// message names the gameId of any query.
+function httpErrorOf(problem: UnknownLevel, query: LeaderboardQuery): Error {
+  switch (problem.kind) {
+    case 'unknown-level': {
+      const gameId = receiveValueOf(query.gameId);
+      const levelId = query.board === 'level' ? ` ${receiveValueOf(query.levelId)}` : '';
+      return new NotFoundException(`No level${levelId} for gameId ${gameId}`);
+    }
   }
 }

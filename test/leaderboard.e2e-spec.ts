@@ -1,12 +1,16 @@
 import request from 'supertest';
 import { DrizzleLeaderboardReader } from '../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { signIn as signInTo, type SignedInUser } from './support/http/sign-in.js';
+import { storeLevels } from './support/http/stored-levels.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { levelJson } from './support/level-format.js';
 
 // API-FR-03: a global leaderboard per gameId and, for Fit and Sort, a
 // leaderboard per level. S3-09: both routes are behind JwtAuthGuard.
 // API-FR-06: every error has the shared ErrorDto body. The routes, the rank
-// and the page size come from the decision recorded on #83.
+// and the page size come from the decision recorded on #83. The board of a
+// level answers 404 when the level definitions do not hold the level (#146),
+// so each test stores the levels whose boards it asks.
 const FIT_01 = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
 const FIT_02 = { levelId: 'fit-02', stars: 2, moves: 20, elapsedMs: 60000 };
 
@@ -39,6 +43,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     const ada = await signIn('ada');
     const grace = await signIn('grace');
     const linus = await signIn('linus');
+    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'), levelJson('hexa-fit', 'fit-02'));
     await sync(ada, { gameId: 'hexa-fit', results: [FIT_01, FIT_02] });
     await sync(grace, { gameId: 'hexa-fit', results: [{ ...FIT_01, moves: 10 }] });
     await sync(linus, { gameId: 'hexa-sort', results: [{ ...FIT_01, stars: 1 }] });
@@ -135,19 +140,56 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     });
   });
 
-  // A game with no stored result has empty boards: the board exists, and it
-  // holds no row. GameId is open (decision 5), so any slug has a board.
-  it('should_answer_empty_boards_when_no_player_has_a_result_for_the_game', async () => {
+  // A game with no stored result has an empty global board: the board
+  // exists, and it holds no row. GameId is open (decision 5), so any slug
+  // has a global board (#146 keeps this answer).
+  it('should_answer_empty_global_boards_when_no_player_has_a_result_for_the_game', async () => {
     const ada = await signIn('ada');
 
     const global = await board(ada, '/leaderboard/hexa-new');
-    const level = await board(ada, '/leaderboard/hexa-new/levels/new-01');
 
     expect(global.status).toBe(200);
     expect(global.body).toEqual({ gameId: 'hexa-new', highScores: [], standings: [] });
-    expect(level.status).toBe(200);
-    expect(level.body).toEqual({ gameId: 'hexa-new', levelId: 'new-01', entries: [] });
   });
+
+  // #146: a level that the definitions hold has a board even with no result.
+  it('should_answer_an_empty_level_board_when_the_level_is_stored_and_no_player_has_a_result', async () => {
+    const ada = await signIn('ada');
+    await storeLevels(testApp, levelJson('hexa-sort', 'sort-01'));
+
+    const level = await board(ada, '/leaderboard/hexa-sort/levels/sort-01');
+
+    expect(level.status).toBe(200);
+    expect(level.body).toEqual({ gameId: 'hexa-sort', levelId: 'sort-01', entries: [] });
+  });
+
+  // #146 and #134 question 1: the API holds every level, so the board of a
+  // level that the definitions do not hold answers 404 with ErrorDto
+  // (API-FR-06). A result of that level does not make a board.
+  it.each([
+    ['/leaderboard/hexa-fit/levels/no-such-level', 'No level no-such-level for gameId hexa-fit'],
+    ['/leaderboard/no-such-game/levels/fit-01', 'No level fit-01 for gameId no-such-game'],
+    ['/leaderboard/hexa-lines/levels/fit-01', 'No level fit-01 for gameId hexa-lines'],
+  ])(
+    'should_return_not_found_error_body_when_the_level_definitions_do_not_hold_the_level',
+    async (path, message) => {
+      const ada = await signIn('ada');
+      await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
+      const synced = await sync(ada, { gameId: 'hexa-lines', score: 120, results: [FIT_01] });
+
+      const response = await board(ada, path);
+
+      expect(synced.status).toBe(200);
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({
+        statusCode: 404,
+        error: 'Not Found',
+        message,
+        details: [],
+        path,
+      });
+    },
+  );
 
   it('should_return_unauthorized_error_body_when_a_board_request_has_no_token', async () => {
     const global = await request(server()).get('/leaderboard/hexa-fit');

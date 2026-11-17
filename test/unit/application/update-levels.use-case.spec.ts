@@ -165,6 +165,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     let calls = 0;
     const flaky: LevelRepository = {
       list: () => levels.list(),
+      holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
       update: (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         calls += 1;
         return calls === 2 ? Promise.reject(failure) : levels.update(gameId, levelId, change);
@@ -200,6 +201,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     const newer = new UpdateLevelsUseCase(levels, levelValidators());
     const racing: LevelRepository = {
       list: () => levels.list(),
+      holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
       update: async (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         await newer.execute(batchOf(levelJson('hexa-fit', 'fit-01', 3)));
         return levels.update(gameId, levelId, change);

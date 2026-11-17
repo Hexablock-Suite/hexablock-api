@@ -61,6 +61,12 @@ export interface LevelRepository {
   // row is an unavailable level.
   list(): Promise<ListedLevels>;
 
+  // Answers whether a row is stored for the gameId and the levelId: true
+  // for a valid row and for a broken row, false when no row is stored. A
+  // broken row is still a level that the definitions hold, so the board of
+  // that level exists (#146). It takes no lock and restores no level.
+  holds(gameId: GameId, levelId: LevelId): Promise<boolean>;
+
   // Runs the change while it holds a lock for the gameId and the levelId,
   // and saves the level that the change returns. Two updates of one level
   // run one after the other, so each change reads what the previous one
