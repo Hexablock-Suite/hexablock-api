@@ -8,14 +8,14 @@ This page is the one source of the level format. The API reads it for the level 
 
 A level is one JSON object with a common part and a typed section (DS-6). The common part is the same for every game. The `gameId` says which section the level holds. Lines and Merge have no level files (API-FR-04), so only `hexa-fit` and `hexa-sort` have a section today.
 
-| Field      | JSON type   | Rule                                                                                                | Domain value                  |
-| ---------- | ----------- | --------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `gameId`   | string      | A lowercase slug: `hexa-fit` or `hexa-sort`. Another game has no section, so the API rejects it.    | `GameId`                      |
-| `levelId`  | string      | A non-blank text, unique in its game, such as `fit-01`.                                             | `LevelId`                     |
-| `order`    | number      | A whole number of 1 or more: the place of the level in the list of its game. The first level has 1. | `LevelOrder`                  |
-| `version`  | number      | A whole number of 1 or more. The first copy has 1. A change that must reach the players raises it.  | `LevelVersion`                |
-| `topology` | string      | A lowercase slug that names how to read the coordinates: `hex`, `square` or `triangle`.             | `TopologyId`                  |
-| `section`  | JSON object | The section of the game: the Fit section or the Sort section below.                                 | `FitSection` or `SortSection` |
+| Field      | JSON type   | Rule                                                                                                                               | Domain value                  |
+| ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `gameId`   | string      | A lowercase slug of 1 to 64 characters: `hexa-fit` or `hexa-sort`. Another game has no section, so the API rejects it.             | `GameId`                      |
+| `levelId`  | string      | A non-blank text of 1 to 64 characters with no control character (U+0000 to U+001F, U+007F), unique in its game, such as `fit-01`. | `LevelId`                     |
+| `order`    | number      | A whole number of 1 or more: the place of the level in the list of its game. The first level has 1.                                | `LevelOrder`                  |
+| `version`  | number      | A whole number of 1 or more. The first copy has 1. A change that must reach the players raises it.                                 | `LevelVersion`                |
+| `topology` | string      | A lowercase slug that names how to read the coordinates: `hex`, `square` or `triangle`.                                            | `TopologyId`                  |
+| `section`  | JSON object | The section of the game: the Fit section or the Sort section below.                                                                | `FitSection` or `SortSection` |
 
 The level object holds exactly these six fields. The `gameId` and the `levelId` are the identity of a level: two copies of one level have the same `gameId` and `levelId`. DS-11 decides which copy wins in the app: the higher `version`, and the bundled copy when the versions are equal. S3-10 decides what the API accepts: it rejects a copy with a lower `version` than the stored copy, and it accepts an equal or a higher one.
 
@@ -53,6 +53,7 @@ A coordinate is a JSON list of whole numbers, such as `[2, 1]`. The `topology` o
 - A fixed source is `{ "stacks": list of stacks }`. A stack is a list of color names, from the bottom tile to the top tile. The source gives the stacks in their order.
 - A color name is a non-blank text, such as `red`. Two names are the same color only when they are written the same way.
 - A Sort star needs one limit: the moves of the play are at most `maxMoves`. The stars are cumulative, as for Fit (DS-6).
+- The most stars that a result of a level can carry is the number of its star thresholds, for Fit and for Sort (DS-6, [#135](https://github.com/Hexablock-Suite/hexablock-api/issues/135)). `POST /progress` rejects a result with more stars, and a result of a level that the API does not hold.
 
 ## Shape rules for both sections
 

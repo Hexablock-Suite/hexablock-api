@@ -4,12 +4,13 @@ import { err, type Result } from '../shared/result.js';
 import { LevelDefinition } from './level-definition.js';
 import type { LevelOrder } from './level-order.js';
 import type { LevelProblem } from './level-problem.js';
+import type { LevelSection } from './level-section.js';
 import type { LevelValidator } from './level-validator.js';
 import type { LevelVersion } from './level-version.js';
 import type { TopologyId } from './topology-id.js';
 
 // One entry of the registry: a game with level files and its strategy.
-export type LevelValidatorEntry = readonly [GameId, LevelValidator<unknown>];
+export type LevelValidatorEntry = readonly [GameId, LevelValidator<LevelSection>];
 
 // Domain service (decision 5). It picks the strategy of an incoming level
 // from its gameId, outside any LevelDefinition: no level exists before its

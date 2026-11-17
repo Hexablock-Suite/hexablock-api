@@ -44,6 +44,16 @@ export class LevelResult {
     return this.levelId.equals(other.levelId);
   }
 
+  // Tells if this result is a play of the level with this levelId (#135).
+  isFor(levelId: LevelId): boolean {
+    return this.levelId.equals(levelId);
+  }
+
+  // Tells if this result carries more stars than a level allows (DS-6, #135).
+  hasMoreStarsThan(most: Stars): boolean {
+    return this.stars.isMoreThan(most);
+  }
+
   // The order of DS-4: more stars wins, then fewer moves, then less time. A
   // full tie is not better, so the caller keeps the result it has.
   isBetterThan(other: LevelResult): boolean {

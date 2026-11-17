@@ -1,6 +1,8 @@
 import type { Moves } from '../../progress/moves.js';
 import { ok, type Result } from '../../shared/result.js';
 import type { LevelProblem } from '../level-problem.js';
+import { type LevelSection, mostStarsOf } from '../level-section.js';
+import type { Stars } from '../../progress/stars.js';
 import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { readFields, readList, sameItems } from '../parts.js';
 import { maxMovesIn } from '../star-limits.js';
@@ -14,7 +16,7 @@ import { StackSource } from './stack-source.js';
 // section checks its own shape when it is created, so isSection() is gone.
 // It holds the rules of the section too, and SortLevelValidator (#78) only
 // picks this type.
-export class SortSection {
+export class SortSection implements LevelSection {
   private constructor(
     private readonly radius: BoardRadius,
     private readonly goals: GoalCount,
@@ -58,6 +60,12 @@ export class SortSection {
       source: this.source,
       stars: this.stars.map((maxMoves) => ({ maxMoves })),
     });
+  }
+
+  // The most stars of a play of this level: the count of its star
+  // thresholds (DS-6, #135).
+  mostStars(): Stars {
+    return mostStarsOf(this.stars);
   }
 
   // Two sections are equal when every field is equal. The stars compare in order.

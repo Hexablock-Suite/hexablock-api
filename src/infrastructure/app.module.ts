@@ -141,9 +141,14 @@ function levelValidators(): LevelValidators {
     // LoggingAspect wraps the use case, so the use case holds no logging code.
     {
       provide: SYNC_PROGRESS,
-      inject: [PROGRESS_REPOSITORY, CLOCK, LOGGER],
-      useFactory: (progress: ProgressRepository, clock: Clock, logger: Logger) =>
-        new LoggingAspect(new SyncProgressUseCase(progress, clock), 'SyncProgress', logger),
+      inject: [PROGRESS_REPOSITORY, LEVEL_REPOSITORY, CLOCK, LOGGER],
+      useFactory: (
+        progress: ProgressRepository,
+        levels: LevelRepository,
+        clock: Clock,
+        logger: Logger,
+      ) =>
+        new LoggingAspect(new SyncProgressUseCase(progress, levels, clock), 'SyncProgress', logger),
     },
     {
       provide: GET_PROGRESS,

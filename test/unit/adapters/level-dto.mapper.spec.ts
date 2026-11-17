@@ -106,9 +106,9 @@ describe('LevelDtoMapper', () => {
     expect(request).toEqual({
       ok: false,
       error: [
-        'levels[0]: gameId must be a lowercase slug, got "Fit".',
-        'levels[1]: levelId must be a non-blank string.',
-        'levels[2]: gameId must be a lowercase slug, got undefined.',
+        'levels[0]: gameId must be a lowercase slug of 1 to 64 characters, got "Fit".',
+        'levels[1]: levelId must be a non-blank string of 1 to 64 characters with no control character.',
+        'levels[2]: gameId must be a lowercase slug of 1 to 64 characters, got undefined.',
       ],
     });
   });

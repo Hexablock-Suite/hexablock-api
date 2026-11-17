@@ -4,7 +4,9 @@ import { DrizzleProgressRepository } from '../src/adapters/persistence/drizzle-p
 import { progress } from '../src/adapters/persistence/schema.js';
 import { FixedClock } from './support/fixed-clock.js';
 import { signIn as signInTo } from './support/http/sign-in.js';
+import { storeLevels } from './support/http/stored-levels.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { levelJson } from './support/level-format.js';
 import { syncInstantOf } from './support/sync-instants.js';
 
 // API-FR-02: one progress entry per user and per gameId. The userId comes
@@ -22,6 +24,8 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
   beforeEach(async () => {
     clock = new FixedClock(syncInstantOf(AT));
     testApp = await createTestApp([], { clock });
+    // A result needs its stored level (#135).
+    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'), levelJson('hexa-fit', 'fit-02'));
   });
 
   afterEach(async () => {
@@ -296,7 +300,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       statusCode: 400,
       error: 'Bad Request',
       message: 'Request validation failed',
-      details: ['stars must be a non-negative integer, got -2.'],
+      details: ['stars must be a non-negative integer of at most 2147483647, got -2.'],
       path: '/progress',
     });
     expect(await storedRows(userId)).toEqual([]);
@@ -307,8 +311,8 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
   const badGame = { gameId: 'Hexa Lines' };
   const badLevel = { results: [{ ...FIT_LEVEL, stars: -2 }] };
   const badScore = { score: -1 };
-  const gameProblem = 'gameId must be a lowercase slug, got "Hexa Lines".';
-  const levelProblem = 'stars must be a non-negative integer, got -2.';
+  const gameProblem = 'gameId must be a lowercase slug of 1 to 64 characters, got "Hexa Lines".';
+  const levelProblem = 'stars must be a non-negative integer of at most 2147483647, got -2.';
   it.each([
     [{ ...badGame, ...badLevel }, gameProblem],
     [{ ...badGame, ...badScore }, gameProblem],
@@ -401,7 +405,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       statusCode: 400,
       error: 'Bad Request',
       message: 'Request validation failed',
-      details: ['gameId must be a lowercase slug, got "Hexa Lines".'],
+      details: ['gameId must be a lowercase slug of 1 to 64 characters, got "Hexa Lines".'],
       path: '/progress/Hexa%20Lines',
     });
   });

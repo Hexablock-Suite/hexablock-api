@@ -1,9 +1,12 @@
 import type { GameId } from '../progress/game-id.js';
 import type { LevelId } from '../progress/level-id.js';
+import type { LevelResult } from '../progress/level-result.js';
+import type { Stars } from '../progress/stars.js';
 import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
 import type { LevelOrder } from './level-order.js';
 import type { LevelProblem } from './level-problem.js';
+import type { LevelSection } from './level-section.js';
 import type { LevelVersion } from './level-version.js';
 import type { TopologyId } from './topology-id.js';
 
@@ -24,13 +27,13 @@ export class LevelDefinition<TSection> {
     private readonly order: LevelOrder,
     private readonly version: LevelVersion,
     private readonly topology: TopologyId,
-    private readonly section: TSection,
+    private readonly section: TSection & LevelSection,
   ) {}
 
   // Takes the Result of the section factory. A failed section gives its level
   // problem, and no level exists. The values of the common part check their
   // own rules when the border builds them.
-  static of<TSection>(
+  static of<TSection extends LevelSection>(
     gameId: GameId,
     levelId: LevelId,
     order: LevelOrder,
@@ -73,6 +76,24 @@ export class LevelDefinition<TSection> {
   // row compares with the version alone (#147). An equal version is not older.
   isOlderThan(version: LevelVersion): boolean {
     return this.version.isOlderThan(version);
+  }
+
+  // Tells if a result of a sync of this gameId is a play of this level: the
+  // same gameId and the same levelId (#135).
+  isLevelOf(gameId: GameId, result: LevelResult): boolean {
+    return this.gameId.equals(gameId) && result.isFor(this.levelId);
+  }
+
+  // The most stars that a play of this level can carry: the count of the
+  // star thresholds of its section (DS-6, decided on #134, built on #135).
+  mostStars(): Stars {
+    return this.section.mostStars();
+  }
+
+  // Tells if a play of this level can carry the stars of the result. The
+  // caller pairs the result with its level through isLevelOf().
+  admits(result: LevelResult): boolean {
+    return !result.hasMoreStarsThan(this.mostStars());
   }
 
   // Delivers the common part and the section to a receiver of the border, in

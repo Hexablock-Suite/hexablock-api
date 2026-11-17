@@ -12,15 +12,16 @@ import { TopologyId } from '../../../src/domain/level/topology-id.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
 import { ok, type Result } from '../../../src/domain/shared/result.js';
-import { levelExample, valueOf, type LevelJson } from '../../support/level-format.js';
+import { levelExample, testSection, valueOf, type LevelJson } from '../../support/level-format.js';
+import type { LevelSection } from '../../../src/domain/level/level-section.js';
 
 // Test double for a strategy. It keeps each call and answers with a fixed result.
-class RecordingValidator implements LevelValidator<string> {
+class RecordingValidator implements LevelValidator<LevelSection> {
   readonly calls: [unknown, TopologyId][] = [];
 
-  constructor(private readonly answer: Result<string, LevelProblem>) {}
+  constructor(private readonly answer: Result<LevelSection, LevelProblem>) {}
 
-  sectionOf(raw: unknown, topology: TopologyId): Result<string, LevelProblem> {
+  sectionOf(raw: unknown, topology: TopologyId): Result<LevelSection, LevelProblem> {
     this.calls.push([raw, topology]);
     return this.answer;
   }
@@ -47,8 +48,8 @@ function checkExample(validators: LevelValidators, json: LevelJson) {
 
 describe('LevelValidators', () => {
   it('should_build_the_level_with_the_strategy_of_its_game_when_the_game_has_level_files', () => {
-    const fit = new RecordingValidator(ok('fit section'));
-    const sort = new RecordingValidator(ok('sort section'));
+    const fit = new RecordingValidator(ok(testSection('fit section')));
+    const sort = new RecordingValidator(ok(testSection('sort section')));
     const validators = LevelValidators.of([
       [valueOf(GameId.of('hexa-fit')), fit],
       [valueOf(GameId.of('hexa-sort')), sort],
@@ -68,7 +69,14 @@ describe('LevelValidators', () => {
     expect(
       valueOf(level).equals(
         valueOf(
-          LevelDefinition.of(valueOf(GameId.of('hexa-fit')), LEVEL_01, FIRST, V1, HEX, ok('any')),
+          LevelDefinition.of(
+            valueOf(GameId.of('hexa-fit')),
+            LEVEL_01,
+            FIRST,
+            V1,
+            HEX,
+            ok(testSection('any')),
+          ),
         ),
       ),
     ).toBe(true);
@@ -77,7 +85,7 @@ describe('LevelValidators', () => {
   // A Map compares object keys by reference, so a GameId built again would
   // find nothing. The registry compares with GameId.equals().
   it('should_find_one_strategy_when_the_same_game_id_is_built_twice', () => {
-    const fit = new RecordingValidator(ok('fit section'));
+    const fit = new RecordingValidator(ok(testSection('fit section')));
     const validators = LevelValidators.of([[valueOf(GameId.of('hexa-fit')), fit]]);
 
     const level = validators.check(
@@ -95,7 +103,7 @@ describe('LevelValidators', () => {
 
   // Lines and Merge have no level files (API-FR-04).
   it('should_fail_with_a_level_problem_when_no_strategy_serves_the_game', () => {
-    const fit = new RecordingValidator(ok('fit section'));
+    const fit = new RecordingValidator(ok(testSection('fit section')));
     const validators = LevelValidators.of([[valueOf(GameId.of('hexa-fit')), fit]]);
 
     expect(
@@ -138,8 +146,8 @@ describe('LevelValidators', () => {
   // datum of a level, so the factory throws.
   it('should_throw_when_two_entries_name_one_game', () => {
     const entries = [
-      [valueOf(GameId.of('hexa-fit')), new RecordingValidator(ok('first'))],
-      [valueOf(GameId.of('hexa-fit')), new RecordingValidator(ok('second'))],
+      [valueOf(GameId.of('hexa-fit')), new RecordingValidator(ok(testSection('first')))],
+      [valueOf(GameId.of('hexa-fit')), new RecordingValidator(ok(testSection('second')))],
     ] as const;
 
     expect(() => LevelValidators.of(entries)).toThrow(
