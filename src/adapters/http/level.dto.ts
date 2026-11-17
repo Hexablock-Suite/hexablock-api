@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 
 // The DTOs of the level routes (API-FR-04). Each one is a part of the shared
 // level format of S3-02, field for field (docs/level-format.md). They give
@@ -168,11 +168,36 @@ export class LevelDto {
   readonly section!: FitSectionDto | SortSectionDto;
 }
 
-// The body of PUT /levels and the answer of GET /levels.
+// A stored level that breaks a rule (#147). The read names it, so the
+// client can show it as not available. It gives no section.
+export class UnavailableLevelDto {
+  @ApiProperty({ example: 'hexa-fit', description: 'The gameId of the stored level.' })
+  readonly gameId!: string;
+
+  @ApiProperty({ example: 'fit-01', description: 'The levelId of the stored level.' })
+  readonly levelId!: string;
+
+  @ApiProperty({
+    example: 'invalid-section',
+    description:
+      'The code of the first rule that the stored level breaks, as docs/level-format.md names it.',
+  })
+  readonly reason!: string;
+}
+
+// The body of PUT /levels and the answer of GET /levels. The update reads
+// only levels.
 export class LevelsDto {
   @ApiProperty({
     type: [LevelDto],
     description: 'The levels, by gameId and then by levelId in an answer.',
   })
   readonly levels!: LevelDto[];
+
+  @ApiPropertyOptional({
+    type: [UnavailableLevelDto],
+    description:
+      'Only in an answer, and only when a stored level breaks a rule: each such level, by gameId and then by levelId. The levels field holds every other level. The update ignores this field.',
+  })
+  readonly unavailable?: UnavailableLevelDto[];
 }

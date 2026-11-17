@@ -155,6 +155,62 @@ describe('HTTP error body (API-FR-06)', () => {
     });
   });
 
+  // The body parser rejects a body over its limit of 100 kB with an error
+  // that carries the status 413. The filter keeps that client status on every
+  // route that takes a body (#136).
+  it.each(['/auth/login', '/auth/register'])(
+    'should_return_413_error_body_when_any_route_gets_a_json_body_over_the_limit',
+    async (path) => {
+      const body = { username: 'player', password: 'x'.repeat(200 * 1024) };
+
+      const response = await request(app.getHttpServer()).post(path).send(body);
+
+      expect(response.status).toBe(413);
+      expect(response.body).toEqual({
+        statusCode: 413,
+        error: 'Payload Too Large',
+        message: 'Payload Too Large',
+        details: [],
+        path,
+      });
+    },
+  );
+
+  // Each 4xx error of the body parser keeps its status, not only the error of
+  // the size. The JSON parser reads only a UTF charset. The message never quotes the charset that the client sent.
+  it('should_return_415_error_body_when_the_json_body_has_an_unsupported_charset', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .set('Content-Type', 'application/json; charset=iso-8859-1')
+      .send('{"username":"player","password":"secret"}');
+
+    expect(response.status).toBe(415);
+    expect(response.body).toEqual({
+      statusCode: 415,
+      error: 'Unsupported Media Type',
+      message: 'Unsupported Media Type',
+      details: [],
+      path: '/auth/login',
+    });
+  });
+
+  // Nest turns the SyntaxError of the body parser into a 400.
+  it('should_return_400_error_body_when_the_json_body_is_malformed', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .set('Content-Type', 'application/json')
+      .send('{"username":');
+
+    expect(response.status).toBe(400);
+    expect(Object.keys(response.body).sort()).toEqual(ERROR_BODY_KEYS);
+    expect(response.body).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+      details: [],
+      path: '/auth/login',
+    });
+  });
+
   it('should_use_same_body_keys_when_errors_differ', async () => {
     const server = app.getHttpServer();
     const responses = await Promise.all([

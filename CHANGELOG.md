@@ -9,6 +9,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 ### Fixed
 
 - A valid token whose user has no stored row gets 401 with the `ErrorDto` body of a bad token, not 500 from `POST /progress` ([#137](https://github.com/Hexablock-Suite/hexablock-api/issues/137)). `AuthenticateTokenUseCase` checks the user through the new `UserRepository.exists()`, so `GET /auth/me` and every other guarded route answer 401 too. A user deleted between the guard and the write makes `ProgressRepository.update()` fail with `unknown-user`, and the sync answers the same 401 and stores nothing.
+- A request body that the body parser rejects keeps its client status ([#136](https://github.com/Hexablock-Suite/hexablock-api/issues/136)). `HttpErrorFilter` keeps the status of an error that is not an `HttpException` and carries an integer `status` or `statusCode` from 400 to 499, with the `ErrorDto` body of API-FR-06 and the reason phrase of the status as its message, and writes no error log line for it. So a JSON body over 100 kB answers 413 on every route that takes a body, and a JSON body in a charset other than UTF answers 415, in place of 500. A malformed JSON body still answers 400, and any other error still answers 500 with the generic message and its log line. `openapi/openapi.json` does not change.
 
 ### Changed
 
@@ -22,6 +23,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 ### Changed
 
 - `PUT /levels` accepts only the accounts in the list of level editors of the configuration ([#145](https://github.com/Hexablock-Suite/hexablock-api/issues/145)). `LEVEL_EDITOR_IDS` holds their user ids, separated by commas. Any other signed-in account gets 403 with the `ErrorDto` body before the API reads the body, and the API saves nothing. An empty or unset list lets no account update, and an entry that is not a UUID stops the start. `LevelEditorGuard` runs after `JwtAuthGuard` and calls the new input port `AuthorizeLevelEditor`, which asks the new domain value `LevelEditors`. `openapi/openapi.json` lists the 403, and `docs/REQUIREMENTS.md` (Q4), the README and decision 18 of `docs/architecture/classes.md` record the rule.
+- `PUT /levels` replaces a stored level row that breaks a rule, and `GET /levels` no longer answers 500 for such a row ([#147](https://github.com/Hexablock-Suite/hexablock-api/issues/147)). The version rule of S3-10 still holds over the row when its `version` is valid; a row with an invalid `version` takes any valid version. `GET /levels` answers 200 with the other levels and names each broken row in the new optional field `unavailable` (`gameId`, `levelId`, `reason`), and the API logs one warn entry per broken row. `openapi/openapi.json`, `docs/REQUIREMENTS.md` (API-FR-04) and decision 19 of `docs/architecture/classes.md` record the rule.
 
 ## [0.2.0] - 2026-11-16
 

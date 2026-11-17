@@ -17,8 +17,12 @@ type HttpRequest = { originalUrl?: string; url: string };
 type HttpResponse = { status(code: number): { json(body: ErrorDto): void } };
 
 // Turns every exception into the ErrorDto body (API-FR-06).
-// An HttpException keeps its status and message. Any other error becomes a
-// 500 that hides its message, because that message can hold internal data.
+// An HttpException keeps its status and message. Another error that carries
+// a client status from 400 to 499 keeps that status. The body parser throws
+// such an error, for example a 413 for a body over its limit (#136). Its
+// message is the reason phrase of the status, because the error text can
+// quote a value that the client sent. Any other error becomes a 500 that
+// hides its message, because that message can hold internal data.
 // No part of the body holds the query of the request.
 @Catch()
 export class HttpErrorFilter implements ExceptionFilter {
@@ -29,10 +33,15 @@ export class HttpErrorFilter implements ExceptionFilter {
     const request = http.getRequest<HttpRequest>();
     const url = request.originalUrl ?? request.url;
     const path = pathOf(url);
-    const body =
-      error instanceof HttpException
-        ? fromHttpException(error, path)
-        : this.unexpected(error, path);
+    const clientStatus = clientStatusOf(error);
+    let body: ErrorDto;
+    if (error instanceof HttpException) {
+      body = fromHttpException(error, path);
+    } else if (clientStatus === undefined) {
+      body = this.unexpected(error, path);
+    } else {
+      body = errorBody(clientStatus, reasonOf(clientStatus), [], path);
+    }
     const reply = withoutQuery(body, url.slice(path.length));
     http.getResponse<HttpResponse>().status(reply.statusCode).json(reply);
   }
@@ -71,6 +80,40 @@ function withoutQuery(body: ErrorDto, query: string): ErrorDto {
   return errorBody(body.statusCode, strip(body.message), body.details.map(strip), body.path);
 }
 
+// An error of the body parser (http-errors) carries its status in `status`
+// and in `statusCode`, and marks a client error with `expose: true`. This
+// function gives that status when the error is exposed and the status is an
+// integer from 400 to 499. An internal error that carries a 4xx status but is
+// not exposed stays a 500, so a server fault never looks like a client error.
+// A client can send the exposed input at will, so the filter writes no log
+// line for it. A getter of the error can throw, so a failed read gives no
+// client status, and the error stays a 500.
+function clientStatusOf(error: unknown): number | undefined {
+  if (typeof error !== 'object' || error === null) {
+    return undefined;
+  }
+  try {
+    const { status, statusCode, expose } = error as {
+      status?: unknown;
+      statusCode?: unknown;
+      expose?: unknown;
+    };
+    const candidate = status ?? statusCode;
+    return expose === true &&
+      Number.isInteger(candidate) &&
+      (candidate as number) >= 400 &&
+      (candidate as number) <= 499
+      ? (candidate as number)
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function reasonOf(statusCode: number): string {
+  return STATUS_CODES[statusCode] ?? 'Error';
+}
+
 function fromHttpException(error: HttpException, path: string): ErrorDto {
   const status = error.getStatus();
   const message = messageOf(error.getResponse());
@@ -93,7 +136,7 @@ function messageOf(response: string | object): string | unknown[] | undefined {
 function errorBody(statusCode: number, message: string, details: string[], path: string): ErrorDto {
   return {
     statusCode,
-    error: STATUS_CODES[statusCode] ?? 'Error',
+    error: reasonOf(statusCode),
     message,
     details,
     path,

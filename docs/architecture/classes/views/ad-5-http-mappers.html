@@ -612,16 +612,8 @@
         <text x="576" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDto(level: LevelDefinition&lt;unknown&gt;): LevelDto
         </text>
-        <text
-          textLength="390"
-          lengthAdjust="spacingAndGlyphs"
-          x="576"
-          y="484"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + toLevelsDto(levels: readonly LevelDefinition&lt;unknown&gt;[]): LevelsDto
+        <text x="576" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toLevelsDto(listed: ListedLevels): LevelsDto
         </text>
         <text x="576" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDetails(problems: readonly LevelProblemReport[]): string[]
@@ -884,7 +876,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           LevelDtoMapper keeps the section as it arrives; the validator of the gameId checks it in
-          the use case. toLevelsDto() turns the levels of GetLevels into the LevelsDto.
+          the use case. toLevelsDto() writes the LevelsDto, with unavailable for broken rows (#147).
         </text>
         <text
           x="24"

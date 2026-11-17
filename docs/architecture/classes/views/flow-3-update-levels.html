@@ -601,7 +601,7 @@
         </text>
         <line x1="196" y1="316" x2="540" y2="316" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="212" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(): Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
+          + list(): Promise&lt;ListedLevels&gt;
         </text>
         <text x="212" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId,
@@ -664,7 +664,7 @@
           + toDto(level: LevelDefinition&lt;unknown&gt;): LevelDto
         </text>
         <text x="776" y="340" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toLevelsDto(levels: readonly LevelDefinition&lt;unknown&gt;[]): LevelsDto
+          + toLevelsDto(listed: ListedLevels): LevelsDto
         </text>
         <text x="776" y="356" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDetails(problems: readonly LevelProblemReport[]): string[]
@@ -835,7 +835,7 @@
         </text>
         <line x1="300" y1="764" x2="740" y2="764" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="316" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(): Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
+          + list(): Promise&lt;ListedLevels&gt;
         </text>
         <text x="316" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId, change: LevelChange):

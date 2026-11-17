@@ -76,7 +76,8 @@
           LevelValidators and uses LevelRowMapper, and DrizzleUserRepository with UserRowMapper,
           implementing the LevelRepository and UserRepository ports. LevelRowMapper restores each
           stored row through the strategy that LevelValidators finds for its gameId, so each
-          LevelDefinition is valid.
+          LevelDefinition is valid; a row that no strategy accepts is a broken row with its reason
+          and its stored version (#147).
         </desc>
         <defs>
           <marker
@@ -410,7 +411,7 @@
         </text>
         <line x1="64" y1="188" x2="496" y2="188" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="80" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(): Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
+          + list(): Promise&lt;ListedLevels&gt;
         </text>
         <text x="80" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId,
@@ -536,14 +537,30 @@
           DS-6
         </text>
         <line x1="112" y1="376" x2="440" y2="376" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="128" y="392" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toLevel(row: LevelRow,
+        <text
+          textLength="304"
+          lengthAdjust="spacingAndGlyphs"
+          x="128"
+          y="392"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + toStoredLevel(row: LevelRow, validators: LevelValidators): StoredLevel
         </text>
-        <text x="150" y="408" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          validators: LevelValidators):
+        <text
+          textLength="304"
+          lengthAdjust="spacingAndGlyphs"
+          x="128"
+          y="408"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + toListedLevels(rows: readonly LevelRow[], validators: LevelValidators):
         </text>
         <text x="150" y="424" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          LevelDefinition&lt;unknown&gt;
+          ListedLevels
         </text>
         <text x="128" y="440" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toRow(level: LevelDefinition&lt;unknown&gt;): LevelRow
@@ -765,7 +782,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           LevelRowMapper restores each row through LevelValidators: the strategy of the row's gameId
-          builds the section, so each level is valid.
+          builds the section, so each level that it gives is valid.
         </text>
         <text
           x="24"
@@ -774,8 +791,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          A row that no strategy accepts is a server fault. update() locks the gameId and levelId in
-          one transaction, as the progress store does.
+          A row that no strategy accepts is broken (#147): list() gives it apart, and update()
+          passes it as the broken state. update() locks each level in one transaction, as the
+          progress store does.
         </text>
         <!-- Legend -->
         <line x1="24" y1="808" x2="1016" y2="808" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

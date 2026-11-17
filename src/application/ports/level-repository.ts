@@ -1,26 +1,65 @@
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
-import type { GameId } from '../../domain/progress/game-id.js';
-import type { LevelId } from '../../domain/progress/level-id.js';
+import type { LevelVersion } from '../../domain/level/level-version.js';
+import type { GameId, GameIdProblem } from '../../domain/progress/game-id.js';
+import type { LevelId, LevelIdProblem } from '../../domain/progress/level-id.js';
 import type { Result } from '../../domain/shared/result.js';
 
-// One change of one level. It gets the stored level, or null when none is
-// stored. It returns the level to save, or a failed Result to save nothing,
-// for example the older-version of LevelDefinition.accepts() (S3-10). The
-// level that it returns has the gameId and the levelId of the update. It is
-// synchronous domain code and does no I/O.
-export type LevelChange = (
-  stored: LevelDefinition<unknown> | null,
-) => Result<LevelDefinition<unknown>, LevelProblem>;
+// The code of the first rule that a stored level row breaks. The row
+// mapper checks the values in the order of the level format, so a broken
+// gameId or levelId comes before a level problem.
+export type StoredLevelProblem = GameIdProblem | LevelIdProblem | LevelProblem;
+
+// What the store holds for one gameId and levelId, read under the lock of
+// update() (#147). The three states are closed, so a change handles each:
+// - absent: no row.
+// - valid: a row that the strategy of its gameId restores into a level.
+// - broken: a row that breaks a rule. It has no level. It gives the code of
+//   its first broken rule and its stored version, or null when the version
+//   column itself breaks the rule of LevelVersion. So a broken row never
+//   passes as no row.
+export type StoredLevel =
+  | { readonly state: 'absent' }
+  | { readonly state: 'valid'; readonly level: LevelDefinition<unknown> }
+  | {
+      readonly state: 'broken';
+      readonly reason: StoredLevelProblem;
+      readonly version: LevelVersion | null;
+    };
+
+// One change of one level. It gets the stored state of the level. It
+// returns the level to save, or a failed Result to save nothing, for
+// example the older-version of LevelDefinition.accepts() (S3-10). The level
+// that it returns has the gameId and the levelId of the update, and it
+// replaces a valid or a broken row. It is synchronous domain code and does
+// no I/O.
+export type LevelChange = (stored: StoredLevel) => Result<LevelDefinition<unknown>, LevelProblem>;
+
+// A stored level row that breaks a rule (#147). The key is the text of the
+// row, because a broken row can hold a gameId or a levelId that breaks its
+// own rule. The reason is the code of the first broken rule.
+export interface UnavailableLevel {
+  readonly gameId: string;
+  readonly levelId: string;
+  readonly reason: StoredLevelProblem;
+}
+
+// Every stored level row, by gameId and then by levelId: the valid levels
+// and the broken rows apart. One broken row hides no other level (#147).
+export interface ListedLevels {
+  readonly levels: readonly LevelDefinition<unknown>[];
+  readonly unavailable: readonly UnavailableLevel[];
+}
 
 // Port. It lists and changes the LevelDefinition aggregates, one per gameId
 // and levelId (API-FR-04, DS-6). Each level is the root of its own aggregate,
 // so one update() changes one level. It names no table and no library type.
 export interface LevelRepository {
-  // Gives every stored level, by gameId and then by levelId. It compares the
-  // values as text, not as numbers: fit-10 comes before fit-9. Each level is
-  // valid: its section passed the strategy of its gameId.
-  list(): Promise<readonly LevelDefinition<unknown>[]>;
+  // Gives every stored row, by gameId and then by levelId. It compares the
+  // values as text, not as numbers: fit-10 comes before fit-9. A row whose
+  // section passed the strategy of its gameId is a valid level. Any other
+  // row is an unavailable level.
+  list(): Promise<ListedLevels>;
 
   // Runs the change while it holds a lock for the gameId and the levelId,
   // and saves the level that the change returns. Two updates of one level

@@ -440,12 +440,13 @@ describe('LoggingAspect', () => {
     const logger = recordingLogger();
     const getLevels: GetLevels = new GetLevelsUseCase(
       new InMemoryLevelRepository(levelValidators()),
+      logger,
     );
     const aspect = new LoggingAspect(getLevels, 'GetLevels', logger);
 
     const result = await aspect.execute();
 
-    expect(result).toEqual({ ok: true, value: [] });
+    expect(result).toEqual({ ok: true, value: { levels: [], unavailable: [] } });
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'GetLevels',
       outcome: 'success',
