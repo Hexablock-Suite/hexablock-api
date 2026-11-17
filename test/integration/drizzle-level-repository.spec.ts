@@ -6,6 +6,7 @@ import { receiveJsonOf } from '../../src/adapters/received.js';
 import { FitLevelValidator } from '../../src/domain/level/fit/fit-level-validator.js';
 import { HexTopology } from '../../src/domain/level/hex-topology.js';
 import type { LevelProblem } from '../../src/domain/level/level-problem.js';
+import type { LevelSection } from '../../src/domain/level/level-section.js';
 import type { LevelValidator } from '../../src/domain/level/level-validator.js';
 import { LevelValidators } from '../../src/domain/level/level-validators.js';
 import { SortLevelValidator } from '../../src/domain/level/sort/sort-level-validator.js';
@@ -73,12 +74,12 @@ function rowOf(json: LevelJson) {
 
 // Test double for a strategy. It keeps each raw section that it reads and
 // asks the real strategy of its game.
-class RecordingStrategy implements LevelValidator<unknown> {
+class RecordingStrategy implements LevelValidator<LevelSection> {
   readonly read: unknown[] = [];
 
-  constructor(private readonly strategy: LevelValidator<unknown>) {}
+  constructor(private readonly strategy: LevelValidator<LevelSection>) {}
 
-  sectionOf(raw: unknown, topology: TopologyId): Result<unknown, LevelProblem> {
+  sectionOf(raw: unknown, topology: TopologyId): Result<LevelSection, LevelProblem> {
     this.read.push(raw);
     return this.strategy.sectionOf(raw, topology);
   }

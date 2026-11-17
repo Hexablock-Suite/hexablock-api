@@ -1,6 +1,8 @@
 import { err, ok, type Result } from '../../shared/result.js';
 import { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
+import { type LevelSection, mostStarsOf } from '../level-section.js';
+import type { Stars } from '../../progress/stars.js';
 import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { readFields, readList, sameItems } from '../parts.js';
 import type { Topology } from '../topology.js';
@@ -13,7 +15,7 @@ import { Placement } from './placement.js';
 // created, so isSection() is gone. It holds the rules of the section too, A5
 // included, so a FitSection that fails A5 never exists. FitLevelValidator
 // only picks this type and gives it the Topology of the level (decision 6).
-export class FitSection {
+export class FitSection implements LevelSection {
   private constructor(
     private readonly figure: readonly Coordinate[],
     private readonly pieces: readonly FitPiece[],
@@ -124,6 +126,12 @@ export class FitSection {
       witness: [...this.witness],
       stars: [...this.stars],
     });
+  }
+
+  // The most stars of a play of this level: the count of its star
+  // thresholds (DS-6, #135).
+  mostStars(): Stars {
+    return mostStarsOf(this.stars);
   }
 
   // Two sections are equal when each field holds equal items in the same order.

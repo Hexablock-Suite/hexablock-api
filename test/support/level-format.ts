@@ -5,6 +5,7 @@ import { HexTopology } from '../../src/domain/level/hex-topology.js';
 import { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../src/domain/level/level-order.js';
 import type { LevelProblem } from '../../src/domain/level/level-problem.js';
+import type { LevelSection } from '../../src/domain/level/level-section.js';
 import { LevelValidators } from '../../src/domain/level/level-validators.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';
 import { SortLevelValidator } from '../../src/domain/level/sort/sort-level-validator.js';
@@ -12,6 +13,7 @@ import { Topologies } from '../../src/domain/level/topologies.js';
 import { TopologyId } from '../../src/domain/level/topology-id.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
+import { Stars } from '../../src/domain/progress/stars.js';
 import type { Result } from '../../src/domain/shared/result.js';
 import { valueOf } from './result.js';
 
@@ -57,10 +59,17 @@ export function levelExample(gameId: 'hexa-fit' | 'hexa-sort'): LevelJson {
   return examples[0];
 }
 
+// A section for a test that needs a level and no real section: a name, so
+// two sections differ, and the count of its star thresholds (DS-6).
+export function testSection(name: string, stars = 3): LevelSection & { readonly name: string } {
+  const most = valueOf(Stars.of(stars));
+  return { name, mostStars: () => most };
+}
+
 // Builds a level as the border does: the domain values of the common part
 // from the JSON, and the section through `sectionOf`. The first broken value
 // stops the build.
-export function levelFrom<TSection>(
+export function levelFrom<TSection extends LevelSection>(
   json: LevelJson,
   sectionOf: (raw: unknown) => Result<TSection, LevelProblem>,
 ): Result<LevelDefinition<TSection>, LevelProblem> {

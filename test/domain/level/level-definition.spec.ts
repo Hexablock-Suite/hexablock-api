@@ -7,13 +7,16 @@ import { SortSection } from '../../../src/domain/level/sort/sort-section.js';
 import { TopologyId } from '../../../src/domain/level/topology-id.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
+import { Stars } from '../../../src/domain/progress/stars.js';
 import { err, ok } from '../../../src/domain/shared/result.js';
 import {
   jsonBlocksOfFormat,
   levelExample,
   levelFrom,
+  testSection,
   valueOf,
 } from '../../support/level-format.js';
+import { levelResultOf } from '../../support/level-results.js';
 
 // A level is born valid (#77): LevelDefinition.of() builds a level only from
 // a section that its section type accepted.
@@ -32,7 +35,9 @@ describe('LevelDefinition', () => {
 
       expect(level.ok).toBe(true);
       expect(
-        valueOf(level).equals(valueOf(levelFrom(levelExample('hexa-fit'), () => ok('any')))),
+        valueOf(level).equals(
+          valueOf(levelFrom(levelExample('hexa-fit'), () => ok(testSection('any')))),
+        ),
       ).toBe(true);
     });
 
@@ -41,7 +46,9 @@ describe('LevelDefinition', () => {
 
       expect(level.ok).toBe(true);
       expect(
-        valueOf(level).equals(valueOf(levelFrom(levelExample('hexa-sort'), () => ok('any')))),
+        valueOf(level).equals(
+          valueOf(levelFrom(levelExample('hexa-sort'), () => ok(testSection('any')))),
+        ),
       ).toBe(true);
     });
 
@@ -75,7 +82,9 @@ describe('LevelDefinition', () => {
 
   // The identity of the root is the gameId plus the levelId (DS-6, DS-11).
   it('should_be_the_same_level_when_the_game_and_the_level_id_are_equal', () => {
-    const stored = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('stored')));
+    const stored = valueOf(
+      LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok(testSection('stored'))),
+    );
     const newer = valueOf(
       LevelDefinition.of(
         valueOf(GameId.of('hexa-fit')),
@@ -83,7 +92,7 @@ describe('LevelDefinition', () => {
         valueOf(LevelOrder.of(2)),
         valueOf(LevelVersion.of(2)),
         valueOf(TopologyId.of('square')),
-        ok('newer'),
+        ok(testSection('newer')),
       ),
     );
 
@@ -97,7 +106,14 @@ describe('LevelDefinition', () => {
   describe('the version rule of S3-10', () => {
     const copy = (version: number) =>
       valueOf(
-        LevelDefinition.of(FIT, FIT_01, FIRST, valueOf(LevelVersion.of(version)), HEX, ok('copy')),
+        LevelDefinition.of(
+          FIT,
+          FIT_01,
+          FIRST,
+          valueOf(LevelVersion.of(version)),
+          HEX,
+          ok(testSection('copy')),
+        ),
       );
 
     it('should_reject_the_incoming_copy_with_older_version_when_its_version_is_lower', () => {
@@ -133,7 +149,14 @@ describe('LevelDefinition', () => {
     it('should_throw_when_the_incoming_level_is_another_level', () => {
       const stored = copy(1);
       const otherLevel = valueOf(
-        LevelDefinition.of(FIT, valueOf(LevelId.of('fit-02')), FIRST, V1, HEX, ok('copy')),
+        LevelDefinition.of(
+          FIT,
+          valueOf(LevelId.of('fit-02')),
+          FIRST,
+          V1,
+          HEX,
+          ok(testSection('copy')),
+        ),
       );
 
       expect(() => stored.accepts(otherLevel)).toThrow(
@@ -144,7 +167,9 @@ describe('LevelDefinition', () => {
 
   // The repository saves a level only under its own key (#80).
   it('should_tell_its_identity_when_asked_with_a_game_and_a_level_id', () => {
-    const level = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('section')));
+    const level = valueOf(
+      LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok(testSection('section'))),
+    );
 
     expect(
       level.isIdentifiedBy(valueOf(GameId.of('hexa-fit')), valueOf(LevelId.of('fit-01'))),
@@ -154,15 +179,77 @@ describe('LevelDefinition', () => {
   });
 
   it('should_be_another_level_when_the_game_or_the_level_id_differs', () => {
-    const level = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok('section')));
+    const level = valueOf(
+      LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok(testSection('section'))),
+    );
     const otherLevel = valueOf(
-      LevelDefinition.of(FIT, valueOf(LevelId.of('fit-02')), FIRST, V1, HEX, ok('section')),
+      LevelDefinition.of(
+        FIT,
+        valueOf(LevelId.of('fit-02')),
+        FIRST,
+        V1,
+        HEX,
+        ok(testSection('section')),
+      ),
     );
     const otherGame = valueOf(
-      LevelDefinition.of(valueOf(GameId.of('hexa-sort')), FIT_01, FIRST, V1, HEX, ok('section')),
+      LevelDefinition.of(
+        valueOf(GameId.of('hexa-sort')),
+        FIT_01,
+        FIRST,
+        V1,
+        HEX,
+        ok(testSection('section')),
+      ),
     );
 
     expect(level.equals(otherLevel)).toBe(false);
     expect(level.equals(otherGame)).toBe(false);
+  });
+});
+
+// DS-6, decided on #134: the most stars that a result can carry is the
+// number of star thresholds of its level (#135).
+describe('LevelDefinition and the stars of a play', () => {
+  const fitLevel = () =>
+    valueOf(levelFrom(levelExample('hexa-fit'), (raw) => FitSection.of(raw, new HexTopology())));
+  const sortLevel = () =>
+    valueOf(levelFrom(levelExample('hexa-sort'), (raw) => SortSection.of(raw)));
+  const play = (levelId: string, stars: number) =>
+    levelResultOf({ levelId, stars, moves: 12, elapsedMs: 45000 });
+
+  it.each([0, 1, 3])(
+    'should_admit_the_result_when_its_stars_are_at_most_the_count_of_star_thresholds',
+    (stars) => {
+      expect(fitLevel().admits(play('fit-01', stars))).toBe(true);
+      expect(sortLevel().admits(play('sort-01', stars))).toBe(true);
+    },
+  );
+
+  it.each([4, 9])(
+    'should_not_admit_the_result_when_its_stars_exceed_the_count_of_star_thresholds',
+    (stars) => {
+      expect(fitLevel().admits(play('fit-01', stars))).toBe(false);
+      expect(sortLevel().admits(play('sort-01', stars))).toBe(false);
+    },
+  );
+
+  it('should_give_the_count_of_star_thresholds_when_asked_the_most_stars', () => {
+    const one = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok(testSection('one', 1))));
+
+    expect(
+      fitLevel()
+        .mostStars()
+        .equals(valueOf(Stars.of(3))),
+    ).toBe(true);
+    expect(one.mostStars().equals(valueOf(Stars.of(1)))).toBe(true);
+  });
+
+  it('should_tell_the_level_of_a_result_when_the_game_and_the_level_id_match', () => {
+    const level = fitLevel();
+
+    expect(level.isLevelOf(FIT, play('fit-01', 3))).toBe(true);
+    expect(level.isLevelOf(FIT, play('fit-02', 3))).toBe(false);
+    expect(level.isLevelOf(valueOf(GameId.of('hexa-sort')), play('fit-01', 3))).toBe(false);
   });
 });
