@@ -53,6 +53,7 @@ A coordinate is a JSON list of whole numbers, such as `[2, 1]`. The `topology` o
 - A fixed source is `{ "stacks": list of stacks }`. A stack is a list of color names, from the bottom tile to the top tile. The source gives the stacks in their order.
 - A color name is a non-blank text, such as `red`. Two names are the same color only when they are written the same way.
 - A Sort star needs one limit: the moves of the play are at most `maxMoves`. The stars are cumulative, as for Fit (DS-6).
+- The most stars that a result of a level can carry is the number of its star thresholds, for Fit and for Sort (DS-6, [#135](https://github.com/Hexablock-Suite/hexablock-api/issues/135)). `POST /progress` rejects a result with more stars, and a result of a level that the API does not hold.
 
 ## Shape rules for both sections
 

@@ -1,7 +1,9 @@
 import request from 'supertest';
 import { FixedClock } from './support/fixed-clock.js';
 import { signIn } from './support/http/sign-in.js';
+import { storeLevels } from './support/http/stored-levels.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { levelJson } from './support/level-format.js';
 import { syncInstantOf } from './support/sync-instants.js';
 
 // API-NFR-03: one save-and-load test per variant. Fit and Sort save level
@@ -50,12 +52,13 @@ const SORT: Variant = {
 };
 
 // GameId is an open value (classes.md decision 5): a variant that is not one
-// of the four saves and loads with no code change.
-const NEW_LEVEL = { levelId: 'new-01', stars: 1, moves: 4, elapsedMs: 8000 };
+// of the four saves and loads its score with no code change. A level result
+// needs a stored level (#135), and a level needs the strategy of its game,
+// so a new variant with level results needs that strategy first.
 const NEW: Variant = {
   gameId: 'hexa-new',
-  save: { gameId: 'hexa-new', score: 7, results: [NEW_LEVEL] },
-  entry: { gameId: 'hexa-new', highScore: 7, updatedAt: AT.toISOString(), results: [NEW_LEVEL] },
+  save: { gameId: 'hexa-new', score: 7 },
+  entry: { gameId: 'hexa-new', highScore: 7, updatedAt: AT.toISOString(), results: [] },
 };
 
 describe('progress save and load per variant (API-NFR-03)', () => {
@@ -63,6 +66,13 @@ describe('progress save and load per variant (API-NFR-03)', () => {
 
   beforeEach(async () => {
     testApp = await createTestApp([], { clock: new FixedClock(syncInstantOf(AT)) });
+    // A result needs its stored level (#135).
+    await storeLevels(
+      testApp,
+      levelJson('hexa-fit', 'fit-01'),
+      levelJson('hexa-sort', 'sort-01'),
+      levelJson('hexa-sort', 'sort-02'),
+    );
   });
 
   afterEach(async () => {

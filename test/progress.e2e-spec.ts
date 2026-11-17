@@ -4,7 +4,9 @@ import { DrizzleProgressRepository } from '../src/adapters/persistence/drizzle-p
 import { progress } from '../src/adapters/persistence/schema.js';
 import { FixedClock } from './support/fixed-clock.js';
 import { signIn as signInTo } from './support/http/sign-in.js';
+import { storeLevels } from './support/http/stored-levels.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { levelJson } from './support/level-format.js';
 import { syncInstantOf } from './support/sync-instants.js';
 
 // API-FR-02: one progress entry per user and per gameId. The userId comes
@@ -22,6 +24,8 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
   beforeEach(async () => {
     clock = new FixedClock(syncInstantOf(AT));
     testApp = await createTestApp([], { clock });
+    // A result needs its stored level (#135).
+    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'), levelJson('hexa-fit', 'fit-02'));
   });
 
   afterEach(async () => {

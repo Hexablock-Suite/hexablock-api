@@ -3,10 +3,11 @@ import type { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { ProgressKey } from '../../domain/progress/progress-key.js';
 import type { Score } from '../../domain/progress/score.js';
-import { ok, type Result } from '../../domain/shared/result.js';
+import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import type { UseCase } from '../use-case.js';
 import type { Clock } from '../ports/clock.js';
+import type { LevelRepository } from '../ports/level-repository.js';
 import type { ProgressRepository } from '../ports/progress-repository.js';
 import type { ProgressProblem } from './progress-problem.js';
 
@@ -36,10 +37,15 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // guards the rule of a valid instant, so the use case checks no instant. A
 // guard of the aggregate that throws is a defect of the caller, and a Clock
 // that throws is a fault of the server. In both cases the use case throws
-// and saves nothing (decision 11).
+// and saves nothing (decision 11). Before the lock, the use case checks each
+// result against its level (DS-6, #135): the API must hold a valid level of
+// the result, and the result carries no more stars than the level has star
+// thresholds. A broken rule returns its problem and saves nothing. The
+// levels are other aggregates, so the use case reads them and changes none.
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
+    private readonly levels: LevelRepository,
     private readonly clock: Clock,
   ) {}
 
@@ -49,6 +55,10 @@ export class SyncProgressUseCase implements SyncProgress {
     // ProgressKey.of() has no expected failure: its error type is never.
     if (!key.ok) {
       return key.error;
+    }
+    const levelProblem = await this.levelProblemOf(request.gameId, results);
+    if (levelProblem !== undefined) {
+      return err(levelProblem);
     }
     let outcome: Result<PlayerProgress, ProgressProblem> | undefined;
     await this.progress.update(key.value, (stored) => {
@@ -70,5 +80,29 @@ export class SyncProgressUseCase implements SyncProgress {
       throw new Error('ProgressRepository.update() must run the change.');
     }
     return outcome;
+  }
+
+  // The first result, in the order of the request, that no valid level
+  // admits, or undefined. A sync with no result reads no level, so Lines
+  // and Merge need none. list() gives the valid levels apart from the
+  // broken rows, so a broken row holds no level here (#147).
+  private async levelProblemOf(
+    gameId: GameId,
+    results: readonly LevelResult[],
+  ): Promise<ProgressProblem | undefined> {
+    if (results.length === 0) {
+      return undefined;
+    }
+    const { levels } = await this.levels.list();
+    for (const result of results) {
+      const level = levels.find((held) => held.isLevelOf(gameId, result));
+      if (level === undefined) {
+        return { kind: 'unknown-level', result };
+      }
+      if (!level.admits(result)) {
+        return { kind: 'too-many-stars', result, most: level.mostStars() };
+      }
+    }
+    return undefined;
   }
 }

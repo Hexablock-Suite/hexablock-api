@@ -16,6 +16,7 @@ import { Score } from '../../src/domain/progress/score.js';
 import type { SyncInstant } from '../../src/domain/progress/sync-instant.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
+import { heldLevels } from '../support/held-levels.js';
 import { levelResultOf } from '../support/level-results.js';
 import { valueOf } from '../support/result.js';
 import { syncInstantOf } from '../support/sync-instants.js';
@@ -87,8 +88,16 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     };
   }
 
+  // The levels of the requests of this suite: l0 to l9 of fit and lines,
+  // so each result has a level (#135).
+  const LEVEL_IDS = Array.from({ length: 10 }, (_, n) => `l${n}`);
+  const LEVELS = heldLevels([
+    ['fit', LEVEL_IDS],
+    ['lines', LEVEL_IDS],
+  ]);
+
   function syncWith(clock: Clock = tickingClock()): SyncProgressUseCase {
-    return new SyncProgressUseCase(new DrizzleProgressRepository(db), clock);
+    return new SyncProgressUseCase(new DrizzleProgressRepository(db), LEVELS, clock);
   }
 
   function syncRequest(

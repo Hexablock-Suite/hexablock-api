@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { levelResults, progress } from '../src/adapters/persistence/schema.js';
 import { DrizzleLeaderboardReader } from '../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { signIn as signInTo, type SignedInUser } from './support/http/sign-in.js';
 import { storeLevels } from './support/http/stored-levels.js';
@@ -43,7 +44,12 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     const ada = await signIn('ada');
     const grace = await signIn('grace');
     const linus = await signIn('linus');
-    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'), levelJson('hexa-fit', 'fit-02'));
+    await storeLevels(
+      testApp,
+      levelJson('hexa-fit', 'fit-01'),
+      levelJson('hexa-fit', 'fit-02'),
+      levelJson('hexa-sort', 'fit-01'),
+    );
     await sync(ada, { gameId: 'hexa-fit', results: [FIT_01, FIT_02] });
     await sync(grace, { gameId: 'hexa-fit', results: [{ ...FIT_01, moves: 10 }] });
     await sync(linus, { gameId: 'hexa-sort', results: [{ ...FIT_01, stars: 1 }] });
@@ -104,6 +110,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
   // #82). Fit gives no score, so nothing ranks Fit by score (S3-03).
   it('should_leave_the_fit_high_scores_empty_when_fit_players_sync_only_level_results', async () => {
     const ada = await signIn('ada');
+    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
     await sync(ada, { gameId: 'hexa-fit', score: null, results: [FIT_01] });
 
     const fit = await board(ada, '/leaderboard/hexa-fit');
@@ -165,7 +172,9 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
 
   // #146 and #134 question 1: the API holds every level, so the board of a
   // level that the definitions do not hold answers 404 with ErrorDto
-  // (API-FR-06). A result of that level does not make a board.
+  // (API-FR-06). A result of that level does not make a board. A sync of
+  // that result answers 400 since #135, so the test writes the row as a
+  // sync before #135 stored it.
   it.each([
     ['/leaderboard/hexa-fit/levels/no-such-level', 'No level no-such-level for gameId hexa-fit'],
     ['/leaderboard/no-such-game/levels/fit-01', 'No level fit-01 for gameId no-such-game'],
@@ -175,11 +184,17 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     async (path, message) => {
       const ada = await signIn('ada');
       await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
-      const synced = await sync(ada, { gameId: 'hexa-lines', score: 120, results: [FIT_01] });
+      const db = testApp.database.db;
+      await db.insert(progress).values({
+        userId: ada.userId,
+        gameId: 'hexa-lines',
+        highScore: 120,
+        updatedAt: new Date(0),
+      });
+      await db.insert(levelResults).values({ userId: ada.userId, gameId: 'hexa-lines', ...FIT_01 });
 
       const response = await board(ada, path);
 
-      expect(synced.status).toBe(200);
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
         statusCode: 404,

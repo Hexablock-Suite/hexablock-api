@@ -1139,7 +1139,7 @@
                 }
               }
             },
-            "description": "A field is missing or breaks its rule."
+            "description": "A field is missing or breaks its rule, the API holds no level of a result, or a result carries more stars than its level has star thresholds."
           },
           "401": {
             "content": {

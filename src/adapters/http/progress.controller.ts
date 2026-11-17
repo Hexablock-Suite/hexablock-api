@@ -29,6 +29,7 @@ import {
   SYNC_PROGRESS,
   type SyncProgress,
 } from '../../application/progress/sync-progress.use-case.js';
+import { receiveLevelResultOf, receiveValueOf } from '../received.js';
 import { ErrorDto } from './error.dto.js';
 import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
 import { ProgressDtoMapper } from './progress-dto.mapper.js';
@@ -57,7 +58,11 @@ export class ProgressController {
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: ProgressDto, description: 'The progress entry after the sync.' })
-  @ApiBadRequestResponse({ type: ErrorDto, description: 'A field is missing or breaks its rule.' })
+  @ApiBadRequestResponse({
+    type: ErrorDto,
+    description:
+      'A field is missing or breaks its rule, the API holds no level of a result, or a result carries more stars than its level has star thresholds.',
+  })
   @ApiUnauthorizedResponse(UNAUTHORIZED)
   async sync(
     @Body() body: SyncProgressDto,
@@ -96,10 +101,23 @@ export class ProgressController {
 }
 
 // A value that breaks its rule stops in ProgressDtoMapper, before any use
-// case. So the one expected failure of a use case is a missing progress.
+// case. The use cases fail on a missing progress, or on a result that its
+// level does not admit (#135). A result of the wrong level breaks the body,
+// not the route, so it answers 400 with one detail, as a broken value does.
 function httpErrorOf(problem: ProgressProblem, gameId: string): Error {
   switch (problem.kind) {
     case 'progress-not-found':
       return new NotFoundException(`No progress for gameId ${gameId}`);
+    case 'unknown-level': {
+      const { levelId } = receiveLevelResultOf(problem.result);
+      return new BadRequestException([`No level ${levelId} for gameId ${gameId}.`]);
+    }
+    case 'too-many-stars': {
+      const { levelId, stars } = receiveLevelResultOf(problem.result);
+      const most = receiveValueOf(problem.most);
+      return new BadRequestException([
+        `stars of level ${levelId} must be at most ${most}, the count of its star thresholds, got ${stars}.`,
+      ]);
+    }
   }
 }

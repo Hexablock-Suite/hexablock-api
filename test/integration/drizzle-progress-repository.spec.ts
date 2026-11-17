@@ -10,6 +10,7 @@ import { ProgressKey } from '../../src/domain/progress/progress-key.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
+import { heldLevels } from '../support/held-levels.js';
 import { levelResultOf } from '../support/level-results.js';
 import {
   CONTRACT_USER_IDS,
@@ -232,7 +233,7 @@ describe('DrizzleProgressRepository', () => {
   it('should_keep_highest_score_when_two_syncs_of_same_game_overlap', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    const sync = new SyncProgressUseCase(repository, new FixedClock(AT));
+    const sync = new SyncProgressUseCase(repository, heldLevels([]), new FixedClock(AT));
     const syncRequest = (score: number) => ({
       userId: ADA,
       gameId: FIT,

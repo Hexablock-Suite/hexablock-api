@@ -334,11 +334,12 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     const fitLevel = levelJson('hexa-fit');
     const result = { levelId: 'fit-01', stars: 3, moves: 4, elapsedMs: 30000 };
 
+    // A result needs its stored level (#135), so the update comes first.
+    const updated = await update(token, { levels: [fitLevel] });
     const synced = await request(server())
       .post('/progress')
       .set('Authorization', `Bearer ${token}`)
       .send({ gameId: 'hexa-fit', results: [result] });
-    const updated = await update(token, { levels: [fitLevel] });
     const read = await list();
     const oldId = await update(token, { levels: [{ ...fitLevel, gameId: 'fit' }] });
 

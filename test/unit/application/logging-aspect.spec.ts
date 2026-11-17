@@ -31,6 +31,7 @@ import {
 } from '../../support/auth/fakes.js';
 import { loginRequest, registerRequest } from '../../support/auth/requests.js';
 import { FixedClock } from '../../support/fixed-clock.js';
+import { heldLevels } from '../../support/held-levels.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
 import { levelValidators } from '../../support/level-format.js';
@@ -391,6 +392,7 @@ describe('LoggingAspect', () => {
     const logger = recordingLogger();
     const sync = new SyncProgressUseCase(
       new InMemoryProgressRepository(),
+      heldLevels([]),
       new FixedClock(syncInstantOf(new Date('2026-11-06T10:00:00.000Z'))),
     );
     const aspect = new LoggingAspect(sync, 'SyncProgress', logger);
