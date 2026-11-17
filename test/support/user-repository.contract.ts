@@ -1,3 +1,4 @@
+import { receiveUserOf, type UserValues } from '../../src/adapters/received.js';
 import type { UserRepository } from '../../src/application/ports/user-repository.js';
 import { err, ok } from '../../src/domain/shared/result.js';
 import { PasswordHash } from '../../src/domain/user/password-hash.js';
@@ -22,6 +23,14 @@ function userNamed(id: string, name: string): User {
   );
 }
 
+// The values that a found user delivers, or null when no user is found.
+// PasswordHash keeps its text in an ECMAScript private field (#138), so a
+// structural comparison of two users ignores the hash. A test compares the
+// delivered values instead, and so it also compares the hash.
+function valuesOf(user: User | null): UserValues | null {
+  return user === null ? null : receiveUserOf(user);
+}
+
 // Contract of the UserRepository port (API-FR-01): no two users have names
 // that collide (#62). The in-memory fake and the Drizzle adapter run the
 // same cases, so the fake promises nothing that the adapter breaks (#100).
@@ -38,7 +47,7 @@ export function describeUserRepositoryContract(
 
       const found = await repository.findByUsername(username('Ada'));
 
-      expect(found).toEqual(ada);
+      expect(valuesOf(found)).toEqual(valuesOf(ada));
     });
 
     it.each(['ada', 'ADA', 'grace'])(
@@ -79,9 +88,11 @@ export function describeUserRepositoryContract(
         expect(username(stored).collidesWith(username(asked))).toBe(collide);
         expect(taken).toBe(collide);
         expect(added).toEqual(collide ? err('username-taken') : ok(undefined));
-        expect(await repository.findByUsername(username(stored))).toEqual(users.first);
-        expect(await repository.findByUsername(username(asked))).toEqual(
-          owner === null ? null : users[owner],
+        expect(valuesOf(await repository.findByUsername(username(stored)))).toEqual(
+          valuesOf(users.first),
+        );
+        expect(valuesOf(await repository.findByUsername(username(asked)))).toEqual(
+          owner === null ? null : valuesOf(users[owner]),
         );
       },
     );
@@ -102,7 +113,7 @@ export function describeUserRepositoryContract(
       expect(lookups).toEqual([false, false]);
       expect(first).toEqual(ok(undefined));
       expect(second).toEqual(err('username-taken'));
-      expect(await repository.findByUsername(username('Ada'))).toEqual(ada);
+      expect(valuesOf(await repository.findByUsername(username('Ada')))).toEqual(valuesOf(ada));
       await expect(repository.findByUsername(username('ada'))).resolves.toBeNull();
     });
   });
