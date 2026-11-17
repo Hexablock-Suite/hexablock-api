@@ -51,7 +51,7 @@ The code saves each level with one call, `LevelRepository.update(gameId, levelId
 
 ### Level routes
 
-`LevelsController` serves the two routes of the level use cases (API-FR-04), as decided on [#81](https://github.com/Hexablock-Suite/hexablock-api/issues/81). `openapi/openapi.json` holds the same schemas. Both routes code against S3-02, one level format, and S3-10, which rejects only a lower `version`. Both are proposals for the team on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), «Propuesta, pendiente del equipo».
+`LevelsController` serves the two routes of the level use cases (API-FR-04), as decided on [#81](https://github.com/Hexablock-Suite/hexablock-api/issues/81). `openapi/openapi.json` holds the same schemas. Both routes code against S3-02, one level format, and S3-10, which rejects only a lower `version`. Both were confirmed on 2026-11-16 on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76).
 
 | Route         | Handler    | Guard          | Request body                            | Success                                                                   |
 | ------------- | ---------- | -------------- | --------------------------------------- | ------------------------------------------------------------------------- |
@@ -116,7 +116,7 @@ The other five use cases follow a path that one of the three flows already draws
 
 ## Leaderboard routes
 
-`LeaderboardController` serves the two routes of `GetLeaderboard` (API-FR-03). Both routes are behind `JwtAuthGuard`: S3-09 is a proposal for the team on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), «Propuesta, pendiente del equipo», and the team evaluates a public read later. The routes, the rank and the page size come from the decision recorded on [#83](https://github.com/Hexablock-Suite/hexablock-api/issues/83#issuecomment-6905667403). `openapi/openapi.json` holds the same schemas.
+`LeaderboardController` serves the two routes of `GetLeaderboard` (API-FR-03). Both routes are behind `JwtAuthGuard`: S3-09 was confirmed on 2026-11-16 on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), and the team evaluates a public read later. The routes, the rank and the page size come from the decision recorded on [#83](https://github.com/Hexablock-Suite/hexablock-api/issues/83#issuecomment-6905667403). `openapi/openapi.json` holds the same schemas.
 
 | Route                                        | Handler        | Path parameters                                                     | 200 body                                                                                                  |
 | -------------------------------------------- | -------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -212,7 +212,7 @@ The flows show some members that the small views of [classes.md](classes.md) do 
 - `UpdateLevelsRequest` holds `levels`, one `IncomingLevel` per level: the values of the common part as domain values and the section as it arrives. `LevelDtoMapper.toRequest()` builds it from the body. The use case asks `LevelValidators.check()` for each level, so no level exists before its strategy builds the section (#77). Built in #81.
 - A failed `Result` holds `InvalidLevels`. `LevelDtoMapper.toDetails()` writes the details of the 400 body, one line per level problem, and `HttpErrorFilter` answers it with `ErrorDto` ([Level routes](#level-routes)). Built in #81.
 - Q4 is answered (2026-11-03): the professor asks for no level editor and no roles, so the token guard is the only check of `UpdateLevels`. `GetLevels` has no guard.
-- S3-02 and S3-10 are proposals for the team on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), «Propuesta, pendiente del equipo», and #81 codes against both.
+- S3-02 and S3-10 were confirmed on 2026-11-16 on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), and #81 codes against both.
 
 ## Render the images
 

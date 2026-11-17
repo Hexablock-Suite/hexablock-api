@@ -1,6 +1,6 @@
 # Shared level format
 
-Status: proposal for team review, 2026-11-15. It codes decision S3-02 of [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), option A: one JSON level format for the app and the API, «Propuesta, pendiente del equipo».
+Status: proposal for team review of 2026-11-15, confirmed on 2026-11-16 on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76). It codes decision S3-02, option A: one JSON level format for the app and the API.
 
 This page is the one source of the level format. The API reads it for the level update and stores it ([#77](https://github.com/Hexablock-Suite/hexablock-api/issues/77) to [#81](https://github.com/Hexablock-Suite/hexablock-api/issues/81)). The app writes its bundled level files in it and reads the levels of the API in it ([hexablock-app#166](https://github.com/Hexablock-Suite/hexablock-app/issues/166), [hexablock-app#167](https://github.com/Hexablock-Suite/hexablock-app/issues/167)). The two complete examples at the end are the fixtures of the level tests of both repositories: `test/support/level-format.ts` reads them from this file. IDs such as DS-6, DS-11 and A5 refer to [`REQUIREMENTS.md`](REQUIREMENTS.md). Decision 4 of [`architecture/classes.md`](architecture/classes.md) names this page.
 
