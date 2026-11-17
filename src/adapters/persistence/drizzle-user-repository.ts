@@ -3,9 +3,11 @@ import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 import type { UserRepository } from '../../application/ports/user-repository.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { User } from '../../domain/user/user.js';
+import type { UserId } from '../../domain/user/user-id.js';
 import type { Username } from '../../domain/user/username.js';
 import { receiveKeyOf, receiveValueOf } from '../received.js';
 import { users } from './schema.js';
+import { hasSqlState, UNIQUE_VIOLATION } from './sql-state.js';
 import type * as schema from './schema.js';
 import { UserRowMapper } from './user-row.mapper.js';
 
@@ -45,23 +47,21 @@ export class DrizzleUserRepository implements UserRepository {
       await this.db.insert(users).values(UserRowMapper.toRow(user));
       return ok(undefined);
     } catch (error) {
-      if (isUniqueViolation(error)) {
+      if (hasSqlState(error, UNIQUE_VIOLATION)) {
         return err('username-taken');
       }
       throw error;
     }
   }
-}
 
-// Postgres code 23505 is unique_violation. Drizzle wraps the driver error
-// in its own error and keeps the driver error as the cause.
-const UNIQUE_VIOLATION = '23505';
-
-function isUniqueViolation(error: unknown): boolean {
-  for (let current = error; current instanceof Error; current = current.cause) {
-    if ((current as { code?: unknown }).code === UNIQUE_VIOLATION) {
-      return true;
-    }
+  // The primary key on id answers the lookup. The uuid column compares the
+  // value, so the letter case of the text does not matter.
+  async exists(id: UserId): Promise<boolean> {
+    const rows = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, receiveValueOf(id)))
+      .limit(1);
+    return rows.length > 0;
   }
-  return false;
 }

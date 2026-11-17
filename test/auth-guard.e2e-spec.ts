@@ -1,5 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
+import { DrizzleUserRepository } from '../src/adapters/persistence/drizzle-user-repository.js';
 import { progress, users } from '../src/adapters/persistence/schema.js';
 import { JwtTokenIssuer } from '../src/infrastructure/auth/jwt-token-issuer.js';
 import { signIn } from './support/http/sign-in.js';
@@ -163,17 +165,70 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
   });
 
-  it('should_return_signed_in_user_when_user_is_deleted_after_sign_in', async () => {
-    const { token, userId } = await signIn(server(), USERNAME);
+  // A valid token whose user has no stored row is a bad token (#137,
+  // decision of 2026-11-17). AuthenticateTokenUseCase looks the user up, so
+  // every guarded route gets the same 401, and the sync stores nothing.
+  it('should_return_unauthorized_error_body_and_store_nothing_when_user_is_deleted_after_sign_in', async () => {
+    const { token } = await signIn(server(), USERNAME);
     await testApp.database.db.delete(users);
 
-    const response = await callProtected(`Bearer ${token}`);
+    const me = await callProtected(`Bearer ${token}`);
+    const sync = await request(server())
+      .post('/progress')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ gameId: 'hexa-lines', score: 10 });
 
-    // The guard reads only the token. It does not look the user up
-    // (flows.md, row AuthenticateTokenUseCase; body of PR #41).
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ userId });
+    expect(me.status).toBe(401);
+    expect(me.body).toEqual(unauthorizedBody('Invalid or expired token'));
+    expect(sync.status).toBe(401);
+    expect(sync.body).toEqual({
+      ...unauthorizedBody('Invalid or expired token'),
+      path: '/progress',
+    });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
+    expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
+  });
+
+  it('should_return_unauthorized_error_body_and_store_nothing_when_token_subject_never_existed', async () => {
+    await signIn(server(), USERNAME);
+    const stranger = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub: randomUUID() });
+
+    const me = await callProtected(`Bearer ${stranger}`);
+    const sync = await request(server())
+      .post('/progress')
+      .set('Authorization', `Bearer ${stranger}`)
+      .send({ gameId: 'hexa-lines', score: 10 });
+
+    expect(me.status).toBe(401);
+    expect(me.body).toEqual(unauthorizedBody('Invalid or expired token'));
+    expect(sync.status).toBe(401);
+    expect(sync.body).toEqual({
+      ...unauthorizedBody('Invalid or expired token'),
+      path: '/progress',
+    });
+    expect(await testApp.database.db.select().from(users)).toHaveLength(1);
+    expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
+  });
+
+  // The user can go between the check of the guard and the write. The
+  // stand-in check lets the request pass the guard, so the foreign key of
+  // progress.user_id rejects the write. The repository names the failure,
+  // and the answer is the 401 of a bad token, not a 500 (#137).
+  it('should_return_unauthorized_error_body_and_store_nothing_when_user_goes_after_the_guard', async () => {
+    const stranger = new JwtService({ secret: TEST_JWT_SECRET }).sign({ sub: randomUUID() });
+    vi.spyOn(DrizzleUserRepository.prototype, 'exists').mockResolvedValue(true);
+
+    const sync = await request(server())
+      .post('/progress')
+      .set('Authorization', `Bearer ${stranger}`)
+      .send({ gameId: 'hexa-lines', score: 10 });
+
+    expect(sync.status).toBe(401);
+    expect(sync.body).toEqual({
+      ...unauthorizedBody('Invalid or expired token'),
+      path: '/progress',
+    });
+    expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
   });
 
   it('should_return_unauthorized_error_body_when_token_has_alg_none', async () => {

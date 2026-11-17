@@ -38,6 +38,10 @@ export class InMemoryUserRepository implements UserRepository {
     this.users.push(user);
     return ok(undefined);
   }
+
+  async exists(id: UserId): Promise<boolean> {
+    return this.users.some((user) => userPartsOf(user).id.equals(id));
+  }
 }
 
 // The hash is the plain password with a prefix. Tests can see that the

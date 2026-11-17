@@ -93,7 +93,8 @@ export class AuthController {
   @ApiOkResponse({ type: CurrentUserDto, description: 'The token is valid.' })
   @ApiUnauthorizedResponse({
     type: ErrorDto,
-    description: 'The bearer token is missing, malformed, expired or signed with another key.',
+    description:
+      'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
   })
   me(@Req() request: AuthenticatedRequest): CurrentUserDto {
     return AuthDtoMapper.toCurrentUserDto(request.userId);

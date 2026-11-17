@@ -4,6 +4,7 @@ import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import { ProgressKey } from '../../src/domain/progress/progress-key.js';
 import { Score } from '../../src/domain/progress/score.js';
+import { err, ok, type Result } from '../../src/domain/shared/result.js';
 import type { SyncInstant } from '../../src/domain/progress/sync-instant.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { levelResultOf } from './level-results.js';
@@ -17,6 +18,8 @@ export const CONTRACT_USER_IDS = [
   '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01',
   '0b9e7f4a-5c3d-4e2b-8a1f-9c8d7e6f5a40',
 ] as const;
+// No adapter stores this user.
+const UNKNOWN_USER = valueOf(UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d'));
 const USER = valueOf(UserId.from(CONTRACT_USER_IDS[0]));
 const OTHER_USER = valueOf(UserId.from(CONTRACT_USER_IDS[1]));
 const FIT = valueOf(GameId.of('fit'));
@@ -25,6 +28,7 @@ const LINES = valueOf(GameId.of('lines'));
 const USER_FIT = valueOf(ProgressKey.of(USER, FIT));
 const USER_LINES = valueOf(ProgressKey.of(USER, LINES));
 const OTHER_USER_FIT = valueOf(ProgressKey.of(OTHER_USER, FIT));
+const UNKNOWN_USER_FIT = valueOf(ProgressKey.of(UNKNOWN_USER, FIT));
 const AT = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
 const LATER = syncInstantOf(new Date('2026-11-06T10:05:00.000Z'));
 
@@ -38,7 +42,7 @@ function level(levelId: string, stars = 1, moves = 9, elapsedMs = 1): LevelResul
 export function storeProgress(
   repository: ProgressRepository,
   progress: PlayerProgress,
-): Promise<PlayerProgress | null> {
+): Promise<Result<PlayerProgress | null, 'unknown-user'>> {
   return repository.update(progressPartsOf(progress).key, () => progress);
 }
 
@@ -146,7 +150,7 @@ export function describeProgressRepositoryContract(
       });
 
       expect(seen).toEqual([null]);
-      expect(saved).toBe(started);
+      expect(valueOf(saved)).toBe(started);
       const found = await repository.find(USER_FIT);
       expect(progressPartsOf(found)?.highScore?.equals(valueOf(Score.of(120)))).toBe(true);
       expect(progressPartsOf(found)?.updatedAt).toEqual(LATER);
@@ -195,8 +199,8 @@ export function describeProgressRepositoryContract(
       expect(progressPartsOf(found)?.highScore?.equals(valueOf(Score.of(500)))).toBe(true);
       expect(progressPartsOf(found)?.updatedAt).toEqual(LATER);
       expect(progressPartsOf(found)?.results).toEqual([level('fit-01'), level('fit-02', 3, 5, 2)]);
-      expect(progressPartsOf(saved)?.highScore?.equals(valueOf(Score.of(500)))).toBe(true);
-      expect(progressPartsOf(saved)?.updatedAt).toEqual(LATER);
+      expect(progressPartsOf(valueOf(saved))?.highScore?.equals(valueOf(Score.of(500)))).toBe(true);
+      expect(progressPartsOf(valueOf(saved))?.updatedAt).toEqual(LATER);
     });
 
     it('should_save_nothing_and_resolve_null_when_change_returns_null', async () => {
@@ -213,8 +217,8 @@ export function describeProgressRepositoryContract(
       });
       const empty = await repository.update(USER_LINES, () => null);
 
-      expect(kept).toBeNull();
-      expect(empty).toBeNull();
+      expect(kept).toEqual(ok(null));
+      expect(empty).toEqual(ok(null));
       const found = await repository.find(USER_FIT);
       expect(progressPartsOf(found)?.highScore?.equals(valueOf(Score.of(500)))).toBe(true);
       expect(progressPartsOf(found)?.updatedAt).toEqual(AT);
@@ -269,6 +273,22 @@ export function describeProgressRepositoryContract(
       expect(seen).toEqual([null, [level('fit-01')]]);
       const found = await repository.find(USER_FIT);
       expect(progressPartsOf(found)?.results).toEqual([level('fit-01'), level('fit-02')]);
+    });
+
+    // The user can go between the guard and the write. The write then
+    // fails with unknown-user, a named failure, not an error (#137). A
+    // change that saves nothing writes nothing, so it does not fail.
+    it('should_fail_with_unknown_user_and_store_nothing_when_no_user_has_the_id_of_the_key', async () => {
+      const repository = await createRepository();
+      const progress = PlayerProgress.start(UNKNOWN_USER_FIT, AT);
+      progress.recordLevel(level('fit-01', 3), AT);
+
+      const saved = await repository.update(UNKNOWN_USER_FIT, () => progress);
+      const unchanged = await repository.update(UNKNOWN_USER_FIT, () => null);
+
+      expect(saved).toEqual(err('unknown-user'));
+      expect(unchanged).toEqual(ok(null));
+      await expect(repository.find(UNKNOWN_USER_FIT)).resolves.toBeNull();
     });
 
     it('should_keep_two_entries_when_one_user_saves_two_variants', async () => {

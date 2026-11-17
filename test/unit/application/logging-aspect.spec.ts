@@ -500,7 +500,10 @@ describe('LoggingAspect', () => {
 
   it('should_log_invalid_token_kind_and_no_token_when_aspect_wraps_authenticate_token_and_the_token_is_forged', async () => {
     const logger = recordingLogger();
-    const authenticate: AuthenticateToken = new AuthenticateTokenUseCase(new PrefixTokenIssuer());
+    const authenticate: AuthenticateToken = new AuthenticateTokenUseCase(
+      new PrefixTokenIssuer(),
+      new InMemoryUserRepository(),
+    );
     const aspect = new LoggingAspect(authenticate, 'AuthenticateToken', logger);
 
     const result = await aspect.execute('forged-token-secret-07');

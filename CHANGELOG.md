@@ -6,6 +6,10 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ## [Unreleased]
 
+### Fixed
+
+- A valid token whose user has no stored row gets 401 with the `ErrorDto` body of a bad token, not 500 from `POST /progress` ([#137](https://github.com/Hexablock-Suite/hexablock-api/issues/137)). `AuthenticateTokenUseCase` checks the user through the new `UserRepository.exists()`, so `GET /auth/me` and every other guarded route answer 401 too. A user deleted between the guard and the write makes `ProgressRepository.update()` fail with `unknown-user`, and the sync answers the same 401 and stores nothing.
+
 ## [0.2.0] - 2026-11-16
 
 ### Added

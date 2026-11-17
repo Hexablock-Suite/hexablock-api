@@ -282,10 +282,12 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     expect(await snapshot(player)).toBe(before);
 
     // The foreign key to users.id rejects a user that does not exist.
-    // Postgres code 23503 is foreign_key_violation.
+    // Postgres code 23503 is foreign_key_violation. The adapter names the
+    // failure, and the sync fails with unknown-user (#137).
     const unknown = randomUUID();
-    await expect(syncWith().execute(syncRequest(unknown, 1, []))).rejects.toMatchObject({
-      cause: { code: '23503' },
+    await expect(syncWith().execute(syncRequest(unknown, 1, []))).resolves.toEqual({
+      ok: false,
+      error: { kind: 'unknown-user' },
     });
     expect(await progressRows(unknown)).toEqual([]);
     expect(await snapshot(player)).toBe(before);

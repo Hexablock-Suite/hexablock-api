@@ -86,6 +86,19 @@ export function describeUserRepositoryContract(
       },
     );
 
+    // AuthenticateTokenUseCase asks it for the user of a valid token (#137).
+    // An id in upper case names the same user: UserId keeps lower case.
+    it('should_tell_that_a_user_exists_only_when_a_user_with_the_id_is_stored', async () => {
+      const repository = await createRepository();
+      await repository.add(userNamed(FIRST_ID, 'Ada'));
+
+      const stored = await repository.exists(valueOf(UserId.from(FIRST_ID.toUpperCase())));
+      const missing = await repository.exists(valueOf(UserId.from(SECOND_ID)));
+
+      expect(stored).toBe(true);
+      expect(missing).toBe(false);
+    });
+
     // Two sign-ups can both miss the lookup before either one adds. add()
     // still fails for the name that collides, and the store keeps the first user.
     it('should_fail_with_username_taken_when_add_follows_a_lookup_that_missed', async () => {
