@@ -81,16 +81,15 @@
           game, a Stars, a LevelsCompleted, a Moves and an ElapsedTime, and the isBetterThan order
           of S3-03. In layer 2, the LeaderboardEntry response type names the player by UserId and
           holds the value that ranks the player: a LevelResult, a Score or a Standing. ProgressKey
-          takes the UserId and the GameId built in of(), which returns a Result that cannot fail,
-          compares them in equals() and delivers both to a ProgressKeyReceiver with deliverTo().
-          GameId, Score, SyncInstant and UserId keep their value private and deliver it to a
-          receiver with deliverTo(). Each of their factories returns a Result with the code of a
-          broken rule. LevelResult keeps its four value objects private, takes them built in of(),
-          and delivers all four to a LevelResultReceiver with deliverTo(). A dashed frame labelled
-          Aggregate encloses PlayerProgress and the value objects that it holds: ProgressKey,
-          UserId, GameId, LevelResult, Score and SyncInstant. A footnote gives the port signatures
-          find(key: ProgressKey) and update(key: ProgressKey, change: ProgressChange) of
-          ProgressRepository.
+          takes the UserId and the GameId built in of(), which returns the key itself, compares them
+          in equals() and delivers both to a ProgressKeyReceiver with deliverTo(). GameId, Score,
+          SyncInstant and UserId keep their value private and deliver it to a receiver with
+          deliverTo(). Each of their factories returns a Result with the code of a broken rule.
+          LevelResult keeps its four value objects private, takes them built in of(), and delivers
+          all four to a LevelResultReceiver with deliverTo(). A dashed frame labelled Aggregate
+          encloses PlayerProgress and the value objects that it holds: ProgressKey, UserId, GameId,
+          LevelResult, Score and SyncInstant. A footnote gives the port signatures find(key:
+          ProgressKey) and update(key: ProgressKey, change: ProgressChange) of ProgressRepository.
         </desc>
         <defs>
           <marker
@@ -1161,7 +1160,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-decoration="underline"
         >
-          Result&lt;ProgressKey, never&gt;
+          ProgressKey
         </text>
         <text x="80" y="614" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: ProgressKey):
@@ -1345,7 +1344,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           ProgressKey holds the UserId and the GameId of a progress (#107). of() takes both built
-          and returns a Result that cannot fail; deliverTo() gives both to a ProgressKeyReceiver.
+          and returns the key itself (#148); deliverTo() gives both to a ProgressKeyReceiver.
         </text>
         <text
           x="24"

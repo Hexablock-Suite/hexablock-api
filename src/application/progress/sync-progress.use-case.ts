@@ -47,17 +47,13 @@ export class SyncProgressUseCase implements SyncProgress {
   async execute(request: SyncProgressRequest): Promise<Result<PlayerProgress, ProgressProblem>> {
     const { score, results } = request;
     const key = ProgressKey.of(request.userId, request.gameId);
-    // ProgressKey.of() has no expected failure: its error type is never.
-    if (!key.ok) {
-      return key.error;
-    }
     let outcome: Result<PlayerProgress, ProgressProblem> | undefined;
-    const saved = await this.progress.update(key.value, (stored) => {
+    const saved = await this.progress.update(key, (stored) => {
       // The use case reads the Clock under the lock, so the instants follow
       // the order of the saves. The aggregate keeps updatedAt from moving
       // back in any case.
       const at = this.clock.now();
-      const progress = stored ?? PlayerProgress.start(key.value, at);
+      const progress = stored ?? PlayerProgress.start(key, at);
       if (score !== undefined) {
         progress.recordScore(score, at);
       }

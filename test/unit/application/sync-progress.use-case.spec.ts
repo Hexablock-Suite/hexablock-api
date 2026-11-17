@@ -25,7 +25,7 @@ const LATER = syncInstantOf(new Date(AT_TIME.getTime() + FIVE_MINUTES_MS));
 
 // The key of the progress of ADA in one game (#107).
 function keyOf(gameId: string): ProgressKey {
-  return valueOf(ProgressKey.of(ADA, valueOf(GameId.of(gameId))));
+  return ProgressKey.of(ADA, valueOf(GameId.of(gameId)));
 }
 
 // Builds the request as the mapper of the border does: the use case gets
