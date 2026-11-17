@@ -14,6 +14,10 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 - `Password` and `PasswordHash` keep their text in an ECMAScript private field (`#value`) in place of a TypeScript `private` field, as `PasswordAttempt` does ([#138](https://github.com/Hexablock-Suite/hexablock-api/issues/138)). So `JSON.stringify()` of a `Password`, a `PasswordHash`, a `User` or a `RegisterUserRequest` shows no typed text and no hash, and four tests pin it. `equals()`, the delivery operations and the row mappers do not change. The tests that compared users or hashes with `toEqual()` now compare the delivered values, because a structural comparison does not see a `#` field. Decision 15 of `docs/architecture/classes.md` says how a secret stays closed at run time. No HTTP contract or class view changes.
 
+### Changed
+
+- `PUT /levels` accepts only the accounts in the list of level editors of the configuration ([#145](https://github.com/Hexablock-Suite/hexablock-api/issues/145)). `LEVEL_EDITOR_IDS` holds their user ids, separated by commas. Any other signed-in account gets 403 with the `ErrorDto` body before the API reads the body, and the API saves nothing. An empty or unset list lets no account update, and an entry that is not a UUID stops the start. `LevelEditorGuard` runs after `JwtAuthGuard` and calls the new input port `AuthorizeLevelEditor`, which asks the new domain value `LevelEditors`. `openapi/openapi.json` lists the 403, and `docs/REQUIREMENTS.md` (Q4), the README and decision 18 of `docs/architecture/classes.md` record the rule.
+
 ## [0.2.0] - 2026-11-16
 
 ### Added
