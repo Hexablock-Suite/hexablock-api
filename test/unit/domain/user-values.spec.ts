@@ -178,6 +178,16 @@ describe('Password', () => {
     expect(receiver.received).toEqual(['correct horse']);
   });
 
+  // #138: a logger or an error body writes an object with JSON.stringify().
+  // The text is an ECMAScript private field, so JSON shows no text.
+  it('should_show_no_typed_text_when_json_receives_the_password', () => {
+    const password = valueOf(Password.create('correct horse battery'));
+
+    expect(JSON.stringify(password)).not.toContain('correct horse battery');
+    expect(JSON.stringify({ password })).not.toContain('correct horse battery');
+    expect(deliveredBy(password)).toEqual(['correct horse battery']);
+  });
+
   it('should_keep_the_length_count_inside_password_when_module_lists_its_exports', () => {
     expect(Object.keys(passwordModule).sort()).toEqual(['PASSWORD_LENGTH', 'Password']);
   });
@@ -325,6 +335,15 @@ describe('PasswordHash', () => {
     void hash.value;
     // The delivery returns nothing: the receiver holds the text.
     expect(hash.deliverTo(receiver)).toBeUndefined();
+  });
+
+  // #138: the hash is an ECMAScript private field, so JSON shows no hash.
+  it('should_show_no_hash_text_when_json_receives_the_password_hash', () => {
+    const hash = passwordHash('scrypt$salt$hashbytes');
+
+    expect(JSON.stringify(hash)).not.toContain('scrypt$salt$hashbytes');
+    expect(JSON.stringify({ hash })).not.toContain('scrypt$salt$hashbytes');
+    expect(deliveredBy(hash)).toEqual(['scrypt$salt$hashbytes']);
   });
 });
 
