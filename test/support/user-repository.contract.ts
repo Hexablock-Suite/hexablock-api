@@ -39,7 +39,8 @@ export function describeUserRepositoryContract(
   createRepository: () => UserRepository | Promise<UserRepository>,
 ): void {
   describe(`UserRepository contract: ${name}`, () => {
-    // findByUsername() compares the name as typed, letter case included.
+    // findByUsername() compares the lower-case key, as isUsernameTaken()
+    // does (#144). The found user keeps the letter case of sign-up.
     it('should_find_the_stored_user_when_the_name_matches_exactly', async () => {
       const repository = await createRepository();
       const ada = userNamed(FIRST_ID, 'Ada');
@@ -50,8 +51,21 @@ export function describeUserRepositoryContract(
       expect(valuesOf(found)).toEqual(valuesOf(ada));
     });
 
-    it.each(['ada', 'ADA', 'grace'])(
-      'should_return_null_when_no_stored_name_matches_exactly',
+    it.each(['ada', 'ADA', 'aDA'])(
+      'should_find_the_stored_user_when_the_name_differs_only_in_letter_case',
+      async (asked) => {
+        const repository = await createRepository();
+        const ada = userNamed(FIRST_ID, 'Ada');
+        await repository.add(ada);
+
+        const found = await repository.findByUsername(username(asked));
+
+        expect(valuesOf(found)).toEqual(valuesOf(ada));
+      },
+    );
+
+    it.each(['grace', 'Adb', 'Ada1'])(
+      'should_return_null_when_no_stored_name_has_the_same_key',
       async (asked) => {
         const repository = await createRepository();
         await repository.add(userNamed(FIRST_ID, 'Ada'));
@@ -64,14 +78,15 @@ export function describeUserRepositoryContract(
     // isUsernameTaken() and add() give its answer. The Drizzle adapter
     // compares the lower case key in SQL, so these pairs pin that the SQL
     // and the domain agree. Every allowed character is ASCII. The last
-    // column names the user that findByUsername() gives for the second name.
+    // column names the user that findByUsername() gives for the second name:
+    // the first user when the names collide (#144).
     it.each([
-      ['Ada', 'ada', true, null],
-      ['Ada', 'ADA', true, null],
+      ['Ada', 'ada', true, 'first'],
+      ['Ada', 'ADA', true, 'first'],
       ['Ada', 'Ada', true, 'first'],
-      ['Zz9', 'zZ9', true, null],
-      ['grace.hopper', 'Grace.Hopper', true, null],
-      ['player_01-x', 'PLAYER_01-X', true, null],
+      ['Zz9', 'zZ9', true, 'first'],
+      ['grace.hopper', 'Grace.Hopper', true, 'first'],
+      ['player_01-x', 'PLAYER_01-X', true, 'first'],
       ['Ada', 'Adb', false, 'second'],
       ['Ada', 'Ada1', false, 'second'],
       ['a-b', 'a_b', false, 'second'],
@@ -92,7 +107,7 @@ export function describeUserRepositoryContract(
           valuesOf(users.first),
         );
         expect(valuesOf(await repository.findByUsername(username(asked)))).toEqual(
-          owner === null ? null : valuesOf(users[owner]),
+          valuesOf(users[owner]),
         );
       },
     );
@@ -114,7 +129,7 @@ export function describeUserRepositoryContract(
       expect(first).toEqual(ok(undefined));
       expect(second).toEqual(err('username-taken'));
       expect(valuesOf(await repository.findByUsername(username('Ada')))).toEqual(valuesOf(ada));
-      await expect(repository.findByUsername(username('ada'))).resolves.toBeNull();
+      expect(valuesOf(await repository.findByUsername(username('ada')))).toEqual(valuesOf(ada));
     });
   });
 }

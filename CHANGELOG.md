@@ -6,6 +6,10 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ## [Unreleased]
 
+### Changed
+
+- Sign-in looks the user up by the same lower-case key that sign-up uses ([#144](https://github.com/Hexablock-Suite/hexablock-api/issues/144)), as decided on 2026-11-16 on [#134](https://github.com/Hexablock-Suite/hexablock-api/issues/134). `ADA`, `Ada` and `ada` now sign in the stored `ada` with its password; before, they answered 401. A wrong password still answers 401 with the same body. `DrizzleUserRepository.findByUsername()` filters on `username_key`, and the in-memory fake uses `Username.collidesWith()`; the `UserRepository` contract pins the lookup by key for both. The stored name keeps the letter case of sign-up. API-FR-01 in `docs/REQUIREMENTS.md` states the new rule. No HTTP schema changes.
+
 ### Security
 
 - `Password` and `PasswordHash` keep their text in an ECMAScript private field (`#value`) in place of a TypeScript `private` field, as `PasswordAttempt` does ([#138](https://github.com/Hexablock-Suite/hexablock-api/issues/138)). So `JSON.stringify()` of a `Password`, a `PasswordHash`, a `User` or a `RegisterUserRequest` shows no typed text and no hash, and four tests pin it. `equals()`, the delivery operations and the row mappers do not change. The tests that compared users or hashes with `toEqual()` now compare the delivered values, because a structural comparison does not see a `#` field. Decision 15 of `docs/architecture/classes.md` says how a secret stays closed at run time. No HTTP contract or class view changes.

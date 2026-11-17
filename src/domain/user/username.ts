@@ -25,7 +25,7 @@ const ONLY_ALLOWED_CHARACTERS = /^[A-Za-z0-9._-]*$/;
 export type UsernameProblem = 'invalid-username';
 
 // The name a player signs in with. It keeps the letter case that the player
-// typed. Sign-in compares the name as typed.
+// typed at sign-up. Sign-in compares the key, as sign-up does (#144).
 // The key is the name in lower case. Two names collide when their keys are
 // equal, and no two users have names that collide, so `Ada` cannot register
 // after `ada` (#62). collidesWith() is the business name of that rule (#100).
