@@ -1,6 +1,10 @@
 import { type LevelRow, LevelRowMapper } from '../../src/adapters/persistence/level-row.mapper.js';
 import { receiveValueOf } from '../../src/adapters/received.js';
-import type { LevelChange, LevelRepository } from '../../src/application/ports/level-repository.js';
+import type {
+  LevelChange,
+  LevelRepository,
+  ListedLevels,
+} from '../../src/application/ports/level-repository.js';
 import type { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import type { LevelProblem } from '../../src/domain/level/level-problem.js';
 import type { LevelValidators } from '../../src/domain/level/level-validators.js';
@@ -20,9 +24,15 @@ export class InMemoryLevelRepository implements LevelRepository {
 
   constructor(private readonly validators: LevelValidators) {}
 
-  list(): Promise<readonly LevelDefinition<unknown>[]> {
+  list(): Promise<ListedLevels> {
     const rows = [...this.rowsByKey.values()].toSorted(byGameAndLevelId);
-    return Promise.resolve(rows.map((row) => LevelRowMapper.toLevel(row, this.validators)));
+    return Promise.resolve(LevelRowMapper.toListedLevels(rows, this.validators));
+  }
+
+  // Writes one row as it is, with no check, as a manual change of the
+  // database can write it. So a test can store a row that breaks a rule (#147).
+  storeRow(row: LevelRow): void {
+    this.rowsByKey.set(rowKey(row.gameId, row.levelId), row);
   }
 
   update(
@@ -39,7 +49,9 @@ export class InMemoryLevelRepository implements LevelRepository {
         // the wait above would let another update run in between.
         const row = await Promise.resolve(this.rowsByKey.get(key));
         const changed = change(
-          row === undefined ? null : LevelRowMapper.toLevel(row, this.validators),
+          row === undefined
+            ? { state: 'absent' }
+            : LevelRowMapper.toStoredLevel(row, this.validators),
         );
         if (changed.ok) {
           if (!changed.value.isIdentifiedBy(gameId, levelId)) {
@@ -56,7 +68,11 @@ export class InMemoryLevelRepository implements LevelRepository {
 
 // JSON keeps the two values apart, whatever characters they hold.
 function keyOf(gameId: GameId, levelId: LevelId): string {
-  return JSON.stringify([receiveValueOf(gameId), receiveValueOf(levelId)]);
+  return rowKey(receiveValueOf(gameId), receiveValueOf(levelId));
+}
+
+function rowKey(gameId: string, levelId: string): string {
+  return JSON.stringify([gameId, levelId]);
 }
 
 // Text order by UTF-16 code unit, first by gameId and then by levelId. For

@@ -73,13 +73,14 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     return receiveValueOf(receiveValueOf(level).version);
   }
 
-  // A change that saves the next version of the level: 1 when no level is
-  // stored, else the stored version plus 1. A lost update gives a lower
-  // final version.
+  // A change that saves the next version of the level: 1 when no valid
+  // level is stored, else the stored version plus 1. A lost update gives a
+  // lower final version.
   function raise(levelId: string, seen: (number | null)[] = []): LevelChange {
     return (stored) => {
-      seen.push(stored === null ? null : versionOf(stored));
-      const version = stored === null ? 1 : versionOf(stored) + 1;
+      const storedVersion = stored.state === 'valid' ? versionOf(stored.level) : null;
+      seen.push(storedVersion);
+      const version = storedVersion === null ? 1 : storedVersion + 1;
       return ok(checkedLevel(levelJson('hexa-sort', levelId, version)));
     };
   }
@@ -130,7 +131,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
       const updates = [firstVersion, secondVersion, thirdVersion].map((version) => {
         const incoming = checkedLevel(levelJson('hexa-sort', levelId, version));
         return repository().update(SORT, valueOf(LevelId.of(levelId)), (stored) =>
-          stored === null ? ok(incoming) : stored.accepts(incoming),
+          stored.state === 'valid' ? stored.level.accepts(incoming) : ok(incoming),
         );
       });
 
@@ -204,7 +205,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     const older = checkedLevel(levelJson('hexa-sort', levelId, 1));
     const newer = await repository().update(SORT, valueOf(LevelId.of(levelId)), raise(levelId));
     const rejected = await repository().update(SORT, valueOf(LevelId.of(levelId)), (stored) =>
-      stored === null ? ok(older) : stored.accepts(older),
+      stored.state === 'valid' ? stored.level.accepts(older) : ok(older),
     );
     expect(newer.ok).toBe(true);
     expect(rejected).toEqual({ ok: false, error: 'older-version' });
