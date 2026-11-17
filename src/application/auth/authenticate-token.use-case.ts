@@ -1,10 +1,12 @@
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import type { SessionToken, TokenIssuer } from '../ports/token-issuer.js';
+import type { UserRepository } from '../ports/user-repository.js';
 import type { UseCase } from '../use-case.js';
 
-// One problem for a malformed, expired or forged token, so the answer does
-// not tell which check failed. It carries a kind, so LoggingAspect logs it
+// One problem for a malformed, expired or forged token, and for a valid
+// token whose user is not stored, so the answer does not tell which check
+// failed. It carries a kind, so LoggingAspect logs it
 // and no token.
 export type TokenProblem = { readonly kind: 'invalid-token' };
 
@@ -15,12 +17,21 @@ export type AuthenticateToken = UseCase<SessionToken, Result<UserId, TokenProble
 
 export const AUTHENTICATE_TOKEN = Symbol('AuthenticateToken');
 
-// Reads the UserId of a SessionToken through the TokenIssuer port.
+// Reads the UserId of a SessionToken through the TokenIssuer port. Then it
+// asks the UserRepository port if that user is still stored. A token of a
+// deleted user is a bad token: every guarded route answers 401 (#137,
+// decision of 2026-11-17). The check costs one query per guarded request.
 export class AuthenticateTokenUseCase implements AuthenticateToken {
-  constructor(private readonly tokens: TokenIssuer) {}
+  constructor(
+    private readonly tokens: TokenIssuer,
+    private readonly users: UserRepository,
+  ) {}
 
   async execute(token: SessionToken): Promise<Result<UserId, TokenProblem>> {
     const userId = this.tokens.verify(token);
-    return userId === null ? err({ kind: 'invalid-token' }) : ok(userId);
+    if (userId === null || !(await this.users.exists(userId))) {
+      return err({ kind: 'invalid-token' });
+    }
+    return ok(userId);
   }
 }

@@ -2,6 +2,7 @@ import { type Logger, sql } from 'drizzle-orm';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import { ProgressRowMapper } from '../../src/adapters/persistence/progress-row.mapper.js';
 import { users } from '../../src/adapters/persistence/schema.js';
+import { err } from '../../src/domain/shared/result.js';
 import { SyncProgressUseCase } from '../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
@@ -26,7 +27,7 @@ const ADA_VALUE = CONTRACT_USER_IDS[0];
 const ADA = valueOf(UserId.from(ADA_VALUE));
 const UNKNOWN = valueOf(UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d'));
 const FIT = valueOf(GameId.of('fit'));
-const ADA_FIT = valueOf(ProgressKey.of(ADA, FIT));
+const ADA_FIT = ProgressKey.of(ADA, FIT);
 // Each instant of the domain, and its Date, as the updated_at column keeps it.
 const AT_TIME = new Date('2026-11-06T10:00:00.000Z');
 const LATER_TIME = new Date('2026-11-06T10:05:00.000Z');
@@ -284,16 +285,15 @@ describe('DrizzleProgressRepository', () => {
     expect(await countRows(database, 'level_results')).toBe(2);
   });
 
-  it('should_reject_save_and_write_no_row_when_user_is_unknown', async () => {
+  it('should_fail_with_unknown_user_and_write_no_row_when_user_is_unknown', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    const progress = PlayerProgress.start(valueOf(ProgressKey.of(UNKNOWN, FIT)), AT);
+    const progress = PlayerProgress.start(ProgressKey.of(UNKNOWN, FIT), AT);
     progress.recordLevel(level('fit-01', 3, 9, 1_000), AT);
 
-    // Postgres code 23503 is foreign_key_violation.
-    await expect(storeProgress(repository, progress)).rejects.toMatchObject({
-      cause: { code: '23503' },
-    });
+    // The foreign key to users.id rejects the write with Postgres code
+    // 23503, foreign_key_violation. The adapter names the failure (#137).
+    await expect(storeProgress(repository, progress)).resolves.toEqual(err('unknown-user'));
 
     expect(await countRows(database, 'progress')).toBe(0);
     expect(await countRows(database, 'level_results')).toBe(0);

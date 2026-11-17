@@ -1,5 +1,4 @@
 import { GameId } from './game-id.js';
-import { ok, type Result } from '../shared/result.js';
 import { UserId } from '../user/user-id.js';
 
 // The receiver of the two parts of a ProgressKey. ProgressKey.deliverTo()
@@ -13,24 +12,24 @@ export interface ProgressKeyReceiver {
 // and gameId (API-FR-02, DS-5, classes.md decision 2). The name is
 // provisional until the team reviews it (#107). UserId and GameId guard their
 // own rules, and any user can have a progress in any game. So no pair of
-// valid parts breaks a rule. of() returns a Result, as the factory of a
-// value object does (decision 11), and its error type is never: the Result
-// is always ok (#128). An argument of another type is a defect of the
-// caller, so its guard throws a TypeError.
+// valid parts breaks a rule. So of() returns the key itself: a factory that
+// no datum can fail returns the value (rule «One failure mechanism», #148).
+// An argument of another type is a defect of the caller, so its guard throws
+// a TypeError.
 export class ProgressKey {
   private constructor(
     private readonly userId: UserId,
     private readonly gameId: GameId,
   ) {}
 
-  static of(userId: UserId, gameId: GameId): Result<ProgressKey, never> {
+  static of(userId: UserId, gameId: GameId): ProgressKey {
     if (!(userId instanceof UserId)) {
       throw new TypeError('A progress needs a userId.');
     }
     if (!(gameId instanceof GameId)) {
       throw new TypeError('A progress needs a gameId.');
     }
-    return ok(new ProgressKey(userId, gameId));
+    return new ProgressKey(userId, gameId);
   }
 
   // Delivers the two parts to a receiver of the border in one call. No

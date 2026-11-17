@@ -3,7 +3,7 @@ import type { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { ProgressKey } from '../../domain/progress/progress-key.js';
 import type { Score } from '../../domain/progress/score.js';
-import { ok, type Result } from '../../domain/shared/result.js';
+import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import type { UseCase } from '../use-case.js';
 import type { Clock } from '../ports/clock.js';
@@ -36,7 +36,8 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // guards the rule of a valid instant, so the use case checks no instant. A
 // guard of the aggregate that throws is a defect of the caller, and a Clock
 // that throws is a fault of the server. In both cases the use case throws
-// and saves nothing (decision 11).
+// and saves nothing (decision 11). When the repository knows no user with
+// the userId, the sync fails with unknown-user and saves nothing (#137).
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
@@ -46,17 +47,13 @@ export class SyncProgressUseCase implements SyncProgress {
   async execute(request: SyncProgressRequest): Promise<Result<PlayerProgress, ProgressProblem>> {
     const { score, results } = request;
     const key = ProgressKey.of(request.userId, request.gameId);
-    // ProgressKey.of() has no expected failure: its error type is never.
-    if (!key.ok) {
-      return key.error;
-    }
     let outcome: Result<PlayerProgress, ProgressProblem> | undefined;
-    await this.progress.update(key.value, (stored) => {
+    const saved = await this.progress.update(key, (stored) => {
       // The use case reads the Clock under the lock, so the instants follow
       // the order of the saves. The aggregate keeps updatedAt from moving
       // back in any case.
       const at = this.clock.now();
-      const progress = stored ?? PlayerProgress.start(key.value, at);
+      const progress = stored ?? PlayerProgress.start(key, at);
       if (score !== undefined) {
         progress.recordScore(score, at);
       }
@@ -66,6 +63,9 @@ export class SyncProgressUseCase implements SyncProgress {
       outcome = ok(progress);
       return progress;
     });
+    if (!saved.ok) {
+      return err({ kind: saved.error });
+    }
     if (outcome === undefined) {
       throw new Error('ProgressRepository.update() must run the change.');
     }

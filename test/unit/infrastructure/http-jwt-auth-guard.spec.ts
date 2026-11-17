@@ -1,7 +1,7 @@
 import { type ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../src/adapters/http/jwt-auth.guard.js';
 import { AuthenticateTokenUseCase } from '../../../src/application/auth/authenticate-token.use-case.js';
-import { PrefixTokenIssuer } from '../../support/auth/fakes.js';
+import { InMemoryUserRepository, PrefixTokenIssuer } from '../../support/auth/fakes.js';
 
 // API-FR-01: JwtAuthGuard reads the token after "Bearer ". An HTTP server
 // trims the whitespace at the end of a header value, so these cases do not
@@ -14,7 +14,10 @@ describe('JwtAuthGuard', () => {
   it.each(['Bearer ', 'Bearer    ', 'Bearer \t '])(
     'should_reject_as_missing_token_when_bearer_is_followed_only_by_whitespace',
     async (authorization) => {
-      const authenticate = new AuthenticateTokenUseCase(new PrefixTokenIssuer());
+      const authenticate = new AuthenticateTokenUseCase(
+        new PrefixTokenIssuer(),
+        new InMemoryUserRepository(),
+      );
       const execute = vi.spyOn(authenticate, 'execute');
       const guard = new JwtAuthGuard(authenticate);
       const request = { headers: { authorization } };

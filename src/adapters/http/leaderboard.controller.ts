@@ -34,7 +34,8 @@ import {
 
 const UNAUTHORIZED = {
   type: ErrorDto,
-  description: 'The bearer token is missing, malformed, expired or signed with another key.',
+  description:
+    'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
 };
 
 // The leaderboards of one gameId (API-FR-03): both global boards, and the

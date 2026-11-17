@@ -128,8 +128,9 @@ function levelValidators(): LevelValidators {
     },
     {
       provide: AUTHENTICATE_TOKEN,
-      inject: [TOKEN_ISSUER],
-      useFactory: (tokens: TokenIssuer) => new AuthenticateTokenUseCase(tokens),
+      inject: [TOKEN_ISSUER, USER_REPOSITORY],
+      useFactory: (tokens: TokenIssuer, users: UserRepository) =>
+        new AuthenticateTokenUseCase(tokens, users),
     },
     {
       provide: PROGRESS_REPOSITORY,
