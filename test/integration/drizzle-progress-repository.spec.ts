@@ -27,7 +27,7 @@ const ADA_VALUE = CONTRACT_USER_IDS[0];
 const ADA = valueOf(UserId.from(ADA_VALUE));
 const UNKNOWN = valueOf(UserId.from('9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d'));
 const FIT = valueOf(GameId.of('fit'));
-const ADA_FIT = valueOf(ProgressKey.of(ADA, FIT));
+const ADA_FIT = ProgressKey.of(ADA, FIT);
 // Each instant of the domain, and its Date, as the updated_at column keeps it.
 const AT_TIME = new Date('2026-11-06T10:00:00.000Z');
 const LATER_TIME = new Date('2026-11-06T10:05:00.000Z');
@@ -288,7 +288,7 @@ describe('DrizzleProgressRepository', () => {
   it('should_fail_with_unknown_user_and_write_no_row_when_user_is_unknown', async () => {
     const database = await openDatabase();
     const repository = new DrizzleProgressRepository(database.db);
-    const progress = PlayerProgress.start(valueOf(ProgressKey.of(UNKNOWN, FIT)), AT);
+    const progress = PlayerProgress.start(ProgressKey.of(UNKNOWN, FIT), AT);
     progress.recordLevel(level('fit-01', 3, 9, 1_000), AT);
 
     // The foreign key to users.id rejects the write with Postgres code

@@ -135,10 +135,7 @@ describe('ProgressDtoMapper.toGetRequest', () => {
 describe('ProgressDtoMapper.toDto', () => {
   it('should_write_plain_numbers_and_strings_when_progress_becomes_a_dto', () => {
     const at = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
-    const progress = PlayerProgress.start(
-      valueOf(ProgressKey.of(ADA, valueOf(GameId.of('hexa-fit')))),
-      at,
-    );
+    const progress = PlayerProgress.start(ProgressKey.of(ADA, valueOf(GameId.of('hexa-fit'))), at);
     progress.recordScore(valueOf(Score.of(120)), at);
     progress.recordLevel(levelResultOf(LEVEL), at);
 
