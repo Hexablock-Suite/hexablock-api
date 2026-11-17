@@ -6,6 +6,15 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ## [Unreleased]
 
+### Added
+
+- `docs/EXTENSIBILITY.md` (API-NFR-10) ([#141](https://github.com/Hexablock-Suite/hexablock-api/issues/141)). For each extension axis of `docs/architecture/extensibility.md`, it names the class that a developer adds, the file that registers it and the tests to copy. It links to the views and does not copy them. The _Check_ of API-NFR-10 in `docs/REQUIREMENTS.md` now points to it.
+
+### Changed
+
+- The README section "Design Patterns" (API-NFR-09) ([#21](https://github.com/Hexablock-Suite/hexablock-api/issues/21)). Each pattern row links the source files that implement it and the view of `docs/architecture/classes.md` that draws it. The Decorator row and the AOP section no longer name `TimingAspect` as built.
+- The README no longer says that the code starts in Sprint 1, and `docs/README.md` indexes `layers.md`, `classes.md` and `flows.md` in place of its TODO ([#26](https://github.com/Hexablock-Suite/hexablock-api/issues/26)). The copyright holder and the critical evaluation of `AI_USAGE.md` stay TODO for the team.
+
 ### Fixed
 
 - A valid token whose user has no stored row gets 401 with the `ErrorDto` body of a bad token, not 500 from `POST /progress` ([#137](https://github.com/Hexablock-Suite/hexablock-api/issues/137)). `AuthenticateTokenUseCase` checks the user through the new `UserRepository.exists()`, so `GET /auth/me` and every other guarded route answer 401 too. A user deleted between the guard and the write makes `ProgressRepository.update()` fail with `unknown-user`, and the sync answers the same 401 and stores nothing.
