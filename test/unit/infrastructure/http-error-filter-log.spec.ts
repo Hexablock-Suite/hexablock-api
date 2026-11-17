@@ -139,4 +139,74 @@ describe('HttpErrorFilter log', () => {
     expect(sent.body).toEqual(INTERNAL_BODY);
     expect(logError).not.toHaveBeenCalled();
   });
+
+  // A library error, such as an error of the body parser, can carry a client
+  // status in `status` or in `statusCode`. The client can send that input at
+  // will, so the filter keeps the status, hides the text and writes no log.
+  it.each([
+    [{ status: 413, expose: true, message: 'request entity too large' }, 413, 'Payload Too Large'],
+    [
+      { statusCode: 415, expose: true, message: 'unsupported charset "UTF-7"' },
+      415,
+      'Unsupported Media Type',
+    ],
+    [{ status: 499, expose: true, message: 'client closed "Hexa Lines"' }, 499, 'Error'],
+  ])(
+    'should_keep_the_client_status_without_a_log_line_when_an_error_carries_a_4xx_status',
+    (fields, status, reason) => {
+      const failure = Object.assign(new Error(fields.message), fields);
+      const { host, sent } = httpHost();
+
+      filter.catch(failure, host);
+
+      expect(sent.status).toBe(status);
+      expect(sent.body).toEqual({
+        statusCode: status,
+        error: reason,
+        message: reason,
+        details: [],
+        path: PATH,
+      });
+      expect(logError).not.toHaveBeenCalled();
+    },
+  );
+
+  // A status outside 400 to 499 is no client error, so the error stays a 500
+  // with its log line.
+  it.each([503, 399, 413.5, '413'])(
+    'should_answer_the_same_500_and_log_it_when_an_error_carries_a_status_that_is_not_4xx',
+    (status) => {
+      const failure = Object.assign(new DriverError('upstream is down'), {
+        status,
+        expose: true,
+      });
+      const { host, sent } = httpHost();
+
+      filter.catch(failure, host);
+
+      expect(sent.status).toBe(500);
+      expect(sent.body).toEqual(INTERNAL_BODY);
+      expect(logError).toHaveBeenCalledExactlyOnceWith('error=DriverError', framesOf(failure));
+    },
+  );
+
+  // An internal error can carry a 4xx status, for example the answer of a
+  // service that the API calls. Only an exposed error is a client error, so
+  // this one stays a 500 with its log line.
+  it.each([undefined, false])(
+    'should_answer_the_same_500_and_log_it_when_a_4xx_error_is_not_exposed',
+    (expose) => {
+      const failure = Object.assign(new DriverError('upstream said not found'), {
+        status: 404,
+        expose,
+      });
+      const { host, sent } = httpHost();
+
+      filter.catch(failure, host);
+
+      expect(sent.status).toBe(500);
+      expect(sent.body).toEqual(INTERNAL_BODY);
+      expect(logError).toHaveBeenCalledExactlyOnceWith('error=DriverError', framesOf(failure));
+    },
+  );
 });
