@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -36,7 +37,8 @@ import { ProgressDto, SyncProgressDto } from './progress.dto.js';
 
 const UNAUTHORIZED = {
   type: ErrorDto,
-  description: 'The bearer token is missing, malformed, expired or signed with another key.',
+  description:
+    'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
 };
 
 // Progress sync and read, one entry per user and gameId (API-FR-02). Both
@@ -96,10 +98,14 @@ export class ProgressController {
 }
 
 // A value that breaks its rule stops in ProgressDtoMapper, before any use
-// case. So the one expected failure of a use case is a missing progress.
+// case. So the expected failures of a use case are a missing progress and
+// a user that went after the guard. The second one gets the 401 of a bad
+// token, with the same message as JwtAuthGuard (#137).
 function httpErrorOf(problem: ProgressProblem, gameId: string): Error {
   switch (problem.kind) {
     case 'progress-not-found':
       return new NotFoundException(`No progress for gameId ${gameId}`);
+    case 'unknown-user':
+      return new UnauthorizedException('Invalid or expired token');
   }
 }

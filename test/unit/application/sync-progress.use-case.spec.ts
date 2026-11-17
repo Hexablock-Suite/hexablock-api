@@ -273,6 +273,18 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     expect(progressPartsOf(stored)?.results).toEqual([]);
   });
 
+  // The repository fails with unknown-user when no user has the id of the
+  // key (#137). The use case returns it as a ProgressProblem.
+  it('should_fail_with_unknown_user_and_store_nothing_when_the_repository_knows_no_such_user', async () => {
+    const strangers = new InMemoryProgressRepository([]);
+    const stranger = new SyncProgressUseCase(strangers, clock);
+
+    const result = await stranger.execute(syncRequest({ score: 120 }));
+
+    expect(result).toEqual({ ok: false, error: { kind: 'unknown-user' } });
+    expect(await strangers.find(keyOf('hexa-lines'))).toBeNull();
+  });
+
   // The request types forbid this value. The mapper of the border builds
   // every value, so a value that is not a Score is a defect of the caller.
   // The guard of the aggregate throws, and the use case saves nothing

@@ -77,7 +77,8 @@ export class LevelsController {
   })
   @ApiUnauthorizedResponse({
     type: ErrorDto,
-    description: 'The bearer token is missing, malformed, expired or signed with another key.',
+    description:
+      'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
   })
   @ApiForbiddenResponse({
     type: ErrorDto,

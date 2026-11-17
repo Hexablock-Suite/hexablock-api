@@ -5,10 +5,12 @@ import type {
 } from '../../application/ports/progress-repository.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import type { ProgressKey } from '../../domain/progress/progress-key.js';
+import { err, ok, type Result } from '../../domain/shared/result.js';
 import { receiveProgressKeyOf } from '../received.js';
 import type { PersistenceDatabase } from './drizzle-user-repository.js';
 import { ProgressRowMapper } from './progress-row.mapper.js';
 import { levelResults, progress } from './schema.js';
+import { FOREIGN_KEY_VIOLATION, hasSqlState } from './sql-state.js';
 
 // The database handle or one of its transactions. Both run the same queries.
 type Queries = Pick<PersistenceDatabase, 'select' | 'insert' | 'delete'>;
@@ -27,7 +29,25 @@ export class DrizzleProgressRepository implements ProgressRepository {
   // lock. A second update of the key waits for the lock, so it reads what
   // the first one saved. Postgres releases the lock at commit or rollback.
   // When the change throws, the transaction rolls back and saves nothing.
-  async update(key: ProgressKey, change: ProgressChange): Promise<PlayerProgress | null> {
+  // When the foreign key to users.id rejects the write, the transaction
+  // rolls back too, and the update fails with unknown-user (#137). It is
+  // the one foreign key that the write can break: the progress row comes
+  // before its level_results rows.
+  async update(
+    key: ProgressKey,
+    change: ProgressChange,
+  ): Promise<Result<PlayerProgress | null, 'unknown-user'>> {
+    try {
+      return ok(await this.lockedUpdate(key, change));
+    } catch (error) {
+      if (hasSqlState(error, FOREIGN_KEY_VIOLATION)) {
+        return err('unknown-user');
+      }
+      throw error;
+    }
+  }
+
+  private lockedUpdate(key: ProgressKey, change: ProgressChange): Promise<PlayerProgress | null> {
     return this.db.transaction(async (tx) => {
       // The key delivers its userId and its gameId. A gameId is a lowercase
       // slug and holds no colon, so the text names one key. Two keys with

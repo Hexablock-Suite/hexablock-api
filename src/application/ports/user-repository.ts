@@ -1,5 +1,6 @@
 import type { Result } from '../../domain/shared/result.js';
 import type { User } from '../../domain/user/user.js';
+import type { UserId } from '../../domain/user/user-id.js';
 import type { Username } from '../../domain/user/username.js';
 
 // Port. The store of the User entities. No two users have names that
@@ -14,6 +15,9 @@ export interface UserRepository {
   // Tells if a user has a username that collides with the name.
   isUsernameTaken(username: Username): Promise<boolean>;
   add(user: User): Promise<Result<void, 'username-taken'>>;
+  // Tells if a user with the id is stored. AuthenticateTokenUseCase asks it
+  // for the user of a valid token (#137).
+  exists(id: UserId): Promise<boolean>;
 }
 
 // Injection token for the UserRepository port. It is a plain symbol, as CLOCK is.
