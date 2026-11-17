@@ -9,6 +9,10 @@ import { CLOCK, type Clock } from '../../../src/application/ports/clock.js';
 import { LEADERBOARD_READER } from '../../../src/application/ports/leaderboard-reader.js';
 import { LEVEL_REPOSITORY } from '../../../src/application/ports/level-repository.js';
 import { PROGRESS_REPOSITORY } from '../../../src/application/ports/progress-repository.js';
+import {
+  USER_ID_GENERATOR,
+  type UserIdGenerator,
+} from '../../../src/application/ports/user-id-generator.js';
 import { USER_REPOSITORY } from '../../../src/application/ports/user-repository.js';
 import type { LevelValidators } from '../../../src/domain/level/level-validators.js';
 import { AppModule, LEVEL_VALIDATORS } from '../../../src/infrastructure/app.module.js';
@@ -24,9 +28,12 @@ export { TEST_JWT_SECRET };
 const UNUSED_DATABASE_URL = 'postgres://test:test@127.0.0.1:1/unused';
 
 // Sets the configuration that AppModule reads. Call vi.unstubAllEnvs() after the test.
+// The list of level editors is empty, so no account may update the levels
+// (#145). A LEVEL_EDITOR_IDS of the shell never reaches a test.
 export function stubTestEnvironment(): void {
   vi.stubEnv('JWT_SECRET', TEST_JWT_SECRET);
   vi.stubEnv('DATABASE_URL', UNUSED_DATABASE_URL);
+  vi.stubEnv('LEVEL_EDITOR_IDS', '');
 }
 
 export interface TestApp {
@@ -38,6 +45,11 @@ export interface TestApp {
 export interface TestAppOptions {
   // Replaces the system clock, so a test can assert the stored instants.
   readonly clock?: Clock;
+  // Replaces the random user ids, so a test knows the id of each account
+  // before it signs up.
+  readonly userIds?: UserIdGenerator;
+  // The user ids that may update the levels (#145). Without it, no account may.
+  readonly levelEditorIds?: readonly string[];
 }
 
 // Starts AppModule with the test configuration. The user, progress and level
@@ -49,6 +61,9 @@ export async function createTestApp(
   options: TestAppOptions = {},
 ): Promise<TestApp> {
   stubTestEnvironment();
+  if (options.levelEditorIds !== undefined) {
+    vi.stubEnv('LEVEL_EDITOR_IDS', options.levelEditorIds.join(','));
+  }
   const database = await createTestDatabase();
   let builder = Test.createTestingModule({ imports: [AppModule], controllers })
     .overrideProvider(USER_REPOSITORY)
@@ -64,6 +79,9 @@ export async function createTestApp(
     .useValue(new DrizzleLeaderboardReader(database.db));
   if (options.clock !== undefined) {
     builder = builder.overrideProvider(CLOCK).useValue(options.clock);
+  }
+  if (options.userIds !== undefined) {
+    builder = builder.overrideProvider(USER_ID_GENERATOR).useValue(options.userIds);
   }
   const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication<INestApplication<App>>({ logger: false });
