@@ -6,6 +6,8 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-16
+
 ### Added
 
 - The leaderboard endpoints (API-FR-03), both behind `JwtAuthGuard` (S3-09, a proposal on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76)) ([#83](https://github.com/Hexablock-Suite/hexablock-api/issues/83)). `GET /leaderboard/{gameId}` answers `GlobalLeaderboardDto` with both global lists of the game: `highScores` (`rank`, `userId`, `highScore`) and `standings` (`rank`, `userId`, `stars`, `levelsCompleted`, `moves`, `elapsedMs`). `GET /leaderboard/{gameId}/levels/{levelId}` answers `LevelLeaderboardDto` with the `entries` of one level (`rank`, `userId`, `stars`, `moves`, `elapsedMs`). `GetLeaderboardUseCase` binds `UseCase`, and `AppModule` wraps it in `LoggingAspect`. It orders each list with `Score.isHigherThan()`, `Standing.isBetterThan()` or `LevelResult.isBetterThan()`, and gives each row a `rank`: 1 plus the rows that are strictly better, so a full tie shares a rank and the next rank skips (1, 1, 3). Tied rows come out by `userId` ascending through the new `UserId.comesBefore()`. A list holds only the players who have a result to rank, and no list has a page size. A broken `gameId` or `levelId` answers 400 and a missing token 401, with the `ErrorDto` body. `LeaderboardDtoMapper` translates the path and the answer. `openapi/openapi.json`, `docs/architecture/flows.md`, decisions 7 and 12 of `docs/architecture/classes.md` and four views with their PNG record the routes and the schemas.
