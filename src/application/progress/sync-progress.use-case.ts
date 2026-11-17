@@ -47,7 +47,6 @@ export class SyncProgressUseCase implements SyncProgress {
   async execute(request: SyncProgressRequest): Promise<Result<PlayerProgress, ProgressProblem>> {
     const { score, results } = request;
     const key = ProgressKey.of(request.userId, request.gameId);
-    let outcome: Result<PlayerProgress, ProgressProblem> | undefined;
     const saved = await this.progress.update(key, (stored) => {
       // The use case reads the Clock under the lock, so the instants follow
       // the order of the saves. The aggregate keeps updatedAt from moving
@@ -60,15 +59,15 @@ export class SyncProgressUseCase implements SyncProgress {
       for (const result of results) {
         progress.recordLevel(result, at);
       }
-      outcome = ok(progress);
       return progress;
     });
     if (!saved.ok) {
       return err({ kind: saved.error });
     }
-    if (outcome === undefined) {
-      throw new Error('ProgressRepository.update() must run the change.');
+    // The change never returns null, so a saved progress is always there.
+    if (saved.value === null) {
+      throw new Error('ProgressRepository.update() must save the change.');
     }
-    return outcome;
+    return ok(saved.value);
   }
 }

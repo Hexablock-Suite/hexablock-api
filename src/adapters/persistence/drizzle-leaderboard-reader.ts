@@ -38,7 +38,7 @@ export class DrizzleLeaderboardReader implements LeaderboardReader {
       );
     // The reader builds the four value objects of each stored result.
     return rows.map((row) => {
-      const stored = `The level_results rows of user ${row.userId}`;
+      const stored = rowsOf('level_results', row.userId);
       return {
         userId: storedValue(UserId.from(row.userId), stored),
         result: storedValue(buildLevelResult(row), stored),
@@ -54,7 +54,7 @@ export class DrizzleLeaderboardReader implements LeaderboardReader {
     // The where clause keeps no null. The check only narrows the type.
     return rows.flatMap(({ userId, highScore }) => {
       if (highScore === null) return [];
-      const stored = `The progress rows of user ${userId}`;
+      const stored = rowsOf('progress', userId);
       return [
         {
           userId: storedValue(UserId.from(userId), stored),
@@ -80,7 +80,7 @@ export class DrizzleLeaderboardReader implements LeaderboardReader {
       .where(eq(levelResults.gameId, receiveValueOf(gameId)))
       .groupBy(levelResults.userId);
     return rows.map(({ userId, stars, levelsCompleted, moves, elapsedMs }) => {
-      const stored = `The level_results rows of user ${userId}`;
+      const stored = rowsOf('level_results', userId);
       const standing = Standing.of(
         storedValue(Stars.of(stars), stored),
         storedValue(LevelsCompleted.of(levelsCompleted), stored),
@@ -93,4 +93,10 @@ export class DrizzleLeaderboardReader implements LeaderboardReader {
       };
     });
   }
+}
+
+// The rows of one user in one table, as storedValue() names them in the
+// message of a broken rule.
+function rowsOf(table: 'level_results' | 'progress', userId: string): string {
+  return `The ${table} rows of user ${userId}`;
 }

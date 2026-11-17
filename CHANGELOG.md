@@ -12,6 +12,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- The five open review suggestions of the queue of 2026-11-15 ([#142](https://github.com/Hexablock-Suite/hexablock-api/issues/142)). `CharacterCount.ofLimit()` is the one home of the credential limits of `Username` and `Password`, `DrizzleLeaderboardReader` names its rows in one function, `SyncProgressUseCase` returns what the repository saved, and an e2e test pins the step by time of the board of a level. `httpErrorOf` of `ProgressController` stays a switch: it has two cases since #137.
 - The README section "Design Patterns" (API-NFR-09) ([#21](https://github.com/Hexablock-Suite/hexablock-api/issues/21)). Each pattern row links the source files that implement it and the view of `docs/architecture/classes.md` that draws it. The Decorator row and the AOP section no longer name `TimingAspect` as built.
 - The README no longer says that the code starts in Sprint 1, and `docs/README.md` indexes `layers.md`, `classes.md` and `flows.md` in place of its TODO ([#26](https://github.com/Hexablock-Suite/hexablock-api/issues/26)). The copyright holder and the critical evaluation of `AI_USAGE.md` stay TODO for the team.
 
