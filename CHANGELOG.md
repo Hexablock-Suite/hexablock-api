@@ -10,6 +10,10 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 - `docs/EXTENSIBILITY.md` (API-NFR-10) ([#141](https://github.com/Hexablock-Suite/hexablock-api/issues/141)). For each extension axis of `docs/architecture/extensibility.md`, it names the class that a developer adds, the file that registers it and the tests to copy. It links to the views and does not copy them. The _Check_ of API-NFR-10 in `docs/REQUIREMENTS.md` now points to it.
 
+### Changed
+
+- The README section "Design Patterns" (API-NFR-09) ([#21](https://github.com/Hexablock-Suite/hexablock-api/issues/21)). Each pattern row links the source files that implement it and the view of `docs/architecture/classes.md` that draws it. The Decorator row and the AOP section no longer name `TimingAspect` as built.
+
 ### Fixed
 
 - A request body that the body parser rejects keeps its client status ([#136](https://github.com/Hexablock-Suite/hexablock-api/issues/136)). `HttpErrorFilter` keeps the status of an error that is not an `HttpException` and carries an integer `status` or `statusCode` from 400 to 499, with the `ErrorDto` body of API-FR-06 and the reason phrase of the status as its message, and writes no error log line for it. So a JSON body over 100 kB answers 413 on every route that takes a body, and a JSON body in a charset other than UTF answers 415, in place of 500. A malformed JSON body still answers 400, and any other error still answers 500 with the generic message and its log line. `openapi/openapi.json` does not change.
