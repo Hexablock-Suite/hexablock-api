@@ -31,7 +31,7 @@ The statement gives the example of a fifth variant: «por ejemplo, Hexa Fill: pi
 
 ## View 3: a new database engine
 
-![A new database engine: the four output ports of layer 2, each held by the use cases that need it and implemented by one Drizzle repository, and the declared MongoDB repositories, each of which implements the same port as the Drizzle repository above it; the footnote names update(gameId, levelId, change) of LevelRepository and the LeaderboardEntry rows of LeaderboardReader with their Standing](extensibility/views/ext-3-database-engine.png)
+![A new database engine: the four output ports of layer 2, each held by the use cases that need it, GetLeaderboardUseCase holding both LeaderboardReader and LevelRepository, and implemented by one Drizzle repository, and the declared MongoDB repositories, each of which implements the same port as the Drizzle repository above it; the footnote names update(gameId, levelId, change) of LevelRepository and the LeaderboardEntry rows of LeaderboardReader with their Standing](extensibility/views/ext-3-database-engine.png)
 
 The database engine row of §8 names MongoDB instead of Postgres (professor, class of 2026-10-26). The `Mongo` class names are placeholders. Each column holds one output port, its Drizzle adapter, its declared Mongo adapter and the use cases that hold it, as views 2.2 to 2.4 of the class diagram show.
 

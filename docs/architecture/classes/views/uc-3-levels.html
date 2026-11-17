@@ -158,10 +158,10 @@
         />
         <!-- Pattern and group frames -->
         <rect
-          x="520"
+          x="530"
           y="136"
-          width="408"
-          height="160"
+          width="398"
+          height="168"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -169,7 +169,7 @@
           stroke-dasharray="4,4"
         />
         <text
-          x="532"
+          x="542"
           y="152"
           fill="#5b6873"
           font-size="8"
@@ -192,7 +192,7 @@
         />
         <!-- UpdateLevelsUseCase holds LevelRepository: use -->
         <path
-          d="M528 328 L672 328 Q680 328 680 320 L680 288"
+          d="M528 328 L672 328 Q680 328 680 320 L680 296"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -307,10 +307,10 @@
         >
           levels 1
         </text>
-        <rect x="686" y="302" width="56" height="12" rx="2" fill="#efe7f8" />
+        <rect x="686" y="314" width="56" height="12" rx="2" fill="#efe7f8" />
         <text
           x="714"
-          y="311"
+          y="323"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -479,9 +479,9 @@
         <!-- Class: LevelRepository («interface» «port» «repository») -->
         <rect
           x="536"
-          y="168"
+          y="160"
           width="376"
-          height="120"
+          height="136"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -489,7 +489,7 @@
         />
         <text
           x="724"
-          y="186"
+          y="178"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -500,7 +500,7 @@
         </text>
         <text
           x="724"
-          y="204"
+          y="196"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -509,17 +509,20 @@
         >
           LevelRepository
         </text>
-        <line x1="536" y1="216" x2="912" y2="216" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="552" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="536" y1="208" x2="912" y2="208" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="552" y="224" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + list(): Promise&lt;ListedLevels&gt;
         </text>
-        <text x="552" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="552" y="240" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
+        </text>
+        <text x="552" y="256" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId,
         </text>
-        <text x="574" y="264" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="574" y="272" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           change: LevelChange):
         </text>
-        <text x="574" y="280" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="574" y="288" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;&gt;
         </text>
         <!-- Class: Result («union») -->
