@@ -53,6 +53,9 @@ async function emptyLevels(): Promise<void> {
 describeLevelRepositoryContract(
   'DrizzleLevelRepository',
   () => new DrizzleLevelRepository(database.db, levelValidators()),
+  async (_repository, row) => {
+    await database.db.insert(levels).values(row);
+  },
 );
 
 async function countLevelRows(): Promise<number | undefined> {

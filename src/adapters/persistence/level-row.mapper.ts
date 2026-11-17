@@ -1,11 +1,11 @@
+import type { StoredLevel, StoredLevelProblem } from '../../application/ports/level-repository.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import { LevelOrder } from '../../domain/level/level-order.js';
-import type { LevelProblem } from '../../domain/level/level-problem.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';
 import { LevelVersion } from '../../domain/level/level-version.js';
 import { TopologyId } from '../../domain/level/topology-id.js';
-import { GameId, type GameIdProblem } from '../../domain/progress/game-id.js';
-import { LevelId, type LevelIdProblem } from '../../domain/progress/level-id.js';
+import { GameId } from '../../domain/progress/game-id.js';
+import { LevelId } from '../../domain/progress/level-id.js';
 import type { Result } from '../../domain/shared/result.js';
 import { receiveJsonOf, receiveValueOf } from '../received.js';
 import type { levels } from './schema.js';
@@ -14,21 +14,36 @@ export type LevelRow = typeof levels.$inferSelect;
 
 // Turns a levels row into a LevelDefinition and back (DS-6, classes.md
 // decision 5). A level is born valid (#77), also from the database:
-// toLevel() builds the values of the common part and asks LevelValidators
-// for the strategy of the row's gameId, which builds the section. The mapper
-// never picks a section type, so a new variant with level files changes no
-// code here. A row that no strategy accepts is a server fault, so toLevel()
-// throws. toRow() receives the value of each part, and the section delivers
-// its parts as the JSON of the shared level format.
+// toStoredLevel() builds the values of the common part and asks
+// LevelValidators for the strategy of the row's gameId, which builds the
+// section. The mapper never picks a section type, so a new variant with
+// level files changes no code here. A row that no strategy accepts is a
+// broken row, not a level (#147): it keeps the code of its first broken rule
+// and its version when the version column passes the rule of LevelVersion.
+// toLevel() reads a row for list(), where a broken row is still a server
+// fault, so toLevel() throws. toRow() receives the value of each part, and the section delivers its
+// parts as the JSON of the shared level format.
 export const LevelRowMapper = {
-  toLevel(row: LevelRow, validators: LevelValidators): LevelDefinition<unknown> {
+  toStoredLevel(
+    row: LevelRow,
+    validators: LevelValidators,
+  ): Exclude<StoredLevel, { readonly state: 'absent' }> {
     const level = restored(row, validators);
-    if (!level.ok) {
+    if (level.ok) {
+      return { state: 'valid', level: level.value };
+    }
+    const version = LevelVersion.of(row.version);
+    return { state: 'broken', reason: level.error, version: version.ok ? version.value : null };
+  },
+
+  toLevel(row: LevelRow, validators: LevelValidators): LevelDefinition<unknown> {
+    const stored = LevelRowMapper.toStoredLevel(row, validators);
+    if (stored.state === 'broken') {
       throw new Error(
-        `The levels row ${row.gameId}/${row.levelId} breaks the level rule ${level.error}.`,
+        `The levels row ${row.gameId}/${row.levelId} breaks the level rule ${stored.reason}.`,
       );
     }
-    return level.value;
+    return stored.level;
   },
 
   toRow(level: LevelDefinition<unknown>): LevelRow {
@@ -48,7 +63,7 @@ export const LevelRowMapper = {
 function restored(
   row: LevelRow,
   validators: LevelValidators,
-): Result<LevelDefinition<unknown>, GameIdProblem | LevelIdProblem | LevelProblem> {
+): Result<LevelDefinition<unknown>, StoredLevelProblem> {
   const gameId = GameId.of(row.gameId);
   if (!gameId.ok) return gameId;
   const levelId = LevelId.of(row.levelId);

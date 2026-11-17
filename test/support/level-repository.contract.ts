@@ -1,6 +1,8 @@
+import type { LevelRow } from '../../src/adapters/persistence/level-row.mapper.js';
 import { receiveJsonOf, receiveValueOf } from '../../src/adapters/received.js';
-import type { LevelRepository } from '../../src/application/ports/level-repository.js';
+import type { LevelRepository, StoredLevel } from '../../src/application/ports/level-repository.js';
 import type { LevelDefinition } from '../../src/domain/level/level-definition.js';
+import { LevelVersion } from '../../src/domain/level/level-version.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import { err, ok, type Result } from '../../src/domain/shared/result.js';
@@ -29,6 +31,24 @@ export async function listedJson(repository: LevelRepository): Promise<unknown[]
   return (await repository.list()).map((level) => receiveJsonOf(level));
 }
 
+// Writes one levels row as it is, with no check, as a manual change of the
+// database can write it. The row of a level of the format, with a broken
+// section or version, is the usual case.
+export type StoreRow = (repository: LevelRepository, row: LevelRow) => Promise<void>;
+
+// The levels row of a level of the format, with a Fit section that breaks
+// its rule (#147). It is the row of the e2e tests of a broken level.
+export function brokenRow(json: LevelJson, version = json.version): LevelRow {
+  const { gameId, levelId, order, topology } = json;
+  return { gameId, levelId, order, version, topology, section: { figure: [] } };
+}
+
+// The state of a stored level as a test compares it: the JSON of a valid
+// level, so a copy compares equal.
+function seenState(stored: StoredLevel): unknown {
+  return stored.state === 'valid' ? { state: 'valid', json: receiveJsonOf(stored.level) } : stored;
+}
+
 // The version of a level as a number, so a test can count the updates.
 function versionOf(level: LevelDefinition<unknown>): number {
   return receiveValueOf(receiveValueOf(level).version);
@@ -40,6 +60,7 @@ function versionOf(level: LevelDefinition<unknown>): number {
 export function describeLevelRepositoryContract(
   name: string,
   createRepository: () => LevelRepository | Promise<LevelRepository>,
+  storeRow: StoreRow,
 ): void {
   describe(`LevelRepository contract: ${name}`, () => {
     it('should_list_no_level_when_no_level_is_stored', async () => {
@@ -66,10 +87,10 @@ export function describeLevelRepositoryContract(
     });
 
     // update() runs one change while it holds the lock of one gameId and
-    // levelId. With no stored level, the change gets null.
-    it('should_pass_null_to_change_and_save_its_level_when_no_level_is_stored', async () => {
+    // levelId. With no stored level, the change gets the absent state.
+    it('should_pass_the_absent_state_to_change_and_save_its_level_when_no_level_is_stored', async () => {
       const repository = await createRepository();
-      const seen: (LevelDefinition<unknown> | null)[] = [];
+      const seen: StoredLevel[] = [];
       const level = checkedLevel(levelJson('hexa-fit'));
 
       const saved = await repository.update(FIT, FIT_01, (stored) => {
@@ -77,14 +98,14 @@ export function describeLevelRepositoryContract(
         return ok(level);
       });
 
-      expect(seen).toEqual([null]);
+      expect(seen).toEqual([{ state: 'absent' }]);
       expect(saved.ok && saved.value).toBe(level);
       expect(await listedJson(repository)).toEqual([levelJson('hexa-fit')]);
     });
 
     // The change gets a copy of the stored level, and the copy that it
     // returns replaces the stored one. The other levels stay as they are.
-    it('should_pass_stored_level_to_change_and_replace_it_when_the_level_is_stored', async () => {
+    it('should_pass_the_valid_state_with_a_copy_of_the_stored_level_to_change_and_replace_it_when_the_level_is_stored', async () => {
       const repository = await createRepository();
       const first = checkedLevel(levelJson('hexa-fit'));
       await repository.update(FIT, FIT_01, () => ok(first));
@@ -93,11 +114,11 @@ export function describeLevelRepositoryContract(
       const seen: { copy: boolean; json: unknown }[] = [];
 
       const saved = await repository.update(FIT, FIT_01, (stored) => {
-        if (stored === null) {
+        if (stored.state !== 'valid') {
           return err('game-without-levels');
         }
-        seen.push({ copy: stored !== first, json: receiveJsonOf(stored) });
-        return stored.accepts(newer);
+        seen.push({ copy: stored.level !== first, json: receiveJsonOf(stored.level) });
+        return stored.level.accepts(newer);
       });
 
       expect(seen).toEqual([{ copy: true, json: levelJson('hexa-fit') }]);
@@ -116,7 +137,7 @@ export function describeLevelRepositoryContract(
       const older = checkedLevel(levelJson('hexa-fit', 'fit-01', 1));
 
       const rejected = await repository.update(FIT, FIT_01, (stored) =>
-        stored === null ? ok(older) : stored.accepts(older),
+        stored.state === 'valid' ? stored.level.accepts(older) : ok(older),
       );
       const empty = await repository.update(SORT, SORT_01, () => err('invalid-section'));
 
@@ -160,9 +181,10 @@ export function describeLevelRepositoryContract(
     it('should_pass_first_level_to_second_change_when_two_updates_of_one_level_overlap', async () => {
       const repository = await createRepository();
       const seen: (number | null)[] = [];
-      const raise = (stored: LevelDefinition<unknown> | null) => {
-        seen.push(stored === null ? null : versionOf(stored));
-        const version = stored === null ? 1 : versionOf(stored) + 1;
+      const raise = (stored: StoredLevel) => {
+        const storedVersion = stored.state === 'valid' ? versionOf(stored.level) : null;
+        seen.push(storedVersion);
+        const version = storedVersion === null ? 1 : storedVersion + 1;
         return ok(checkedLevel(levelJson('hexa-fit', 'fit-01', version)));
       };
 
@@ -173,6 +195,50 @@ export function describeLevelRepositoryContract(
 
       expect(seen).toEqual([null, 1]);
       expect(await listedJson(repository)).toEqual([levelJson('hexa-fit', 'fit-01', 2)]);
+    });
+    // #147: a stored row that breaks a rule is the broken state, never the
+    // absent state. It carries the code of the first broken rule and the
+    // stored version, so the change can still run the version rule.
+    it('should_pass_the_broken_state_with_its_reason_and_stored_version_to_change_when_the_stored_section_breaks_its_rule', async () => {
+      const repository = await createRepository();
+      await storeRow(repository, brokenRow(levelJson('hexa-fit'), 3));
+      const seen: unknown[] = [];
+
+      const saved = await repository.update(FIT, FIT_01, (stored) => {
+        seen.push(seenState(stored));
+        return err('invalid-section');
+      });
+
+      expect(seen).toEqual([
+        { state: 'broken', reason: 'invalid-figure', version: valueOf(LevelVersion.of(3)) },
+      ]);
+      expect(saved).toEqual({ ok: false, error: 'invalid-section' });
+    });
+
+    // A version column that LevelVersion does not accept gives no version.
+    it('should_pass_the_broken_state_with_no_version_to_change_when_the_stored_version_breaks_its_rule', async () => {
+      const repository = await createRepository();
+      await storeRow(repository, { ...brokenRow(levelJson('hexa-fit')), version: 0 });
+      const seen: unknown[] = [];
+
+      await repository.update(FIT, FIT_01, (stored) => {
+        seen.push(seenState(stored));
+        return err('invalid-version');
+      });
+
+      expect(seen).toEqual([{ state: 'broken', reason: 'invalid-version', version: null }]);
+    });
+
+    // The level that the change returns replaces the broken row.
+    it('should_replace_the_broken_row_with_the_level_of_the_change_when_the_change_returns_a_level', async () => {
+      const repository = await createRepository();
+      await storeRow(repository, brokenRow(levelJson('hexa-fit')));
+      const level = checkedLevel(levelJson('hexa-fit', 'fit-01', 2));
+
+      const saved = await repository.update(FIT, FIT_01, () => ok(level));
+
+      expect(saved.ok && saved.value).toBe(level);
+      await expect(listedJson(repository)).resolves.toEqual([levelJson('hexa-fit', 'fit-01', 2)]);
     });
   });
 }

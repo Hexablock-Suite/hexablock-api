@@ -9,6 +9,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 ### Changed
 
 - `PUT /levels` accepts only the accounts in the list of level editors of the configuration ([#145](https://github.com/Hexablock-Suite/hexablock-api/issues/145)). `LEVEL_EDITOR_IDS` holds their user ids, separated by commas. Any other signed-in account gets 403 with the `ErrorDto` body before the API reads the body, and the API saves nothing. An empty or unset list lets no account update, and an entry that is not a UUID stops the start. `LevelEditorGuard` runs after `JwtAuthGuard` and calls the new input port `AuthorizeLevelEditor`, which asks the new domain value `LevelEditors`. `openapi/openapi.json` lists the 403, and `docs/REQUIREMENTS.md` (Q4), the README and decision 18 of `docs/architecture/classes.md` record the rule.
+- `PUT /levels` replaces a stored level row that breaks a rule ([#147](https://github.com/Hexablock-Suite/hexablock-api/issues/147)). The version rule of S3-10 still holds over the row when its `version` is valid; a row with an invalid `version` takes any valid version. `docs/REQUIREMENTS.md` (API-FR-04) and decision 19 of `docs/architecture/classes.md` record the rule.
 
 ## [0.2.0] - 2026-11-16
 

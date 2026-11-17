@@ -6,12 +6,15 @@ import {
   type UpdateLevelsRequest,
   UpdateLevelsUseCase,
 } from '../../../src/application/levels/update-levels.use-case.js';
+import { receiveJsonOf } from '../../../src/adapters/received.js';
+import { LevelVersion } from '../../../src/domain/level/level-version.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
+import { err } from '../../../src/domain/shared/result.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { levelJson, levelValidators, type LevelJson } from '../../support/level-format.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
-import { listedJson, storeLevel } from '../../support/level-repository.contract.js';
+import { brokenRow, listedJson, storeLevel } from '../../support/level-repository.contract.js';
 import { valueOf } from '../../support/result.js';
 
 // The request of a batch, built as LevelDtoMapper builds it.
@@ -47,6 +50,18 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     levels = new InMemoryLevelRepository(levelValidators());
     update = new UpdateLevelsUseCase(levels, levelValidators());
   });
+
+  // The stored state of one level, read under its lock by a change that
+  // saves nothing. A valid level compares by its JSON.
+  async function storedStateOf(gameId: string, levelId: string): Promise<unknown> {
+    let seen: unknown;
+    await levels.update(valueOf(GameId.of(gameId)), valueOf(LevelId.of(levelId)), (stored) => {
+      seen =
+        stored.state === 'valid' ? { state: 'valid', json: receiveJsonOf(stored.level) } : stored;
+      return err('invalid-section');
+    });
+    return seen;
+  }
 
   it('should_save_every_level_when_each_level_of_the_batch_passes_its_check', async () => {
     const result = await update.execute(batchOf(levelJson('hexa-sort'), levelJson('hexa-fit')));
@@ -103,6 +118,50 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
       levelJson('hexa-fit', 'fit-01', 2),
       levelJson('hexa-sort'),
     ]);
+  });
+
+  // #147: a stored row that breaks a rule has no level, but its version
+  // column can still hold a valid version. The version rule of S3-10 then
+  // compares with it: a lower version saves nothing and gives older-version.
+  // The other levels of the batch are saved.
+  it('should_reject_the_lower_version_and_keep_the_broken_row_when_the_broken_row_holds_a_higher_version', async () => {
+    levels.storeRow(brokenRow(levelJson('hexa-fit'), 3));
+
+    const result = await update.execute(
+      batchOf(levelJson('hexa-fit', 'fit-01', 2), levelJson('hexa-sort')),
+    );
+
+    expect(result).toEqual(invalidLevels(['hexa-fit', 'fit-01', 'older-version']));
+    expect(await storedStateOf('hexa-fit', 'fit-01')).toEqual({
+      state: 'broken',
+      reason: 'invalid-figure',
+      version: valueOf(LevelVersion.of(3)),
+    });
+    expect(await storedStateOf('hexa-sort', 'sort-01')).toEqual({
+      state: 'valid',
+      json: levelJson('hexa-sort'),
+    });
+  });
+
+  // An equal version passes, so the same packaged level replaces its broken row.
+  it('should_replace_the_broken_row_when_the_level_has_the_version_of_the_broken_row', async () => {
+    levels.storeRow(brokenRow(levelJson('hexa-fit'), 3));
+
+    const result = await update.execute(batchOf(levelJson('hexa-fit', 'fit-01', 3)));
+
+    expect(result).toEqual({ ok: true, value: undefined });
+    expect(await listedJson(levels)).toEqual([levelJson('hexa-fit', 'fit-01', 3)]);
+  });
+
+  // A version column that breaks its rule gives no version to compare, so
+  // any valid version replaces the row.
+  it('should_replace_the_broken_row_with_any_version_when_the_stored_version_breaks_its_rule', async () => {
+    levels.storeRow({ ...brokenRow(levelJson('hexa-fit')), version: 0 });
+
+    const result = await update.execute(batchOf(levelJson('hexa-fit', 'fit-01', 1)));
+
+    expect(result).toEqual({ ok: true, value: undefined });
+    expect(await listedJson(levels)).toEqual([levelJson('hexa-fit', 'fit-01', 1)]);
   });
 
   // S3-10: an equal version passes, so a repeated batch is safe.
