@@ -6,6 +6,10 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ## [Unreleased]
 
+### Added
+
+- `docs/EXTENSIBILITY.md` (API-NFR-10) ([#141](https://github.com/Hexablock-Suite/hexablock-api/issues/141)). For each extension axis of `docs/architecture/extensibility.md`, it names the class that a developer adds, the file that registers it and the tests to copy. It links to the views and does not copy them. The _Check_ of API-NFR-10 in `docs/REQUIREMENTS.md` now points to it.
+
 ## [0.2.0] - 2026-11-16
 
 ### Added
