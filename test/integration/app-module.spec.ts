@@ -147,4 +147,15 @@ describe('AppModule account wiring', () => {
       'JWT_SECRET is not set.',
     );
   });
+
+  // #145: a wrong entry in the list of level editors stops the start, as a
+  // missing JWT_SECRET does.
+  it('should_refuse_to_start_when_level_editor_ids_holds_an_entry_that_is_not_a_user_id', async () => {
+    stubTestEnvironment();
+    vi.stubEnv('LEVEL_EDITOR_IDS', 'ada');
+
+    await expect(Test.createTestingModule({ imports: [AppModule] }).compile()).rejects.toThrow(
+      'LEVEL_EDITOR_IDS holds "ada", which is not a user id.',
+    );
+  });
 });

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1594"
+        viewBox="0 0 1240 1610"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow3updatelevels-title flow3updatelevels-desc"
@@ -522,6 +522,8 @@
           LevelsController
         </text>
         <text
+          textLength="320"
+          lengthAdjust="spacingAndGlyphs"
           x="686"
           y="106"
           fill="#5b6873"
@@ -530,7 +532,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-04 · update guarded by JwtAuthGuard
+          API-FR-04 · update guarded by JwtAuthGuard, LevelEditorGuard
         </text>
         <line x1="516" y1="116" x2="856" y2="116" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="532" y="132" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -1355,18 +1357,29 @@
           LevelValidator and its validators (FitLevelValidator, SortLevelValidator) form the
           Strategy pattern.
         </text>
+        <text
+          x="24"
+          y="1500"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelEditorGuard runs after JwtAuthGuard: an account outside LevelEditors gets a 403, and
+          the body is never read (#145, decision 18). Part 2, view 3, and Part 3, view 3, draw it;
+          this slice does not.
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1512"
+          y1="1528"
           x2="1216"
-          y2="1512"
+          y2="1528"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1530"
+          y="1546"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1376,9 +1389,9 @@
         </text>
         <line
           x1="24"
-          y1="1548"
+          y1="1564"
           x2="52"
-          y2="1548"
+          y2="1564"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1386,7 +1399,7 @@
         />
         <text
           x="60"
-          y="1552"
+          y="1568"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1395,16 +1408,16 @@
         </text>
         <line
           x1="128"
-          y1="1548"
+          y1="1564"
           x2="156"
-          y2="1548"
+          y2="1564"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#flow3updatelevels-open)"
         />
         <text
           x="164"
-          y="1552"
+          y="1568"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1413,7 +1426,7 @@
         </text>
         <rect
           x="24"
-          y="1568"
+          y="1584"
           width="20"
           height="12"
           rx="2"
@@ -1423,7 +1436,7 @@
         />
         <rect
           x="48"
-          y="1568"
+          y="1584"
           width="20"
           height="12"
           rx="2"
@@ -1433,7 +1446,7 @@
         />
         <rect
           x="72"
-          y="1568"
+          y="1584"
           width="20"
           height="12"
           rx="2"
@@ -1443,7 +1456,7 @@
         />
         <text
           x="104"
-          y="1577"
+          y="1593"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1452,7 +1465,7 @@
         </text>
         <rect
           x="352"
-          y="1568"
+          y="1584"
           width="28"
           height="12"
           rx="2"
@@ -1462,7 +1475,7 @@
         />
         <text
           x="388"
-          y="1577"
+          y="1593"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1471,7 +1484,7 @@
         </text>
         <rect
           x="512"
-          y="1568"
+          y="1584"
           width="28"
           height="12"
           rx="2"
@@ -1482,7 +1495,7 @@
         />
         <text
           x="548"
-          y="1577"
+          y="1593"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1491,7 +1504,7 @@
         </text>
         <rect
           x="700"
-          y="1568"
+          y="1584"
           width="28"
           height="12"
           rx="2"
@@ -1502,7 +1515,7 @@
         />
         <text
           x="736"
-          y="1577"
+          y="1593"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
