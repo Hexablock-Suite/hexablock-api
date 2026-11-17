@@ -1,16 +1,55 @@
 import { USERNAME_PATTERN } from '../../../src/adapters/http/credentials.dto.js';
-import { Username } from '../../../src/domain/user/username.js';
+import { receiveBoundValuesOf, receiveValueOf } from '../../../src/adapters/received.js';
+import type { ValueReceiver } from '../../../src/domain/shared/value-receiver.js';
+import {
+  USERNAME_CHARACTERS,
+  USERNAME_LENGTH,
+  Username,
+} from '../../../src/domain/user/username.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';
 
-// #99: the domain exports no string, so the HTTP adapter writes the OpenAPI
-// pattern of a username, and Username.create() checks the rule in the domain.
-// The two must accept the same names. test/auth.e2e-spec.ts pins the text
-// that openapi/openapi.json publishes.
+const USERNAME_MODULE = '../../../src/domain/user/username.js';
+
+// #149: the domain holds the allowed characters of a username once. The HTTP
+// adapter builds the OpenAPI pattern from the characters of
+// USERNAME_CHARACTERS and the limits of USERNAME_LENGTH, and
+// Username.create() checks the same rule in the domain. The two must accept
+// the same names. test/auth.e2e-spec.ts pins the text that
+// openapi/openapi.json publishes.
 describe('CredentialsDto username pattern', () => {
+  afterEach(() => {
+    vi.doUnmock(USERNAME_MODULE);
+    vi.resetModules();
+  });
+
   it('should_keep_the_published_text_when_the_limits_of_the_domain_build_it', () => {
     expect(USERNAME_PATTERN).toBe('^[A-Za-z0-9._-]{3,32}$');
+  });
+
+  it('should_build_the_pattern_from_what_the_domain_delivers_when_the_dto_loads', () => {
+    const { min, max } = receiveBoundValuesOf(USERNAME_LENGTH);
+
+    expect(USERNAME_PATTERN).toBe(`^${receiveValueOf(USERNAME_CHARACTERS)}{${min},${max}}$`);
+  });
+
+  // The DTO holds no character list of its own: other characters in the
+  // domain give another pattern.
+  it('should_publish_other_characters_when_the_domain_delivers_other_characters', async () => {
+    vi.resetModules();
+    vi.doMock(USERNAME_MODULE, async (importOriginal) => ({
+      ...(await importOriginal<object>()),
+      USERNAME_CHARACTERS: {
+        deliverTo(receiver: ValueReceiver<string>): void {
+          receiver.receive('[xyz]');
+        },
+      },
+    }));
+
+    const dto = await import('../../../src/adapters/http/credentials.dto.js');
+
+    expect(dto.USERNAME_PATTERN).toBe('^[xyz]{3,32}$');
   });
 
   it.each([

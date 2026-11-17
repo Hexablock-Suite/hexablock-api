@@ -8,6 +8,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- The allowed characters of a username have one home, in the domain ([#149](https://github.com/Hexablock-Suite/hexablock-api/issues/149)), as decided on 2026-11-16 on [#139](https://github.com/Hexablock-Suite/hexablock-api/issues/139). A private constant of `src/domain/user/username.ts` holds them, `Username.create()` checks it, and the new `USERNAME_CHARACTERS` value delivers it to `CredentialsDto`, which builds the OpenAPI pattern from it and from the limits of `USERNAME_LENGTH`. The published pattern stays `^[A-Za-z0-9._-]{3,32}$`, and `openapi/openapi.json` does not change. Decision 17 of `docs/architecture/classes.md` records the change.
 - Sign-in looks the user up by the same lower-case key that sign-up uses ([#144](https://github.com/Hexablock-Suite/hexablock-api/issues/144)), as decided on 2026-11-16 on [#134](https://github.com/Hexablock-Suite/hexablock-api/issues/134). `ADA`, `Ada` and `ada` now sign in the stored `ada` with its password; before, they answered 401. A wrong password still answers 401 with the same body. `DrizzleUserRepository.findByUsername()` filters on `username_key`, and the in-memory fake uses `Username.collidesWith()`; the `UserRepository` contract pins the lookup by key for both. The stored name keeps the letter case of sign-up. API-FR-01 in `docs/REQUIREMENTS.md` states the new rule. No HTTP schema changes.
 
 ### Security
