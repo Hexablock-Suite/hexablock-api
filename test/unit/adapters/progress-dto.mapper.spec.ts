@@ -13,8 +13,8 @@ const ADA = valueOf(UserId.from(testUserId(1)));
 const LEVEL = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
 const BAD_GAME = 'Hexa Lines';
 const BAD_LEVEL = { ...LEVEL, stars: -2 };
-const GAME_PROBLEM = 'gameId must be a lowercase slug, got "Hexa Lines".';
-const LEVEL_PROBLEM = 'stars must be a non-negative integer, got -2.';
+const GAME_PROBLEM = 'gameId must be a lowercase slug of 1 to 64 characters, got "Hexa Lines".';
+const LEVEL_PROBLEM = 'stars must be a non-negative integer of at most 2147483647, got -2.';
 const SCORE_PROBLEM = 'score must be a non-negative integer, got -1.';
 
 // The mapper of the border builds the domain values of a request. A use
@@ -77,12 +77,21 @@ describe('ProgressDtoMapper.toRequest', () => {
   // gives the one problem. A missing field breaks the rule of its value.
   const broken = { levelId: ' ', stars: -1, moves: -2, elapsedMs: -3 };
   it.each([
-    [broken, 'levelId must be a non-blank string.'],
-    [{ ...broken, levelId: 'fit-01' }, 'stars must be a non-negative integer, got -1.'],
-    [{ ...LEVEL, moves: -2, elapsedMs: -3 }, 'moves must be a non-negative integer, got -2.'],
+    [broken, 'levelId must be a non-blank string of 1 to 64 characters with no control character.'],
+    [
+      { ...broken, levelId: 'fit-01' },
+      'stars must be a non-negative integer of at most 2147483647, got -1.',
+    ],
+    [
+      { ...LEVEL, moves: -2, elapsedMs: -3 },
+      'moves must be a non-negative integer of at most 2147483647, got -2.',
+    ],
     [{ ...LEVEL, elapsedMs: -3 }, 'elapsedMs must be a non-negative integer, got -3.'],
-    [{}, 'levelId must be a non-blank string.'],
-    [{ levelId: 'fit-01' }, 'stars must be a non-negative integer, got undefined.'],
+    [{}, 'levelId must be a non-blank string of 1 to 64 characters with no control character.'],
+    [
+      { levelId: 'fit-01' },
+      'stars must be a non-negative integer of at most 2147483647, got undefined.',
+    ],
   ])(
     'should_fail_with_the_first_broken_field_when_several_fields_of_a_result_break_their_rules',
     (result, problem) => {

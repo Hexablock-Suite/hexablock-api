@@ -60,3 +60,26 @@ describe('Moves', () => {
     expect(built.deliverTo(receiver)).toBeUndefined();
   });
 });
+
+// #135: the moves of one play that a client sends must fit the integer
+// column of level_results. A total of moves is a sum, and a star threshold
+// lives in a JSON column, so of() keeps no such bound.
+describe('Moves.ofIncoming', () => {
+  it.each([2_147_483_648, 3_000_000_000, -1, 1.5])(
+    'should_give_the_code_of_the_rule_when_the_moves_of_a_play_exceed_the_column_or_break_the_rule',
+    (bad) => {
+      expect(Moves.ofIncoming(bad)).toEqual({ ok: false, error: 'invalid-moves' });
+    },
+  );
+
+  it.each([0, 12, 2_147_483_647])(
+    'should_build_the_moves_when_the_moves_of_a_play_fit_the_column',
+    (value) => {
+      expect(valueOf(Moves.ofIncoming(value)).equals(moves(value))).toBe(true);
+    },
+  );
+
+  it('should_build_a_total_over_the_column_when_of_builds_a_sum', () => {
+    expect(Moves.of(4_294_967_294).ok).toBe(true);
+  });
+});

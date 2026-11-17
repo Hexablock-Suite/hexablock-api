@@ -229,7 +229,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     const calls = reads.reduce((sum, read) => sum + read.mock.calls.length, 0);
     reads.forEach((read) => read.mockRestore());
 
-    const gameProblem = 'gameId must be a lowercase slug, got "Hexa Fit".';
+    const gameProblem = 'gameId must be a lowercase slug of 1 to 64 characters, got "Hexa Fit".';
     expect(global.status).toBe(400);
     expect(global.body).toEqual({
       statusCode: 400,
@@ -251,7 +251,9 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       statusCode: 400,
       error: 'Bad Request',
       message: 'Request validation failed',
-      details: ['levelId must be a non-blank string.'],
+      details: [
+        'levelId must be a non-blank string of 1 to 64 characters with no control character.',
+      ],
       path: '/leaderboard/hexa-fit/levels/%20',
     });
     expect(calls).toBe(0);

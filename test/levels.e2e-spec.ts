@@ -203,8 +203,9 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
 
   // A gameId or a levelId that is not a string has no name, so its problem
   // names its place in the list, as for a string that breaks the rule.
-  const GAME_ID_PROBLEM = 'levels[0]: gameId must be a lowercase slug, got';
-  const LEVEL_ID_PROBLEM = 'levels[0]: levelId must be a non-blank string.';
+  const GAME_ID_PROBLEM = 'levels[0]: gameId must be a lowercase slug of 1 to 64 characters, got';
+  const LEVEL_ID_PROBLEM =
+    'levels[0]: levelId must be a non-blank string of 1 to 64 characters with no control character.';
   it.each([
     ['gameId', 5, `${GAME_ID_PROBLEM} 5.`],
     ['gameId', null, `${GAME_ID_PROBLEM} null.`],
@@ -214,6 +215,28 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     ['levelId', { name: 'fit-01' }, LEVEL_ID_PROBLEM],
   ])(
     'should_answer_bad_request_and_save_nothing_when_the_game_id_or_the_level_id_is_not_a_string',
+    async (field, value, detail) => {
+      const token = await tokenOf('ada');
+
+      const rejected = await update(token, {
+        levels: [{ ...levelJson('hexa-fit'), [field]: value }],
+      });
+      const read = await list();
+
+      expect(rejected.status).toBe(400);
+      expect(rejected.body).toEqual(badRequest(detail));
+      expect(read.body).toEqual({ levels: [] });
+    },
+  );
+
+  // #135: the update takes a gameId and a levelId through the same incoming
+  // bounds as a sync: 64 characters at most, and no control character.
+  it.each([
+    ['gameId', 'a'.repeat(65), `${GAME_ID_PROBLEM} "${'a'.repeat(65)}".`],
+    ['levelId', 'f'.repeat(65), LEVEL_ID_PROBLEM],
+    ['levelId', 'fit\n01', LEVEL_ID_PROBLEM],
+  ])(
+    'should_answer_bad_request_and_save_nothing_when_the_game_id_or_the_level_id_breaks_an_incoming_bound',
     async (field, value, detail) => {
       const token = await tokenOf('ada');
 

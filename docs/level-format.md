@@ -8,14 +8,14 @@ This page is the one source of the level format. The API reads it for the level 
 
 A level is one JSON object with a common part and a typed section (DS-6). The common part is the same for every game. The `gameId` says which section the level holds. Lines and Merge have no level files (API-FR-04), so only `hexa-fit` and `hexa-sort` have a section today.
 
-| Field      | JSON type   | Rule                                                                                                | Domain value                  |
-| ---------- | ----------- | --------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `gameId`   | string      | A lowercase slug: `hexa-fit` or `hexa-sort`. Another game has no section, so the API rejects it.    | `GameId`                      |
-| `levelId`  | string      | A non-blank text, unique in its game, such as `fit-01`.                                             | `LevelId`                     |
-| `order`    | number      | A whole number of 1 or more: the place of the level in the list of its game. The first level has 1. | `LevelOrder`                  |
-| `version`  | number      | A whole number of 1 or more. The first copy has 1. A change that must reach the players raises it.  | `LevelVersion`                |
-| `topology` | string      | A lowercase slug that names how to read the coordinates: `hex`, `square` or `triangle`.             | `TopologyId`                  |
-| `section`  | JSON object | The section of the game: the Fit section or the Sort section below.                                 | `FitSection` or `SortSection` |
+| Field      | JSON type   | Rule                                                                                                                               | Domain value                  |
+| ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `gameId`   | string      | A lowercase slug of 1 to 64 characters: `hexa-fit` or `hexa-sort`. Another game has no section, so the API rejects it.             | `GameId`                      |
+| `levelId`  | string      | A non-blank text of 1 to 64 characters with no control character (U+0000 to U+001F, U+007F), unique in its game, such as `fit-01`. | `LevelId`                     |
+| `order`    | number      | A whole number of 1 or more: the place of the level in the list of its game. The first level has 1.                                | `LevelOrder`                  |
+| `version`  | number      | A whole number of 1 or more. The first copy has 1. A change that must reach the players raises it.                                 | `LevelVersion`                |
+| `topology` | string      | A lowercase slug that names how to read the coordinates: `hex`, `square` or `triangle`.                                            | `TopologyId`                  |
+| `section`  | JSON object | The section of the game: the Fit section or the Sort section below.                                                                | `FitSection` or `SortSection` |
 
 The level object holds exactly these six fields. The `gameId` and the `levelId` are the identity of a level: two copies of one level have the same `gameId` and `levelId`. DS-11 decides which copy wins in the app: the higher `version`, and the bundled copy when the versions are equal. S3-10 decides what the API accepts: it rejects a copy with a lower `version` than the stored copy, and it accepts an equal or a higher one.
 

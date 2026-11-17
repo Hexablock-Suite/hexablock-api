@@ -1,4 +1,5 @@
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { INCOMING_ID_BOUNDS } from './progress-values.js';
 
 // The DTOs of the level routes (API-FR-04). Each one is a part of the shared
 // level format of S3-02, field for field (docs/level-format.md). They give
@@ -130,11 +131,19 @@ export class LevelDto {
   @ApiProperty({
     example: 'hexa-fit',
     pattern: '^[a-z][a-z0-9-]*$',
+    minLength: INCOMING_ID_BOUNDS.min,
+    maxLength: INCOMING_ID_BOUNDS.max,
     description: 'The game variant: hexa-fit or hexa-sort. Another game has no level files.',
   })
   readonly gameId!: string;
 
-  @ApiProperty({ example: 'fit-01', description: 'A non-blank text, unique in its game.' })
+  @ApiProperty({
+    example: 'fit-01',
+    minLength: INCOMING_ID_BOUNDS.min,
+    maxLength: INCOMING_ID_BOUNDS.max,
+    description:
+      'A non-blank text, unique in its game, with no control character (U+0000 to U+001F, U+007F).',
+  })
   readonly levelId!: string;
 
   @ApiProperty({

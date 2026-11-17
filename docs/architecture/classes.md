@@ -54,7 +54,7 @@ The file is generated from the code at `3a3b45a` plus the views of this page. A 
 
 ### View 1.4: the level result and its values
 
-![Level result: the LevelResult value object holds a LevelId, a Stars, a Moves and an ElapsedTime value object in private fields, takes the four built in of(), delivers them to a LevelResultReceiver with deliverTo(), and asks them which of two results of one level is better](classes/views/domain-4-level-result.png)
+![Level result: the LevelResult value object holds a LevelId, a Stars, a Moves and an ElapsedTime value object in private fields, takes the four built in of(), delivers them to a LevelResultReceiver with deliverTo(), and asks them which of two results of one level is better; LevelId, Stars and Moves also build a value that a client sends with ofIncoming(), which adds the bounds of #135](classes/views/domain-4-level-result.png)
 
 ### View 1.5: the level values
 
@@ -249,6 +249,14 @@ These rules say how the domain model must be. They apply to every class of `src/
     - **The bundled levels.** The API holds every level, the levels that the app bundles too. A deploy step that loads them is [#158](https://github.com/Hexablock-Suite/hexablock-api/issues/158); until it runs, the board of a bundled level that the API does not store answers 404.
 
     Views 2.2, 2.3, 3.2 and slice 3 draw `holds()`; view 2.2 draws the use arrow `levels 1` from `GetLeaderboardUseCase` to `LevelRepository`.
+
+21. **Incoming bounds of the progress values, and stored rows that keep their values (built, [#135](https://github.com/Hexablock-Suite/hexablock-api/issues/135)).** A value that a client sends must fit its column and the bounds of its value object, so it stops at the border with 400 and the code of its rule, not with a 500 of the database.
+    - **Two factories.** `GameId`, `LevelId`, `Stars` and `Moves` keep `of()` with the rule that they had, and add `ofIncoming()` for a value that a client sends. `GameId.ofIncoming()` and `LevelId.ofIncoming()` take 1 to 64 characters, the range `INCOMING_ID_LENGTH` over `CharacterCount`; the columns are Postgres `text` and give no length, so 64 is a choice of the API. `LevelId.ofIncoming()` also rejects a control character (U+0000 to U+001F, U+007F); the `GameId` pattern already allows none. `Stars.ofIncoming()` and `Moves.ofIncoming()` take at most 2147483647, the largest value of the Postgres `integer` columns `level_results.stars` and `level_results.moves`. `MOST_STARS_OF_ONE_PLAY` and `MOST_MOVES_OF_ONE_PLAY` deliver that number to the border. The codes stay `invalid-game-id`, `invalid-level-id`, `invalid-stars` and `invalid-moves`.
+    - **Why the bound is not in `of()`.** `Stars.of()` and `Moves.of()` also build a total: `DrizzleLeaderboardReader` sums the stored rows into a `Standing`, and a sum can exceed one column. `Moves.of()` also builds the move limit of a star threshold, which lives in a JSON column. A bound in `of()` would make a large total throw on read, a 500 of the global board. So the bound lives in the value of one play, not in the shared type.
+    - **A stored row keeps its values.** The bounds apply where a value comes in, not where a stored row is rebuilt. `ProgressRowMapper`, `DrizzleLeaderboardReader` and `LevelRowMapper` build with `of()`, so a row stored before the bounds still reads, for example a `levelId` of 10 000 characters. No stored data changes, and no task cleans the rows.
+    - **The border.** `progress-values.ts` builds each `gameId` and `levelId` of a request with `ofIncoming()`: the sync body, the progress path, the leaderboard paths and the level update. `levelResultFrom()` checks the incoming bounds of the `levelId`, the stars and the moves first, in the order of the fields, and then `buildLevelResult()` builds the result. The texts of the rules name the bounds, and `openapi/openapi.json` lists them as `minLength`, `maxLength` and `maximum`.
+
+    Views 1.1 and 1.4 draw `ofIncoming()`.
 
 ## Render the images
 

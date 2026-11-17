@@ -287,12 +287,16 @@
           "gameId": {
             "description": "The game variant: hexa-fit or hexa-sort. Another game has no level files.",
             "example": "hexa-fit",
+            "maxLength": 64,
+            "minLength": 1,
             "pattern": "^[a-z][a-z0-9-]*$",
             "type": "string"
           },
           "levelId": {
-            "description": "A non-blank text, unique in its game.",
+            "description": "A non-blank text, unique in its game, with no control character (U+0000 to U+001F, U+007F).",
             "example": "fit-01",
+            "maxLength": 64,
+            "minLength": 1,
             "type": "string"
           },
           "order": {
@@ -407,18 +411,23 @@
             "type": "number"
           },
           "levelId": {
+            "description": "A non-blank text with no control character (U+0000 to U+001F, U+007F).",
             "example": "fit-01",
+            "maxLength": 64,
+            "minLength": 1,
             "type": "string"
           },
           "moves": {
-            "description": "A non-negative integer.",
+            "description": "A non-negative integer that fits the integer column of the store.",
             "example": 12,
+            "maximum": 2147483647,
             "minimum": 0,
             "type": "number"
           },
           "stars": {
-            "description": "A non-negative integer.",
+            "description": "A non-negative integer that fits the integer column of the store.",
             "example": 3,
+            "maximum": 2147483647,
             "minimum": 0,
             "type": "number"
           }
@@ -659,6 +668,8 @@
           "gameId": {
             "description": "The game variant. Required.",
             "example": "hexa-lines",
+            "maxLength": 64,
+            "minLength": 1,
             "pattern": "^[a-z][a-z0-9-]*$",
             "type": "string"
           },
