@@ -995,6 +995,16 @@
               }
             },
             "description": "The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The level definitions do not hold the levelId for the gameId."
           }
         },
         "security": [

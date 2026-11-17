@@ -259,5 +259,26 @@ export function describeLevelRepositoryContract(
         { gameId: 'hexa-fit', levelId: 'fit-02', reason: 'invalid-figure' },
       ]);
     });
+
+    // #146: the board of a level asks whether the definitions hold the
+    // level. A broken row is still a level that the definitions hold, so
+    // holds() answers true for it. Only a key with no row answers false.
+    it('should_answer_true_for_a_valid_and_a_broken_row_and_false_for_an_unknown_key_when_holds_is_asked', async () => {
+      const repository = await createRepository();
+      await storeLevel(repository, levelJson('hexa-fit'));
+      await storeRow(repository, brokenRow(levelJson('hexa-sort', 'sort-01')));
+
+      const valid = await repository.holds(FIT, FIT_01);
+      const broken = await repository.holds(SORT, SORT_01);
+      const unknownLevel = await repository.holds(FIT, valueOf(LevelId.of('no-such-level')));
+      const otherGame = await repository.holds(valueOf(GameId.of('hexa-lines')), FIT_01);
+
+      expect({ valid, broken, unknownLevel, otherGame }).toEqual({
+        valid: true,
+        broken: true,
+        unknownLevel: false,
+        otherGame: false,
+      });
+    });
   });
 }

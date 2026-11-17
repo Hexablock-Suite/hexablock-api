@@ -189,7 +189,7 @@
         <!-- DrizzleLevelRepository uses LevelRowMapper: use with a verb -->
         <line
           x1="300"
-          y1="260"
+          y1="276"
           x2="300"
           y2="316"
           stroke="#5b6873"
@@ -209,7 +209,7 @@
         <!-- DrizzleLevelRepository implements LevelRepository: realization -->
         <line
           x1="464"
-          y1="260"
+          y1="276"
           x2="464"
           y2="524"
           stroke="#17212a"
@@ -231,7 +231,7 @@
         <!-- DrizzleLevelRepository holds LevelValidators: use, attribute across layers -->
         <line
           x1="80"
-          y1="260"
+          y1="276"
           x2="80"
           y2="656"
           stroke="#5b6873"
@@ -361,7 +361,7 @@
           x="64"
           y="88"
           width="432"
-          height="172"
+          height="188"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -414,12 +414,15 @@
           + list(): Promise&lt;ListedLevels&gt;
         </text>
         <text x="80" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
+        </text>
+        <text x="80" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId,
         </text>
-        <text x="102" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           change: LevelChange):
         </text>
-        <text x="102" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="268" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;&gt;
         </text>
         <!-- Class: DrizzleUserRepository («repository»; no role label) -->

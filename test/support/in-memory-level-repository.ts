@@ -29,6 +29,11 @@ export class InMemoryLevelRepository implements LevelRepository {
     return Promise.resolve(LevelRowMapper.toListedLevels(rows, this.validators));
   }
 
+  // A valid row and a broken row both count, as in the Drizzle adapter.
+  holds(gameId: GameId, levelId: LevelId): Promise<boolean> {
+    return Promise.resolve(this.rowsByKey.has(keyOf(gameId, levelId)));
+  }
+
   // Writes one row as it is, with no check, as a manual change of the
   // database can write it. So a test can store a row that breaks a rule (#147).
   storeRow(row: LevelRow): void {

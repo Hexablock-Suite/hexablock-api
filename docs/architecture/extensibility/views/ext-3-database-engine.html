@@ -75,8 +75,10 @@
           Extensibility diagram showing the four output ports of layer 2, each held by the use cases
           that need it and implemented today by one Drizzle repository over Postgres, and the
           declared MongoDB repositories that would implement the same ports with no change to the
-          use cases. The footnote names update(gameId, levelId, change) of LevelRepository and the
-          LeaderboardEntry rows of LeaderboardReader, with their Standing.
+          use cases. GetLeaderboardUseCase holds LevelRepository too, to ask whether the definitions
+          hold the level of a level board (#146). The footnote names update(gameId, levelId, change)
+          of LevelRepository and the LeaderboardEntry rows of LeaderboardReader, with their
+          Standing.
         </desc>
         <defs>
           <marker
@@ -285,6 +287,14 @@
           stroke="#5b6873"
           marker-end="url(#ext3database-open)"
         />
+        <!-- GetLeaderboardUseCase holds LevelRepository: use (#146) -->
+        <path
+          d="M498 476 L530 476 L530 440 L590 440 L590 408"
+          fill="none"
+          stroke-width="1"
+          stroke="#5b6873"
+          marker-end="url(#ext3database-open)"
+        />
         <!-- GetLevelsUseCase holds LevelRepository: use -->
         <path
           d="M637 456 L637 408"
@@ -354,6 +364,18 @@
         <text
           x="668.5"
           y="435"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          levels 1
+        </text>
+        <rect x="535" y="422" width="51" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="560.5"
+          y="431"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -821,7 +843,7 @@
         </text>
         <line x1="552" y1="380" x2="760" y2="380" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="568" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(), update()
+          + list(), holds(), update()
         </text>
         <!-- Class: UserRepository (focal, the seam) -->
         <rect

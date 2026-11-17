@@ -72,10 +72,12 @@
         <desc id="uc2progress-desc">
           Class diagram of layer 2 showing SyncProgressUseCase, which holds the ProgressRepository
           port for the whole progress aggregate and the Clock port, and GetLeaderboardUseCase, which
-          holds the LeaderboardReader port. The reader only filters and sums, and the use case
-          orders the entries with the comparisons of the domain. Each progress use case joins the
-          userId and the gameId of its request in a ProgressKey, and ProgressRepository finds and
-          updates one progress by that key. A footnote names LeaderboardController and
+          holds the LeaderboardReader port and the LevelRepository port. Before the board of a
+          level, the use case asks LevelRepository.holds() whether the definitions hold the level,
+          and fails with UnknownLevel when they do not (#146). The reader only filters and sums, and
+          the use case orders the entries with the comparisons of the domain. Each progress use case
+          joins the userId and the gameId of its request in a ProgressKey, and ProgressRepository
+          finds and updates one progress by that key. A footnote names LeaderboardController and
           LeaderboardDtoMapper of layer 3, which call GetLeaderboard and translate its query and
           answer, and says that LeaderboardEntry is a response type of layer 2 with no tactical
           stereotype.
@@ -188,13 +190,32 @@
         <!-- GetLeaderboardUseCase holds LeaderboardReader: use -->
         <line
           x1="448"
-          y1="552"
+          y1="568"
           x2="568"
-          y2="552"
+          y2="568"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
+        <!-- GetLeaderboardUseCase holds LevelRepository: use -->
+        <path
+          d="M448 552 L520 552 L520 372 L568 372"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#uc2progress-open)"
+        />
+        <text
+          x="484"
+          y="390"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          levels 1
+        </text>
         <!-- GetProgressUseCase holds ProgressRepository: use -->
         <path
           d="M448 340 L536 340 L536 168 L568 168"
@@ -228,10 +249,10 @@
         >
           clock 1
         </text>
-        <rect x="468" y="534" width="80" height="12" rx="2" fill="#efe7f8" />
+        <rect x="468" y="572" width="80" height="12" rx="2" fill="#efe7f8" />
         <text
           x="508"
-          y="543"
+          y="581"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -331,7 +352,7 @@
           x="64"
           y="472"
           width="384"
-          height="124"
+          height="140"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -372,14 +393,65 @@
         </text>
         <line x1="64" y1="532" x2="448" y2="532" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="548" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - levels: LevelRepository
+        </text>
+        <text x="80" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - leaderboard: LeaderboardReader
         </text>
-        <line x1="64" y1="556" x2="448" y2="556" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="572" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="572" x2="448" y2="572" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="588" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + execute(query: LeaderboardQuery):
         </text>
-        <text x="102" y="588" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;Result&lt;Leaderboard, never&gt;&gt;
+        <text x="102" y="604" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;Leaderboard, UnknownLevel&gt;&gt;
+        </text>
+        <!-- Class: LevelRepository («interface» «port» «repository»): only the operation of this view -->
+        <rect
+          x="568"
+          y="320"
+          width="416"
+          height="92"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="776"
+          y="338"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port» «repository»
+        </text>
+        <text
+          x="776"
+          y="356"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelRepository
+        </text>
+        <text
+          x="776"
+          y="370"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · #146 · view 2.3 draws list() and update()
+        </text>
+        <line x1="568" y1="380" x2="984" y2="380" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="584" y="398" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
         </text>
         <!-- Class: ProgressRepository («interface» «port») -->
         <rect
