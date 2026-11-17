@@ -81,7 +81,8 @@ The table shows the design. Most of these pieces are not code yet; their code st
 
 Full layer diagram and the place of each piece: [docs/architecture/layers.md](docs/architecture/layers.md).
 Classes per layer: [docs/architecture/classes.md](docs/architecture/classes.md). Extension points:
-[docs/architecture/extensibility.md](docs/architecture/extensibility.md).
+[docs/architecture/extensibility.md](docs/architecture/extensibility.md). The class to add and the file that
+registers it, per axis: [docs/EXTENSIBILITY.md](docs/EXTENSIBILITY.md).
 How one request crosses the layers, as a class view and a sequence diagram:
 [docs/architecture/flows.md](docs/architecture/flows.md).
 
