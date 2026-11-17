@@ -21,8 +21,10 @@ import { valueOf } from '../result.js';
 export class InMemoryUserRepository implements UserRepository {
   readonly users: User[] = [];
 
+  // Finds the user by the rule of isUsernameTaken(), as the Drizzle adapter
+  // compares the key (#144).
   async findByUsername(username: Username): Promise<User | null> {
-    return this.users.find((user) => userPartsOf(user).username.equals(username)) ?? null;
+    return this.users.find((user) => userPartsOf(user).username.collidesWith(username)) ?? null;
   }
 
   // Asks the rule by its business name (#100). The UserRepository contract

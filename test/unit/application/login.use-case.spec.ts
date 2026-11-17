@@ -62,9 +62,18 @@ describe('LoginUseCase', () => {
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
 
-  // Login finds the user by the name as typed (#62).
-  it('should_fail_with_invalid_credentials_when_username_differs_only_in_case', async () => {
-    const result = await login.execute(loginRequest('ADA', 'correct horse'));
+  // Login finds the user by the lower-case key that sign-up uses (#144).
+  it.each(['ADA', 'Ada'])(
+    'should_return_token_for_user_when_username_differs_only_in_case',
+    async (typed) => {
+      const result = await login.execute(loginRequest(typed, 'correct horse'));
+
+      expect(result).toEqual({ ok: true, value: `token-for:${testUserId(1)}` });
+    },
+  );
+
+  it('should_fail_with_invalid_credentials_when_username_differs_only_in_case_and_password_is_wrong', async () => {
+    const result = await login.execute(loginRequest('ADA', 'wrong horse'));
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } });
   });
