@@ -88,9 +88,9 @@ describe.skipIf(!PG_URL)('DrizzleProgressRepository on a real Postgres', () => {
     };
   }
 
-  // The levels of the requests of this suite: l0 to l9 of fit and lines,
+  // The levels of the requests of this suite: l0 to l29 of fit and lines,
   // so each result has a level (#135).
-  const LEVEL_IDS = Array.from({ length: 10 }, (_, n) => `l${n}`);
+  const LEVEL_IDS = Array.from({ length: 30 }, (_, n) => `l${n}`);
   const LEVELS = heldLevels([
     ['fit', LEVEL_IDS],
     ['lines', LEVEL_IDS],
