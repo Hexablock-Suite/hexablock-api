@@ -8,7 +8,11 @@ import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import * as usernameModule from '../../../src/domain/user/username.js';
-import { USERNAME_LENGTH, Username } from '../../../src/domain/user/username.js';
+import {
+  USERNAME_CHARACTERS,
+  USERNAME_LENGTH,
+  Username,
+} from '../../../src/domain/user/username.js';
 import {
   boundsDeliveredBy,
   deliveredBy,
@@ -36,10 +40,20 @@ describe('credential limits', () => {
     expect(boundValuesOf(PASSWORD_LENGTH)).toEqual([8, 128]);
   });
 
-  // The OpenAPI pattern of a username moved to the HTTP adapter (#99), so
-  // the module exports no string.
+  // The OpenAPI pattern of a username lives in the HTTP adapter (#99), so
+  // the module exports no string. The characters leave in a delivery (#149).
   it('should_export_no_primitive_when_the_username_module_lists_its_exports', () => {
-    expect(Object.keys(usernameModule).sort()).toEqual(['USERNAME_LENGTH', 'Username']);
+    expect(Object.keys(usernameModule).sort()).toEqual([
+      'USERNAME_CHARACTERS',
+      'USERNAME_LENGTH',
+      'Username',
+      'UsernameCharacters',
+    ]);
+  });
+
+  // #149: the allowed characters of a username have one home, in the domain.
+  it('should_deliver_the_allowed_characters_once_when_a_border_asks_for_them', () => {
+    expect(deliveredBy(USERNAME_CHARACTERS)).toEqual(['[A-Za-z0-9._-]']);
   });
 });
 
@@ -176,6 +190,16 @@ describe('Password', () => {
     // The delivery returns nothing: the receiver holds the text.
     expect(password.deliverTo(receiver)).toBeUndefined();
     expect(receiver.received).toEqual(['correct horse']);
+  });
+
+  // #138: a logger or an error body writes an object with JSON.stringify().
+  // The text is an ECMAScript private field, so JSON shows no text.
+  it('should_show_no_typed_text_when_json_receives_the_password', () => {
+    const password = valueOf(Password.create('correct horse battery'));
+
+    expect(JSON.stringify(password)).not.toContain('correct horse battery');
+    expect(JSON.stringify({ password })).not.toContain('correct horse battery');
+    expect(deliveredBy(password)).toEqual(['correct horse battery']);
   });
 
   it('should_keep_the_length_count_inside_password_when_module_lists_its_exports', () => {
@@ -325,6 +349,15 @@ describe('PasswordHash', () => {
     void hash.value;
     // The delivery returns nothing: the receiver holds the text.
     expect(hash.deliverTo(receiver)).toBeUndefined();
+  });
+
+  // #138: the hash is an ECMAScript private field, so JSON shows no hash.
+  it('should_show_no_hash_text_when_json_receives_the_password_hash', () => {
+    const hash = passwordHash('scrypt$salt$hashbytes');
+
+    expect(JSON.stringify(hash)).not.toContain('scrypt$salt$hashbytes');
+    expect(JSON.stringify({ hash })).not.toContain('scrypt$salt$hashbytes');
+    expect(deliveredBy(hash)).toEqual(['scrypt$salt$hashbytes']);
   });
 });
 

@@ -90,6 +90,22 @@ describe('AuthDtoMapper.toRegisterRequest', () => {
       expect(AuthDtoMapper.toRegisterRequest({ username, password }).ok).toBe(true);
     },
   );
+
+  // #138: a logger or an error body can write the request with
+  // JSON.stringify(). The Password keeps its text in an ECMAScript private
+  // field, so JSON shows the username but no typed text.
+  it('should_show_no_typed_text_when_json_receives_the_register_request', () => {
+    const request = AuthDtoMapper.toRegisterRequest({
+      username: 'Ada',
+      password: 'correct horse battery',
+    });
+
+    if (!request.ok) {
+      throw new Error('The mapper must build the request.');
+    }
+    expect(JSON.stringify(request.value)).not.toContain('correct horse battery');
+    expect(receiveValueOf(request.value.password)).toBe('correct horse battery');
+  });
 });
 
 describe('AuthDtoMapper.toLoginRequest', () => {

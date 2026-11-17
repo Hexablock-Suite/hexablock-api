@@ -4,7 +4,7 @@ import type { PasswordVerifier } from '../../../src/domain/user/password-verifie
 import { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
-import { type UserParts, userPartsOf } from '../../support/recording-receiver.js';
+import { deliveredBy, type UserParts, userPartsOf } from '../../support/recording-receiver.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
@@ -133,16 +133,34 @@ describe('User delivery', () => {
   ])(
     'should_build_the_user_when_register_and_restore_take_any_valid_values',
     ({ id, name, hash }) => {
-      const parts = { id, username: nameOf(name), passwordHash: valueOf(PasswordHash.from(hash)) };
+      const username = nameOf(name);
+      const passwordHash = valueOf(PasswordHash.from(hash));
 
-      expect(userPartsOf(User.register(parts.id, parts.username, parts.passwordHash))).toEqual(
-        parts,
-      );
-      expect(userPartsOf(User.restore(parts.id, parts.username, parts.passwordHash))).toEqual(
-        parts,
-      );
+      // toBe, not toEqual: a structural comparison ignores the ECMAScript
+      // private field of a PasswordHash (#138), so it would pass with any hash.
+      const registered = userPartsOf(User.register(id, username, passwordHash));
+      const restored = userPartsOf(User.restore(id, username, passwordHash));
+      expect(registered.id).toBe(id);
+      expect(registered.username).toBe(username);
+      expect(registered.passwordHash).toBe(passwordHash);
+      expect(restored.id).toBe(id);
+      expect(restored.username).toBe(username);
+      expect(restored.passwordHash).toBe(passwordHash);
     },
   );
+});
+
+// #138: a logger or an error body writes an object with JSON.stringify().
+// The user holds a PasswordHash, which keeps its text in an ECMAScript
+// private field, so JSON shows no hash.
+describe('User serialization', () => {
+  it('should_show_no_hash_text_when_json_receives_the_user', () => {
+    const user = userOf(1, 'ada', 'scrypt$salt$hashbytes');
+
+    expect(JSON.stringify(user)).not.toContain('scrypt$salt$hashbytes');
+    expect(JSON.stringify({ user })).not.toContain('scrypt$salt$hashbytes');
+    expect(deliveredBy(userPartsOf(user).passwordHash)).toEqual(['scrypt$salt$hashbytes']);
+  });
 });
 
 // #91: the user checks a typed password, so no caller reads its hash.

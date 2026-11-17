@@ -8,7 +8,8 @@ import type { Username } from '../../domain/user/username.js';
 // also after a lookup that missed it. test/support/user-repository.contract.ts
 // holds the cases that every adapter passes.
 export interface UserRepository {
-  // Finds the user whose username equals the name exactly, letter case included.
+  // Finds the user whose username collides with the name: the same lower-case
+  // key that sign-up compares (#144). The user keeps the stored letter case.
   findByUsername(username: Username): Promise<User | null>;
   // Tells if a user has a username that collides with the name.
   isUsernameTaken(username: Username): Promise<boolean>;
