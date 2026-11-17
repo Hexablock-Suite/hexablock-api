@@ -65,7 +65,14 @@ export class LevelDefinition<TSection> {
     if (!this.equals(incoming)) {
       throw new RangeError('The version rule compares two copies of one level.');
     }
-    return incoming.version.isOlderThan(this.version) ? err('older-version') : ok(incoming);
+    return incoming.isOlderThan(this.version) ? err('older-version') : ok(incoming);
+  }
+
+  // Tells if this copy is older than a stored version (S3-10). A stored row
+  // that breaks a rule gives only its version, so the version rule over that
+  // row compares with the version alone (#147). An equal version is not older.
+  isOlderThan(version: LevelVersion): boolean {
+    return this.version.isOlderThan(version);
   }
 
   // Delivers the common part and the section to a receiver of the border, in

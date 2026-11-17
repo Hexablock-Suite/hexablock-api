@@ -439,6 +439,13 @@
               "$ref": "#/components/schemas/LevelDto"
             },
             "type": "array"
+          },
+          "unavailable": {
+            "description": "Only in an answer, and only when a stored level breaks a rule: each such level, by gameId and then by levelId. The levels field holds every other level. The update ignores this field.",
+            "items": {
+              "$ref": "#/components/schemas/UnavailableLevelDto"
+            },
+            "type": "array"
           }
         },
         "required": [
@@ -685,6 +692,31 @@
         },
         "required": [
           "accessToken"
+        ],
+        "type": "object"
+      },
+      "UnavailableLevelDto": {
+        "properties": {
+          "gameId": {
+            "description": "The gameId of the stored level.",
+            "example": "hexa-fit",
+            "type": "string"
+          },
+          "levelId": {
+            "description": "The levelId of the stored level.",
+            "example": "fit-01",
+            "type": "string"
+          },
+          "reason": {
+            "description": "The code of the first rule that the stored level breaks, as docs/level-format.md names it.",
+            "example": "invalid-section",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gameId",
+          "levelId",
+          "reason"
         ],
         "type": "object"
       }
@@ -988,7 +1020,7 @@
                 }
               }
             },
-            "description": "Every stored level, by gameId and levelId."
+            "description": "Every stored level, by gameId and levelId. A stored level that breaks a rule is not in levels: unavailable names it with the code of its rule."
           }
         },
         "tags": [
@@ -1010,7 +1042,7 @@
         },
         "responses": {
           "204": {
-            "description": "Every level of the batch is saved. The body is empty."
+            "description": "Every level of the batch is saved. A level replaces a stored level that breaks a rule. The body is empty."
           },
           "400": {
             "content": {
@@ -1020,7 +1052,7 @@
                 }
               }
             },
-            "description": "The body has the wrong shape, or a level breaks a rule: a value of the common part, its section, A5, a lower version than the stored one, or a gameId with no level files. Each detail names one level by its gameId and levelId. A level problem saves no level of the batch, except a lower version, which saves the other levels."
+            "description": "The body has the wrong shape, or a level breaks a rule: a value of the common part, its section, A5, a lower version than the stored one, or a gameId with no level files. Over a stored level that breaks a rule, a lower version than its stored version is rejected too, when that stored version is valid. Each detail names one level by its gameId and levelId. A level problem saves no level of the batch, except a lower version, which saves the other levels."
           },
           "401": {
             "content": {
@@ -1031,6 +1063,16 @@
               }
             },
             "description": "The bearer token is missing, malformed, expired or signed with another key."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The account of the token is not in the list of level editors of the configuration. An empty or unset list lets no account update. No level is saved."
           }
         },
         "security": [

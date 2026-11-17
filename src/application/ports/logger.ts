@@ -5,7 +5,9 @@
 // A thrown error gives its name, its code when the code is a string, and the
 // frames of its stack. It never gives its message: a message is free text,
 // and it can quote a value that the client sent. The frames exclude the
-// first line of the stack, because that line repeats the message.
+// first line of the stack, because that line repeats the message. An
+// unavailable level is a stored level row that breaks a rule (#147). It
+// gives the key of the row and the code of the rule, and no section.
 export type UseCaseLogEntry =
   | { readonly useCase: string; readonly outcome: 'success' }
   | { readonly useCase: string; readonly outcome: 'failure'; readonly kind: string }
@@ -15,6 +17,13 @@ export type UseCaseLogEntry =
       readonly name: string;
       readonly code: string | undefined;
       readonly frames: string | undefined;
+    }
+  | {
+      readonly useCase: string;
+      readonly outcome: 'unavailable-level';
+      readonly gameId: string;
+      readonly levelId: string;
+      readonly reason: string;
     };
 
 export interface Logger {

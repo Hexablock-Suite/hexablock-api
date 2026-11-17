@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 3 of 5</p>
       <h1>HTTP: controllers call input ports, never use case classes</h1>
       <svg
-        viewBox="0 0 1040 894"
+        viewBox="0 0 1040 982"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad3http-title ad3http-desc"
@@ -75,9 +75,10 @@
           each request and each answer, among them the RegisterUserRequest and the LoginRequest, the
           LeaderboardDtoMapper that LeaderboardController uses to build each board query and each
           answer, the JwtAuthGuard that the controller decorators apply to progress, leaderboard
-          reads and level updates and that holds the AuthenticateToken input port, the LevelDto that
-          carries the section for the validator of its gameId, and the HttpErrorFilter for
-          unexpected errors.
+          reads and level updates and that holds the AuthenticateToken input port, the
+          LevelEditorGuard that runs after it on level updates and holds the AuthorizeLevelEditor
+          input port (#145), the LevelDto that carries the section for the validator of its gameId,
+          and the HttpErrorFilter for unexpected errors.
         </desc>
         <defs>
           <marker
@@ -136,7 +137,7 @@
           x="24"
           y="24"
           width="992"
-          height="644"
+          height="716"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -428,6 +429,8 @@
           LevelsController
         </text>
         <text
+          textLength="248"
+          lengthAdjust="spacingAndGlyphs"
           x="868"
           y="138"
           fill="#5b6873"
@@ -436,7 +439,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-04 · update guarded by JwtAuthGuard
+          API-FR-04 · update guarded by JwtAuthGuard, LevelEditorGuard
         </text>
         <line x1="736" y1="148" x2="1000" y2="148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="752" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -606,6 +609,62 @@
           Promise&lt;boolean&gt;
         </text>
 
+        <!-- Class: LevelEditorGuard («guard», #145) -->
+        <rect
+          x="736"
+          y="596"
+          width="264"
+          height="124"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="868"
+          y="614"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «guard»
+        </text>
+        <text
+          x="868"
+          y="632"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelEditorGuard
+        </text>
+        <text
+          x="868"
+          y="646"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          #145 · after JwtAuthGuard
+        </text>
+        <line x1="736" y1="656" x2="1000" y2="656" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="672" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - authorize: AuthorizeLevelEditor
+        </text>
+        <line x1="736" y1="680" x2="1000" y2="680" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="696" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + canActivate(context: ExecutionContext):
+        </text>
+        <text x="774" y="712" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;boolean&gt;
+        </text>
+
         <!-- Class: HttpErrorFilter («filter») -->
         <rect
           x="400"
@@ -748,7 +807,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="692"
+          y="764"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -758,7 +817,7 @@
         </text>
         <text
           x="24"
-          y="708"
+          y="780"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -768,7 +827,7 @@
         </text>
         <text
           x="24"
-          y="724"
+          y="796"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -778,7 +837,7 @@
         </text>
         <text
           x="24"
-          y="740"
+          y="812"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -788,7 +847,7 @@
         </text>
         <text
           x="24"
-          y="756"
+          y="828"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -798,7 +857,7 @@
         </text>
         <text
           x="24"
-          y="772"
+          y="844"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -807,7 +866,7 @@
         </text>
         <text
           x="24"
-          y="788"
+          y="860"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -815,11 +874,22 @@
           AuthDtoMapper builds the RegisterUserRequest and the LoginRequest that RegisterUser and
           Login take (Part 2, view 4, and the login slice).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="812" x2="1016" y2="812" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="830"
+          y="876"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelEditorGuard runs after JwtAuthGuard on the level update. It holds the
+          AuthorizeLevelEditor input port and answers 403 for an account outside LevelEditors
+          (#145).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="900" x2="1016" y2="900" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="918"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -829,16 +899,16 @@
         </text>
         <line
           x1="24"
-          y1="848"
+          y1="936"
           x2="52"
-          y2="848"
+          y2="936"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad3http-open)"
         />
         <text
           x="60"
-          y="852"
+          y="940"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -847,7 +917,7 @@
         </text>
         <rect
           x="24"
-          y="868"
+          y="956"
           width="20"
           height="12"
           rx="2"
@@ -857,7 +927,7 @@
         />
         <text
           x="56"
-          y="877"
+          y="965"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -866,7 +936,7 @@
         </text>
         <rect
           x="166"
-          y="868"
+          y="956"
           width="28"
           height="12"
           rx="2"
@@ -876,7 +946,7 @@
         />
         <text
           x="202"
-          y="877"
+          y="965"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -885,7 +955,7 @@
         </text>
         <rect
           x="312"
-          y="868"
+          y="956"
           width="28"
           height="12"
           rx="2"
@@ -896,7 +966,7 @@
         />
         <text
           x="348"
-          y="877"
+          y="965"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
