@@ -1031,6 +1031,16 @@
               }
             },
             "description": "The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "The account of the token is not in the list of level editors of the configuration. An empty or unset list lets no account update. No level is saved."
           }
         },
         "security": [

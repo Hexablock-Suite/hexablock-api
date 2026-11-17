@@ -21,6 +21,10 @@ import {
   GET_LEADERBOARD,
   GetLeaderboardUseCase,
 } from '../application/leaderboard/get-leaderboard.use-case.js';
+import {
+  AUTHORIZE_LEVEL_EDITOR,
+  AuthorizeLevelEditorUseCase,
+} from '../application/levels/authorize-level-editor.use-case.js';
 import { GET_LEVELS, GetLevelsUseCase } from '../application/levels/get-levels.use-case.js';
 import {
   UPDATE_LEVELS,
@@ -53,7 +57,7 @@ import { SortLevelValidator } from '../domain/level/sort/sort-level-validator.js
 import { Topologies } from '../domain/level/topologies.js';
 import { TopologyId } from '../domain/level/topology-id.js';
 import { GameId } from '../domain/progress/game-id.js';
-import { createJwtService, readJwtSecret } from './auth/auth-config.js';
+import { createJwtService, readJwtSecret, readLevelEditors } from './auth/auth-config.js';
 import { JwtTokenIssuer } from './auth/jwt-token-issuer.js';
 import { RandomUserIdGenerator } from './auth/random-user-id-generator.js';
 import { ScryptPasswordHasher } from './auth/scrypt-password-hasher.js';
@@ -163,6 +167,11 @@ function levelValidators(): LevelValidators {
       inject: [LEVEL_REPOSITORY, LEVEL_VALIDATORS, LOGGER],
       useFactory: (levels: LevelRepository, validators: LevelValidators, logger: Logger) =>
         new LoggingAspect(new UpdateLevelsUseCase(levels, validators), 'UpdateLevels', logger),
+    },
+    // The list of level editors comes from LEVEL_EDITOR_IDS (#145).
+    {
+      provide: AUTHORIZE_LEVEL_EDITOR,
+      useFactory: () => new AuthorizeLevelEditorUseCase(readLevelEditors()),
     },
     {
       provide: LEADERBOARD_READER,

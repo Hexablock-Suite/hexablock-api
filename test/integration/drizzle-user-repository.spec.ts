@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import { receiveUserOf } from '../../src/adapters/received.js';
 import { DrizzleUserRepository } from '../../src/adapters/persistence/drizzle-user-repository.js';
 import { users } from '../../src/adapters/persistence/schema.js';
 import { UserRowMapper } from '../../src/adapters/persistence/user-row.mapper.js';
@@ -9,7 +10,6 @@ import { UserId } from '../../src/domain/user/user-id.js';
 import { Username } from '../../src/domain/user/username.js';
 import { PrefixPasswordHasher } from '../support/auth/fakes.js';
 import { registerRequest } from '../support/auth/requests.js';
-import { userPartsOf } from '../support/recording-receiver.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
 import { describeUserRepositoryContract } from '../support/user-repository.contract.js';
 import { valueOf } from '../support/result.js';
@@ -167,7 +167,7 @@ describe('DrizzleUserRepository', () => {
     expect(UserRowMapper.toRow(ada)).toEqual(row);
     const restored = UserRowMapper.toEntity(row);
     expect(restored.equals(ada)).toBe(true);
-    expect(userPartsOf(restored)).toEqual(userPartsOf(ada));
+    expect(receiveUserOf(restored)).toEqual(receiveUserOf(ada));
     expect(UserRowMapper.toRow(restored)).toEqual(row);
   });
 

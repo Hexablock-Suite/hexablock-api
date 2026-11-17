@@ -1,3 +1,4 @@
+import { receiveUserOf, type UserValues } from '../../src/adapters/received.js';
 import type { UserRepository } from '../../src/application/ports/user-repository.js';
 import { err, ok } from '../../src/domain/shared/result.js';
 import { PasswordHash } from '../../src/domain/user/password-hash.js';
@@ -22,6 +23,14 @@ function userNamed(id: string, name: string): User {
   );
 }
 
+// The values that a found user delivers, or null when no user is found.
+// PasswordHash keeps its text in an ECMAScript private field (#138), so a
+// structural comparison of two users ignores the hash. A test compares the
+// delivered values instead, and so it also compares the hash.
+function valuesOf(user: User | null): UserValues | null {
+  return user === null ? null : receiveUserOf(user);
+}
+
 // Contract of the UserRepository port (API-FR-01): no two users have names
 // that collide (#62). The in-memory fake and the Drizzle adapter run the
 // same cases, so the fake promises nothing that the adapter breaks (#100).
@@ -30,7 +39,8 @@ export function describeUserRepositoryContract(
   createRepository: () => UserRepository | Promise<UserRepository>,
 ): void {
   describe(`UserRepository contract: ${name}`, () => {
-    // findByUsername() compares the name as typed, letter case included.
+    // findByUsername() compares the lower-case key, as isUsernameTaken()
+    // does (#144). The found user keeps the letter case of sign-up.
     it('should_find_the_stored_user_when_the_name_matches_exactly', async () => {
       const repository = await createRepository();
       const ada = userNamed(FIRST_ID, 'Ada');
@@ -38,11 +48,24 @@ export function describeUserRepositoryContract(
 
       const found = await repository.findByUsername(username('Ada'));
 
-      expect(found).toEqual(ada);
+      expect(valuesOf(found)).toEqual(valuesOf(ada));
     });
 
-    it.each(['ada', 'ADA', 'grace'])(
-      'should_return_null_when_no_stored_name_matches_exactly',
+    it.each(['ada', 'ADA', 'aDA'])(
+      'should_find_the_stored_user_when_the_name_differs_only_in_letter_case',
+      async (asked) => {
+        const repository = await createRepository();
+        const ada = userNamed(FIRST_ID, 'Ada');
+        await repository.add(ada);
+
+        const found = await repository.findByUsername(username(asked));
+
+        expect(valuesOf(found)).toEqual(valuesOf(ada));
+      },
+    );
+
+    it.each(['grace', 'Adb', 'Ada1'])(
+      'should_return_null_when_no_stored_name_has_the_same_key',
       async (asked) => {
         const repository = await createRepository();
         await repository.add(userNamed(FIRST_ID, 'Ada'));
@@ -55,14 +78,15 @@ export function describeUserRepositoryContract(
     // isUsernameTaken() and add() give its answer. The Drizzle adapter
     // compares the lower case key in SQL, so these pairs pin that the SQL
     // and the domain agree. Every allowed character is ASCII. The last
-    // column names the user that findByUsername() gives for the second name.
+    // column names the user that findByUsername() gives for the second name:
+    // the first user when the names collide (#144).
     it.each([
-      ['Ada', 'ada', true, null],
-      ['Ada', 'ADA', true, null],
+      ['Ada', 'ada', true, 'first'],
+      ['Ada', 'ADA', true, 'first'],
       ['Ada', 'Ada', true, 'first'],
-      ['Zz9', 'zZ9', true, null],
-      ['grace.hopper', 'Grace.Hopper', true, null],
-      ['player_01-x', 'PLAYER_01-X', true, null],
+      ['Zz9', 'zZ9', true, 'first'],
+      ['grace.hopper', 'Grace.Hopper', true, 'first'],
+      ['player_01-x', 'PLAYER_01-X', true, 'first'],
       ['Ada', 'Adb', false, 'second'],
       ['Ada', 'Ada1', false, 'second'],
       ['a-b', 'a_b', false, 'second'],
@@ -79,9 +103,11 @@ export function describeUserRepositoryContract(
         expect(username(stored).collidesWith(username(asked))).toBe(collide);
         expect(taken).toBe(collide);
         expect(added).toEqual(collide ? err('username-taken') : ok(undefined));
-        expect(await repository.findByUsername(username(stored))).toEqual(users.first);
-        expect(await repository.findByUsername(username(asked))).toEqual(
-          owner === null ? null : users[owner],
+        expect(valuesOf(await repository.findByUsername(username(stored)))).toEqual(
+          valuesOf(users.first),
+        );
+        expect(valuesOf(await repository.findByUsername(username(asked)))).toEqual(
+          valuesOf(users[owner]),
         );
       },
     );
@@ -115,8 +141,8 @@ export function describeUserRepositoryContract(
       expect(lookups).toEqual([false, false]);
       expect(first).toEqual(ok(undefined));
       expect(second).toEqual(err('username-taken'));
-      expect(await repository.findByUsername(username('Ada'))).toEqual(ada);
-      await expect(repository.findByUsername(username('ada'))).resolves.toBeNull();
+      expect(valuesOf(await repository.findByUsername(username('Ada')))).toEqual(valuesOf(ada));
+      expect(valuesOf(await repository.findByUsername(username('ada')))).toEqual(valuesOf(ada));
     });
   });
 }

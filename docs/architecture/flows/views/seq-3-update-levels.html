@@ -63,7 +63,7 @@
       <p class="eyebrow">Sequence diagram · Use case 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1386"
+        viewBox="0 0 1240 1402"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="seq3updatelevels-title seq3updatelevels-desc"
@@ -1524,18 +1524,28 @@
           LevelValidator and its validators (FitLevelValidator, SortLevelValidator) form the
           Strategy pattern.
         </text>
+        <text
+          x="24"
+          y="1294"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Not drawn: LevelEditorGuard runs after JwtAuthGuard and asks AuthorizeLevelEditor; an
+          account outside LevelEditors gets a 403 before LevelsController runs (#145, decision 18).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1306"
+          y1="1322"
           x2="1216"
-          y2="1306"
+          y2="1322"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1324"
+          y="1340"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1545,16 +1555,16 @@
         </text>
         <line
           x1="24"
-          y1="1342"
+          y1="1358"
           x2="52"
-          y2="1342"
+          y2="1358"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
         <text
           x="60"
-          y="1346"
+          y="1362"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1563,9 +1573,9 @@
         </text>
         <line
           x1="196"
-          y1="1342"
+          y1="1358"
           x2="224"
-          y2="1342"
+          y2="1358"
           stroke="#5b6873"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1573,7 +1583,7 @@
         />
         <text
           x="232"
-          y="1346"
+          y="1362"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1582,7 +1592,7 @@
         </text>
         <rect
           x="392"
-          y="1334"
+          y="1350"
           width="10"
           height="16"
           fill="#ffffff"
@@ -1591,7 +1601,7 @@
         />
         <text
           x="410"
-          y="1346"
+          y="1362"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1600,7 +1610,7 @@
         </text>
         <rect
           x="548"
-          y="1336"
+          y="1352"
           width="28"
           height="12"
           rx="2"
@@ -1610,7 +1620,7 @@
         />
         <text
           x="584"
-          y="1346"
+          y="1362"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1619,7 +1629,7 @@
         </text>
         <rect
           x="24"
-          y="1362"
+          y="1378"
           width="20"
           height="12"
           rx="2"
@@ -1629,7 +1639,7 @@
         />
         <rect
           x="48"
-          y="1362"
+          y="1378"
           width="20"
           height="12"
           rx="2"
@@ -1639,7 +1649,7 @@
         />
         <rect
           x="72"
-          y="1362"
+          y="1378"
           width="20"
           height="12"
           rx="2"
@@ -1649,7 +1659,7 @@
         />
         <text
           x="104"
-          y="1371"
+          y="1387"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1658,7 +1668,7 @@
         </text>
         <rect
           x="352"
-          y="1362"
+          y="1378"
           width="28"
           height="12"
           rx="1"
@@ -1668,7 +1678,7 @@
         />
         <text
           x="388"
-          y="1371"
+          y="1387"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1676,14 +1686,14 @@
           Frame · sd names the interaction; a message on its left edge enters or leaves the API
         </text>
         <path
-          d="M788 1362 L804 1362 L808 1366 L808 1374 L788 1374 Z"
+          d="M788 1378 L804 1378 L808 1382 L808 1390 L788 1390 Z"
           fill="#ffffff"
           stroke="#5b6873"
           stroke-width="1"
         />
         <text
           x="816"
-          y="1371"
+          y="1387"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
