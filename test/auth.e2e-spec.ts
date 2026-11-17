@@ -249,9 +249,11 @@ describe('auth endpoints (API-FR-01)', () => {
     expect(rows.map((row) => row.username)).toEqual(['ada']);
   });
 
-  it('should_store_username_as_typed_when_it_has_capital_letters', async () => {
+  // Sign-in looks the user up by the lower-case key, and the stored name
+  // keeps the letter case of sign-up (#144).
+  it('should_store_username_as_typed_when_the_user_signs_in_with_another_letter_case', async () => {
     const response = await post('/auth/register', { username: 'Ada', password: PASSWORD });
-    const login = await post('/auth/login', { username: 'Ada', password: PASSWORD });
+    const login = await post('/auth/login', { username: 'ada', password: PASSWORD });
 
     expect(response.status).toBe(201);
     expect(login.status).toBe(200);
@@ -259,11 +261,27 @@ describe('auth endpoints (API-FR-01)', () => {
     expect(rows.map((row) => row.username)).toEqual(['Ada']);
   });
 
-  // Login finds the user by the name as typed (#62).
-  it('should_return_unauthorized_error_body_when_login_username_differs_only_in_case', async () => {
+  // Sign-in looks the user up by the same lower-case key that sign-up
+  // uses (#144), so `ADA` signs in the stored `ada`.
+  it('should_return_jwt_for_the_stored_user_when_login_username_differs_only_in_case', async () => {
+    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    const [stored] = await testApp.database.db.select().from(users);
+
+    const login = await post('/auth/login', { username: 'ADA', password: PASSWORD });
+    const me = await request(testApp.app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${login.body.accessToken}`);
+
+    expect(login.status).toBe(200);
+    expect(Object.keys(login.body)).toEqual(['accessToken']);
+    expect(me.status).toBe(200);
+    expect(me.body).toEqual({ userId: stored.id });
+  });
+
+  it('should_return_unauthorized_error_body_when_login_username_differs_only_in_case_and_password_is_wrong', async () => {
     await post('/auth/register', { username: USERNAME, password: PASSWORD });
 
-    const response = await post('/auth/login', { username: 'ADA', password: PASSWORD });
+    const response = await post('/auth/login', { username: 'ADA', password: 'wrong password' });
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -286,7 +304,7 @@ describe('auth endpoints (API-FR-01)', () => {
       path: 'other letter case',
       username: 'ADA',
       password: PASSWORD,
-      status: 401,
+      status: 200,
       verify: 1,
       hash: 0,
     },

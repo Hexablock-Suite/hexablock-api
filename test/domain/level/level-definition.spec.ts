@@ -118,6 +118,16 @@ describe('LevelDefinition', () => {
       expect(acceptedHigher.ok && acceptedHigher.value).toBe(higher);
     });
 
+    // #147: a stored row that breaks a rule gives only its version. The
+    // incoming copy tells if it is older than that version.
+    it('should_be_older_only_when_its_version_is_lower_than_the_stored_version', () => {
+      const version = (value: number) => valueOf(LevelVersion.of(value));
+
+      expect(copy(1).isOlderThan(version(2))).toBe(true);
+      expect(copy(2).isOlderThan(version(2))).toBe(false);
+      expect(copy(3).isOlderThan(version(2))).toBe(false);
+    });
+
     // The rule compares two copies of one level. Another level is a defect
     // of the caller, not a datum of a level, so this guard throws.
     it('should_throw_when_the_incoming_level_is_another_level', () => {

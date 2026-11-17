@@ -6,7 +6,7 @@ import type { TopologyId } from '../../domain/level/topology-id.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { LevelRepository } from '../ports/level-repository.js';
+import type { LevelChange, LevelRepository } from '../ports/level-repository.js';
 import type { UseCase } from '../use-case.js';
 import type { InvalidLevels, LevelProblemReport } from './invalid-levels.js';
 
@@ -48,7 +48,11 @@ interface CheckedLevel {
 // one transaction changes one level (section «Domain design rules»).
 // The change of each update runs the version rule of S3-10 under the lock
 // of the level. A lower version saves nothing for that level, and the use
-// case reports it as a level problem. This also covers a race: another
+// case reports it as a level problem. A stored row that breaks a rule has
+// no level, and the level of the update replaces it (#147). The version rule
+// still compares with the version of that row when its version column holds
+// a valid version. When that column breaks the rule of LevelVersion, there
+// is no version to compare, and any valid version replaces the row. This also covers a race: another
 // update can save a newer copy between the check and the save. The other
 // levels of the batch are still saved. An equal version passes, so a retry
 // of the same batch is safe. A save that throws stops the batch: the levels
@@ -68,9 +72,7 @@ export class UpdateLevelsUseCase implements UpdateLevels {
     for (const { gameId, levelId, level } of checked.value) {
       // The saves run one after the other, in the order of the batch, so a
       // failed save keeps exactly the levels before it.
-      const saved = await this.levels.update(gameId, levelId, (stored) =>
-        stored === null ? ok(level) : stored.accepts(level),
-      );
+      const saved = await this.levels.update(gameId, levelId, versionRule(level));
       if (!saved.ok) {
         problems.push({ gameId, levelId, problem: saved.error });
       }
@@ -93,6 +95,23 @@ export class UpdateLevelsUseCase implements UpdateLevels {
     }
     return problems.length === 0 ? ok(checked) : err(invalidLevels(problems));
   }
+}
+
+// The change of one update: the version rule of S3-10 over each state of
+// the stored level.
+function versionRule(level: LevelDefinition<unknown>): LevelChange {
+  return (stored) => {
+    switch (stored.state) {
+      case 'absent':
+        return ok(level);
+      case 'valid':
+        return stored.level.accepts(level);
+      case 'broken':
+        return stored.version !== null && level.isOlderThan(stored.version)
+          ? err('older-version')
+          : ok(level);
+    }
+  };
 }
 
 function invalidLevels(problems: readonly LevelProblemReport[]): InvalidLevels {
