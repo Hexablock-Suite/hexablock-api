@@ -4,6 +4,7 @@ import { LevelDefinition } from '../../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../../src/domain/level/level-order.js';
 import { LevelVersion } from '../../../src/domain/level/level-version.js';
 import { SortSection } from '../../../src/domain/level/sort/sort-section.js';
+import type { StoredLevel } from '../../../src/domain/level/stored-level.js';
 import { TopologyId } from '../../../src/domain/level/topology-id.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
@@ -162,6 +163,61 @@ describe('LevelDefinition', () => {
       expect(() => stored.accepts(otherLevel)).toThrow(
         'The version rule compares two copies of one level.',
       );
+    });
+
+    // #174: the incoming copy decides the version rule over each state of
+    // the store, so the use case only coordinates.
+    const broken = (version: number | null): StoredLevel => ({
+      state: 'broken',
+      reason: 'invalid-section',
+      version: version === null ? null : valueOf(LevelVersion.of(version)),
+    });
+
+    it('should_give_the_incoming_copy_when_no_row_is_stored', () => {
+      const incoming = copy(1);
+
+      expect(incoming.decideReplace({ state: 'absent' })).toEqual({ ok: true, value: incoming });
+    });
+
+    it.each([1, 2])(
+      'should_give_the_incoming_copy_when_the_valid_stored_level_has_a_lower_or_an_equal_version',
+      (storedVersion) => {
+        const incoming = copy(2);
+
+        expect(incoming.decideReplace({ state: 'valid', level: copy(storedVersion) })).toEqual({
+          ok: true,
+          value: incoming,
+        });
+      },
+    );
+
+    it('should_reject_the_incoming_copy_with_older_version_when_the_valid_stored_level_has_a_higher_version', () => {
+      expect(copy(2).decideReplace({ state: 'valid', level: copy(3) })).toEqual({
+        ok: false,
+        error: 'older-version',
+      });
+    });
+
+    it('should_reject_the_incoming_copy_with_older_version_when_the_broken_row_holds_a_newer_version', () => {
+      expect(copy(2).decideReplace(broken(3))).toEqual({ ok: false, error: 'older-version' });
+    });
+
+    it.each([1, 2])(
+      'should_give_the_incoming_copy_when_the_broken_row_holds_a_lower_or_an_equal_version',
+      (storedVersion) => {
+        const incoming = copy(2);
+
+        expect(incoming.decideReplace(broken(storedVersion))).toEqual({
+          ok: true,
+          value: incoming,
+        });
+      },
+    );
+
+    it('should_give_the_incoming_copy_when_the_broken_row_holds_no_valid_version', () => {
+      const incoming = copy(2);
+
+      expect(incoming.decideReplace(broken(null))).toEqual({ ok: true, value: incoming });
     });
   });
 
