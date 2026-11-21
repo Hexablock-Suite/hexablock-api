@@ -83,8 +83,9 @@
           holds Topologies and gives FitSection the Topology of the level. A dashed frame labelled
           Aggregate marks the boundary of LevelDefinition; views 2 and 5 of Part 1 draw its members.
           The footnote says that a level that fails its check leaves the stored levels unchanged,
-          that FitSection and SortSection are value objects of the aggregate of LevelDefinition, and
-          that LevelValidator and its validators form the Strategy pattern.
+          that each save asks decideReplace() of the incoming level (S3-10, #174), that FitSection
+          and SortSection are value objects of the aggregate of LevelDefinition, and that
+          LevelValidator and its validators form the Strategy pattern.
         </desc>
         <defs>
           <marker
@@ -1314,7 +1315,8 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           The use case checks every level before the first save, so a level that fails its check
-          leaves the stored levels unchanged (API-FR-04). Layer 4 adds
+          leaves the stored levels unchanged (API-FR-04); each change asks decideReplace() of the
+          incoming level (S3-10, #174). Layer 4 adds
         </text>
         <text
           x="24"
