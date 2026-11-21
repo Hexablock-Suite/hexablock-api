@@ -1,13 +1,9 @@
-import type {
-  ListedLevels,
-  StoredLevel,
-  StoredLevelProblem,
-  UnavailableLevel,
-} from '../../application/ports/level-repository.js';
+import type { ListedLevels, UnavailableLevel } from '../../application/ports/level-repository.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import { LevelOrder } from '../../domain/level/level-order.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';
 import { LevelVersion } from '../../domain/level/level-version.js';
+import type { StoredLevel, StoredLevelProblem } from '../../domain/level/stored-level.js';
 import { TopologyId } from '../../domain/level/topology-id.js';
 import { GameId } from '../../domain/progress/game-id.js';
 import { LevelId } from '../../domain/progress/level-id.js';

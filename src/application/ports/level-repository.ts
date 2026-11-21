@@ -1,31 +1,9 @@
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
-import type { LevelVersion } from '../../domain/level/level-version.js';
-import type { GameId, GameIdProblem } from '../../domain/progress/game-id.js';
-import type { LevelId, LevelIdProblem } from '../../domain/progress/level-id.js';
+import type { StoredLevel, StoredLevelProblem } from '../../domain/level/stored-level.js';
+import type { GameId } from '../../domain/progress/game-id.js';
+import type { LevelId } from '../../domain/progress/level-id.js';
 import type { Result } from '../../domain/shared/result.js';
-
-// The code of the first rule that a stored level row breaks. The row
-// mapper checks the values in the order of the level format, so a broken
-// gameId or levelId comes before a level problem.
-export type StoredLevelProblem = GameIdProblem | LevelIdProblem | LevelProblem;
-
-// What the store holds for one gameId and levelId, read under the lock of
-// update() (#147). The three states are closed, so a change handles each:
-// - absent: no row.
-// - valid: a row that the strategy of its gameId restores into a level.
-// - broken: a row that breaks a rule. It has no level. It gives the code of
-//   its first broken rule and its stored version, or null when the version
-//   column itself breaks the rule of LevelVersion. So a broken row never
-//   passes as no row.
-export type StoredLevel =
-  | { readonly state: 'absent' }
-  | { readonly state: 'valid'; readonly level: LevelDefinition<unknown> }
-  | {
-      readonly state: 'broken';
-      readonly reason: StoredLevelProblem;
-      readonly version: LevelVersion | null;
-    };
 
 // One change of one level. It gets the stored state of the level. It
 // returns the level to save, or a failed Result to save nothing, for

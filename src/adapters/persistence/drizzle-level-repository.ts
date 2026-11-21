@@ -3,11 +3,11 @@ import type {
   LevelChange,
   LevelRepository,
   ListedLevels,
-  StoredLevel,
 } from '../../application/ports/level-repository.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';
+import type { StoredLevel } from '../../domain/level/stored-level.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import type { Result } from '../../domain/shared/result.js';
