@@ -7,10 +7,10 @@ import type { Result } from '../../domain/shared/result.js';
 
 // One change of one level. It gets the stored state of the level. It
 // returns the level to save, or a failed Result to save nothing, for
-// example the older-version of LevelDefinition.accepts() (S3-10). The level
-// that it returns has the gameId and the levelId of the update, and it
-// replaces a valid or a broken row. It is synchronous domain code and does
-// no I/O.
+// example the older-version of LevelDefinition.decideReplace() (S3-10,
+// #174). The level that it returns has the gameId and the levelId of the
+// update, and it replaces a valid or a broken row. It is synchronous
+// domain code and does no I/O.
 export type LevelChange = (stored: StoredLevel) => Result<LevelDefinition<unknown>, LevelProblem>;
 
 // A stored level row that breaks a rule (#147). The key is the text of the
