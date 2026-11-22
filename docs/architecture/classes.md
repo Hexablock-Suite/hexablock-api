@@ -10,14 +10,14 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 
 - Page 1, `All classes`, holds every class, interface and type of the model once, by layer: layer 4 at the top and layer 1 at the bottom, so every dependency points down.
 - Pages 2 to 4, `Domain`, `Use cases` and `Adapters`, hold one part each. A part page shows the types of its part in full. A grey box with the name only is a type of another part that one of its lines touches, and its eyebrow names the page that details it.
-- A solid box is a type that exists in the code at `3820cd8`. A dashed box with `«planned»` is design from the views of this page that the code does not have yet. It keeps the `«Sprint N»` of its view when the view gives one.
+- A solid box is a type that exists in the code at `dad0a45`. A dashed box with `«planned»` is design from the views of this page that the code does not have yet. It keeps the `«Sprint N»` of its view when the view gives one.
 - `members not designed yet` marks a planned class that no view details.
 - `«dataType»` marks a type in the code that only carries data; it has no operations by design. `«module»` marks `AppModule`, a Nest module that only holds decorator metadata.
 - A line of structure (extends, implements, composition) is thick. A `use` line is thin and light, and it lives in the draw.io layer `use lines`. Hide that layer in Edit > Layers to read the structure alone.
 - Inside a group of 12 boxes or more, a frame holds the boxes of one view of this page. The frame title is the file name of the view in [`classes/views/`](classes/views/), for example `view ad-3-http` for `ad-3-http.png`.
 - The pages follow the reading rules of the next section, and each page has a legend.
 
-The file is generated from the code at `3820cd8` plus the views of this page, by the tool [`drawio-clases`](https://github.com/Hexablock-Suite/.github/tree/main/tools/drawio-clases) of the organization repository. The README of the tool gives the commands. [`classes.config.json`](classes.config.json) maps the folders and the views to layers and parts. [`classes.layout.json`](classes.layout.json) fixes the order of the groups of each band and of the boxes of each group.
+The file is generated from the code at `dad0a45` plus the views of this page, by the tool [`drawio-clases`](https://github.com/Hexablock-Suite/.github/tree/main/tools/drawio-clases) of the organization repository. The README of the tool gives the commands. [`classes.config.json`](classes.config.json) maps the folders and the views to layers and parts. [`classes.layout.json`](classes.layout.json) fixes the order of the groups of each band and of the boxes of each group.
 
 A hand edit of that order survives. Move the boxes in draw.io, run `pin.mjs` of the tool to write the order into `classes.layout.json`, and generate the file again. Commit `classes.drawio` and `classes.layout.json` together. Any other hand edit is lost at the next generation: a pixel position, a line route, a text or a style.
 
