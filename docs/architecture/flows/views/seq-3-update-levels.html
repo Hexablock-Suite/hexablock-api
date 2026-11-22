@@ -80,8 +80,9 @@
           the section type, the section checks its own shape and rules, and LevelValidators builds
           the level. With no problem, the use case saves each level with
           LevelRepository.update(gameId, levelId, change): DrizzleLevelRepository opens one
-          transaction, locks the gameId and the levelId, and the change runs stored.accepts(level)
-          on the stored copy (S3-10). Otherwise the use case returns a failed Result, and the
+          transaction, locks the gameId and the levelId, and the change asks the incoming level:
+          level.decideReplace(stored) decides the version rule of S3-10 over the stored state,
+          absent, valid or broken (#174). Otherwise the use case returns a failed Result, and the
           controller answers a 400 whose details LevelDtoMapper writes. A note on the strategy gives
           the Fit path: FitLevelValidator finds the Topology of the level in Topologies, and
           FitSection checks A5 on it; a topology with no entry gives unknown-topology. The same note
@@ -1268,7 +1269,7 @@
           font-size="7.5"
           font-family="'IBM Plex Mono', monospace"
         >
-          stored.accepts(level)
+          level.decideReplace(stored)
         </text>
         <!-- Reply: Result&lt;LevelDefinition, LevelProblem&gt; -->
         <line

@@ -71,7 +71,9 @@
             "Coordinate",
             "Topology",
             "TopologyId",
-            "LevelProblem"
+            "LevelProblem",
+            "StoredLevel",
+            "StoredLevelProblem"
           ]
         },
         {
@@ -167,7 +169,6 @@
             "ProgressChange",
             "UseCaseLogEntry",
             "ProgressRepository",
-            "StoredLevel",
             "LeaderboardReader",
             "Clock",
             "TokenIssuer",
@@ -175,7 +176,6 @@
             "UserIdGenerator",
             "SessionToken",
             "LevelRepository",
-            "StoredLevelProblem",
             "LevelChange",
             "UserRepository"
           ]
@@ -316,7 +316,9 @@
             "LevelValidator",
             "HexTopology",
             "Coordinate",
-            "Topology"
+            "Topology",
+            "StoredLevel",
+            "StoredLevelProblem"
           ]
         },
         {
@@ -415,7 +417,6 @@
             "AuthorizeLevelEditor",
             "UserRepository",
             "LevelChange",
-            "StoredLevel",
             "LevelRepository",
             "ProgressProblem",
             "GetProgressUseCase",
@@ -437,7 +438,6 @@
             "SyncProgressRequest",
             "GetProgressRequest",
             "GlobalLeaderboard",
-            "StoredLevelProblem",
             "TokenIssuer",
             "PasswordHasher",
             "UserIdGenerator",
@@ -497,7 +497,6 @@
             "ProgressKey",
             "GameId",
             "UserId",
-            "GameIdProblem",
             "PasswordHash",
             "LevelResult",
             "Standing",
@@ -513,11 +512,12 @@
             "Username",
             "PasswordVerifier",
             "Password",
-            "LevelIdProblem",
             "LevelId",
             "LevelOrder",
             "Result",
-            "LevelEditors"
+            "LevelEditors",
+            "StoredLevel",
+            "StoredLevelProblem"
           ]
         }
       ],
@@ -562,11 +562,9 @@
             "ListedLevels",
             "UnavailableLevel",
             "Logger",
-            "StoredLevelProblem",
             "UseCaseLogEntry",
             "ProgressRepository",
             "LevelChange",
-            "StoredLevel",
             "LeaderboardReader",
             "UserRepository",
             "TokenIssuer",
@@ -685,7 +683,9 @@
             "MovesProblem",
             "ElapsedTimeProblem",
             "StarsProblem",
-            "ProgressKeyReceiver"
+            "ProgressKeyReceiver",
+            "StoredLevel",
+            "StoredLevelProblem"
           ]
         }
       ],
@@ -699,7 +699,6 @@
             "GetLevels",
             "Login",
             "ListedLevels",
-            "StoredLevel",
             "UnavailableLevel",
             "Logger",
             "UseCaseLogEntry",
@@ -710,7 +709,6 @@
             "LoginProblem",
             "LevelRepository",
             "LevelChange",
-            "StoredLevelProblem",
             "TokenProblem",
             "NotALevelEditor",
             "LeaderboardReader",

@@ -8,6 +8,7 @@ import type { LevelOrder } from './level-order.js';
 import type { LevelProblem } from './level-problem.js';
 import type { LevelSection } from './level-section.js';
 import type { LevelVersion } from './level-version.js';
+import type { StoredLevel } from './stored-level.js';
 import type { TopologyId } from './topology-id.js';
 
 // Entity and aggregate root of one level definition (DS-6, API-FR-04, decision
@@ -69,6 +70,23 @@ export class LevelDefinition<TSection> {
       throw new RangeError('The version rule compares two copies of one level.');
     }
     return incoming.isOlderThan(this.version) ? err('older-version') : ok(incoming);
+  }
+
+  // The version rule of S3-10 over the stored state of the level (#174).
+  // This level is the incoming copy: an absent store takes it, a valid
+  // stored level decides through accepts(), and a broken row compares only
+  // its version, when the row holds one. The use case only coordinates.
+  decideReplace(stored: StoredLevel): Result<LevelDefinition<unknown>, LevelProblem> {
+    switch (stored.state) {
+      case 'absent':
+        return ok(this);
+      case 'valid':
+        return stored.level.accepts(this);
+      case 'broken':
+        return stored.version !== null && this.isOlderThan(stored.version)
+          ? err('older-version')
+          : ok(this);
+    }
   }
 
   // Tells if this copy is older than a stored version (S3-10). A stored row

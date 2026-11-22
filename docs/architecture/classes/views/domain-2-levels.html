@@ -79,6 +79,8 @@
           FitLevelValidator holds Topologies, finds the Topology of the level and picks FitSection,
           which checks A5 on that Topology. A dashed frame labelled Aggregate encloses
           LevelDefinition and its section types, FitSection and SortSection.
+          LevelDefinition.decideReplace(stored), called on the incoming copy, decides the version
+          rule of S3-10 over the stored state (#174).
         </desc>
         <defs>
           <marker
@@ -110,7 +112,7 @@
           x="24"
           y="24"
           width="992"
-          height="828"
+          height="852"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -143,7 +145,7 @@
           x="36"
           y="72"
           width="374"
-          height="764"
+          height="788"
           rx="8"
           fill="none"
           stroke="rgba(23,33,42,0.65)"
@@ -164,7 +166,7 @@
         <!-- Relationships (drawn before boxes) -->
         <!-- LevelDefinition&lt;FitSection&gt; holds section: FitSection: a value object, so a use arrow with role and multiplicity (decision 13) -->
         <path
-          d="M184 368 L184 416"
+          d="M184 400 L184 440"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -172,7 +174,7 @@
         />
         <!-- LevelDefinition&lt;SortSection&gt; holds section: SortSection: a value object, so a use arrow with role and multiplicity (decision 13) -->
         <path
-          d="M340 368 L340 718 Q340 726 332 726 L320 726"
+          d="M340 400 L340 742 Q340 750 332 750 L320 750"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -347,7 +349,7 @@
           x="48"
           y="100"
           width="312"
-          height="268"
+          height="300"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -471,10 +473,25 @@
         >
           + equals(other: LevelDefinition&lt;unknown&gt;): boolean
         </text>
+        <text x="64" y="376" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + decideReplace(stored: StoredLevel):
+        </text>
+        <text
+          textLength="268"
+          lengthAdjust="spacingAndGlyphs"
+          text-decoration="underline"
+          x="86"
+          y="392"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;
+        </text>
         <!-- Class: FitSection («value object») -->
         <rect
           x="48"
-          y="416"
+          y="440"
           width="272"
           height="204"
           rx="6"
@@ -484,7 +501,7 @@
         />
         <text
           x="184"
-          y="434"
+          y="458"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -495,7 +512,7 @@
         </text>
         <text
           x="184"
-          y="452"
+          y="476"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -506,7 +523,7 @@
         </text>
         <text
           x="184"
-          y="466"
+          y="490"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -515,24 +532,24 @@
         >
           DS-6 · A5 · decision 6
         </text>
-        <line x1="48" y1="476" x2="320" y2="476" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="64" y="492" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="48" y1="500" x2="320" y2="500" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - figure: Coordinate[]
         </text>
-        <text x="64" y="508" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - pieces: FitPiece[]
         </text>
-        <text x="64" y="524" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="548" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - witness: Placement[]
         </text>
-        <text x="64" y="540" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - stars: FitStarThreshold[]
         </text>
-        <line x1="48" y1="548" x2="320" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="48" y1="572" x2="320" y2="572" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           text-decoration="underline"
           x="64"
-          y="564"
+          y="588"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -542,7 +559,7 @@
         <text
           text-decoration="underline"
           x="86"
-          y="580"
+          y="604"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -552,20 +569,20 @@
         <text
           text-decoration="underline"
           x="86"
-          y="596"
+          y="620"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           Result&lt;FitSection, LevelProblem&gt;
         </text>
-        <text x="64" y="612" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="636" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: FitSection): boolean
         </text>
         <!-- Class: SortSection («value object») -->
         <rect
           x="48"
-          y="632"
+          y="656"
           width="272"
           height="188"
           rx="6"
@@ -575,7 +592,7 @@
         />
         <text
           x="184"
-          y="650"
+          y="674"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -586,7 +603,7 @@
         </text>
         <text
           x="184"
-          y="668"
+          y="692"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -597,7 +614,7 @@
         </text>
         <text
           x="184"
-          y="682"
+          y="706"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -606,24 +623,24 @@
         >
           DS-6 · API-FR-04
         </text>
-        <line x1="48" y1="692" x2="320" y2="692" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="64" y="708" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="48" y1="716" x2="320" y2="716" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="732" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - radius: BoardRadius
         </text>
-        <text x="64" y="724" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="748" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - goals: GoalCount
         </text>
-        <text x="64" y="740" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - source: StackSource
         </text>
-        <text x="64" y="756" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - stars: Moves[]
         </text>
-        <line x1="48" y1="764" x2="320" y2="764" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="48" y1="788" x2="320" y2="788" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           text-decoration="underline"
           x="64"
-          y="780"
+          y="804"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -633,14 +650,14 @@
         <text
           text-decoration="underline"
           x="86"
-          y="796"
+          y="820"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           Result&lt;SortSection, LevelProblem&gt;
         </text>
-        <text x="64" y="812" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="64" y="836" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: SortSection): boolean
         </text>
         <!-- Class: LevelValidators («domain service») -->
@@ -958,8 +975,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          A topology with no entry gives unknown-topology. docs/level-format.md gives the shared
-          level format.
+          A topology with no entry gives unknown-topology. decideReplace(stored) decides the version
+          rule of S3-10 over the stored state (#174). docs/level-format.md gives the shared level
+          format.
         </text>
         <!-- Legend -->
         <line x1="24" y1="988" x2="1016" y2="988" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

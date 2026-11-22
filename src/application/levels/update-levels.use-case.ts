@@ -6,7 +6,7 @@ import type { TopologyId } from '../../domain/level/topology-id.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { LevelChange, LevelRepository } from '../ports/level-repository.js';
+import type { LevelRepository } from '../ports/level-repository.js';
 import type { UseCase } from '../use-case.js';
 import type { InvalidLevels, LevelProblemReport } from './invalid-levels.js';
 
@@ -46,8 +46,9 @@ interface CheckedLevel {
 // it saves level by level, each in its own transaction, through
 // LevelRepository.update(). Each level is the root of its own aggregate, so
 // one transaction changes one level (section «Domain design rules»).
-// The change of each update runs the version rule of S3-10 under the lock
-// of the level. A lower version saves nothing for that level, and the use
+// The change of each update asks the incoming level: decideReplace() runs
+// the version rule of S3-10 in LevelDefinition, under the lock of the level.
+// A lower version saves nothing for that level, and the use
 // case reports it as a level problem. A stored row that breaks a rule has
 // no level, and the level of the update replaces it (#147). The version rule
 // still compares with the version of that row when its version column holds
@@ -72,7 +73,9 @@ export class UpdateLevelsUseCase implements UpdateLevels {
     for (const { gameId, levelId, level } of checked.value) {
       // The saves run one after the other, in the order of the batch, so a
       // failed save keeps exactly the levels before it.
-      const saved = await this.levels.update(gameId, levelId, versionRule(level));
+      const saved = await this.levels.update(gameId, levelId, (stored) =>
+        level.decideReplace(stored),
+      );
       if (!saved.ok) {
         problems.push({ gameId, levelId, problem: saved.error });
       }
@@ -95,23 +98,6 @@ export class UpdateLevelsUseCase implements UpdateLevels {
     }
     return problems.length === 0 ? ok(checked) : err(invalidLevels(problems));
   }
-}
-
-// The change of one update: the version rule of S3-10 over each state of
-// the stored level.
-function versionRule(level: LevelDefinition<unknown>): LevelChange {
-  return (stored) => {
-    switch (stored.state) {
-      case 'absent':
-        return ok(level);
-      case 'valid':
-        return stored.level.accepts(level);
-      case 'broken':
-        return stored.version !== null && level.isOlderThan(stored.version)
-          ? err('older-version')
-          : ok(level);
-    }
-  };
 }
 
 function invalidLevels(problems: readonly LevelProblemReport[]): InvalidLevels {

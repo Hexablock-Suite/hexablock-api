@@ -77,7 +77,8 @@
           implementing the LevelRepository and UserRepository ports. LevelRowMapper restores each
           stored row through the strategy that LevelValidators finds for its gameId, so each
           LevelDefinition is valid; a row that no strategy accepts is a broken row with its reason
-          and its stored version (#147).
+          and its stored version (#147); update() passes each stored state to decideReplace() of the
+          incoming level (#174).
         </desc>
         <defs>
           <marker
@@ -795,8 +796,8 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           A row that no strategy accepts is broken (#147): list() gives it apart, and update()
-          passes it as the broken state. update() locks each level in one transaction, as the
-          progress store does.
+          passes it as the broken state to decideReplace() of the incoming level (#174). update()
+          locks each level in one transaction, as the progress store does.
         </text>
         <!-- Legend -->
         <line x1="24" y1="808" x2="1016" y2="808" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

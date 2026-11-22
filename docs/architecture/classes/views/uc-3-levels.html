@@ -72,16 +72,17 @@
         <desc id="uc3levels-desc">
           Class diagram of layers 2 and 1 showing GetLevelsUseCase and UpdateLevelsUseCase over the
           LevelRepository port, which lists the levels and updates one level per call under a lock
-          of its gameId and levelId; UpdateLevelsUseCase also holds the LevelValidators domain
-          service and returns a Result whose InvalidLevels failure holds one problem per broken
-          level with its gameId and levelId, so a level that fails its check is never saved and no
-          exception reaches the HTTP layer. GetLevelsUseCase takes no request and has no expected
-          failure; it gives the valid levels and the broken rows apart, and logs each broken row
-          through the Logger port (#147). AuthorizeLevelEditorUseCase holds the LevelEditors value
-          object of layer 1, the user ids of the configuration, and fails with not-a-level-editor
-          for any other id, so an empty list lets no account update (#145). A footnote names
-          LevelDtoMapper, which builds the UpdateLevelsRequest, and LevelRowMapper, which restores
-          each stored row through LevelValidators.
+          of its gameId and levelId; its change asks the incoming level, whose decideReplace()
+          decides the version rule of S3-10 over the stored state (#174); UpdateLevelsUseCase also
+          holds the LevelValidators domain service and returns a Result whose InvalidLevels failure
+          holds one problem per broken level with its gameId and levelId, so a level that fails its
+          check is never saved and no exception reaches the HTTP layer. GetLevelsUseCase takes no
+          request and has no expected failure; it gives the valid levels and the broken rows apart,
+          and logs each broken row through the Logger port (#147). AuthorizeLevelEditorUseCase holds
+          the LevelEditors value object of layer 1, the user ids of the configuration, and fails
+          with not-a-level-editor for any other id, so an empty list lets no account update (#145).
+          A footnote names LevelDtoMapper, which builds the UpdateLevelsRequest, and LevelRowMapper,
+          which restores each stored row through LevelValidators.
         </desc>
         <defs>
           <marker
@@ -902,8 +903,8 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           LevelRepository.update() saves one level per transaction, under a lock of its gameId and
-          levelId. Its LevelChange gets the stored level, absent, valid or broken (#147), and runs
-          the version rule of S3-10.
+          levelId. Its LevelChange gets the stored level, absent, valid or broken (#147), and the
+          incoming level runs decideReplace(), the version rule of S3-10 (#174).
         </text>
         <text
           x="24"
