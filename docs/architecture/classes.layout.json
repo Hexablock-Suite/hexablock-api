@@ -1,0 +1,845 @@
+{
+  "pages": {
+    "all-classes": {
+      "1": [
+        {
+          "group": "domain|src/domain/progress",
+          "types": [
+            "PlayerProgress",
+            "GameId",
+            "Score",
+            "ProgressKey",
+            "GameIdProblem",
+            "LevelResult",
+            "Standing",
+            "PlayerProgressReceiver",
+            "LevelResultReceiver",
+            "SyncInstantProblem",
+            "SyncInstant",
+            "StandingProblem",
+            "LevelsCompleted",
+            "StandingReceiver",
+            "LevelId",
+            "ScoreProblem",
+            "LevelsCompletedProblem",
+            "LevelIdProblem",
+            "StarsProblem",
+            "ElapsedTimeProblem",
+            "Moves",
+            "MovesProblem",
+            "ElapsedTime",
+            "Stars",
+            "ProgressKeyReceiver"
+          ]
+        },
+        {
+          "group": "domain|src/domain/user",
+          "types": [
+            "User",
+            "PasswordAttempt",
+            "PasswordHash",
+            "PasswordHashProblem",
+            "UserId",
+            "PasswordVerifier",
+            "UsernameProblem",
+            "Username",
+            "UserReceiver",
+            "CharacterCount",
+            "CharacterCountProblem",
+            "Password",
+            "PasswordProblem",
+            "UserIdProblem",
+            "LevelEditors",
+            "UsernameCharacters"
+          ]
+        },
+        {
+          "group": "domain|src/domain/level",
+          "types": [
+            "LevelDefinition",
+            "LevelSection",
+            "LevelValidatorEntry",
+            "LevelValidators",
+            "Topologies",
+            "PartReader",
+            "FieldReaders",
+            "LevelOrder",
+            "HexTopology",
+            "LevelVersion",
+            "TopologyEntry",
+            "LevelValidator",
+            "Coordinate",
+            "Topology",
+            "TopologyId",
+            "LevelProblem"
+          ]
+        },
+        {
+          "group": "domain|src/domain/shared",
+          "types": ["Range", "BoundsReceiver", "Result", "ValueReceiver", "Ordered"]
+        },
+        {
+          "group": "domain|src/domain/level/fit",
+          "types": [
+            "FitSection",
+            "FitLevelValidator",
+            "Placement",
+            "FitStarThreshold",
+            "PieceId",
+            "Rotation",
+            "FitPiece"
+          ]
+        },
+        {
+          "group": "domain|src/domain/level/sort",
+          "types": [
+            "SortLevelValidator",
+            "SortSection",
+            "BoardRadius",
+            "GoalCount",
+            "StackSource",
+            "Seed",
+            "TileColor"
+          ]
+        }
+      ],
+      "2": [
+        {
+          "group": "usecases|src/application/leaderboard",
+          "types": [
+            "GetLeaderboardUseCase",
+            "UnknownLevel",
+            "GlobalLeaderboard",
+            "GetLeaderboard",
+            "LevelLeaderboard",
+            "Leaderboard",
+            "LeaderboardQuery",
+            "RankedEntry"
+          ]
+        },
+        {
+          "group": "usecases|src/application",
+          "types": ["UseCase", "ThrownValue"]
+        },
+        {
+          "group": "usecases|src/application/aspects",
+          "types": ["UseCaseAspect", "LoggingAspect"]
+        },
+        {
+          "group": "usecases|src/application/auth",
+          "types": [
+            "AuthenticateTokenUseCase",
+            "TokenProblem",
+            "RegisterProblem",
+            "RegisterUser",
+            "RegisterUserRequest",
+            "LoginUseCase",
+            "LoginRequest",
+            "RegisterUseCase",
+            "AuthenticateToken",
+            "LoginProblem",
+            "Login"
+          ]
+        },
+        {
+          "group": "usecases|src/application/levels",
+          "types": [
+            "GetLevelsUseCase",
+            "UpdateLevelsUseCase",
+            "GetLevels",
+            "InvalidLevels",
+            "UpdateLevelsRequest",
+            "AuthorizeLevelEditorUseCase",
+            "AuthorizeLevelEditor",
+            "IncomingLevel",
+            "LevelProblemReport",
+            "UpdateLevels",
+            "NotALevelEditor"
+          ]
+        },
+        {
+          "group": "usecases|src/application/ports",
+          "types": [
+            "LeaderboardEntry",
+            "Logger",
+            "ListedLevels",
+            "PasswordHasher",
+            "ProgressChange",
+            "UseCaseLogEntry",
+            "ProgressRepository",
+            "StoredLevel",
+            "LeaderboardReader",
+            "Clock",
+            "TokenIssuer",
+            "UnavailableLevel",
+            "UserIdGenerator",
+            "SessionToken",
+            "LevelRepository",
+            "StoredLevelProblem",
+            "LevelChange",
+            "UserRepository"
+          ]
+        },
+        {
+          "group": "usecases|src/application/progress",
+          "types": [
+            "SyncProgressUseCase",
+            "SyncProgressRequest",
+            "GetProgressUseCase",
+            "SyncProgress",
+            "GetProgress",
+            "GetProgressRequest",
+            "ProgressProblem"
+          ]
+        },
+        {
+          "group": "usecases|planned",
+          "types": ["TimingAspect"]
+        }
+      ],
+      "3": [
+        {
+          "group": "adapters|src/adapters/http",
+          "types": [
+            "LevelsController",
+            "CredentialsDto",
+            "LevelDto",
+            "UnavailableLevelDto",
+            "LoginDto",
+            "TokenDto",
+            "CurrentUserDto",
+            "AuthController",
+            "LevelsDto",
+            "ScoreEntryDto",
+            "LeaderboardDto",
+            "LevelLeaderboardDto",
+            "ProgressDto",
+            "SortSectionDto",
+            "AuthenticatedRequest",
+            "LeaderboardController",
+            "GlobalLeaderboardDto",
+            "SyncProgressDto",
+            "LevelEntryDto",
+            "FixedSourceDto",
+            "SortStarDto",
+            "SignInProblem",
+            "ProgressController",
+            "LevelResultDto",
+            "StandingEntryDto",
+            "HttpErrorFilter",
+            "SeededSourceDto",
+            "ErrorDto",
+            "AuthDtoMapper",
+            "FitPieceDto",
+            "FitPlacementDto",
+            "FitSectionDto",
+            "LeaderboardDtoMapper",
+            "FitStarDto",
+            "LevelEditorGuard",
+            "JwtAuthGuard",
+            "LevelDtoMapper",
+            "ProgressDtoMapper",
+            "HealthResponse",
+            "HealthController"
+          ]
+        },
+        {
+          "group": "adapters|src/adapters/persistence",
+          "types": [
+            "DrizzleProgressRepository",
+            "LevelRowMapper",
+            "ProgressRowMapper",
+            "PersistenceDatabase",
+            "LevelResultRow",
+            "ProgressRow",
+            "DrizzleLevelRepository",
+            "DrizzleUserRepository",
+            "LevelRow",
+            "DrizzleLeaderboardReader",
+            "UserRow",
+            "UserRowMapper"
+          ]
+        },
+        {
+          "group": "adapters|src/adapters",
+          "types": [
+            "LevelResultValues",
+            "Json",
+            "Bounds",
+            "ProgressKeyValues",
+            "ProgressValues",
+            "UserValues",
+            "LevelResultProblem"
+          ]
+        }
+      ],
+      "4": [
+        {
+          "group": "adapters|src/infrastructure/database",
+          "types": ["Database", "DatabaseModule"]
+        },
+        {
+          "group": "adapters|src/infrastructure/logging",
+          "types": ["NestLogger"]
+        },
+        {
+          "group": "adapters|src/infrastructure",
+          "types": ["AppModule"]
+        },
+        {
+          "group": "adapters|src/infrastructure/clock",
+          "types": ["SystemClock"]
+        },
+        {
+          "group": "adapters|src/infrastructure/auth",
+          "types": ["JwtTokenIssuer", "ScryptPasswordHasher", "RandomUserIdGenerator"]
+        }
+      ]
+    },
+    "part-domain": {
+      "1": [
+        {
+          "group": "domain|src/domain/level",
+          "types": [
+            "LevelDefinition",
+            "LevelSection",
+            "LevelValidatorEntry",
+            "LevelValidators",
+            "Topologies",
+            "PartReader",
+            "FieldReaders",
+            "LevelOrder",
+            "LevelVersion",
+            "TopologyId",
+            "LevelProblem",
+            "TopologyEntry",
+            "LevelValidator",
+            "HexTopology",
+            "Coordinate",
+            "Topology"
+          ]
+        },
+        {
+          "group": "domain|src/domain/progress",
+          "types": [
+            "PlayerProgress",
+            "GameIdProblem",
+            "Score",
+            "ProgressKey",
+            "SyncInstant",
+            "StandingProblem",
+            "PlayerProgressReceiver",
+            "ProgressKeyReceiver",
+            "ScoreProblem",
+            "LevelIdProblem",
+            "LevelsCompletedProblem",
+            "LevelsCompleted",
+            "GameId",
+            "LevelResult",
+            "LevelId",
+            "StandingReceiver",
+            "SyncInstantProblem",
+            "Stars",
+            "ElapsedTime",
+            "Moves",
+            "Standing",
+            "MovesProblem",
+            "LevelResultReceiver",
+            "StarsProblem",
+            "ElapsedTimeProblem"
+          ]
+        },
+        {
+          "group": "domain|src/domain/shared",
+          "types": ["Range", "Result", "BoundsReceiver", "Ordered", "ValueReceiver"]
+        },
+        {
+          "group": "domain|src/domain/level/fit",
+          "types": [
+            "FitLevelValidator",
+            "FitSection",
+            "Placement",
+            "FitPiece",
+            "Rotation",
+            "PieceId",
+            "FitStarThreshold"
+          ]
+        },
+        {
+          "group": "domain|src/domain/level/sort",
+          "types": [
+            "SortLevelValidator",
+            "SortSection",
+            "BoardRadius",
+            "GoalCount",
+            "StackSource",
+            "Seed",
+            "TileColor"
+          ]
+        },
+        {
+          "group": "domain|src/domain/user",
+          "types": [
+            "User",
+            "PasswordAttempt",
+            "Username",
+            "UserIdProblem",
+            "UserId",
+            "PasswordHash",
+            "PasswordHashProblem",
+            "CharacterCountProblem",
+            "CharacterCount",
+            "PasswordVerifier",
+            "Password",
+            "PasswordProblem",
+            "UserReceiver",
+            "UsernameProblem",
+            "LevelEditors",
+            "UsernameCharacters"
+          ]
+        }
+      ],
+      "2": [
+        {
+          "group": "ref|usecases",
+          "types": [
+            "LeaderboardEntry",
+            "Clock",
+            "LoggingAspect",
+            "ListedLevels",
+            "SyncProgressUseCase",
+            "SyncProgress",
+            "GetLeaderboard",
+            "GetLeaderboardUseCase",
+            "LeaderboardQuery",
+            "AuthorizeLevelEditor",
+            "UserRepository",
+            "LevelChange",
+            "StoredLevel",
+            "LevelRepository",
+            "ProgressProblem",
+            "GetProgressUseCase",
+            "ProgressRepository",
+            "LeaderboardReader",
+            "AuthorizeLevelEditorUseCase",
+            "RegisterUseCase",
+            "GetLevels",
+            "GetLevelsUseCase",
+            "UpdateLevelsUseCase",
+            "LevelProblemReport",
+            "GetProgress",
+            "ProgressChange",
+            "AuthenticateTokenUseCase",
+            "LoginUseCase",
+            "RegisterUserRequest",
+            "RegisterUser",
+            "IncomingLevel",
+            "SyncProgressRequest",
+            "GetProgressRequest",
+            "GlobalLeaderboard",
+            "StoredLevelProblem",
+            "TokenIssuer",
+            "PasswordHasher",
+            "UserIdGenerator",
+            "AuthenticateToken",
+            "LoginRequest",
+            "Login",
+            "UpdateLevels",
+            "LevelLeaderboard"
+          ]
+        }
+      ],
+      "3": [
+        {
+          "group": "ref|adapters",
+          "types": [
+            "DrizzleProgressRepository",
+            "LevelRowMapper",
+            "DrizzleLevelRepository",
+            "ProgressRowMapper",
+            "DrizzleLeaderboardReader",
+            "UserRowMapper",
+            "AuthController",
+            "AuthenticatedRequest",
+            "LeaderboardController",
+            "LeaderboardDtoMapper",
+            "AuthDtoMapper",
+            "LevelEditorGuard",
+            "JwtAuthGuard",
+            "LevelsController",
+            "ProgressController",
+            "LevelResultProblem",
+            "DrizzleUserRepository",
+            "LevelDtoMapper",
+            "ProgressDtoMapper"
+          ]
+        }
+      ],
+      "4": [
+        {
+          "group": "ref|adapters",
+          "types": [
+            "SystemClock",
+            "JwtTokenIssuer",
+            "RandomUserIdGenerator",
+            "ScryptPasswordHasher"
+          ]
+        }
+      ]
+    },
+    "part-usecases": {
+      "1": [
+        {
+          "group": "ref|domain",
+          "types": [
+            "PlayerProgress",
+            "Score",
+            "ProgressKey",
+            "GameId",
+            "UserId",
+            "GameIdProblem",
+            "PasswordHash",
+            "LevelResult",
+            "Standing",
+            "LevelDefinition",
+            "LevelValidators",
+            "SyncInstant",
+            "User",
+            "PasswordAttempt",
+            "Stars",
+            "LevelVersion",
+            "LevelProblem",
+            "TopologyId",
+            "Username",
+            "PasswordVerifier",
+            "Password",
+            "LevelIdProblem",
+            "LevelId",
+            "LevelOrder",
+            "Result",
+            "LevelEditors"
+          ]
+        }
+      ],
+      "2": [
+        {
+          "group": "usecases|src/application/leaderboard",
+          "types": [
+            "GetLeaderboardUseCase",
+            "Leaderboard",
+            "UnknownLevel",
+            "LeaderboardQuery",
+            "GetLeaderboard",
+            "RankedEntry",
+            "LevelLeaderboard",
+            "GlobalLeaderboard"
+          ]
+        },
+        {
+          "group": "usecases|src/application/auth",
+          "types": [
+            "AuthenticateTokenUseCase",
+            "LoginUseCase",
+            "RegisterUseCase",
+            "LoginProblem",
+            "TokenProblem",
+            "RegisterProblem",
+            "RegisterUser",
+            "RegisterUserRequest",
+            "AuthenticateToken",
+            "LoginRequest",
+            "Login"
+          ]
+        },
+        {
+          "group": "usecases|src/application",
+          "types": ["UseCase", "ThrownValue"]
+        },
+        {
+          "group": "usecases|src/application/ports",
+          "types": [
+            "LeaderboardEntry",
+            "ListedLevels",
+            "UnavailableLevel",
+            "Logger",
+            "StoredLevelProblem",
+            "UseCaseLogEntry",
+            "ProgressRepository",
+            "LevelChange",
+            "StoredLevel",
+            "LeaderboardReader",
+            "UserRepository",
+            "TokenIssuer",
+            "ProgressChange",
+            "SessionToken",
+            "LevelRepository",
+            "Clock",
+            "PasswordHasher",
+            "UserIdGenerator"
+          ]
+        },
+        {
+          "group": "usecases|src/application/aspects",
+          "types": ["UseCaseAspect", "LoggingAspect"]
+        },
+        {
+          "group": "usecases|src/application/levels",
+          "types": [
+            "GetLevelsUseCase",
+            "GetLevels",
+            "AuthorizeLevelEditorUseCase",
+            "UpdateLevelsUseCase",
+            "UpdateLevelsRequest",
+            "NotALevelEditor",
+            "AuthorizeLevelEditor",
+            "InvalidLevels",
+            "LevelProblemReport",
+            "IncomingLevel",
+            "UpdateLevels"
+          ]
+        },
+        {
+          "group": "usecases|src/application/progress",
+          "types": [
+            "SyncProgressUseCase",
+            "SyncProgress",
+            "ProgressProblem",
+            "GetProgressUseCase",
+            "SyncProgressRequest",
+            "GetProgressRequest",
+            "GetProgress"
+          ]
+        },
+        {
+          "group": "usecases|planned",
+          "types": ["TimingAspect"]
+        }
+      ],
+      "3": [
+        {
+          "group": "ref|adapters",
+          "types": [
+            "DrizzleProgressRepository",
+            "DrizzleLevelRepository",
+            "LevelRowMapper",
+            "DrizzleUserRepository",
+            "SignInProblem",
+            "DrizzleLeaderboardReader",
+            "LevelsController",
+            "LeaderboardController",
+            "ProgressController",
+            "AuthController",
+            "HttpErrorFilter",
+            "LeaderboardDtoMapper",
+            "LevelDtoMapper",
+            "ProgressDtoMapper",
+            "LevelEditorGuard",
+            "AuthDtoMapper",
+            "JwtAuthGuard"
+          ]
+        }
+      ],
+      "4": [
+        {
+          "group": "ref|adapters",
+          "types": [
+            "JwtTokenIssuer",
+            "ScryptPasswordHasher",
+            "RandomUserIdGenerator",
+            "SystemClock",
+            "NestLogger"
+          ]
+        }
+      ]
+    },
+    "part-adapters": {
+      "1": [
+        {
+          "group": "ref|domain",
+          "types": [
+            "PlayerProgress",
+            "Score",
+            "ProgressKey",
+            "UserId",
+            "GameId",
+            "Result",
+            "LevelVersion",
+            "SyncInstant",
+            "Standing",
+            "LevelsCompleted",
+            "Username",
+            "LevelDefinition",
+            "LevelValidators",
+            "LevelProblem",
+            "LevelResult",
+            "PasswordAttempt",
+            "User",
+            "PasswordHash",
+            "Password",
+            "LevelId",
+            "LevelIdProblem",
+            "PlayerProgressReceiver",
+            "ElapsedTime",
+            "Stars",
+            "Moves",
+            "MovesProblem",
+            "ElapsedTimeProblem",
+            "StarsProblem",
+            "ProgressKeyReceiver"
+          ]
+        }
+      ],
+      "2": [
+        {
+          "group": "ref|usecases",
+          "types": [
+            "LeaderboardEntry",
+            "SyncProgress",
+            "GetProgressRequest",
+            "GetLevels",
+            "Login",
+            "ListedLevels",
+            "StoredLevel",
+            "UnavailableLevel",
+            "Logger",
+            "UseCaseLogEntry",
+            "Clock",
+            "ProgressProblem",
+            "GetProgress",
+            "SessionToken",
+            "LoginProblem",
+            "LevelRepository",
+            "LevelChange",
+            "StoredLevelProblem",
+            "TokenProblem",
+            "NotALevelEditor",
+            "LeaderboardReader",
+            "ProgressRepository",
+            "UserRepository",
+            "TokenIssuer",
+            "PasswordHasher",
+            "AuthenticateToken",
+            "UserIdGenerator",
+            "RegisterUserRequest",
+            "AuthorizeLevelEditor",
+            "ProgressChange",
+            "UpdateLevels",
+            "LoginRequest",
+            "UpdateLevelsRequest",
+            "IncomingLevel",
+            "RegisterProblem",
+            "Leaderboard",
+            "GetLeaderboard",
+            "UnknownLevel",
+            "LevelProblemReport",
+            "InvalidLevels",
+            "SyncProgressRequest",
+            "GlobalLeaderboard",
+            "ThrownValue",
+            "RegisterUser",
+            "LeaderboardQuery",
+            "LevelLeaderboard"
+          ]
+        }
+      ],
+      "3": [
+        {
+          "group": "adapters|src/adapters/http",
+          "types": [
+            "LevelsController",
+            "UnavailableLevelDto",
+            "LevelDto",
+            "FixedSourceDto",
+            "SortSectionDto",
+            "SeededSourceDto",
+            "SortStarDto",
+            "LevelEntryDto",
+            "FitStarDto",
+            "LevelsDto",
+            "LoginDto",
+            "SignInProblem",
+            "FitPieceDto",
+            "AuthenticatedRequest",
+            "FitPlacementDto",
+            "LeaderboardDto",
+            "LevelLeaderboardDto",
+            "HealthResponse",
+            "HealthController",
+            "CurrentUserDto",
+            "AuthController",
+            "CredentialsDto",
+            "LeaderboardController",
+            "StandingEntryDto",
+            "GlobalLeaderboardDto",
+            "ProgressDto",
+            "TokenDto",
+            "AuthDtoMapper",
+            "LeaderboardDtoMapper",
+            "HttpErrorFilter",
+            "FitSectionDto",
+            "ErrorDto",
+            "ProgressController",
+            "SyncProgressDto",
+            "JwtAuthGuard",
+            "LevelResultDto",
+            "LevelEditorGuard",
+            "ScoreEntryDto",
+            "LevelDtoMapper",
+            "ProgressDtoMapper"
+          ]
+        },
+        {
+          "group": "adapters|src/adapters/persistence",
+          "types": [
+            "DrizzleProgressRepository",
+            "ProgressRow",
+            "LevelResultRow",
+            "PersistenceDatabase",
+            "LevelRow",
+            "ProgressRowMapper",
+            "UserRowMapper",
+            "UserRow",
+            "LevelRowMapper",
+            "DrizzleLeaderboardReader",
+            "DrizzleUserRepository",
+            "DrizzleLevelRepository"
+          ]
+        },
+        {
+          "group": "adapters|src/adapters",
+          "types": [
+            "LevelResultValues",
+            "Json",
+            "Bounds",
+            "ProgressKeyValues",
+            "ProgressValues",
+            "UserValues",
+            "LevelResultProblem"
+          ]
+        }
+      ],
+      "4": [
+        {
+          "group": "adapters|src/infrastructure/clock",
+          "types": ["SystemClock"]
+        },
+        {
+          "group": "adapters|src/infrastructure",
+          "types": ["AppModule"]
+        },
+        {
+          "group": "adapters|src/infrastructure/auth",
+          "types": ["JwtTokenIssuer", "ScryptPasswordHasher", "RandomUserIdGenerator"]
+        },
+        {
+          "group": "adapters|src/infrastructure/logging",
+          "types": ["NestLogger"]
+        },
+        {
+          "group": "adapters|src/infrastructure/database",
+          "types": ["Database", "DatabaseModule"]
+        }
+      ]
+    }
+  }
+}

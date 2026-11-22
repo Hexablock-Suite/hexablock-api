@@ -1,0 +1,31 @@
+{
+  "repo": "hexablock-api",
+  "parts": [
+    { "id": "domain", "title": "Domain", "layers": [1] },
+    { "id": "usecases", "title": "Use cases", "layers": [2] },
+    { "id": "adapters", "title": "Adapters", "layers": [3, 4] }
+  ],
+  "folders": [
+    { "path": "src/domain/", "layer": 1, "part": "domain" },
+    { "path": "src/application/", "layer": 2, "part": "usecases" },
+    { "path": "src/adapters/", "layer": 3, "part": "adapters" },
+    { "path": "src/infrastructure/", "layer": 4, "part": "adapters" },
+    { "path": "src/", "layer": 4, "part": "adapters" }
+  ],
+  "views": { "domain-": "domain", "uc-": "usecases", "ad-": "adapters", "flow-": null },
+  "patterns": { "LevelValidators->LevelValidator": "Strategy" },
+  "stereotypeFor": { "AppModule": "module" },
+  "staleMembers": [
+    { "type": "JwtTokenIssuer", "member": "secret", "equivalent": ["JwtTokenIssuer.jwt"] },
+    {
+      "type": "ProgressRowMapper",
+      "member": "toEntity",
+      "equivalent": ["ProgressRowMapper.toAggregate"]
+    },
+    {
+      "type": "ProgressRowMapper",
+      "member": "toRows",
+      "equivalent": ["ProgressRowMapper.toProgressRow", "ProgressRowMapper.toLevelResultRows"]
+    }
+  ]
+}
