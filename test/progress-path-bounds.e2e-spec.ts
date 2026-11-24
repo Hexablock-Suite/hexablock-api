@@ -54,32 +54,32 @@ describe('id bounds at every border (#135 decision 3, API-FR-02, API-FR-06)', ()
     request(server()).get(path).set('Authorization', `Bearer ${token}`);
 
   const updateLevels = (token: string, levels: object[]) =>
-    request(server()).put('/levels').set('Authorization', `Bearer ${token}`).send({ levels });
+    request(server()).put('/v1/levels').set('Authorization', `Bearer ${token}`).send({ levels });
 
   it.each([
     [
-      '/progress/:gameId with a gameId of 65 characters',
-      `/progress/${TOO_LONG_GAME_ID}`,
+      '/v1/progress/:gameId with a gameId of 65 characters',
+      `/v1/progress/${TOO_LONG_GAME_ID}`,
       GAME_ID_PROBLEM,
     ],
     [
-      '/leaderboard/:gameId with a gameId of 65 characters',
-      `/leaderboard/${TOO_LONG_GAME_ID}`,
+      '/v1/leaderboard/:gameId with a gameId of 65 characters',
+      `/v1/leaderboard/${TOO_LONG_GAME_ID}`,
       GAME_ID_PROBLEM,
     ],
     [
-      '/leaderboard/:gameId/levels/:levelId with a gameId of 65 characters',
-      `/leaderboard/${TOO_LONG_GAME_ID}/levels/fit-01`,
+      '/v1/leaderboard/:gameId/levels/:levelId with a gameId of 65 characters',
+      `/v1/leaderboard/${TOO_LONG_GAME_ID}/levels/fit-01`,
       GAME_ID_PROBLEM,
     ],
     [
-      '/leaderboard/:gameId/levels/:levelId with a levelId of 65 characters',
-      `/leaderboard/hexa-fit/levels/${TOO_LONG_LEVEL_ID}`,
+      '/v1/leaderboard/:gameId/levels/:levelId with a levelId of 65 characters',
+      `/v1/leaderboard/hexa-fit/levels/${TOO_LONG_LEVEL_ID}`,
       LEVEL_ID_PROBLEM,
     ],
     [
-      '/leaderboard/:gameId/levels/:levelId with a NUL in the levelId',
-      '/leaderboard/hexa-fit/levels/fi%00t',
+      '/v1/leaderboard/:gameId/levels/:levelId with a NUL in the levelId',
+      '/v1/leaderboard/hexa-fit/levels/fi%00t',
       LEVEL_ID_PROBLEM,
     ],
   ])(
@@ -107,15 +107,15 @@ describe('id bounds at every border (#135 decision 3, API-FR-02, API-FR-06)', ()
       const response = await updateLevels(token, [levelJson('hexa-fit', levelId)]);
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(badRequest('/levels', `levels[0]: ${LEVEL_ID_PROBLEM}`));
-      expect((await request(server()).get('/levels')).body).toEqual({ levels: [] });
+      expect(response.body).toEqual(badRequest('/v1/levels', `levels[0]: ${LEVEL_ID_PROBLEM}`));
+      expect((await request(server()).get('/v1/levels')).body).toEqual({ levels: [] });
     },
   );
 
   it('should_answer_not_found_when_the_progress_path_holds_a_game_id_of_64_characters', async () => {
     const { token } = await signInTo(server(), 'ada');
 
-    const response = await read(token, `/progress/${LONGEST_GAME_ID}`);
+    const response = await read(token, `/v1/progress/${LONGEST_GAME_ID}`);
 
     expect(response.status).toBe(404);
     expect(response.body).toMatchObject({
@@ -127,7 +127,7 @@ describe('id bounds at every border (#135 decision 3, API-FR-02, API-FR-06)', ()
   it('should_answer_ok_with_empty_boards_when_the_leaderboard_path_holds_a_game_id_of_64_characters', async () => {
     const { token } = await signInTo(server(), 'ada');
 
-    const response = await read(token, `/leaderboard/${LONGEST_GAME_ID}`);
+    const response = await read(token, `/v1/leaderboard/${LONGEST_GAME_ID}`);
 
     expect(response.status).toBe(200);
     expect(response.body.gameId).toBe(LONGEST_GAME_ID);
@@ -136,7 +136,7 @@ describe('id bounds at every border (#135 decision 3, API-FR-02, API-FR-06)', ()
   it('should_answer_not_found_when_the_level_board_path_holds_a_game_id_of_64_characters', async () => {
     const { token } = await signInTo(server(), 'ada');
 
-    const response = await read(token, `/leaderboard/${LONGEST_GAME_ID}/levels/fit-01`);
+    const response = await read(token, `/v1/leaderboard/${LONGEST_GAME_ID}/levels/fit-01`);
 
     expect(response.status).toBe(404);
     expect(response.body).toMatchObject({
@@ -149,10 +149,10 @@ describe('id bounds at every border (#135 decision 3, API-FR-02, API-FR-06)', ()
     const { token } = await signInTo(server(), 'ada');
 
     const updated = await updateLevels(token, [levelJson('hexa-fit', LONGEST_LEVEL_ID)]);
-    const board = await read(token, `/leaderboard/hexa-fit/levels/${LONGEST_LEVEL_ID}`);
+    const board = await read(token, `/v1/leaderboard/hexa-fit/levels/${LONGEST_LEVEL_ID}`);
 
     expect(updated.status).toBe(204);
-    expect((await request(server()).get('/levels')).body).toEqual({
+    expect((await request(server()).get('/v1/levels')).body).toEqual({
       levels: [levelJson('hexa-fit', LONGEST_LEVEL_ID)],
     });
     expect(board.status).toBe(200);

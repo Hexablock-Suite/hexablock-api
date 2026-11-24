@@ -38,28 +38,28 @@ describe('stored values that break a rule (API-FR-06)', () => {
   it('should_answer_internal_error_and_keep_the_row_when_a_stored_high_score_breaks_its_rule', async () => {
     const { token, userId } = await signInTo(server(), 'ada');
     await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${token}`)
       .send({ gameId: 'hexa-lines', score: 120 });
     await db().update(progress).set({ highScore: -1 }).where(eq(progress.userId, userId));
 
     const read = await request(server())
-      .get('/progress/hexa-lines')
+      .get('/v1/progress/hexa-lines')
       .set('Authorization', `Bearer ${token}`);
     const sync = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${token}`)
       .send({ gameId: 'hexa-lines', score: 130 });
     const board = await request(server())
-      .get('/leaderboard/hexa-lines')
+      .get('/v1/leaderboard/hexa-lines')
       .set('Authorization', `Bearer ${token}`);
 
     expect(read.status).toBe(500);
-    expect(read.body).toEqual(internalError('/progress/hexa-lines'));
+    expect(read.body).toEqual(internalError('/v1/progress/hexa-lines'));
     expect(sync.status).toBe(500);
-    expect(sync.body).toEqual(internalError('/progress'));
+    expect(sync.body).toEqual(internalError('/v1/progress'));
     expect(board.status).toBe(500);
-    expect(board.body).toEqual(internalError('/leaderboard/hexa-lines'));
+    expect(board.body).toEqual(internalError('/v1/leaderboard/hexa-lines'));
     const rows = await db().select().from(progress).where(eq(progress.userId, userId));
     expect(rows.map(({ gameId, highScore }) => ({ gameId, highScore }))).toEqual([
       { gameId: 'hexa-lines', highScore: -1 },
@@ -68,27 +68,28 @@ describe('stored values that break a rule (API-FR-06)', () => {
 
   // The stars column has no check constraint either. Stars.of() rejects -1,
   // and the reader of the leaderboard treats it as a server fault too.
-  it.each(['/leaderboard/hexa-fit/levels/fit-01', '/leaderboard/hexa-fit', '/progress/hexa-fit'])(
-    'should_answer_internal_error_when_a_stored_level_result_breaks_its_rule',
-    async (path) => {
-      const { token, userId } = await signInTo(server(), 'ada');
-      // The board of a level needs the stored level (#146).
-      await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
-      await request(server())
-        .post('/progress')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          gameId: 'hexa-fit',
-          results: [{ levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 }],
-        });
-      await db().update(levelResults).set({ stars: -1 }).where(eq(levelResults.userId, userId));
+  it.each([
+    '/v1/leaderboard/hexa-fit/levels/fit-01',
+    '/v1/leaderboard/hexa-fit',
+    '/v1/progress/hexa-fit',
+  ])('should_answer_internal_error_when_a_stored_level_result_breaks_its_rule', async (path) => {
+    const { token, userId } = await signInTo(server(), 'ada');
+    // The board of a level needs the stored level (#146).
+    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
+    await request(server())
+      .post('/v1/progress')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        gameId: 'hexa-fit',
+        results: [{ levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 }],
+      });
+    await db().update(levelResults).set({ stars: -1 }).where(eq(levelResults.userId, userId));
 
-      const response = await request(server()).get(path).set('Authorization', `Bearer ${token}`);
+    const response = await request(server()).get(path).set('Authorization', `Bearer ${token}`);
 
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual(internalError(path));
-    },
-  );
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual(internalError(path));
+  });
 
   // The password_hash column accepts an empty text. PasswordHash.from()
   // rejects it, so sign-in answers 500 and issues no token.
@@ -103,10 +104,10 @@ describe('stored values that break a rule (API-FR-06)', () => {
       });
 
     const response = await request(server())
-      .post('/auth/login')
+      .post('/v1/auth/login')
       .send({ username: 'grace', password: TEST_PASSWORD });
 
     expect(response.status).toBe(500);
-    expect(response.body).toEqual(internalError('/auth/login'));
+    expect(response.body).toEqual(internalError('/v1/auth/login'));
   });
 });

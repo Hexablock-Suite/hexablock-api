@@ -16,7 +16,7 @@ const PASSWORD_BOUNDS = receiveBoundValuesOf(PASSWORD_LENGTH);
 // test/unit/adapters/credentials-dto.spec.ts checks that both accept the same names.
 export const USERNAME_PATTERN = `^${receiveValueOf(USERNAME_CHARACTERS)}{${USERNAME_BOUNDS.min},${USERNAME_BOUNDS.max}}$`;
 
-// The body of POST /auth/register (API-FR-01). The limits come from the
+// The body of POST /v1/auth/register (API-FR-01). The limits come from the
 // domain, so OpenAPI publishes the rules that Username and Password check.
 export class CredentialsDto {
   @ApiProperty({

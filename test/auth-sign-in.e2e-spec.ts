@@ -14,7 +14,7 @@ const UNAUTHORIZED = {
   error: 'Unauthorized',
   message: 'Invalid username or password',
   details: [],
-  path: '/auth/login',
+  path: '/v1/auth/login',
 };
 
 // One app and one database for the file: each sign-in only reads the user
@@ -27,7 +27,7 @@ describe('sign-in with a malformed username (API-FR-01)', () => {
     // The comparison with a wrong password needs a stored user, so a failed
     // sign-up stops the file here.
     const signUp = await request(testApp.app.getHttpServer())
-      .post('/auth/register')
+      .post('/v1/auth/register')
       .send({ username: USERNAME, password: PASSWORD });
     if (signUp.status !== 201) {
       throw new Error(`The sign-up of the stored user answered ${signUp.status}.`);
@@ -43,7 +43,7 @@ describe('sign-in with a malformed username (API-FR-01)', () => {
   });
 
   const post = (body: object) =>
-    request(testApp.app.getHttpServer()).post('/auth/login').send(body);
+    request(testApp.app.getHttpServer()).post('/v1/auth/login').send(body);
 
   it.each([
     ['a!', PASSWORD],

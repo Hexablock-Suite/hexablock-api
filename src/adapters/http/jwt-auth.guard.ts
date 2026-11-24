@@ -21,7 +21,7 @@ export interface AuthenticatedRequest {
   userId: UserId;
 }
 
-// Guards a route with the token of POST /auth/login (API-FR-01). It calls
+// Guards a route with the token of POST /v1/auth/login (API-FR-01). It calls
 // the AuthenticateToken input port, as a controller calls its input ports
 // (decision 14). A rejected request gets a 401, and HttpErrorFilter answers
 // it with ErrorDto (API-FR-06).

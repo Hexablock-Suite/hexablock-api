@@ -81,9 +81,9 @@ describe('progress save and load per variant (API-NFR-03)', () => {
 
   const server = () => testApp.app.getHttpServer();
   const save = (token: string, body: object) =>
-    request(server()).post('/progress').set('Authorization', `Bearer ${token}`).send(body);
+    request(server()).post('/v1/progress').set('Authorization', `Bearer ${token}`).send(body);
   const load = (token: string, gameId: string) =>
-    request(server()).get(`/progress/${gameId}`).set('Authorization', `Bearer ${token}`);
+    request(server()).get(`/v1/progress/${gameId}`).set('Authorization', `Bearer ${token}`);
 
   // Signs in, saves the own variant and one other variant, and loads both.
   // The load of the own gameId returns only the own entry. The load of the
