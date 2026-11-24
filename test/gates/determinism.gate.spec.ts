@@ -25,6 +25,14 @@ describe('determinism gate', () => {
     expect(codes.filter((code) => code.includes('no-current-date'))).toHaveLength(2);
   });
 
+  it('should_report_each_ambient_global_when_domain_reads_crypto_performance_or_process_env', () => {
+    const codes = codesOf(lintFile('test/fixtures/arch/src/domain/reads-ambient-globals.ts'));
+
+    // crypto.randomUUID, crypto.getRandomValues, performance.now and process.env.
+    const restricted = codes.filter((code) => code.includes('no-restricted-properties'));
+    expect(restricted).toHaveLength(4);
+  });
+
   it('should_report_clock_read_when_application_calls_new_date', () => {
     const codes = codesOf(lintFile('test/fixtures/arch/src/application/reads-ambient-state.ts'));
 
