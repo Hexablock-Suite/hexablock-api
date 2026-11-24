@@ -49,6 +49,9 @@ describe('migration 0002_username_lower_unique', () => {
   beforeEach(async () => {
     client = new PGlite();
     db = drizzle({ client, schema });
+    // Awaits the WASM boot here, under the hook budget: the test body then
+    // only pays the migration and query work it asserts on.
+    await client.waitReady;
     partialMigrations = await migrationsThrough(LAST_BEFORE_INDEX);
   });
 

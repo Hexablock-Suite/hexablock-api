@@ -57,9 +57,21 @@ afterEach(async () => {
   await Promise.all(openDatabases.splice(0).map((database) => database.close()));
 });
 
-describeProgressRepositoryContract('DrizzleProgressRepository', async () => {
-  const database = await openDatabase();
-  return new DrizzleProgressRepository(database.db);
+// The database-backed contract boots and migrates one PGlite instance per
+// test. The hook below pays the boot and the seeding under the hook budget,
+// and the contract body only runs its queries. The wrapper scopes the hook
+// to this contract alone: the separate describe below keeps its own
+// openDatabase() per test.
+describe('the DrizzleProgressRepository contract', () => {
+  let database: TestDatabase;
+
+  beforeEach(async () => {
+    database = await openDatabase();
+  });
+
+  describeProgressRepositoryContract('DrizzleProgressRepository', () => {
+    return new DrizzleProgressRepository(database.db);
+  });
 });
 
 async function countRows(database: TestDatabase, table: 'progress' | 'level_results') {
