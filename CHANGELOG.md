@@ -9,6 +9,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 ### Added
 
 - `docs/EXTENSIBILITY.md` (API-NFR-10) ([#141](https://github.com/Hexablock-Suite/hexablock-api/issues/141)). For each extension axis of `docs/architecture/extensibility.md`, it names the class that a developer adds, the file that registers it and the tests to copy. It links to the views and does not copy them. The _Check_ of API-NFR-10 in `docs/REQUIREMENTS.md` now points to it.
+- `docs/DEPENDENCIES.md` and its gate `test/gates/dependencies.gate.spec.ts` ([#84](https://github.com/Hexablock-Suite/hexablock-api/issues/84)). Every entry of the `dependencies` and the `devDependencies` maps of `package.json` has one truthful reason in the document. The gate reports every package that the document does not explain: an explanation is only a list-item line that starts with the backticked name and continues with a non-empty reason, and the check is one-way, so a line about a package that `package.json` no longer lists fails nothing. Rule R-dependencies-doc in `AGENTS.md` names the gate, and the index of `docs/README.md` links the document.
 
 ### Changed
 
