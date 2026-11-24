@@ -11,6 +11,8 @@ const TEST_TITLE = '^should_[a-z0-9_]+_when_[a-z0-9_]+$';
 const CORE_FILES = ['**/src/domain/**', '**/src/application/**'];
 const USE_THE_PORT =
   'Take the instant as a parameter in src/domain or from the Clock port in src/application, and inject a seeded random source.';
+const NO_AMBIENT_GLOBAL =
+  'Take randomness, time or configuration from an injected port or parameter.';
 
 export default defineConfig({
   lint: {
@@ -45,6 +47,10 @@ export default defineConfig({
             'error',
             { object: 'Math', property: 'random', message: USE_THE_PORT },
             { object: 'Date', property: 'now', message: USE_THE_PORT },
+            { object: 'crypto', property: 'randomUUID', message: NO_AMBIENT_GLOBAL },
+            { object: 'crypto', property: 'getRandomValues', message: NO_AMBIENT_GLOBAL },
+            { object: 'performance', property: 'now', message: NO_AMBIENT_GLOBAL },
+            { object: 'process', property: 'env', message: NO_AMBIENT_GLOBAL },
           ],
           'hexablock/no-current-date': 'error',
           'hexablock/no-delivery-call': 'error',
