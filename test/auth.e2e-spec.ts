@@ -25,7 +25,7 @@ describe('auth endpoints (API-FR-01)', () => {
     request(testApp.app.getHttpServer()).post(path).send(body);
 
   it('should_store_password_hash_when_user_registers', async () => {
-    const response = await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    const response = await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({});
@@ -37,9 +37,9 @@ describe('auth endpoints (API-FR-01)', () => {
   });
 
   it('should_return_conflict_error_body_when_username_is_taken', async () => {
-    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
 
-    const response = await post('/auth/register', {
+    const response = await post('/v1/auth/register', {
       username: USERNAME,
       password: 'other password',
     });
@@ -50,13 +50,13 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Conflict',
       message: 'Username is already taken',
       details: [],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(1);
   });
 
   it('should_return_validation_error_body_when_credentials_break_the_rules', async () => {
-    const response = await post('/auth/register', { username: 'a!', password: 'short' });
+    const response = await post('/v1/auth/register', { username: 'a!', password: 'short' });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -67,14 +67,14 @@ describe('auth endpoints (API-FR-01)', () => {
         'username must have 3 to 32 characters: letters, digits, dots, hyphens or underscores',
         'password must have 8 to 128 characters',
       ],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
 
   // Four emoji are 8 UTF-16 units but 4 code points (#60).
   it('should_return_validation_error_body_when_password_has_four_emoji', async () => {
-    const response = await post('/auth/register', {
+    const response = await post('/v1/auth/register', {
       username: USERNAME,
       password: '\u{1F600}'.repeat(4),
     });
@@ -85,7 +85,7 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['password must have 8 to 128 characters'],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
@@ -93,8 +93,8 @@ describe('auth endpoints (API-FR-01)', () => {
   it('should_accept_registration_when_password_has_128_emoji_code_points', async () => {
     const password = '\u{1F600}'.repeat(128);
 
-    const registered = await post('/auth/register', { username: USERNAME, password });
-    const login = await post('/auth/login', { username: USERNAME, password });
+    const registered = await post('/v1/auth/register', { username: USERNAME, password });
+    const login = await post('/v1/auth/login', { username: USERNAME, password });
 
     expect(registered.status).toBe(201);
     expect(registered.body).toEqual({});
@@ -103,11 +103,14 @@ describe('auth endpoints (API-FR-01)', () => {
   });
 
   it('should_return_validation_error_body_when_password_has_129_emoji_code_points', async () => {
-    const emoji = await post('/auth/register', {
+    const emoji = await post('/v1/auth/register', {
       username: USERNAME,
       password: '\u{1F600}'.repeat(129),
     });
-    const ascii = await post('/auth/register', { username: USERNAME, password: 'x'.repeat(129) });
+    const ascii = await post('/v1/auth/register', {
+      username: USERNAME,
+      password: 'x'.repeat(129),
+    });
 
     expect(emoji.status).toBe(400);
     expect(emoji.body).toEqual({
@@ -115,14 +118,14 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['password must have 8 to 128 characters'],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     expect(emoji.body).toEqual(ascii.body);
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
 
   it('should_return_validation_error_body_when_credentials_are_missing', async () => {
-    const response = await post('/auth/register', { username: 7 });
+    const response = await post('/v1/auth/register', { username: 7 });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -130,16 +133,16 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['username must be a string', 'password must be a string'],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
 
   it('should_return_jwt_for_user_when_credentials_are_valid', async () => {
-    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
     const [stored] = await testApp.database.db.select().from(users);
 
-    const response = await post('/auth/login', { username: USERNAME, password: PASSWORD });
+    const response = await post('/v1/auth/login', { username: USERNAME, password: PASSWORD });
 
     expect(response.status).toBe(200);
     expect(Object.keys(response.body)).toEqual(['accessToken']);
@@ -150,9 +153,12 @@ describe('auth endpoints (API-FR-01)', () => {
   });
 
   it('should_return_unauthorized_error_body_when_password_is_wrong', async () => {
-    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
 
-    const response = await post('/auth/login', { username: USERNAME, password: 'wrong password' });
+    const response = await post('/v1/auth/login', {
+      username: USERNAME,
+      password: 'wrong password',
+    });
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -160,12 +166,12 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Unauthorized',
       message: 'Invalid username or password',
       details: [],
-      path: '/auth/login',
+      path: '/v1/auth/login',
     });
   });
 
   it('should_return_unauthorized_error_body_when_username_is_unknown', async () => {
-    const response = await post('/auth/login', { username: 'nobody', password: PASSWORD });
+    const response = await post('/v1/auth/login', { username: 'nobody', password: PASSWORD });
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -173,14 +179,17 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Unauthorized',
       message: 'Invalid username or password',
       details: [],
-      path: '/auth/login',
+      path: '/v1/auth/login',
     });
   });
 
   it('should_return_unauthorized_error_body_when_login_password_has_more_than_128_characters', async () => {
-    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
 
-    const response = await post('/auth/login', { username: USERNAME, password: 'x'.repeat(129) });
+    const response = await post('/v1/auth/login', {
+      username: USERNAME,
+      password: 'x'.repeat(129),
+    });
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -188,7 +197,7 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Unauthorized',
       message: 'Invalid username or password',
       details: [],
-      path: '/auth/login',
+      path: '/v1/auth/login',
     });
   });
 
@@ -198,8 +207,8 @@ describe('auth endpoints (API-FR-01)', () => {
 
     const { paths, components } = response.body;
     const bodyOf = (path: string) => paths[path].post.requestBody.content['application/json'];
-    expect(bodyOf('/auth/login').schema).toEqual({ $ref: '#/components/schemas/LoginDto' });
-    expect(bodyOf('/auth/register').schema).toEqual({
+    expect(bodyOf('/v1/auth/login').schema).toEqual({ $ref: '#/components/schemas/LoginDto' });
+    expect(bodyOf('/v1/auth/register').schema).toEqual({
       $ref: '#/components/schemas/CredentialsDto',
     });
     const login = components.schemas.LoginDto;
@@ -217,7 +226,7 @@ describe('auth endpoints (API-FR-01)', () => {
   });
 
   it('should_return_validation_error_body_when_login_body_is_missing_fields', async () => {
-    const response = await post('/auth/login', {});
+    const response = await post('/v1/auth/login', {});
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -225,16 +234,16 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['username must be a string', 'password must be a string'],
-      path: '/auth/login',
+      path: '/v1/auth/login',
     });
   });
 
   // A name that differs only in letter case is taken, with the same answer
   // as an exact duplicate (#62). It replaces the two-account rule of #49.
   it('should_return_conflict_error_body_when_username_differs_only_in_case', async () => {
-    const lower = await post('/auth/register', { username: 'ada', password: PASSWORD });
+    const lower = await post('/v1/auth/register', { username: 'ada', password: PASSWORD });
 
-    const upper = await post('/auth/register', { username: 'Ada', password: 'other password' });
+    const upper = await post('/v1/auth/register', { username: 'Ada', password: 'other password' });
 
     expect(lower.status).toBe(201);
     expect(upper.status).toBe(409);
@@ -243,7 +252,7 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Conflict',
       message: 'Username is already taken',
       details: [],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     const rows = await testApp.database.db.select().from(users);
     expect(rows.map((row) => row.username)).toEqual(['ada']);
@@ -252,8 +261,8 @@ describe('auth endpoints (API-FR-01)', () => {
   // Sign-in looks the user up by the lower-case key, and the stored name
   // keeps the letter case of sign-up (#144).
   it('should_store_username_as_typed_when_the_user_signs_in_with_another_letter_case', async () => {
-    const response = await post('/auth/register', { username: 'Ada', password: PASSWORD });
-    const login = await post('/auth/login', { username: 'ada', password: PASSWORD });
+    const response = await post('/v1/auth/register', { username: 'Ada', password: PASSWORD });
+    const login = await post('/v1/auth/login', { username: 'ada', password: PASSWORD });
 
     expect(response.status).toBe(201);
     expect(login.status).toBe(200);
@@ -264,12 +273,12 @@ describe('auth endpoints (API-FR-01)', () => {
   // Sign-in looks the user up by the same lower-case key that sign-up
   // uses (#144), so `ADA` signs in the stored `ada`.
   it('should_return_jwt_for_the_stored_user_when_login_username_differs_only_in_case', async () => {
-    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
     const [stored] = await testApp.database.db.select().from(users);
 
-    const login = await post('/auth/login', { username: 'ADA', password: PASSWORD });
+    const login = await post('/v1/auth/login', { username: 'ADA', password: PASSWORD });
     const me = await request(testApp.app.getHttpServer())
-      .get('/auth/me')
+      .get('/v1/auth/me')
       .set('Authorization', `Bearer ${login.body.accessToken}`);
 
     expect(login.status).toBe(200);
@@ -279,9 +288,9 @@ describe('auth endpoints (API-FR-01)', () => {
   });
 
   it('should_return_unauthorized_error_body_when_login_username_differs_only_in_case_and_password_is_wrong', async () => {
-    await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
 
-    const response = await post('/auth/login', { username: 'ADA', password: 'wrong password' });
+    const response = await post('/v1/auth/login', { username: 'ADA', password: 'wrong password' });
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -289,7 +298,7 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Unauthorized',
       message: 'Invalid username or password',
       details: [],
-      path: '/auth/login',
+      path: '/v1/auth/login',
     });
   });
 
@@ -343,12 +352,12 @@ describe('auth endpoints (API-FR-01)', () => {
   ])(
     'should_call_verify_and_hash_the_counted_number_of_times_when_a_sign_in_path_runs',
     async ({ username, password, status, verify, hash }) => {
-      await post('/auth/register', { username: USERNAME, password: PASSWORD });
+      await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
       const hasher = testApp.app.get<PasswordHasher>(PASSWORD_HASHER);
       const verifyCalls = vi.spyOn(hasher, 'verify');
       const hashCalls = vi.spyOn(hasher, 'hash');
 
-      const response = await post('/auth/login', { username, password });
+      const response = await post('/v1/auth/login', { username, password });
 
       expect(response.status).toBe(status);
       expect(verifyCalls).toHaveBeenCalledTimes(verify);
@@ -356,7 +365,7 @@ describe('auth endpoints (API-FR-01)', () => {
     },
   );
 
-  it.each(['/auth/register', '/auth/login'])(
+  it.each(['/v1/auth/register', '/v1/auth/login'])(
     'should_return_validation_error_body_when_body_is_not_a_json_object',
     async (path) => {
       const server = testApp.app.getHttpServer();
@@ -381,7 +390,7 @@ describe('auth endpoints (API-FR-01)', () => {
 
   it('should_return_bad_request_error_body_when_json_body_is_null', async () => {
     const response = await request(testApp.app.getHttpServer())
-      .post('/auth/register')
+      .post('/v1/auth/register')
       .set('Content-Type', 'application/json')
       .send('null');
 
@@ -393,7 +402,7 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Bad Request',
       message: expect.any(String),
       details: [],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });
@@ -405,7 +414,7 @@ describe('auth endpoints (API-FR-01)', () => {
       sql`alter table users add constraint users_reject_all check (false) not valid`,
     );
 
-    const response = await post('/auth/register', { username: USERNAME, password: PASSWORD });
+    const response = await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
 
     expect(response.status).toBe(500);
     expect(response.body).toEqual({
@@ -413,7 +422,7 @@ describe('auth endpoints (API-FR-01)', () => {
       error: 'Internal Server Error',
       message: 'Internal server error',
       details: [],
-      path: '/auth/register',
+      path: '/v1/auth/register',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
   });

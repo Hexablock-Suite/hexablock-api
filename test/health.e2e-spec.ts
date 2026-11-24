@@ -19,7 +19,7 @@ describe('HTTP entry points', () => {
   });
 
   it('should_return_ok_status_when_health_is_requested', async () => {
-    const response = await request(app.getHttpServer()).get('/health');
+    const response = await request(app.getHttpServer()).get('/v1/health');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ status: 'ok' });
@@ -30,7 +30,7 @@ describe('HTTP entry points', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.openapi).toMatch(/^3\./);
-    expect(response.body.paths).toHaveProperty('/health');
+    expect(response.body.paths).toHaveProperty('/v1/health');
   });
 
   it('should_match_committed_openapi_file_when_docs_json_is_requested', async () => {

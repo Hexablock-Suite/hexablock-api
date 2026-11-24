@@ -12,7 +12,7 @@ import { testUserId } from './support/user-ids.js';
 // without one. API-FR-06: every 401 has the shared ErrorDto body.
 const USERNAME = 'ada';
 const PASSWORD = 'correct horse battery';
-const PROTECTED_PATH = '/auth/me';
+const PROTECTED_PATH = '/v1/auth/me';
 const FOREIGN_SECRET = 'another-secret-that-this-api-never-uses';
 
 function unauthorizedBody(message: string) {
@@ -44,9 +44,11 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
   };
 
   it('should_return_signed_in_user_when_token_from_login_is_sent', async () => {
-    await request(server()).post('/auth/register').send({ username: USERNAME, password: PASSWORD });
+    await request(server())
+      .post('/v1/auth/register')
+      .send({ username: USERNAME, password: PASSWORD });
     const login = await request(server())
-      .post('/auth/login')
+      .post('/v1/auth/login')
       .send({ username: USERNAME, password: PASSWORD });
     const userId = new JwtService({ secret: TEST_JWT_SECRET }).decode<{ sub: string }>(
       login.body.accessToken,
@@ -150,7 +152,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
 
     const me = await callProtected(`Bearer ${notUuid}`);
     const sync = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${notUuid}`)
       .send({ gameId: 'hexa-lines', score: 120 });
 
@@ -159,7 +161,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(sync.status).toBe(401);
     expect(sync.body).toEqual({
       ...unauthorizedBody('Invalid or expired token'),
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
     expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
@@ -174,7 +176,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
 
     const me = await callProtected(`Bearer ${token}`);
     const sync = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${token}`)
       .send({ gameId: 'hexa-lines', score: 10 });
 
@@ -183,7 +185,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(sync.status).toBe(401);
     expect(sync.body).toEqual({
       ...unauthorizedBody('Invalid or expired token'),
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(0);
     expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
@@ -195,7 +197,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
 
     const me = await callProtected(`Bearer ${stranger}`);
     const sync = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${stranger}`)
       .send({ gameId: 'hexa-lines', score: 10 });
 
@@ -204,7 +206,7 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     expect(sync.status).toBe(401);
     expect(sync.body).toEqual({
       ...unauthorizedBody('Invalid or expired token'),
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await testApp.database.db.select().from(users)).toHaveLength(1);
     expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
@@ -219,14 +221,14 @@ describe('token guard (API-FR-01, API-FR-06)', () => {
     vi.spyOn(DrizzleUserRepository.prototype, 'exists').mockResolvedValue(true);
 
     const sync = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${stranger}`)
       .send({ gameId: 'hexa-lines', score: 10 });
 
     expect(sync.status).toBe(401);
     expect(sync.body).toEqual({
       ...unauthorizedBody('Invalid or expired token'),
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await testApp.database.db.select().from(progress)).toHaveLength(0);
   });

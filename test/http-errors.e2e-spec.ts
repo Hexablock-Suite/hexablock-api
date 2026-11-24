@@ -21,15 +21,15 @@ describe('HTTP error body (API-FR-06)', () => {
   });
 
   it('should_return_error_body_when_resource_does_not_exist', async () => {
-    const response = await request(app.getHttpServer()).get('/no-such-resource');
+    const response = await request(app.getHttpServer()).get('/v1/no-such-resource');
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: 'Cannot GET /no-such-resource',
+      message: 'Cannot GET /v1/no-such-resource',
       details: [],
-      path: '/no-such-resource',
+      path: '/v1/no-such-resource',
     });
   });
 
@@ -38,8 +38,8 @@ describe('HTTP error body (API-FR-06)', () => {
   it('should_return_path_without_query_when_url_has_a_query', async () => {
     const server = app.getHttpServer();
 
-    const probe = await request(server).get('/error-probe/items/abc?token=secret-value');
-    const unknown = await request(server).get('/no-such-resource?token=secret-value?next=1');
+    const probe = await request(server).get('/v1/error-probe/items/abc?token=secret-value');
+    const unknown = await request(server).get('/v1/no-such-resource?token=secret-value?next=1');
 
     expect(probe.status).toBe(400);
     expect(probe.body).toEqual({
@@ -47,24 +47,26 @@ describe('HTTP error body (API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Validation failed (numeric string is expected)',
       details: [],
-      path: '/error-probe/items/abc',
+      path: '/v1/error-probe/items/abc',
     });
     expect(unknown.status).toBe(404);
-    expect(unknown.body.path).toBe('/no-such-resource');
+    expect(unknown.body.path).toBe('/v1/no-such-resource');
   });
 
   // Nest answers an unknown route with «Cannot GET <url>». That url holds the
   // query, so the filter removes the query from the message too.
   it('should_return_no_query_in_the_error_body_when_the_route_is_unknown', async () => {
-    const response = await request(app.getHttpServer()).get('/no-such-resource?token=secret-value');
+    const response = await request(app.getHttpServer()).get(
+      '/v1/no-such-resource?token=secret-value',
+    );
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: 'Cannot GET /no-such-resource',
+      message: 'Cannot GET /v1/no-such-resource',
       details: [],
-      path: '/no-such-resource',
+      path: '/v1/no-such-resource',
     });
     expect(JSON.stringify(response.body)).not.toContain('secret-value');
     expect(JSON.stringify(response.body)).not.toContain('?');
@@ -75,15 +77,15 @@ describe('HTTP error body (API-FR-06)', () => {
   it('should_return_no_query_in_the_error_body_when_the_unknown_route_uses_any_method_or_a_double_question_mark', async () => {
     const server = app.getHttpServer();
     const responses = await Promise.all([
-      request(server).post('/no-such-resource?token=secret-value'),
-      request(server).delete('/no-such-resource?token=secret-value'),
-      request(server).get('/no-such-resource??token=secret-value'),
-      request(server).get('/no-such-resource?a=%E2%9C%93&b=%20secret-value'),
+      request(server).post('/v1/no-such-resource?token=secret-value'),
+      request(server).delete('/v1/no-such-resource?token=secret-value'),
+      request(server).get('/v1/no-such-resource??token=secret-value'),
+      request(server).get('/v1/no-such-resource?a=%E2%9C%93&b=%20secret-value'),
     ]);
 
     for (const response of responses) {
       expect(response.status).toBe(404);
-      expect(response.body.path).toBe('/no-such-resource');
+      expect(response.body.path).toBe('/v1/no-such-resource');
       expect(JSON.stringify(response.body)).not.toContain('secret-value');
     }
   });
@@ -91,7 +93,7 @@ describe('HTTP error body (API-FR-06)', () => {
   // The filter removes only the query. A message or a detail that does not
   // quote the query keeps its exact text.
   it('should_keep_message_and_details_unchanged_when_the_error_has_no_query', async () => {
-    const response = await request(app.getHttpServer()).get('/error-probe/invalid-fields?x=1');
+    const response = await request(app.getHttpServer()).get('/v1/error-probe/invalid-fields?x=1');
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -99,12 +101,12 @@ describe('HTTP error body (API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['name must be a string', 'gameId should not be empty'],
-      path: '/error-probe/invalid-fields',
+      path: '/v1/error-probe/invalid-fields',
     });
   });
 
   it('should_return_error_body_when_path_parameter_fails_validation', async () => {
-    const response = await request(app.getHttpServer()).get('/error-probe/items/abc');
+    const response = await request(app.getHttpServer()).get('/v1/error-probe/items/abc');
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -112,12 +114,12 @@ describe('HTTP error body (API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Validation failed (numeric string is expected)',
       details: [],
-      path: '/error-probe/items/abc',
+      path: '/v1/error-probe/items/abc',
     });
   });
 
   it('should_list_each_problem_in_details_when_several_fields_fail_validation', async () => {
-    const response = await request(app.getHttpServer()).get('/error-probe/invalid-fields');
+    const response = await request(app.getHttpServer()).get('/v1/error-probe/invalid-fields');
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -125,12 +127,12 @@ describe('HTTP error body (API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['name must be a string', 'gameId should not be empty'],
-      path: '/error-probe/invalid-fields',
+      path: '/v1/error-probe/invalid-fields',
     });
   });
 
   it('should_return_error_body_when_token_is_missing', async () => {
-    const response = await request(app.getHttpServer()).get('/error-probe/protected');
+    const response = await request(app.getHttpServer()).get('/v1/error-probe/protected');
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -138,12 +140,12 @@ describe('HTTP error body (API-FR-06)', () => {
       error: 'Unauthorized',
       message: 'Missing bearer token',
       details: [],
-      path: '/error-probe/protected',
+      path: '/v1/error-probe/protected',
     });
   });
 
   it('should_hide_internal_message_when_handler_throws_unexpected_error', async () => {
-    const response = await request(app.getHttpServer()).get('/error-probe/crash');
+    const response = await request(app.getHttpServer()).get('/v1/error-probe/crash');
 
     expect(response.status).toBe(500);
     expect(response.body).toEqual({
@@ -151,14 +153,14 @@ describe('HTTP error body (API-FR-06)', () => {
       error: 'Internal Server Error',
       message: 'Internal server error',
       details: [],
-      path: '/error-probe/crash',
+      path: '/v1/error-probe/crash',
     });
   });
 
   // The body parser rejects a body over its limit of 100 kB with an error
   // that carries the status 413. The filter keeps that client status on every
   // route that takes a body (#136).
-  it.each(['/auth/login', '/auth/register'])(
+  it.each(['/v1/auth/login', '/v1/auth/register'])(
     'should_return_413_error_body_when_any_route_gets_a_json_body_over_the_limit',
     async (path) => {
       const body = { username: 'player', password: 'x'.repeat(200 * 1024) };
@@ -180,7 +182,7 @@ describe('HTTP error body (API-FR-06)', () => {
   // the size. The JSON parser reads only a UTF charset. The message never quotes the charset that the client sent.
   it('should_return_415_error_body_when_the_json_body_has_an_unsupported_charset', async () => {
     const response = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/v1/auth/login')
       .set('Content-Type', 'application/json; charset=iso-8859-1')
       .send('{"username":"player","password":"secret"}');
 
@@ -190,14 +192,14 @@ describe('HTTP error body (API-FR-06)', () => {
       error: 'Unsupported Media Type',
       message: 'Unsupported Media Type',
       details: [],
-      path: '/auth/login',
+      path: '/v1/auth/login',
     });
   });
 
   // Nest turns the SyntaxError of the body parser into a 400.
   it('should_return_400_error_body_when_the_json_body_is_malformed', async () => {
     const response = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/v1/auth/login')
       .set('Content-Type', 'application/json')
       .send('{"username":');
 
@@ -207,17 +209,17 @@ describe('HTTP error body (API-FR-06)', () => {
       statusCode: 400,
       error: 'Bad Request',
       details: [],
-      path: '/auth/login',
+      path: '/v1/auth/login',
     });
   });
 
   it('should_use_same_body_keys_when_errors_differ', async () => {
     const server = app.getHttpServer();
     const responses = await Promise.all([
-      request(server).get('/no-such-resource'),
-      request(server).get('/error-probe/items/abc'),
-      request(server).get('/error-probe/protected'),
-      request(server).get('/error-probe/crash'),
+      request(server).get('/v1/no-such-resource'),
+      request(server).get('/v1/error-probe/items/abc'),
+      request(server).get('/v1/error-probe/protected'),
+      request(server).get('/v1/error-probe/crash'),
     ]);
 
     for (const response of responses) {
@@ -227,7 +229,7 @@ describe('HTTP error body (API-FR-06)', () => {
 
   it('should_keep_success_body_when_request_succeeds', async () => {
     const response = await request(app.getHttpServer())
-      .get('/error-probe/protected')
+      .get('/v1/error-probe/protected')
       .set('Authorization', 'Bearer any');
 
     expect(response.status).toBe(200);

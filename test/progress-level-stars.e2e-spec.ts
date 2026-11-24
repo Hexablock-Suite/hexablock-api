@@ -28,14 +28,14 @@ describe('progress stars against the level (#135, DS-6, API-FR-02)', () => {
   const db = () => testApp.database.db;
 
   const sync = (token: string, body: object) =>
-    request(server()).post('/progress').set('Authorization', `Bearer ${token}`).send(body);
+    request(server()).post('/v1/progress').set('Authorization', `Bearer ${token}`).send(body);
 
   const badRequest = (detail: string) => ({
     statusCode: 400,
     error: 'Bad Request',
     message: 'Request validation failed',
     details: [detail],
-    path: '/progress',
+    path: '/v1/progress',
   });
 
   const storedRows = async (userId: string) => ({

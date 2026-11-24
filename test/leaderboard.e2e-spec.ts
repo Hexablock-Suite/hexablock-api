@@ -31,7 +31,10 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
   const signIn = (username: string) => signInTo(server(), username);
 
   const sync = (player: SignedInUser, body: object) =>
-    request(server()).post('/progress').set('Authorization', `Bearer ${player.token}`).send(body);
+    request(server())
+      .post('/v1/progress')
+      .set('Authorization', `Bearer ${player.token}`)
+      .send(body);
   const board = (player: SignedInUser, path: string) =>
     request(server()).get(path).set('Authorization', `Bearer ${player.token}`);
 
@@ -55,10 +58,10 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     await sync(linus, { gameId: 'hexa-sort', results: [{ ...FIT_01, stars: 1 }] });
     await sync(linus, { gameId: 'hexa-lines', score: 120 });
 
-    const level01 = await board(ada, '/leaderboard/hexa-fit/levels/fit-01');
-    const level02 = await board(ada, '/leaderboard/hexa-fit/levels/fit-02');
-    const fit = await board(ada, '/leaderboard/hexa-fit');
-    const lines = await board(ada, '/leaderboard/hexa-lines');
+    const level01 = await board(ada, '/v1/leaderboard/hexa-fit/levels/fit-01');
+    const level02 = await board(ada, '/v1/leaderboard/hexa-fit/levels/fit-02');
+    const fit = await board(ada, '/v1/leaderboard/hexa-fit');
+    const lines = await board(ada, '/v1/leaderboard/hexa-lines');
 
     expect(level01.status).toBe(200);
     expect(level01.body).toEqual({
@@ -116,7 +119,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     await sync(ada, { gameId: 'hexa-fit', results: [{ ...FIT_01, elapsedMs: 50000 }] });
     await sync(grace, { gameId: 'hexa-fit', results: [{ ...FIT_01, elapsedMs: 40000 }] });
 
-    const level = await board(ada, '/leaderboard/hexa-fit/levels/fit-01');
+    const level = await board(ada, '/v1/leaderboard/hexa-fit/levels/fit-01');
 
     expect(level.status).toBe(200);
     expect(level.body).toEqual({
@@ -136,7 +139,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
     await sync(ada, { gameId: 'hexa-fit', score: null, results: [FIT_01] });
 
-    const fit = await board(ada, '/leaderboard/hexa-fit');
+    const fit = await board(ada, '/v1/leaderboard/hexa-fit');
 
     expect(fit.status).toBe(200);
     expect(fit.body.highScores).toEqual([]);
@@ -155,7 +158,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     await sync(grace, { gameId: 'hexa-lines', score: 120 });
     await sync(linus, { gameId: 'hexa-lines', score: 80 });
 
-    const lines = await board(linus, '/leaderboard/hexa-lines');
+    const lines = await board(linus, '/v1/leaderboard/hexa-lines');
 
     const [firstTied, secondTied] = ascending(ada, grace);
     expect(lines.status).toBe(200);
@@ -176,7 +179,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
   it('should_answer_empty_global_boards_when_no_player_has_a_result_for_the_game', async () => {
     const ada = await signIn('ada');
 
-    const global = await board(ada, '/leaderboard/hexa-new');
+    const global = await board(ada, '/v1/leaderboard/hexa-new');
 
     expect(global.status).toBe(200);
     expect(global.body).toEqual({ gameId: 'hexa-new', highScores: [], standings: [] });
@@ -187,7 +190,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     const ada = await signIn('ada');
     await storeLevels(testApp, levelJson('hexa-sort', 'sort-01'));
 
-    const level = await board(ada, '/leaderboard/hexa-sort/levels/sort-01');
+    const level = await board(ada, '/v1/leaderboard/hexa-sort/levels/sort-01');
 
     expect(level.status).toBe(200);
     expect(level.body).toEqual({ gameId: 'hexa-sort', levelId: 'sort-01', entries: [] });
@@ -199,9 +202,9 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
   // that result answers 400 since #135, so the test writes the row as a
   // sync before #135 stored it.
   it.each([
-    ['/leaderboard/hexa-fit/levels/no-such-level', 'No level no-such-level for gameId hexa-fit'],
-    ['/leaderboard/no-such-game/levels/fit-01', 'No level fit-01 for gameId no-such-game'],
-    ['/leaderboard/hexa-lines/levels/fit-01', 'No level fit-01 for gameId hexa-lines'],
+    ['/v1/leaderboard/hexa-fit/levels/no-such-level', 'No level no-such-level for gameId hexa-fit'],
+    ['/v1/leaderboard/no-such-game/levels/fit-01', 'No level fit-01 for gameId no-such-game'],
+    ['/v1/leaderboard/hexa-lines/levels/fit-01', 'No level fit-01 for gameId hexa-lines'],
   ])(
     'should_return_not_found_error_body_when_the_level_definitions_do_not_hold_the_level',
     async (path, message) => {
@@ -230,8 +233,8 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
   );
 
   it('should_return_unauthorized_error_body_when_a_board_request_has_no_token', async () => {
-    const global = await request(server()).get('/leaderboard/hexa-fit');
-    const level = await request(server()).get('/leaderboard/hexa-fit/levels/fit-01');
+    const global = await request(server()).get('/v1/leaderboard/hexa-fit');
+    const level = await request(server()).get('/v1/leaderboard/hexa-fit/levels/fit-01');
 
     expect(global.status).toBe(401);
     expect(global.body).toEqual({
@@ -239,7 +242,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       error: 'Unauthorized',
       message: 'Missing bearer token',
       details: [],
-      path: '/leaderboard/hexa-fit',
+      path: '/v1/leaderboard/hexa-fit',
     });
     expect(level.status).toBe(401);
     expect(level.body).toEqual({
@@ -247,7 +250,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       error: 'Unauthorized',
       message: 'Missing bearer token',
       details: [],
-      path: '/leaderboard/hexa-fit/levels/fit-01',
+      path: '/v1/leaderboard/hexa-fit/levels/fit-01',
     });
   });
 
@@ -261,9 +264,9 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       vi.spyOn(DrizzleLeaderboardReader.prototype, 'standings'),
     ];
 
-    const global = await board(ada, '/leaderboard/Hexa%20Fit');
-    const level = await board(ada, '/leaderboard/Hexa%20Fit/levels/fit-01');
-    const blankLevel = await board(ada, '/leaderboard/hexa-fit/levels/%20');
+    const global = await board(ada, '/v1/leaderboard/Hexa%20Fit');
+    const level = await board(ada, '/v1/leaderboard/Hexa%20Fit/levels/fit-01');
+    const blankLevel = await board(ada, '/v1/leaderboard/hexa-fit/levels/%20');
     const calls = reads.reduce((sum, read) => sum + read.mock.calls.length, 0);
     reads.forEach((read) => read.mockRestore());
 
@@ -274,7 +277,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: [gameProblem],
-      path: '/leaderboard/Hexa%20Fit',
+      path: '/v1/leaderboard/Hexa%20Fit',
     });
     expect(level.status).toBe(400);
     expect(level.body).toEqual({
@@ -282,7 +285,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: [gameProblem],
-      path: '/leaderboard/Hexa%20Fit/levels/fit-01',
+      path: '/v1/leaderboard/Hexa%20Fit/levels/fit-01',
     });
     expect(blankLevel.status).toBe(400);
     expect(blankLevel.body).toEqual({
@@ -292,7 +295,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       details: [
         'levelId must be a non-blank string of 1 to 64 characters with no control character.',
       ],
-      path: '/leaderboard/hexa-fit/levels/%20',
+      path: '/v1/leaderboard/hexa-fit/levels/%20',
     });
     expect(calls).toBe(0);
   });
@@ -305,7 +308,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       .spyOn(DrizzleLeaderboardReader.prototype, 'standings')
       .mockRejectedValue(new Error('database is down'));
 
-    const response = await board(ada, '/leaderboard/hexa-fit');
+    const response = await board(ada, '/v1/leaderboard/hexa-fit');
     standings.mockRestore();
 
     expect(response.status).toBe(500);
@@ -314,7 +317,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       error: 'Internal Server Error',
       message: 'Internal server error',
       details: [],
-      path: '/leaderboard/hexa-fit',
+      path: '/v1/leaderboard/hexa-fit',
     });
   });
 });

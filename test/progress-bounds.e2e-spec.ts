@@ -26,14 +26,14 @@ describe('progress value bounds (#135, API-FR-02, API-FR-06)', () => {
   const db = () => testApp.database.db;
 
   const sync = (token: string, body: object) =>
-    request(server()).post('/progress').set('Authorization', `Bearer ${token}`).send(body);
+    request(server()).post('/v1/progress').set('Authorization', `Bearer ${token}`).send(body);
 
   const badRequest = (detail: string) => ({
     statusCode: 400,
     error: 'Bad Request',
     message: 'Request validation failed',
     details: [detail],
-    path: '/progress',
+    path: '/v1/progress',
   });
 
   const longGameId = 'a'.repeat(200);
@@ -102,7 +102,7 @@ describe('progress value bounds (#135, API-FR-02, API-FR-06)', () => {
     });
 
     const response = await request(server())
-      .get('/progress/hexa-fit')
+      .get('/v1/progress/hexa-fit')
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(200);
@@ -127,7 +127,7 @@ describe('progress value bounds (#135, API-FR-02, API-FR-06)', () => {
       ]);
 
     const response = await request(server())
-      .get('/leaderboard/hexa-fit')
+      .get('/v1/leaderboard/hexa-fit')
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(200);
