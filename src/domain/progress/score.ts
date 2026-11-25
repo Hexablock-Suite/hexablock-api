@@ -26,4 +26,10 @@ export class Score {
   isHigherThan(other: Score): boolean {
     return this.value > other.value;
   }
+
+  // The same order under the name that RankedBoard asks of every board
+  // value: an equal score is not better (S3-03).
+  isBetterThan(other: Score): boolean {
+    return this.isHigherThan(other);
+  }
 }
