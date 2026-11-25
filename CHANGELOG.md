@@ -8,6 +8,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- Decision 7, DS-12, Q4, the error body of `flows.md` and the extensibility documents match the code again ([#189](https://github.com/Hexablock-Suite/hexablock-api/issues/189)). Decision 7 gives `GetLeaderboard` the signature of decision 20, with its one expected failure `unknown-level`. DS-12 says that a repeated sync changes no stored result and no high score, and that `updatedAt` records the instant of the sync. Q4 says that the list of level editors is built on #145. The error body shows the path with `/v1`. `extensibility.md`, decision 5, `docs/EXTENSIBILITY.md` and view `ext-1-overview` say that a new variant with level files adds a section DTO in the HTTP adapter, and that the core does not change. The PNG of view 1 is exported again. No code changes.
 - The order and the shared rank of a board live in the domain ([#183](https://github.com/Hexablock-Suite/hexablock-api/issues/183)). `RankedBoard` in `src/domain/progress/` sorts the entries of a leaderboard with the comparison of the value object of the board and gives each row its `Rank`, a value object that delivers its number, so `GetLeaderboardUseCase` no longer orders or ranks: it holds the `RankedBoard` that the domain builds and `LeaderboardDtoMapper` receives the rows that the board delivers. No HTTP answer changes, and `openapi/openapi.json` stays the same.
 
 ### Added

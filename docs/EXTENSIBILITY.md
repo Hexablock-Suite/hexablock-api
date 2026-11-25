@@ -10,10 +10,12 @@ Before you add a class, read the layer rules in [`AGENTS.md`](../AGENTS.md) and 
 
 The example of the statement is a fifth variant, Fill (§3.1). `FillSection` and `FillLevelValidator` are placeholders: no code holds them.
 
+A variant with level files adds two domain classes (its section and its validator), one entry in `levelValidators()` of `src/infrastructure/app.module.ts` and one section DTO in `src/adapters/http/level.dto.ts`. The section DTO is a change of the HTTP adapter. The core does not change.
+
 - **Add:** a section type in its own folder of `src/domain/level/`, as [`FitSection`](../src/domain/level/fit/fit-section.ts) and [`SortSection`](../src/domain/level/sort/sort-section.ts). It checks its own shape and holds its own rules. A datum can break its rules, so its factory returns a `Result`. A value object of the section that no datum can fail returns the value itself (rule «One failure mechanism» of the [Domain design rules](architecture/classes.md#domain-design-rules), decided on [#139](https://github.com/Hexablock-Suite/hexablock-api/issues/139)).
 - **Add:** a class that implements [`LevelValidator<TSection>`](../src/domain/level/level-validator.ts), as [`SortLevelValidator`](../src/domain/level/sort/sort-level-validator.ts). It only picks the section type of its game and holds no rule.
 - **Register:** one `[GameId, validator]` entry in `levelValidators()` of [`app.module.ts`](../src/infrastructure/app.module.ts). [`LevelValidators.of()`](../src/domain/level/level-validators.ts) throws a `RangeError` when two entries name one `gameId`.
-- **Document the HTTP schema:** `LevelDto.section` in [`level.dto.ts`](../src/adapters/http/level.dto.ts) is a `oneOf` of `FitSectionDto` and `SortSectionDto`. Add a section DTO there so that the OpenAPI schema describes the new section, then run `pnpm openapi:export`. `LevelDtoMapper` keeps each section as it arrives, so it does not change.
+- **Document the HTTP schema:** `LevelDto.section` in [`level.dto.ts`](../src/adapters/http/level.dto.ts) is a `oneOf` of `FitSectionDto` and `SortSectionDto`. Add a section DTO there and add it to that `oneOf` and to `@ApiExtraModels`, so that the OpenAPI schema describes the new section, then run `pnpm openapi:export`. `LevelDtoMapper` keeps each section as it arrives, so it does not change.
 - **Test:** as [`sort-section.spec.ts`](../test/domain/level/sort-section.spec.ts), [`sort-level-validator.spec.ts`](../test/domain/level/sort-level-validator.spec.ts) and [`level-validators.spec.ts`](../test/domain/level/level-validators.spec.ts) do.
 
 ## A variant with no level files

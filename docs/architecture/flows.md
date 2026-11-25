@@ -100,7 +100,7 @@ Example request of `PUT /v1/levels`, with the Sort example of the format:
   "error": "Bad Request",
   "message": "Request validation failed",
   "details": ["gameId \"hexa-fit\", levelId \"fit-01\": inexact-witness"],
-  "path": "/levels"
+  "path": "/v1/levels"
 }
 ```
 
