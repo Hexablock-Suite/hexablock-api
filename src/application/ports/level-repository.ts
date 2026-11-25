@@ -3,6 +3,7 @@ import type { LevelProblem } from '../../domain/level/level-problem.js';
 import type { StoredLevel, StoredLevelProblem } from '../../domain/level/stored-level.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
+import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { Result } from '../../domain/shared/result.js';
 
 // One change of one level. It gets the stored state of the level. It
@@ -44,6 +45,13 @@ export interface LevelRepository {
   // broken row is still a level that the definitions hold, so the board of
   // that level exists (#146). It takes no lock and restores no level.
   holds(gameId: GameId, levelId: LevelId): Promise<boolean>;
+
+  // Gives the one valid level of the gameId and the levelId of one result,
+  // or undefined: the level of a stored valid row, and undefined for a row
+  // that is absent or that breaks a rule (decision 19, #147), which holds
+  // no star thresholds. A sync reads one level per result and no level that
+  // its results do not name (#171). It takes no lock and saves no level.
+  find(gameId: GameId, result: LevelResult): Promise<LevelDefinition<unknown> | undefined>;
 
   // Runs the change while it holds a lock for the gameId and the levelId,
   // and saves the level that the change returns. Two updates of one level

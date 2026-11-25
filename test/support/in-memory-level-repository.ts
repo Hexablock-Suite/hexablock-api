@@ -1,5 +1,5 @@
 import { type LevelRow, LevelRowMapper } from '../../src/adapters/persistence/level-row.mapper.js';
-import { receiveValueOf } from '../../src/adapters/received.js';
+import { receiveLevelResultOf, receiveValueOf } from '../../src/adapters/received.js';
 import type {
   LevelChange,
   LevelRepository,
@@ -10,6 +10,7 @@ import type { LevelProblem } from '../../src/domain/level/level-problem.js';
 import type { LevelValidators } from '../../src/domain/level/level-validators.js';
 import type { GameId } from '../../src/domain/progress/game-id.js';
 import type { LevelId } from '../../src/domain/progress/level-id.js';
+import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import type { Result } from '../../src/domain/shared/result.js';
 
 // Test double for the LevelRepository port. It keeps one row per gameId and
@@ -32,6 +33,19 @@ export class InMemoryLevelRepository implements LevelRepository {
   // A valid row and a broken row both count, as in the Drizzle adapter.
   holds(gameId: GameId, levelId: LevelId): Promise<boolean> {
     return Promise.resolve(this.rowsByKey.has(keyOf(gameId, levelId)));
+  }
+
+  // One level per synced result (#171), with the answer of the Drizzle
+  // adapter: the level of a valid row, and undefined for a row that is
+  // absent or that breaks a rule.
+  async find(gameId: GameId, result: LevelResult): Promise<LevelDefinition<unknown> | undefined> {
+    const levelId = receiveLevelResultOf(result).levelId;
+    const row = await Promise.resolve(this.rowsByKey.get(rowKey(receiveValueOf(gameId), levelId)));
+    if (row === undefined) {
+      return undefined;
+    }
+    const stored = LevelRowMapper.toStoredLevel(row, this.validators);
+    return stored.state === 'valid' ? stored.level : undefined;
   }
 
   // Writes one row as it is, with no check, as a manual change of the

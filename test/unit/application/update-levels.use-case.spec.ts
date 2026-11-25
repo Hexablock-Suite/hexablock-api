@@ -8,6 +8,7 @@ import {
 } from '../../../src/application/levels/update-levels.use-case.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
+import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { levelJson, levelValidators, type LevelJson } from '../../support/level-format.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
@@ -165,6 +166,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     let calls = 0;
     const flaky: LevelRepository = {
       list: () => levels.list(),
+      find: (gameId: GameId, result: LevelResult) => levels.find(gameId, result),
       holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
       update: (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         calls += 1;
@@ -201,6 +203,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     const newer = new UpdateLevelsUseCase(levels, levelValidators());
     const racing: LevelRepository = {
       list: () => levels.list(),
+      find: (gameId: GameId, result: LevelResult) => levels.find(gameId, result),
       holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
       update: async (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         await newer.execute(batchOf(levelJson('hexa-fit', 'fit-01', 3)));
