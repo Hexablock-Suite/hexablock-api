@@ -1,9 +1,9 @@
 import type {
   Leaderboard,
   LeaderboardQuery,
-  RankedEntry,
 } from '../../application/leaderboard/get-leaderboard.use-case.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
+import type { RankedBoard } from '../../domain/progress/ranked-board.js';
 import type { Score } from '../../domain/progress/score.js';
 import type { Standing } from '../../domain/progress/standing.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
@@ -38,55 +38,78 @@ export const LeaderboardDtoMapper = {
     return ok({ board: 'level', gameId: builtGameId.value, levelId: builtLevelId.value });
   },
 
-  // The mapper receives the value that each value object delivers. It keeps
-  // the order and the rank that the use case gave.
+  // The mapper receives the values that the board and each value object
+  // deliver. The board delivers its rows in the order that the domain gave,
+  // and each rank delivers its number.
   toDto(board: Leaderboard): LeaderboardDto {
     const gameId = receiveValueOf(board.gameId);
     if (board.board === 'level') {
-      return {
-        gameId,
-        levelId: receiveValueOf(board.levelId),
-        entries: board.entries.map(levelRow),
-      };
+      return { gameId, levelId: receiveValueOf(board.levelId), entries: levelRows(board.entries) };
     }
     return {
       gameId,
-      highScores: board.highScores.map(scoreRow),
-      standings: board.standings.map(standingRow),
+      highScores: scoreRows(board.highScores),
+      standings: standingRows(board.standings),
     };
   },
 };
 
 // A LevelResult delivers its four values in one call. The row of a level
 // board leaves out the levelId: the board names it once.
-function levelRow({ rank, userId, result }: RankedEntry<LevelResult>): LevelEntryDto {
-  const { stars, moves, elapsedMs } = receiveLevelResultOf(result);
-  return { rank, userId: receiveValueOf(userId), stars, moves, elapsedMs };
-}
-
-function scoreRow({ rank, userId, result }: RankedEntry<Score>): ScoreEntryDto {
-  return { rank, userId: receiveValueOf(userId), highScore: receiveValueOf(result) };
-}
-
-// A Standing delivers its four totals in one call.
-function standingRow({ rank, userId, result }: RankedEntry<Standing>): StandingEntryDto {
-  const rows: StandingEntryDto[] = [];
-  result.deliverTo({
-    receive(stars, levelsCompleted, moves, elapsedTime) {
+function levelRows(board: RankedBoard<LevelResult>): LevelEntryDto[] {
+  const rows: LevelEntryDto[] = [];
+  board.deliverTo({
+    receive(rank, userId, result) {
+      const { stars, moves, elapsedMs } = receiveLevelResultOf(result);
       rows.push({
-        rank,
+        rank: receiveValueOf(rank),
         userId: receiveValueOf(userId),
-        stars: receiveValueOf(stars),
-        levelsCompleted: receiveValueOf(levelsCompleted),
-        moves: receiveValueOf(moves),
-        elapsedMs: receiveValueOf(elapsedTime),
+        stars,
+        moves,
+        elapsedMs,
       });
     },
   });
-  const [row] = rows;
-  // A Standing that delivers nothing breaks its contract.
-  if (row === undefined) {
-    throw new Error('The Standing delivered no totals.');
-  }
-  return row;
+  return rows;
+}
+
+function scoreRows(board: RankedBoard<Score>): ScoreEntryDto[] {
+  const rows: ScoreEntryDto[] = [];
+  board.deliverTo({
+    receive(rank, userId, result) {
+      rows.push({
+        rank: receiveValueOf(rank),
+        userId: receiveValueOf(userId),
+        highScore: receiveValueOf(result),
+      });
+    },
+  });
+  return rows;
+}
+
+// A Standing delivers its four totals in one call.
+function standingRows(board: RankedBoard<Standing>): StandingEntryDto[] {
+  const rows: StandingEntryDto[] = [];
+  board.deliverTo({
+    receive(rank, userId, result) {
+      const before = rows.length;
+      result.deliverTo({
+        receive(stars, levelsCompleted, moves, elapsedTime) {
+          rows.push({
+            rank: receiveValueOf(rank),
+            userId: receiveValueOf(userId),
+            stars: receiveValueOf(stars),
+            levelsCompleted: receiveValueOf(levelsCompleted),
+            moves: receiveValueOf(moves),
+            elapsedMs: receiveValueOf(elapsedTime),
+          });
+        },
+      });
+      // A Standing that delivers nothing breaks its contract.
+      if (rows.length === before) {
+        throw new Error('The Standing delivered no totals.');
+      }
+    },
+  });
+  return rows;
 }
