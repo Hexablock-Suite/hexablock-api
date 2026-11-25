@@ -13,7 +13,10 @@
     { "path": "src/", "layer": 4, "part": "adapters" }
   ],
   "views": { "domain-": "domain", "uc-": "usecases", "ad-": "adapters", "flow-": null },
-  "patterns": { "LevelValidators->LevelValidator": "Strategy" },
+  "patterns": {
+    "LevelValidators->LevelValidator": "Strategy",
+    "UseCaseAspect->UseCase": "Decorator"
+  },
   "stereotypeFor": { "AppModule": "module" },
   "staleMembers": [
     { "type": "JwtTokenIssuer", "member": "secret", "equivalent": ["JwtTokenIssuer.jwt"] },
