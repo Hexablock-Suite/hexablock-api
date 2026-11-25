@@ -37,9 +37,9 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
   const signIn = (username: string) => signInTo(server(), username);
 
   const sync = (token: string, body: object) =>
-    request(server()).post('/progress').set('Authorization', `Bearer ${token}`).send(body);
+    request(server()).post('/v1/progress').set('Authorization', `Bearer ${token}`).send(body);
   const read = (token: string, gameId: string) =>
-    request(server()).get(`/progress/${gameId}`).set('Authorization', `Bearer ${token}`);
+    request(server()).get(`/v1/progress/${gameId}`).set('Authorization', `Bearer ${token}`);
 
   it('should_read_back_two_entries_when_user_syncs_two_variants', async () => {
     const { token } = await signIn('ada');
@@ -173,7 +173,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['gameId must be a string'],
-      path: '/progress',
+      path: '/v1/progress',
     });
     const rows = await testApp.database.db
       .select()
@@ -195,7 +195,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['score must be a non-negative integer, got -1.'],
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(readBack.body.highScore).toBe(120);
   });
@@ -214,7 +214,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['score must be a non-negative integer, got 9007199254740992.'],
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await storedRows(userId)).toEqual([]);
   });
@@ -225,7 +225,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
     const { token, userId } = await signIn('ada');
 
     const response = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json')
       .send('{"gameId":"hexa-lines","score":-0}');
@@ -246,7 +246,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
     const { token } = await signIn('ada');
 
     const response = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json')
       .send('{"gameId":"hexa-lines","score":-0}');
@@ -281,7 +281,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['score must be a non-negative integer, got -1.'],
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await storedRows(userId)).toEqual([]);
   });
@@ -301,7 +301,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['stars must be a non-negative integer of at most 2147483647, got -2.'],
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await storedRows(userId)).toEqual([]);
   });
@@ -331,7 +331,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
         error: 'Bad Request',
         message: 'Request validation failed',
         details: [problem],
-        path: '/progress',
+        path: '/v1/progress',
       });
       expect(await storedRows(userId)).toEqual([]);
     },
@@ -385,7 +385,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['results must be an array of objects'],
-      path: '/progress',
+      path: '/v1/progress',
     };
     expect(notArray.status).toBe(400);
     expect(notArray.body).toEqual(error);
@@ -406,7 +406,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Bad Request',
       message: 'Request validation failed',
       details: ['gameId must be a lowercase slug of 1 to 64 characters, got "Hexa Lines".'],
-      path: '/progress/Hexa%20Lines',
+      path: '/v1/progress/Hexa%20Lines',
     });
   });
 
@@ -428,7 +428,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Internal Server Error',
       message: 'Internal server error',
       details: [],
-      path: '/progress/hexa-lines',
+      path: '/v1/progress/hexa-lines',
     });
   });
 
@@ -448,14 +448,14 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Internal Server Error',
       message: 'Internal server error',
       details: [],
-      path: '/progress',
+      path: '/v1/progress',
     });
     expect(await storedRows(userId)).toEqual([]);
   });
 
   it('should_return_unauthorized_error_body_when_sync_has_no_token', async () => {
     const response = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .send({ gameId: 'hexa-lines', score: 120 });
 
     expect(response.status).toBe(401);
@@ -464,12 +464,12 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Unauthorized',
       message: 'Missing bearer token',
       details: [],
-      path: '/progress',
+      path: '/v1/progress',
     });
   });
 
   it('should_return_unauthorized_error_body_when_read_has_no_token', async () => {
-    const response = await request(server()).get('/progress/hexa-lines');
+    const response = await request(server()).get('/v1/progress/hexa-lines');
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -477,7 +477,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Unauthorized',
       message: 'Missing bearer token',
       details: [],
-      path: '/progress/hexa-lines',
+      path: '/v1/progress/hexa-lines',
     });
   });
 
@@ -492,7 +492,7 @@ describe('progress endpoints (API-FR-02, API-FR-06)', () => {
       error: 'Not Found',
       message: 'No progress for gameId hexa-sort',
       details: [],
-      path: '/progress/hexa-sort',
+      path: '/v1/progress/hexa-sort',
     });
   });
 });

@@ -33,12 +33,12 @@ HexaBlock API is the REST backend of the four HexaBlock games. It serves the cli
 Today `src/` holds the health endpoint, the `Clock` port and its adapter, the database
 connection, the `HttpErrorFilter` that gives every HTTP error the `ErrorDto` body, and the
 `PlayerProgress` aggregate in `src/domain/progress` with its `ProgressRepository` port and its
-Drizzle repository. It also holds sign-up, sign-in and `GET /auth/me`, the first route behind
-`JwtAuthGuard`, and the progress sync `POST /progress` with its read `GET /progress/{gameId}`,
+Drizzle repository. It also holds sign-up, sign-in and `GET /v1/auth/me`, the first route behind
+`JwtAuthGuard`, and the progress sync `POST /v1/progress` with its read `GET /v1/progress/{gameId}`,
 both behind the guard. It holds the level schema of DS-6 with the Fit and Sort level validators,
-the level store, the level read `GET /levels` with no guard and the level update `PUT /levels`
-behind the guard. It holds the leaderboard reads `GET /leaderboard/{gameId}` and
-`GET /leaderboard/{gameId}/levels/{levelId}`, both behind the guard. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
+the level store, the level read `GET /v1/levels` with no guard and the level update `PUT /v1/levels`
+behind the guard. It holds the leaderboard reads `GET /v1/leaderboard/{gameId}` and
+`GET /v1/leaderboard/{gameId}/levels/{levelId}`, both behind the guard. The rest is designed in [docs/architecture/](docs/architecture/) and is not built yet.
 
 ## Architecture
 
@@ -183,7 +183,7 @@ Docker.
 ```bash
 fnm use            # reads .node-version (Node 26)
 pnpm install       # also installs the git hooks
-pnpm start:dev     # http://localhost:3000/health, docs at /docs, JSON at /docs-json
+pnpm start:dev     # http://localhost:3000/v1/health, docs at /docs, JSON at /docs-json
 ```
 
 The API reads `PORT` (default `3000`), `DATABASE_URL` and `JWT_SECRET` from the environment, and does not
@@ -196,17 +196,17 @@ set -a && . ./.env && set +a
 pnpm start:dev
 ```
 
-The pool connects on the first query, so `/health` answers without a running database.
-Sign-up and sign-in (`POST /auth/register`, `POST /auth/login`) need the database and its migrations.
-`GET /auth/me`, `POST /progress` and `GET /progress/{gameId}` need the header
-`Authorization: Bearer <accessToken>` from `POST /auth/login`.
+The pool connects on the first query, so `/v1/health` answers without a running database.
+Sign-up and sign-in (`POST /v1/auth/register`, `POST /v1/auth/login`) need the database and its migrations.
+`GET /v1/auth/me`, `POST /v1/progress` and `GET /v1/progress/{gameId}` need the header
+`Authorization: Bearer <accessToken>` from `POST /v1/auth/login`.
 Without a valid token it answers 401 with the `ErrorDto` body.
 
-`PUT /levels` also needs an account in the list of level editors
+`PUT /v1/levels` also needs an account in the list of level editors
 ([#145](https://github.com/Hexablock-Suite/hexablock-api/issues/145)). `LEVEL_EDITOR_IDS` holds
 the user ids of those accounts, separated by commas; the API trims each entry and skips an empty
 one. The list holds ids, not usernames, because another person can sign up a name first. To find
-the id of an account, sign up and sign in, then call `GET /auth/me` with its token: the answer gives
+the id of an account, sign up and sign in, then call `GET /v1/auth/me` with its token: the answer gives
 the `userId`, the same value as the `sub` claim of the token. Then restart the API with the id:
 
 ```bash
@@ -214,7 +214,7 @@ export LEVEL_EDITOR_IDS=0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b,6f1c1d0e-2b7a-4c55-
 pnpm start:dev
 ```
 
-An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /levels` gets
+An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` gets
 403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
 does. The account that a deploy uses to send the levels must be in the list.
 

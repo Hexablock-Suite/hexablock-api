@@ -4,7 +4,7 @@
   "interactions": [
     {
       "description": "a health check that expects a body the API never sends",
-      "request": { "method": "GET", "path": "/health" },
+      "request": { "method": "GET", "path": "/v1/health" },
       "response": { "status": 200, "body": { "status": "down" } }
     }
   ],

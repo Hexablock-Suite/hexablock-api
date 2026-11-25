@@ -9,3 +9,4 @@ This index lists the requirements, the design notes and the architecture documen
 - [architecture/flows.md](architecture/flows.md): how a use case crosses the four layers, as a class view and a sequence diagram.
 - [architecture/extensibility.md](architecture/extensibility.md): the extensibility diagram, with the application core in the center and its extension points.
 - [EXTENSIBILITY.md](EXTENSIBILITY.md): for each extension axis of that diagram, the class that a developer adds and the file that registers it.
+- [DEPENDENCIES.md](DEPENDENCIES.md): one truthful reason per entry of the `dependencies` and `devDependencies` maps of `package.json`, checked by the gate `test/gates/dependencies.gate.spec.ts`.

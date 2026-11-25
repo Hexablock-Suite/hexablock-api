@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../../dist/infrastructure/app.module.js';
-import { buildOpenApiDocument } from '../../dist/infrastructure/http-app.js';
+import { buildOpenApiDocument, configureHttpApp } from '../../dist/infrastructure/http-app.js';
 
 const COMMITTED = resolve(import.meta.dirname, '../../openapi/openapi.json');
 
@@ -26,8 +26,11 @@ function sortKeys(value) {
 }
 
 async function renderDocument() {
-  // The app is created but never listens on a port.
+  // The app is created but never listens on a port. It goes through
+  // configureHttpApp, so the /v1 prefix of the served routes reaches the
+  // document too.
   const app = await NestFactory.create(AppModule, { logger: false });
+  configureHttpApp(app);
   try {
     return `${JSON.stringify(sortKeys(buildOpenApiDocument(app)), null, 2)}\n`;
   } finally {

@@ -20,6 +20,10 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
 }
 
 export function configureHttpApp(app: INestApplication): void {
+  // Every route is served under the /v1 URI version prefix (decision of
+  // 2026-11-23, recorded in docs/REQUIREMENTS.md). No other form of HTTP
+  // versioning: the prefix is exactly v1.
+  app.setGlobalPrefix('v1');
   SwaggerModule.setup(DOCS_PATH, app, () => buildOpenApiDocument(app), {
     jsonDocumentUrl: `${DOCS_PATH}-json`,
   });

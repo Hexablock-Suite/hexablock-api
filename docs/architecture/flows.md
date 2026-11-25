@@ -23,7 +23,7 @@ The app calls this endpoint when it syncs its progress and its leaderboard: `Sav
 
 The code runs the find, the change and the save of this view as one call, `ProgressRepository.update(key, change)`. The key is the `ProgressKey` that the use case builds from the `userId` and the `gameId` of the request ([#107](https://github.com/Hexablock-Suite/hexablock-api/issues/107)). The key holds the `userId` and the `gameId`, so this one call is the `update(userId, gameId, change)` call of the diagrams task ([#22](https://github.com/Hexablock-Suite/hexablock-api/issues/22)) with the identity type of #107, and it replaces `find()` and `save()`. `DrizzleProgressRepository` opens one transaction, takes a Postgres advisory lock for the key, on the text `<userId>:<gameId>` that it receives from the key, reads the aggregate and passes it, or `null`, to the change. The change reads the `SyncInstant` of `Clock.now()` first, then starts or changes the `PlayerProgress` at that instant. The adapter saves what the change returns in the same transaction. So two overlapping syncs of one key run one after the other, and no level result is lost. `updatedAt` never moves back: each record of a score or a level result moves it to the instant of its sync, and the aggregate keeps the latest instant (decision 3 of [classes.md](classes.md)). A row lock is not enough, because the first sync of a game has no row yet. The sequence diagram draws the change as a call back from the adapter into the use case, with an activation of its own.
 
-A token whose user has no stored row gets a 401, not a 500 ([#137](https://github.com/Hexablock-Suite/hexablock-api/issues/137), decision of 2026-11-17). The check lives in `AuthenticateTokenUseCase`, which the guard already calls: after `TokenIssuer.verify()` it asks `UserRepository.exists()`, so every guarded route, `GET /auth/me` too, answers 401 with the `ErrorDto` body and the message of a bad token. It costs one query per guarded request. The user can still go between the guard and the write. Then the foreign key `progress.user_id → users.id` rejects the write with Postgres code 23503, the transaction rolls back, and `update()` returns the failed `Result` `unknown-user`. `SyncProgressUseCase` returns it as the `ProgressProblem` `{ kind: 'unknown-user' }`, and `ProgressController` answers it with the same 401 as the guard. The sync stores nothing.
+A token whose user has no stored row gets a 401, not a 500 ([#137](https://github.com/Hexablock-Suite/hexablock-api/issues/137), decision of 2026-11-17). The check lives in `AuthenticateTokenUseCase`, which the guard already calls: after `TokenIssuer.verify()` it asks `UserRepository.exists()`, so every guarded route, `GET /v1/auth/me` too, answers 401 with the `ErrorDto` body and the message of a bad token. It costs one query per guarded request. The user can still go between the guard and the write. Then the foreign key `progress.user_id → users.id` rejects the write with Postgres code 23503, the transaction rolls back, and `update()` returns the failed `Result` `unknown-user`. `SyncProgressUseCase` returns it as the `ProgressProblem` `{ kind: 'unknown-user' }`, and `ProgressController` answers it with the same 401 as the guard. The sync stores nothing.
 
 ## Use case 2: login
 
@@ -39,7 +39,7 @@ The app calls this endpoint when a player signs in. The endpoint is `AuthControl
 
 ## Use case 3: update levels
 
-A signed-in client calls this endpoint to publish new levels without an app update. Q4 changed on 2026-11-16 ([#134](https://github.com/Hexablock-Suite/hexablock-api/issues/134)) and 2026-11-17 ([#145](https://github.com/Hexablock-Suite/hexablock-api/issues/145)): after the token guard, `LevelEditorGuard` lets only an account in the list of level editors of the configuration update, with no roles, and answers 403 to any other account before the controller reads the body (decision 18 of [classes.md](classes.md)). The class view and the sequence diagram of this use case name that guard in a note and do not draw it. The endpoint is `LevelsController.update()`, `PUT /levels` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a domain service that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The strategy only picks the section type, the section checks its own shape and holds its rules, and `LevelValidators` creates each level, so no level exists before its section is valid (decisions 4 and 5 of [classes.md](classes.md)). The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels one by one or returns the problems. No class of layer 4 takes part.
+A signed-in client calls this endpoint to publish new levels without an app update. Q4 changed on 2026-11-16 ([#134](https://github.com/Hexablock-Suite/hexablock-api/issues/134)) and 2026-11-17 ([#145](https://github.com/Hexablock-Suite/hexablock-api/issues/145)): after the token guard, `LevelEditorGuard` lets only an account in the list of level editors of the configuration update, with no roles, and answers 403 to any other account before the controller reads the body (decision 18 of [classes.md](classes.md)). The class view and the sequence diagram of this use case name that guard in a note and do not draw it. The endpoint is `LevelsController.update()`, `PUT /v1/levels` (API-FR-04). Its path is new because it makes the Strategy of §3.3 visible: `LevelValidators` is a domain service that holds one `LevelValidator` per `gameId`, and `FitLevelValidator` and `SortLevelValidator` implement it. The strategy only picks the section type, the section checks its own shape and holds its rules, and `LevelValidators` creates each level, so no level exists before its section is valid (decisions 4 and 5 of [classes.md](classes.md)). The use case checks every level before it saves any level, so the sequence diagram has a `loop` over the levels and an `alt` that saves the levels one by one or returns the problems. No class of layer 4 takes part.
 
 ### Class view
 
@@ -55,14 +55,14 @@ The code saves each level with one call, `LevelRepository.update(gameId, levelId
 
 `LevelsController` serves the two routes of the level use cases (API-FR-04), as decided on [#81](https://github.com/Hexablock-Suite/hexablock-api/issues/81). `openapi/openapi.json` holds the same schemas. Both routes code against S3-02, one level format, and S3-10, which rejects only a lower `version`. Both were confirmed on 2026-11-16 on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76).
 
-| Route         | Handler    | Guard          | Request body                            | Success                                                                   |
-| ------------- | ---------- | -------------- | --------------------------------------- | ------------------------------------------------------------------------- |
-| `GET /levels` | `list()`   | none           | none                                    | 200, `LevelsDto`: `{ "levels": LevelDto[] }`, by `gameId`, then `levelId` |
-| `PUT /levels` | `update()` | `JwtAuthGuard` | `LevelsDto`: `{ "levels": LevelDto[] }` | 204, no body                                                              |
+| Route            | Handler    | Guard          | Request body                            | Success                                                                   |
+| ---------------- | ---------- | -------------- | --------------------------------------- | ------------------------------------------------------------------------- |
+| `GET /v1/levels` | `list()`   | none           | none                                    | 200, `LevelsDto`: `{ "levels": LevelDto[] }`, by `gameId`, then `levelId` |
+| `PUT /v1/levels` | `update()` | `JwtAuthGuard` | `LevelsDto`: `{ "levels": LevelDto[] }` | 204, no body                                                              |
 
 - `LevelDto` is one level of [`docs/level-format.md`](../level-format.md), field for field: `gameId`, `levelId`, `order`, `version`, `topology` and `section`. The OpenAPI document gives the section as `FitSectionDto` or `SortSectionDto`.
 - No route has a parameter, a page size or a filter: one read gives every level.
-- `PUT /levels` is an idempotent batch. An equal `version` passes (S3-10), so a retry of the same batch is safe. An empty batch saves nothing and answers 204.
+- `PUT /v1/levels` is an idempotent batch. An equal `version` passes (S3-10), so a retry of the same batch is safe. An empty batch saves nothing and answers 204.
 - Each failure has the `ErrorDto` body (API-FR-06):
   - 400 for a body with no array of level objects: `details` is `["levels must be an array of objects"]`.
   - 400 for a level that breaks a rule, with `message` `Request validation failed`. The API checks a batch in two steps. First `LevelDtoMapper` checks the fields and the common values of every level: the six fields of the format, then `gameId`, `levelId`, `order`, `version` and `topology`. Each level that fails gets one line of `details`, for its first problem. Only when every level passes that step, `UpdateLevelsUseCase` checks the rules of each level through the strategy of its `gameId`: its section, A5, or a `gameId` with no level files. Each level that breaks a rule gets one line, for its first broken rule. So a level with a wrong field hides the A5 problem of another level of the same batch.
@@ -70,7 +70,7 @@ The code saves each level with one call, `LevelRepository.update(gameId, levelId
   - 401 for an update without a valid token.
   - 500 for an unexpected failure, with no stack, no SQL and no rule in the body. A stored level that breaks a rule is not such a failure: the update replaces it, and the read names it in `unavailable` (#147). A save that fails after the first level keeps the levels saved before it, and a retry of the same batch saves every level.
 
-Example request of `PUT /levels`, with the Sort example of the format:
+Example request of `PUT /v1/levels`, with the Sort example of the format:
 
 ```json
 {
@@ -92,7 +92,7 @@ Example request of `PUT /levels`, with the Sort example of the format:
 }
 ```
 
-`GET /levels` then answers 200 with the same body. Example answer of `PUT /levels` when the witness of the Fit example fails A5:
+`GET /v1/levels` then answers 200 with the same body. Example answer of `PUT /v1/levels` when the witness of the Fit example fails A5:
 
 ```json
 {
@@ -120,10 +120,10 @@ The other five use cases follow a path that one of the three flows already draws
 
 `LeaderboardController` serves the two routes of `GetLeaderboard` (API-FR-03). Both routes are behind `JwtAuthGuard`: S3-09 was confirmed on 2026-11-16 on [#76](https://github.com/Hexablock-Suite/hexablock-api/issues/76), and the team evaluates a public read later. The routes, the rank and the page size come from the decision recorded on [#83](https://github.com/Hexablock-Suite/hexablock-api/issues/83#issuecomment-6905667403). `openapi/openapi.json` holds the same schemas.
 
-| Route                                        | Handler        | Path parameters                                                     | 200 body                                                                                                  |
-| -------------------------------------------- | -------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `GET /leaderboard/{gameId}`                  | `top()`        | `gameId`, a lowercase slug                                          | `GlobalLeaderboardDto`: `gameId`, `highScores` (`ScoreEntryDto[]`) and `standings` (`StandingEntryDto[]`) |
-| `GET /leaderboard/{gameId}/levels/{levelId}` | `topOfLevel()` | `gameId`, a lowercase slug, and `levelId`, a text that is not blank | `LevelLeaderboardDto`: `gameId`, `levelId` and `entries` (`LevelEntryDto[]`)                              |
+| Route                                           | Handler        | Path parameters                                                     | 200 body                                                                                                  |
+| ----------------------------------------------- | -------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `GET /v1/leaderboard/{gameId}`                  | `top()`        | `gameId`, a lowercase slug                                          | `GlobalLeaderboardDto`: `gameId`, `highScores` (`ScoreEntryDto[]`) and `standings` (`StandingEntryDto[]`) |
+| `GET /v1/leaderboard/{gameId}/levels/{levelId}` | `topOfLevel()` | `gameId`, a lowercase slug, and `levelId`, a text that is not blank | `LevelLeaderboardDto`: `gameId`, `levelId` and `entries` (`LevelEntryDto[]`)                              |
 
 - A `ScoreEntryDto` row holds `rank`, `userId` and `highScore`. A `StandingEntryDto` row holds `rank`, `userId`, `stars`, `levelsCompleted`, `moves` and `elapsedMs`, the totals of the stored level results of the player. A `LevelEntryDto` row holds `rank`, `userId`, `stars`, `moves` and `elapsedMs`.
 - `highScores` ranks by `Score.isHigherThan()`, `standings` by `Standing.isBetterThan()` (S3-03), and `entries` by `LevelResult.isBetterThan()` (DS-4). `GameId` is open (decision 5 of [classes.md](classes.md)), so the global route gives both lists for every game, and no list of `gameId` exists. A list holds only the players who have a result to rank (decision of [#82](https://github.com/Hexablock-Suite/hexablock-api/issues/82)): `highScores` of Fit and Sort is empty, and `standings` of Lines and Merge is empty.
@@ -131,7 +131,7 @@ The other five use cases follow a path that one of the three flows already draws
 - No query parameter and no page size: a list holds every player who has a result to rank.
 - A game with no stored result gives empty lists, not a 404. So does a stored level with no result: a stored row that breaks a rule counts as stored. The board of a level that the level definitions do not hold answers 404 with the `ErrorDto` body, message `No level <levelId> for gameId <gameId>`, because the API holds every level (API-FR-03, [#146](https://github.com/Hexablock-Suite/hexablock-api/issues/146)). A result of that level does not make a board. A `gameId` or a `levelId` that breaks its rule gives a 400, and a request without a valid token gives a 401, both with the `ErrorDto` body (API-FR-06).
 
-Example answer of `GET /leaderboard/hexa-lines`:
+Example answer of `GET /v1/leaderboard/hexa-lines`:
 
 ```json
 {
@@ -145,7 +145,7 @@ Example answer of `GET /leaderboard/hexa-lines`:
 }
 ```
 
-Example answer of `GET /leaderboard/hexa-fit/levels/fit-01`:
+Example answer of `GET /v1/leaderboard/hexa-fit/levels/fit-01`:
 
 ```json
 {
@@ -199,7 +199,7 @@ The flows show some members that the small views of [classes.md](classes.md) do 
 
 - `SyncProgressRequest` holds `userId`, `gameId`, an optional `score` and `results`, each one a domain value that `ProgressDtoMapper` builds.
 - `ProgressController.sync()` takes the `userId` that `JwtAuthGuard` puts on the request, and `ProgressDtoMapper.toRequest()` builds the request. Views 3.3 and 3.5 of [classes.md](classes.md) show both members.
-- The route is `POST /progress`, and a success answers 200 with `ProgressDto`, as `openapi/openapi.json` records.
+- The route is `POST /v1/progress`, and a success answers 200 with `ProgressDto`, as `openapi/openapi.json` records.
 
 ### Flow 2: login
 

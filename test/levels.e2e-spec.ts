@@ -12,7 +12,7 @@ import { testUserId } from './support/user-ids.js';
 // has no guard. The update is behind JwtAuthGuard and LevelEditorGuard (Q4,
 // #145): an idempotent batch that answers 204. API-FR-06: every error has the
 // shared ErrorDto body.
-const LEVELS_PATH = '/levels';
+const LEVELS_PATH = '/v1/levels';
 
 // The user ids come in sign-up order, so the first account, ada, is the
 // only level editor, and the second account, eve, is not one.
@@ -337,7 +337,7 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     // A result needs its stored level (#135), so the update comes first.
     const updated = await update(token, { levels: [fitLevel] });
     const synced = await request(server())
-      .post('/progress')
+      .post('/v1/progress')
       .set('Authorization', `Bearer ${token}`)
       .send({ gameId: 'hexa-fit', results: [result] });
     const read = await list();

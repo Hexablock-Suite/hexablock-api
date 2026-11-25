@@ -4,7 +4,7 @@
   "interactions": [
     {
       "description": "a health check",
-      "request": { "method": "GET", "path": "/health" },
+      "request": { "method": "GET", "path": "/v1/health" },
       "response": { "status": 200, "body": { "status": "ok" } }
     }
   ],
