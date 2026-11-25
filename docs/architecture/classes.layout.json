@@ -115,8 +115,7 @@
             "GetLeaderboard",
             "LevelLeaderboard",
             "Leaderboard",
-            "LeaderboardQuery",
-            "RankedEntry"
+            "LeaderboardQuery"
           ]
         },
         {
@@ -348,7 +347,10 @@
             "MovesProblem",
             "LevelResultReceiver",
             "StarsProblem",
-            "ElapsedTimeProblem"
+            "ElapsedTimeProblem",
+            "Rank",
+            "RankedBoard",
+            "RankedBoardReceiver"
           ]
         },
         {
@@ -530,7 +532,6 @@
             "UnknownLevel",
             "LeaderboardQuery",
             "GetLeaderboard",
-            "RankedEntry",
             "LevelLeaderboard",
             "GlobalLeaderboard"
           ]

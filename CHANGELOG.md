@@ -6,6 +6,10 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ## [Unreleased]
 
+### Changed
+
+- The order and the shared rank of a board live in the domain ([#183](https://github.com/Hexablock-Suite/hexablock-api/issues/183)). `RankedBoard` in `src/domain/progress/` sorts the entries of a leaderboard with the comparison of the value object of the board and gives each row its `Rank`, a value object that delivers its number, so `GetLeaderboardUseCase` no longer orders or ranks: it holds the `RankedBoard` that the domain builds and `LeaderboardDtoMapper` receives the rows that the board delivers. No HTTP answer changes, and `openapi/openapi.json` stays the same.
+
 ### Added
 
 - `docs/EXTENSIBILITY.md` (API-NFR-10) ([#141](https://github.com/Hexablock-Suite/hexablock-api/issues/141)). For each extension axis of `docs/architecture/extensibility.md`, it names the class that a developer adds, the file that registers it and the tests to copy. It links to the views and does not copy them. The _Check_ of API-NFR-10 in `docs/REQUIREMENTS.md` now points to it.

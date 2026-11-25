@@ -75,12 +75,12 @@
           holds the LeaderboardReader port and the LevelRepository port. Before the board of a
           level, the use case asks LevelRepository.holds() whether the definitions hold the level,
           and fails with UnknownLevel when they do not (#146). The reader only filters and sums, and
-          the use case orders the entries with the comparisons of the domain. Each progress use case
-          joins the userId and the gameId of its request in a ProgressKey, and ProgressRepository
-          finds and updates one progress by that key. A footnote names LeaderboardController and
-          LeaderboardDtoMapper of layer 3, which call GetLeaderboard and translate its query and
-          answer, and says that LeaderboardEntry is a response type of layer 2 with no tactical
-          stereotype.
+          the RankedBoard value object of the domain ranks the entries that the reader gives: the
+          use case builds no order. Each progress use case joins the userId and the gameId of its
+          request in a ProgressKey, and ProgressRepository finds and updates one progress by that
+          key. A footnote names LeaderboardController and LeaderboardDtoMapper of layer 3, which
+          call GetLeaderboard and translate its query and answer, and says that LeaderboardEntry is
+          a response type of layer 2 with no tactical stereotype.
         </desc>
         <defs>
           <marker
@@ -718,7 +718,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           under a lock per ProgressKey, and passes it to the domain. LeaderboardReader only filters
-          and sums: GetLeaderboardUseCase orders the entries
+          and sums: RankedBoard of the domain ranks the entries
         </text>
         <text
           x="24"
@@ -728,7 +728,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           with the comparisons of the domain: LevelResult.isBetterThan() (DS-4),
-          Score.isHigherThan() and Standing.isBetterThan() (S3-03).
+          Score.isHigherThan() and Standing.isBetterThan() (S3-03). The use case builds no order,
         </text>
         <text
           x="24"
@@ -737,8 +737,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Each row gets a rank: 1 plus the entries that are strictly better. A full tie shares the
-          rank, and the next rank skips: 1, 1, 3 (#83).
+          and the adapter adds none. Each row gets a rank: 1 plus the entries that are strictly
+          better. A full tie shares the rank, and the next rank skips: 1, 1, 3 (#83).
         </text>
         <text
           x="24"
