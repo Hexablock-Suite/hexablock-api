@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
+import { sql } from 'drizzle-orm';
 import { DrizzleLeaderboardReader } from '../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import {
@@ -230,5 +231,29 @@ describe('DrizzleLeaderboardReader', () => {
 
     expect(names).toEqual(expect.arrayContaining(['progress', 'levelResults']));
     expect(names.filter((name) => /users|username|password/i.test(name))).toEqual([]);
+  });
+
+  // #171: the keyed filters of the reader run on one index of level_results.
+  // The board of one level filters on game_id and level_id, and the standings
+  // of one game filter on game_id, so the index on those two columns serves
+  // both reads. The index is not unique: the primary key keeps the rows.
+  it('should_index_level_results_by_game_and_level_id_when_the_migrations_run', async () => {
+    const index = await shared.db.execute<{ indexname: string; indexdef: string }>(
+      sql`select indexname, indexdef from pg_indexes
+          where tablename = 'level_results' order by indexname`,
+    );
+
+    expect(index.rows).toEqual([
+      {
+        indexname: 'level_results_game_id_level_id_idx',
+        indexdef:
+          'CREATE INDEX level_results_game_id_level_id_idx ON public.level_results USING btree (game_id, level_id)',
+      },
+      {
+        indexname: 'level_results_user_id_game_id_level_id_pk',
+        indexdef:
+          'CREATE UNIQUE INDEX level_results_user_id_game_id_level_id_pk ON public.level_results USING btree (user_id, game_id, level_id)',
+      },
+    ]);
   });
 });

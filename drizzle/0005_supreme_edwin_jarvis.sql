@@ -1,0 +1,1 @@
+CREATE INDEX "level_results_game_id_level_id_idx" ON "level_results" USING btree ("game_id","level_id");
