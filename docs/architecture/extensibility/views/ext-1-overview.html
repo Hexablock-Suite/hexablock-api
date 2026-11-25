@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 1 of 3</p>
       <h1>The application core and its extension axes</h1>
       <svg
-        viewBox="0 0 1040 1412"
+        viewBox="0 0 1040 1428"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext1overview-title ext1overview-desc"
@@ -80,8 +80,9 @@
           labelled Aggregate encloses the LevelDefinition root alone. The footnote says that every
           input port binds UseCase, that LevelDefinition keeps its fields private, that FitSection
           and SortSection are value objects, that LeaderboardEntry is a response type of layer 2 and
-          that Standing is a value object of layer 1, and it names the DTO mappers and the
-          operations of LevelRepository that other views draw.
+          that Standing is a value object of layer 1, that a new variant with level files adds a
+          section DTO and leaves the core unchanged, and it names the DTO mappers and the operations
+          of LevelRepository that other views draw.
         </desc>
         <defs>
           <marker
@@ -1524,11 +1525,22 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           The core points inward to layer 1 only through LevelValidators, which UpdateLevelsUseCase
-          holds. A new variant registers its validator and changes no class.
+          holds.
         </text>
         <text
           x="24"
           y="1172"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          A new variant with level files adds its section, its validator, one levelValidators()
+          entry and one section DTO in level.dto.ts, a change of the HTTP adapter. The core does not
+          change.
+        </text>
+        <text
+          x="24"
+          y="1188"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1538,7 +1550,7 @@
         </text>
         <text
           x="24"
-          y="1188"
+          y="1204"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1548,7 +1560,7 @@
         </text>
         <text
           x="24"
-          y="1204"
+          y="1220"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1557,7 +1569,7 @@
         </text>
         <text
           x="24"
-          y="1220"
+          y="1236"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1567,7 +1579,7 @@
         </text>
         <text
           x="24"
-          y="1236"
+          y="1252"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1577,7 +1589,7 @@
         </text>
         <text
           x="24"
-          y="1252"
+          y="1268"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1587,7 +1599,7 @@
         </text>
         <text
           x="24"
-          y="1268"
+          y="1284"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1597,7 +1609,7 @@
         </text>
         <text
           x="24"
-          y="1284"
+          y="1300"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1608,15 +1620,15 @@
         <!-- Legend -->
         <line
           x1="24"
-          y1="1296"
+          y1="1312"
           x2="1016"
-          y2="1296"
+          y2="1312"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1314"
+          y="1330"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1626,9 +1638,9 @@
         </text>
         <line
           x1="24"
-          y1="1332"
+          y1="1348"
           x2="52"
-          y2="1332"
+          y2="1348"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1636,7 +1648,7 @@
         />
         <text
           x="60"
-          y="1336"
+          y="1352"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1645,16 +1657,16 @@
         </text>
         <line
           x1="128"
-          y1="1332"
+          y1="1348"
           x2="156"
-          y2="1332"
+          y2="1348"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext1overview-open)"
         />
         <text
           x="164"
-          y="1336"
+          y="1352"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1663,7 +1675,7 @@
         </text>
         <rect
           x="24"
-          y="1348"
+          y="1364"
           width="12"
           height="12"
           rx="2"
@@ -1673,7 +1685,7 @@
         />
         <rect
           x="40"
-          y="1348"
+          y="1364"
           width="12"
           height="12"
           rx="2"
@@ -1683,7 +1695,7 @@
         />
         <rect
           x="56"
-          y="1348"
+          y="1364"
           width="12"
           height="12"
           rx="2"
@@ -1693,7 +1705,7 @@
         />
         <rect
           x="72"
-          y="1348"
+          y="1364"
           width="12"
           height="12"
           rx="2"
@@ -1703,7 +1715,7 @@
         />
         <text
           x="92"
-          y="1358"
+          y="1374"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1712,7 +1724,7 @@
         </text>
         <rect
           x="272"
-          y="1348"
+          y="1364"
           width="28"
           height="12"
           rx="2"
@@ -1723,7 +1735,7 @@
         />
         <text
           x="308"
-          y="1358"
+          y="1374"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1732,7 +1744,7 @@
         </text>
         <rect
           x="520"
-          y="1348"
+          y="1364"
           width="28"
           height="12"
           rx="2"
@@ -1742,7 +1754,7 @@
         />
         <text
           x="556"
-          y="1358"
+          y="1374"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1751,7 +1763,7 @@
         </text>
         <rect
           x="768"
-          y="1348"
+          y="1364"
           width="28"
           height="12"
           rx="2"
@@ -1762,7 +1774,7 @@
         />
         <text
           x="804"
-          y="1358"
+          y="1374"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1771,7 +1783,7 @@
         </text>
         <rect
           x="24"
-          y="1370"
+          y="1386"
           width="28"
           height="12"
           rx="2"
@@ -1782,7 +1794,7 @@
         />
         <text
           x="60"
-          y="1380"
+          y="1396"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1791,7 +1803,7 @@
         </text>
         <rect
           x="272"
-          y="1370"
+          y="1386"
           width="28"
           height="12"
           rx="2"
@@ -1802,7 +1814,7 @@
         />
         <text
           x="308"
-          y="1380"
+          y="1396"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
