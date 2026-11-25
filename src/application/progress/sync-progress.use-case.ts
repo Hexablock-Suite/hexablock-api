@@ -40,10 +40,12 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // and saves nothing (decision 11). When the repository knows no user with
 // the userId, the sync fails with unknown-user and saves nothing (#137).
 // Before the lock, the use case checks each result against its level
-// (DS-6, #135): the API must hold a valid level of the result, and the
-// result carries no more stars than the level has star thresholds. A broken
-// rule returns its problem and saves nothing. The levels are other
-// aggregates, so the use case reads them and changes none.
+// (DS-6, #135): it reads one level per result through
+// LevelRepository.find() (#171), in the order of the request, so the API
+// must hold a valid level of the result, and the result carries no more
+// stars than the level has star thresholds. A broken rule returns its
+// problem and saves nothing. The levels are other aggregates, so the use
+// case reads them and changes none.
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
@@ -84,8 +86,9 @@ export class SyncProgressUseCase implements SyncProgress {
 
   // The first result, in the order of the request, that no valid level
   // admits, or undefined. A sync with no result reads no level, so Lines
-  // and Merge need none. list() gives the valid levels apart from the
-  // broken rows, so a broken row holds no level here (#147).
+  // and Merge need none. find() answers the level of the gameId and the
+  // levelId of one result, or undefined for an absent row or a broken row,
+  // so a broken row holds no level here (#147, #171).
   private async levelProblemOf(
     gameId: GameId,
     results: readonly LevelResult[],
@@ -93,9 +96,8 @@ export class SyncProgressUseCase implements SyncProgress {
     if (results.length === 0) {
       return undefined;
     }
-    const { levels } = await this.levels.list();
     for (const result of results) {
-      const level = levels.find((held) => held.isLevelOf(gameId, result));
+      const level = await this.levels.find(gameId, result);
       if (level === undefined) {
         return { kind: 'unknown-level', result };
       }

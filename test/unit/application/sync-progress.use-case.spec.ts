@@ -408,10 +408,10 @@ describe('SyncProgressUseCase and the stars of a level (DS-6)', () => {
     ]);
   });
 
-  // A sync with no result reads no level, so Lines and Merge need no level.
+  // A sync with no result reads no level, so Lines and Merge need no level (#171).
   it('should_read_no_level_when_the_sync_has_no_result', async () => {
     const levels = heldLevels([]);
-    const list = vi.spyOn(levels, 'list');
+    const find = vi.spyOn(levels, 'find');
     const sync = new SyncProgressUseCase(
       new InMemoryProgressRepository(),
       levels,
@@ -421,6 +421,42 @@ describe('SyncProgressUseCase and the stars of a level (DS-6)', () => {
     const result = await sync.execute(syncRequest({ gameId: 'hexa-lines', score: 120 }));
 
     expect(result.ok).toBe(true);
-    expect(list).not.toHaveBeenCalled();
+    expect(find).not.toHaveBeenCalled();
+  });
+
+  // One level per result: the sync asks find() once, with the gameId and
+  // that result, and never lists every stored level (#171).
+  it('should_find_one_level_of_each_result_when_the_sync_has_one_result', async () => {
+    const levels = heldLevels([['hexa-fit', ['fit-01']]]);
+    const find = vi.spyOn(levels, 'find');
+    const sync = new SyncProgressUseCase(
+      new InMemoryProgressRepository(),
+      levels,
+      new FixedClock(AT),
+    );
+    const result = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
+
+    await sync.execute(syncRequest({ gameId: 'hexa-fit', results: [result] }));
+
+    expect(find).toHaveBeenCalledTimes(1);
+    expect(find).toHaveBeenCalledWith(valueOf(GameId.of('hexa-fit')), levelResultOf(result));
+  });
+
+  it('should_find_one_level_of_each_result_when_the_sync_has_two_results', async () => {
+    const levels = heldLevels([['hexa-fit', ['fit-01', 'fit-02']]]);
+    const find = vi.spyOn(levels, 'find');
+    const sync = new SyncProgressUseCase(
+      new InMemoryProgressRepository(),
+      levels,
+      new FixedClock(AT),
+    );
+    const first = { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 };
+    const second = { levelId: 'fit-02', stars: 3, moves: 9, elapsedMs: 30000 };
+
+    await sync.execute(syncRequest({ gameId: 'hexa-fit', results: [first, second] }));
+
+    expect(find).toHaveBeenCalledTimes(2);
+    expect(find).toHaveBeenNthCalledWith(1, valueOf(GameId.of('hexa-fit')), levelResultOf(first));
+    expect(find).toHaveBeenNthCalledWith(2, valueOf(GameId.of('hexa-fit')), levelResultOf(second));
   });
 });

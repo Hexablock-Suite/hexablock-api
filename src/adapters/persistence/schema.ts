@@ -5,6 +5,7 @@
 import {
   bigint,
   foreignKey,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -51,7 +52,11 @@ export const progress = pgTable(
 );
 
 // DS-5: one row per user, gameId and levelId. Each row belongs to one
-// progress row, and it goes with that row.
+// progress row, and it goes with that row. The primary key keeps one row
+// per user, game and level, and the index on game_id and level_id serves
+// the keyed filters of the leaderboard reader (#171): the board of one
+// level filters on both columns, and the standings of one game filter on
+// the game.
 export const levelResults = pgTable(
   'level_results',
   {
@@ -64,6 +69,7 @@ export const levelResults = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.userId, table.gameId, table.levelId] }),
+    index('level_results_game_id_level_id_idx').on(table.gameId, table.levelId),
     foreignKey({
       columns: [table.userId, table.gameId],
       foreignColumns: [progress.userId, progress.gameId],
