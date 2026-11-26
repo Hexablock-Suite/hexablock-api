@@ -74,11 +74,10 @@
           Stars, a Moves and an ElapsedTime value object. Each one guards its own rule in a factory
           that returns a Result with the code of a broken rule, and compares by value, and
           LevelResult asks them which of two results of one level is better. Each one keeps its
-          value private and delivers it to a receiver with deliverTo(). LevelId, Stars and Moves
-          also build an incoming value with ofIncoming(), which adds the bounds of #135. A
-          LevelDefinition asks a LevelResult isFor() and hasMoreStarsThan() to check its stars
-          (DS-6). LevelResult keeps the four value objects private, takes them built in of(), and
-          delivers all four to a LevelResultReceiver with deliverTo().
+          value private and delivers it to a receiver with deliverTo(). A LevelDefinition asks a
+          LevelResult isFor() and hasMoreStarsThan() to check its stars (DS-6). LevelResult keeps
+          the four value objects private, takes them built in of(), and delivers all four to a
+          LevelResultReceiver with deliverTo().
         </desc>
         <defs>
           <marker
@@ -330,7 +329,7 @@
           x="64"
           y="96"
           width="256"
-          height="192"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -383,34 +382,13 @@
         >
           Result&lt;LevelId, LevelIdProblem&gt;
         </text>
-        <text
-          x="80"
-          y="216"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          + ofIncoming(value: string):
-        </text>
-        <text
-          x="102"
-          y="232"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          Result&lt;LevelId, LevelIdProblem&gt;
-        </text>
-
-        <text x="80" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: LevelId): boolean
         </text>
-        <text x="80" y="264" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="280" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: Stars («value object») -->
@@ -418,7 +396,7 @@
           x="720"
           y="96"
           width="280"
-          height="192"
+          height="160"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -471,38 +449,17 @@
         >
           Result&lt;Stars, StarsProblem&gt;
         </text>
-        <text
-          x="736"
-          y="216"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          + ofIncoming(value: number):
-        </text>
-        <text
-          x="758"
-          y="232"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          Result&lt;Stars, StarsProblem&gt;
-        </text>
-
-        <text x="736" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="736" y="216" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Stars): boolean
         </text>
-        <text x="736" y="264" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="736" y="232" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isMoreThan(other: Stars): boolean
         </text>
         <text
           textLength="258"
           lengthAdjust="spacingAndGlyphs"
           x="736"
-          y="280"
+          y="248"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -514,7 +471,7 @@
           x="64"
           y="332"
           width="256"
-          height="208"
+          height="176"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -567,37 +524,16 @@
         >
           Result&lt;Moves, MovesProblem&gt;
         </text>
-        <text
-          x="80"
-          y="452"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          + ofIncoming(value: number):
-        </text>
-        <text
-          x="102"
-          y="468"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          text-decoration="underline"
-        >
-          Result&lt;Moves, MovesProblem&gt;
-        </text>
-
-        <text x="80" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="452" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: Moves): boolean
         </text>
-        <text x="80" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="468" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + isFewerThan(other: Moves): boolean
         </text>
-        <text x="80" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="484" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="500" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;number&gt;): void
         </text>
         <!-- Class: ElapsedTime («value object») -->
@@ -744,16 +680,6 @@
         >
           four values to a LevelResultReceiver in one call. Only the adapters of layer 3 receive a
           value: the rows and the JSON bodies keep text and numbers.
-        </text>
-        <text
-          x="24"
-          y="668"
-          fill="#5b6873"
-          font-size="11"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          ofIncoming() builds a value that a client sends (#135): LevelId has 1 to 64 characters and
-          no control character, and Stars and Moves fit the integer column.
         </text>
         <!-- Legend -->
         <line x1="24" y1="692" x2="1016" y2="692" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

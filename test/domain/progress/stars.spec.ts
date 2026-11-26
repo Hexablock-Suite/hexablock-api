@@ -61,24 +61,9 @@ describe('Stars', () => {
   });
 });
 
-// #135: the stars of one play that a client sends must fit the integer
-// column of level_results. A total of stars is a sum, and a stored row keeps
-// what it holds, so of() keeps no such bound.
-describe('Stars.ofIncoming', () => {
-  it.each([2_147_483_648, 3_000_000_000, -1, 1.5])(
-    'should_give_the_code_of_the_rule_when_the_stars_of_a_play_exceed_the_column_or_break_the_rule',
-    (bad) => {
-      expect(Stars.ofIncoming(bad)).toEqual({ ok: false, error: 'invalid-stars' });
-    },
-  );
-
-  it.each([0, 3, 2_147_483_647])(
-    'should_build_the_stars_when_the_stars_of_a_play_fit_the_column',
-    (value) => {
-      expect(valueOf(Stars.ofIncoming(value)).equals(stars(value))).toBe(true);
-    },
-  );
-
+// A total of stars is a sum of stored rows, so of() keeps no column
+// bound (#135).
+describe('Stars.of', () => {
   it('should_build_a_total_over_the_column_when_of_builds_a_sum', () => {
     expect(Stars.of(4_294_967_294).ok).toBe(true);
   });

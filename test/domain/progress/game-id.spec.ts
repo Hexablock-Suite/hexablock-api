@@ -62,23 +62,8 @@ describe('GameId', () => {
   });
 });
 
-// #135: a gameId that a client sends holds 64 characters at most. A stored
-// row keeps what it holds, so of() keeps no length bound.
-describe('GameId.ofIncoming', () => {
-  it.each(['a'.repeat(65), 'a'.repeat(200), 'Lines', '', 'fit\u0000'])(
-    'should_give_the_code_of_the_rule_when_an_incoming_game_id_is_too_long_or_not_a_slug',
-    (bad) => {
-      expect(GameId.ofIncoming(bad)).toEqual({ ok: false, error: 'invalid-game-id' });
-    },
-  );
-
-  it.each(['hexa-fit', 'a'.repeat(64)])(
-    'should_build_the_game_id_when_an_incoming_slug_has_at_most_64_characters',
-    (value) => {
-      expect(valueOf(GameId.ofIncoming(value)).equals(gameId(value))).toBe(true);
-    },
-  );
-
+// A stored row keeps what it holds, so of() keeps no length bound (#135).
+describe('GameId.of', () => {
   it('should_build_a_stored_game_id_over_the_bound_when_of_rebuilds_a_row', () => {
     expect(GameId.of('a'.repeat(200)).ok).toBe(true);
   });

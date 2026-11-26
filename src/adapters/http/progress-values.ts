@@ -1,13 +1,12 @@
 import { GameId, type GameIdProblem } from '../../domain/progress/game-id.js';
-import { INCOMING_ID_LENGTH } from '../../domain/progress/incoming-id-length.js';
 import { LevelId } from '../../domain/progress/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
-import { MOST_MOVES_OF_ONE_PLAY, Moves } from '../../domain/progress/moves.js';
+import { Moves } from '../../domain/progress/moves.js';
 import { Score, type ScoreProblem } from '../../domain/progress/score.js';
-import { MOST_STARS_OF_ONE_PLAY, Stars } from '../../domain/progress/stars.js';
+import { Stars } from '../../domain/progress/stars.js';
 import { err, type Result } from '../../domain/shared/result.js';
 import { buildLevelResult, type LevelResultProblem } from '../built.js';
-import { type LevelResultValues, receiveBoundValuesOf, receiveValueOf } from '../received.js';
+import { type Bounds, type LevelResultValues } from '../received.js';
 
 // Builds the progress values of a request: a JSON body or a path. The
 // factory of each value object returns a Result with the code of the broken
@@ -16,11 +15,16 @@ import { type LevelResultValues, receiveBoundValuesOf, receiveValueOf } from '..
 // domain. Each 400 body keeps them word for word. ProgressDtoMapper,
 // LevelDtoMapper and LeaderboardDtoMapper share them.
 
-// The bounds of a value that a client sends (#135). The domain delivers
-// them, so the messages and the OpenAPI limits name the same numbers.
-export const INCOMING_ID_BOUNDS = receiveBoundValuesOf(INCOMING_ID_LENGTH);
-export const MOST_STARS = receiveValueOf(MOST_STARS_OF_ONE_PLAY);
-export const MOST_MOVES = receiveValueOf(MOST_MOVES_OF_ONE_PLAY);
+// The bounds of a value that a client sends (#135, moved here by #179).
+// The columns are Postgres text and set no length, so 1 to 64 characters
+// is a choice of the API: a slug such as hexa-fit or an id such as fit-01
+// needs far fewer characters. The numbers of the stars and the moves are
+// the largest value of the Postgres integer columns level_results.stars
+// and level_results.moves. The DTOs publish them as the OpenAPI limits,
+// and the texts of the rules name them, so the numbers live here.
+export const INCOMING_ID_BOUNDS: Readonly<Bounds<number>> = { min: 1, max: 64 };
+export const MOST_STARS = 2_147_483_647;
+export const MOST_MOVES = 2_147_483_647;
 
 // The field of a level result that each code names.
 const RESULT_FIELDS = {
@@ -30,23 +34,62 @@ const RESULT_FIELDS = {
   'invalid-elapsed-time': 'elapsedMs',
 } as const satisfies Record<LevelResultProblem, keyof LevelResultValues>;
 
-// The value of a request can have any type. Each factory checks the type of
-// its value, so the casts only satisfy the signature of the factory. A
-// request brings an incoming value, so each id takes the bounds of
-// ofIncoming() (#135).
+// The number of code points of a text: a character is one code point, so an
+// emoji counts once (#135).
+function codePointsOf(value: string): number {
+  return Array.from(value).length;
+}
+
+// An id of a client holds 1 to 64 characters (#135). A stored row keeps
+// what it holds, so of() of the domain keeps no such bound.
+function fitsIdColumn(value: string): boolean {
+  const count = codePointsOf(value);
+  return count >= INCOMING_ID_BOUNDS.min && count <= INCOMING_ID_BOUNDS.max;
+}
+
+// A control character is U+0000 to U+001F or U+007F: Postgres rejects
+// U+0000 in a text column (#135).
+function holdsControlCharacter(value: string): boolean {
+  return Array.from(value).some((character) => {
+    const code = character.codePointAt(0) ?? 0;
+    return code <= 0x1f || code === 0x7f;
+  });
+}
+
+// The value of a request can have any type. Each builder checks the rules
+// of its value: the rules of the domain factory first, and then the bounds
+// of the columns, which live here (#179).
 export function gameIdFrom(value: unknown): Result<GameId, string> {
-  const built = GameId.ofIncoming(value as string);
-  return built.ok ? built : err(ruleText(built.error, value));
+  const built = GameId.of(value as string);
+  return built.ok && fitsIdColumn(value as string)
+    ? built
+    : err(ruleText('invalid-game-id', value));
 }
 
 export function levelIdFrom(value: unknown): Result<LevelId, string> {
-  const built = LevelId.ofIncoming(value as string);
-  return built.ok ? built : err(ruleText(built.error, value));
+  const built = LevelId.of(value as string);
+  return built.ok && fitsIdColumn(value as string) && !holdsControlCharacter(value as string)
+    ? built
+    : err(ruleText('invalid-level-id', value));
 }
 
 export function scoreFrom(value: unknown): Result<Score, string> {
   const built = Score.of(value as number);
   return built.ok ? built : err(ruleText(built.error, value));
+}
+
+export function starsFrom(value: unknown): Result<Stars, string> {
+  const built = Stars.of(value as number);
+  return built.ok && (value as number) <= MOST_STARS
+    ? built
+    : err(ruleText('invalid-stars', value));
+}
+
+export function movesFrom(value: unknown): Result<Moves, string> {
+  const built = Moves.of(value as number);
+  return built.ok && (value as number) <= MOST_MOVES
+    ? built
+    : err(ruleText('invalid-moves', value));
 }
 
 // Builds one result of a sync body. The first broken rule in the order of
@@ -73,14 +116,9 @@ function incomingProblemOf({
   stars,
   moves,
 }: LevelResultValues): LevelResultProblem | undefined {
-  const checks: readonly Result<unknown, LevelResultProblem>[] = [
-    LevelId.ofIncoming(levelId),
-    Stars.ofIncoming(stars),
-    Moves.ofIncoming(moves),
-  ];
-  for (const check of checks) {
-    if (!check.ok) return check.error;
-  }
+  if (!levelIdFrom(levelId).ok) return 'invalid-level-id';
+  if (!starsFrom(stars).ok) return 'invalid-stars';
+  if (!movesFrom(moves).ok) return 'invalid-moves';
   return undefined;
 }
 
