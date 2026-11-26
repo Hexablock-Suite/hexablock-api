@@ -1,6 +1,6 @@
 # Extending the API
 
-This guide lists, for each extension axis of the [extensibility diagram](architecture/extensibility.md), the class that you add and the file that registers it. The diagram shows why each axis leaves the core unchanged. This guide does not repeat the views: read [view 1](architecture/extensibility.md#view-1-the-core-and-its-extension-axes) for every axis, [view 2](architecture/extensibility.md#view-2-a-new-variant) for a new variant and [view 3](architecture/extensibility.md#view-3-a-new-database-engine) for a new database engine. The table [Extension points](architecture/extensibility.md#extension-points) lists what each axis does not change.
+This guide lists, for each extension axis of the [extensibility diagram](architecture/extensibility.md), the class that you add and the file that registers it. The diagram shows why each axis leaves the core unchanged. This guide does not repeat the views: read [view 1](architecture/extensibility.md#view-1-the-core-and-its-extension-axes) for every axis, [view 2](architecture/extensibility.md#view-2-a-new-variant) for a new variant, and the [scenarios](architecture/extensibility.md#scenarios) for a new database engine, a second protocol and another web framework. The table [Extension points](architecture/extensibility.md#extension-points) lists what each axis does not change.
 
 One file registers almost every extension: [`src/infrastructure/app.module.ts`](../src/infrastructure/app.module.ts), the composition root. It binds each port to its adapter, fills `LevelValidators` and `Topologies` in `levelValidators()`, and lists the HTTP controllers.
 
@@ -30,7 +30,7 @@ A variant with no level files, as Lines and Merge, adds nothing. `GameId` is an 
 
 ## A database engine
 
-The view names MongoDB (§8). The `Mongo` classes are placeholders: no code holds them.
+The scenario [Database engine](architecture/extensibility.md#database-engine) names MongoDB (§8). The `Mongo` classes are placeholders: no code holds them.
 
 - **Add:** one class per output port in `src/adapters/persistence/`, as the Drizzle adapters do: [`UserRepository`](../src/application/ports/user-repository.ts) ([`DrizzleUserRepository`](../src/adapters/persistence/drizzle-user-repository.ts)), [`ProgressRepository`](../src/application/ports/progress-repository.ts) ([`DrizzleProgressRepository`](../src/adapters/persistence/drizzle-progress-repository.ts)), [`LevelRepository`](../src/application/ports/level-repository.ts) ([`DrizzleLevelRepository`](../src/adapters/persistence/drizzle-level-repository.ts)) and [`LeaderboardReader`](../src/application/ports/leaderboard-reader.ts) ([`DrizzleLeaderboardReader`](../src/adapters/persistence/drizzle-leaderboard-reader.ts)). These classes never import `@nestjs/*` or `src/infrastructure` (rules R-persistence-no-nest and R-adapters-no-infrastructure). The level adapter takes `LevelValidators` to restore each stored level, as `DrizzleLevelRepository` does.
 - **Register:** the connection in [`database.module.ts`](../src/infrastructure/database/database.module.ts), which provides `DATABASE` from [`connection.ts`](../src/infrastructure/database/connection.ts). Then the `useFactory` of `USER_REPOSITORY`, `PROGRESS_REPOSITORY`, `LEVEL_REPOSITORY` and `LEADERBOARD_READER` in [`app.module.ts`](../src/infrastructure/app.module.ts).

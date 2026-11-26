@@ -1,0 +1,300 @@
+{
+  "scenarios": [
+    {
+      "id": "database-engine",
+      "title": "A new database engine: MongoDB",
+      "source": "docs/EXTENSIBILITY.md",
+      "extensionPoints": [
+        "UserRepository",
+        "ProgressRepository",
+        "LevelRepository",
+        "LeaderboardReader"
+      ],
+      "adds": [
+        {
+          "name": "MongoUserRepository",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/persistence/mongo-user-repository.ts",
+          "implements": "UserRepository"
+        },
+        {
+          "name": "MongoProgressRepository",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/persistence/mongo-progress-repository.ts",
+          "implements": "ProgressRepository"
+        },
+        {
+          "name": "MongoLevelRepository",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/persistence/mongo-level-repository.ts",
+          "implements": "LevelRepository"
+        },
+        {
+          "name": "MongoLeaderboardReader",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/persistence/mongo-leaderboard-reader.ts",
+          "implements": "LeaderboardReader"
+        }
+      ],
+      "edits": [
+        {
+          "file": "src/infrastructure/app.module.ts",
+          "change": "the useFactory of USER_REPOSITORY, PROGRESS_REPOSITORY, LEVEL_REPOSITORY and LEADERBOARD_READER builds the Mongo adapter"
+        },
+        {
+          "file": "src/infrastructure/database/database.module.ts",
+          "change": "the DATABASE provider opens the MongoDB connection"
+        },
+        {
+          "file": "src/infrastructure/database/connection.ts",
+          "change": "the connection and the Database type of MongoDB"
+        }
+      ],
+      "unchanged": [
+        "LevelDefinition",
+        "FitSection",
+        "SortSection",
+        "PlayerProgress",
+        "Result",
+        "User",
+        "LoggingAspect",
+        "LoginUseCase",
+        "GetLeaderboardUseCase",
+        "UpdateLevelsUseCase",
+        "Clock",
+        "SyncProgressUseCase",
+        "ThrownValue",
+        "ProgressController"
+      ]
+    },
+    {
+      "id": "second-protocol",
+      "title": "A second protocol: RPC handlers beside HTTP",
+      "source": "docs/architecture/extensibility.md",
+      "extensionPoints": [
+        "UseCase",
+        "RegisterUser",
+        "Login",
+        "AuthenticateToken",
+        "SyncProgress",
+        "GetProgress",
+        "GetLevels",
+        "UpdateLevels",
+        "AuthorizeLevelEditor",
+        "GetLeaderboard"
+      ],
+      "adds": [
+        {
+          "name": "AuthRpcHandler",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/rpc/auth.handler.ts"
+        },
+        {
+          "name": "ProgressRpcHandler",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/rpc/progress.handler.ts"
+        },
+        {
+          "name": "LevelsRpcHandler",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/rpc/levels.handler.ts"
+        },
+        {
+          "name": "LeaderboardRpcHandler",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/rpc/leaderboard.handler.ts"
+        },
+        {
+          "name": "HealthRpcHandler",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/rpc/health.handler.ts"
+        }
+      ],
+      "edits": [
+        {
+          "file": "src/infrastructure/app.module.ts",
+          "change": "register the five RPC handlers next to the HTTP controllers"
+        },
+        {
+          "file": "src/main.ts",
+          "change": "start the second listener next to the HTTP server"
+        },
+        {
+          "file": ".dependency-cruiser.cjs",
+          "change": "one rule for src/adapters/rpc/ before it imports its protocol library (rule R-other-adapters-no-package)"
+        }
+      ],
+      "unchanged": [
+        "LevelDefinition",
+        "FitSection",
+        "SortSection",
+        "PlayerProgress",
+        "Result",
+        "User",
+        "LoggingAspect",
+        "LoginUseCase",
+        "GetLeaderboardUseCase",
+        "UpdateLevelsUseCase",
+        "Clock",
+        "SyncProgressUseCase",
+        "ThrownValue",
+        "ProgressController",
+        "DrizzleProgressRepository"
+      ]
+    },
+    {
+      "id": "web-framework",
+      "title": "Another web framework in place of Nest",
+      "source": "docs/architecture/extensibility.md",
+      "extensionPoints": [
+        "UseCase",
+        "RegisterUser",
+        "Login",
+        "AuthenticateToken",
+        "SyncProgress",
+        "GetProgress",
+        "GetLevels",
+        "UpdateLevels",
+        "AuthorizeLevelEditor",
+        "GetLeaderboard",
+        "Logger"
+      ],
+      "adds": [],
+      "edits": [
+        {
+          "file": "src/adapters/http/auth.controller.ts",
+          "change": "route its requests through the decorators of the new framework"
+        },
+        {
+          "file": "src/adapters/http/credentials.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/current-user.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/error.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/health.controller.ts",
+          "change": "route its requests through the decorators of the new framework"
+        },
+        {
+          "file": "src/adapters/http/health.response.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/http-error.filter.ts",
+          "change": "map each error to its answer as an error handler of the new framework"
+        },
+        {
+          "file": "src/adapters/http/jwt-auth.guard.ts",
+          "change": "check the request as a guard of the new framework"
+        },
+        {
+          "file": "src/adapters/http/leaderboard.controller.ts",
+          "change": "route its requests through the decorators of the new framework"
+        },
+        {
+          "file": "src/adapters/http/leaderboard.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/level.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/level-editor.guard.ts",
+          "change": "check the request as a guard of the new framework"
+        },
+        {
+          "file": "src/adapters/http/levels.controller.ts",
+          "change": "route its requests through the decorators of the new framework"
+        },
+        {
+          "file": "src/adapters/http/login.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/progress.controller.ts",
+          "change": "route its requests through the decorators of the new framework"
+        },
+        {
+          "file": "src/adapters/http/progress.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/adapters/http/token.dto.ts",
+          "change": "describe the OpenAPI schema without @nestjs/swagger"
+        },
+        {
+          "file": "src/infrastructure/app.module.ts",
+          "change": "bind the ports and list the handlers with the container of the new framework"
+        },
+        {
+          "file": "src/infrastructure/http-app.ts",
+          "change": "configure the HTTP app of the new framework"
+        },
+        {
+          "file": "src/infrastructure/database/database.module.ts",
+          "change": "provide DATABASE and close the pool at shutdown without @nestjs/common"
+        },
+        {
+          "file": "src/infrastructure/database/connection.ts",
+          "change": "log the pool errors without the Logger of @nestjs/common"
+        },
+        {
+          "file": "src/infrastructure/logging/nest-logger.ts",
+          "change": "write the log entries through the logger of the new framework"
+        },
+        {
+          "file": "src/infrastructure/auth/auth-config.ts",
+          "change": "build the JWT service without @nestjs/jwt"
+        },
+        {
+          "file": "src/infrastructure/auth/jwt-token-issuer.ts",
+          "change": "sign and verify the token without @nestjs/jwt"
+        },
+        {
+          "file": "src/main.ts",
+          "change": "create and start the app of the new framework"
+        },
+        {
+          "file": ".dependency-cruiser.cjs",
+          "change": "the rule http-adapters-import-only-nest names the packages of the new framework"
+        },
+        {
+          "file": "package.json",
+          "change": "the packages of the new framework in place of @nestjs/*"
+        }
+      ],
+      "unchanged": [
+        "LevelDefinition",
+        "FitSection",
+        "SortSection",
+        "PlayerProgress",
+        "Result",
+        "User",
+        "LoggingAspect",
+        "LoginUseCase",
+        "GetLeaderboardUseCase",
+        "UpdateLevelsUseCase",
+        "Clock",
+        "SyncProgressUseCase",
+        "ThrownValue",
+        "DrizzleProgressRepository"
+      ]
+    }
+  ]
+}
