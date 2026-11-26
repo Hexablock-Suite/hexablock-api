@@ -17,7 +17,7 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 - Inside a group of 12 boxes or more, a frame holds the boxes of one view of this page. The frame title is the file name of the view in [`classes/views/`](classes/views/), for example `view ad-3-http` for `ad-3-http.png`.
 - The pages follow the reading rules of the next section, and each page has a legend.
 
-The file is generated from the code at `440f756` plus the views of this page, by the tool [`drawio-clases`](https://github.com/Hexablock-Suite/.github/tree/main/tools/drawio-clases) of the organization repository. The README of the tool gives the commands. [`classes.config.json`](classes.config.json) maps the folders and the views to layers and parts. [`classes.layout.json`](classes.layout.json) fixes the order of the groups of each band and of the boxes of each group.
+The file is generated from the code at `69bcfcd` plus the views of this page, by the tool [`drawio-clases`](https://github.com/Hexablock-Suite/.github/tree/main/tools/drawio-clases) of the organization repository. The README of the tool gives the commands. [`classes.config.json`](classes.config.json) maps the folders and the views to layers and parts. [`classes.layout.json`](classes.layout.json) fixes the order of the groups of each band and of the boxes of each group.
 
 A hand edit of that order survives. Move the boxes in draw.io, run `pin.mjs` of the tool to write the order into `classes.layout.json`, and generate the file again. Commit `classes.drawio` and `classes.layout.json` together. Any other hand edit is lost at the next generation: a pixel position, a line route, a text or a style.
 

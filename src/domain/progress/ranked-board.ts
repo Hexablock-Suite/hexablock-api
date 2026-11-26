@@ -45,7 +45,7 @@ export class RankedBoard<T extends { isBetterThan(other: T): boolean }> {
       const rank =
         previous !== undefined && !previous.result.isBetterThan(result)
           ? previous.rank
-          : Rank.of(index + 1);
+          : rankAt(index + 1);
       rows.push({ rank, userId, result });
     }
     return new RankedBoard(rows);
@@ -58,4 +58,15 @@ export class RankedBoard<T extends { isBetterThan(other: T): boolean }> {
       receiver.receive(rank, userId, result);
     }
   }
+}
+
+// The factory of the board passes the position of a row, index + 1, which is
+// always a whole number of 1 or more. So a failed Result is a defect of the
+// code (#195).
+function rankAt(position: number): Rank {
+  const rank = Rank.of(position);
+  if (!rank.ok) {
+    throw new RangeError(`The position ${position} of a row breaks the rule ${rank.error}.`);
+  }
+  return rank.value;
 }
