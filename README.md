@@ -162,7 +162,7 @@ Each principle has one example from the progress slice. Each link opens the sour
 ## AOP
 
 The cross-cutting aspects are logging and timing (§3.5, API-NFR-07). They wrap use cases as
-decorators: `UseCaseAspect` implements the input port, and `LoggingAspect` extends it. [View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)
+decorators: `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and `LoggingAspect` extends it. [View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)
 also draws a `TimingAspect`, which is not built yet.
 They are custom decorators or proxies, never Nest interceptors, because `src/application`
 imports no package (rule R-application-pure).
@@ -254,11 +254,29 @@ The migration `drizzle/0003_username_key.sql` replaces that index
 ([#73](https://github.com/Hexablock-Suite/hexablock-api/issues/73)). It adds the column
 `username_key` with a plain unique index. The column holds `Username.key`: the name in lower case,
 which the domain computes. The database applies no letter case rule of its own. The column is
-`NOT NULL`, and the migration fills no value. No database holds users today. Before a database
-with users runs this migration, the team adds a backfill of `username_key`, after the duplicate
-check above.
+`NOT NULL`, and the migration fills no value, so it fails on a database that already holds a user.
+The migrator runs all pending migrations in one transaction, so a later migration cannot repair
+that database. The repository has no down migrations.
 
-The schema has the `users` table of API-FR-01. The other business tables are still the design.
+A local compose database created before `0003` reaches the current schema only through a reset
+([#172](https://github.com/Hexablock-Suite/hexablock-api/issues/172)). **The reset deletes every
+row of the local database**: every user, every progress entry and every level. Run it from the
+repository root:
+
+```bash
+docker compose down -v   # stops the postgres service and removes its volume postgres-data
+docker compose up -d --wait
+export DATABASE_URL=postgres://hexablock:hexablock@localhost:5432/hexablock
+pnpm db:migrate          # applies every drizzle/ migration to the empty database
+```
+
+The reset is for a local database only. No deployed database holds users today, and the
+repository has no procedure for a deployed database with users. Before such a database runs
+`0003`, the team writes that procedure, after the duplicate check above.
+
+`src/adapters/persistence/schema.ts` declares four tables: `users` (API-FR-01), `progress`
+(API-FR-02), `level_results` (the level results of a progress entry, DS-5) and `levels`
+(API-FR-04).
 
 ## Running Tests
 

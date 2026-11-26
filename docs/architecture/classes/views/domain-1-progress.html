@@ -180,9 +180,9 @@
         <!-- ProgressKey holds userId: UserId: use with role and multiplicity (#107) -->
         <line
           x1="176"
-          y1="462"
+          y1="478"
           x2="176"
-          y2="432"
+          y2="448"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
@@ -190,9 +190,9 @@
         <!-- ProgressKey holds gameId: GameId: use with role and multiplicity (#107) -->
         <line
           x1="176"
-          y1="670"
+          y1="686"
           x2="176"
-          y2="700"
+          y2="716"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
@@ -272,10 +272,10 @@
         >
           0..*
         </text>
-        <rect x="182" y="679" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="182" y="695" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="210"
-          y="688"
+          y="704"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -284,10 +284,10 @@
         >
           gameId 1
         </text>
-        <rect x="182" y="441" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="182" y="457" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="210"
-          y="450"
+          y="466"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -485,7 +485,7 @@
           x="64"
           y="272"
           width="224"
-          height="160"
+          height="176"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -541,10 +541,21 @@
         <text x="80" y="392" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: UserId): boolean
         </text>
-        <text x="80" y="408" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text
+          textLength="200"
+          lengthAdjust="spacingAndGlyphs"
+          x="80"
+          y="408"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + comesBefore(other: UserId): boolean
+        </text>
+        <text x="80" y="424" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="424" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="440" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- Class: LevelResult («value object») -->
@@ -1094,7 +1105,7 @@
         <!-- Class: ProgressKey («value object», #107) -->
         <rect
           x="64"
-          y="462"
+          y="478"
           width="224"
           height="208"
           rx="6"
@@ -1104,7 +1115,7 @@
         />
         <text
           x="176"
-          y="480"
+          y="496"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1115,7 +1126,7 @@
         </text>
         <text
           x="176"
-          y="498"
+          y="514"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1124,17 +1135,17 @@
         >
           ProgressKey
         </text>
-        <line x1="64" y1="510" x2="288" y2="510" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="526" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="526" x2="288" y2="526" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="542" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - userId: UserId
         </text>
-        <text x="80" y="542" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="558" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - gameId: GameId
         </text>
-        <line x1="64" y1="550" x2="288" y2="550" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="64" y1="566" x2="288" y2="566" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="80"
-          y="566"
+          y="582"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1144,7 +1155,7 @@
         </text>
         <text
           x="102"
-          y="582"
+          y="598"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1154,7 +1165,7 @@
         </text>
         <text
           x="102"
-          y="598"
+          y="614"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1162,22 +1173,22 @@
         >
           ProgressKey
         </text>
-        <text x="80" y="614" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="630" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: ProgressKey):
         </text>
-        <text x="102" y="630" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="646" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           boolean
         </text>
-        <text x="80" y="646" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="662" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="662" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="678" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ProgressKeyReceiver): void
         </text>
         <!-- Class: GameId («value object») -->
         <rect
           x="64"
-          y="700"
+          y="716"
           width="224"
           height="192"
           rx="6"
@@ -1187,7 +1198,7 @@
         />
         <text
           x="176"
-          y="718"
+          y="734"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1198,7 +1209,7 @@
         </text>
         <text
           x="176"
-          y="736"
+          y="752"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1207,14 +1218,14 @@
         >
           GameId
         </text>
-        <line x1="64" y1="748" x2="288" y2="748" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="764" x2="288" y2="764" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - value: string
         </text>
-        <line x1="64" y1="772" x2="288" y2="772" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="64" y1="788" x2="288" y2="788" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           x="80"
-          y="788"
+          y="804"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1224,7 +1235,7 @@
         </text>
         <text
           x="102"
-          y="804"
+          y="820"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1234,7 +1245,7 @@
         </text>
         <text
           x="80"
-          y="820"
+          y="836"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1244,7 +1255,7 @@
         </text>
         <text
           x="102"
-          y="836"
+          y="852"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -1253,13 +1264,13 @@
           Result&lt;GameId, GameIdProblem&gt;
         </text>
 
-        <text x="80" y="852" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="868" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: GameId): boolean
         </text>
-        <text x="80" y="868" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="884" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + deliverTo(receiver:
         </text>
-        <text x="102" y="884" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="900" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;string&gt;): void
         </text>
         <!-- UML template box: the type parameter on the top-right corner -->

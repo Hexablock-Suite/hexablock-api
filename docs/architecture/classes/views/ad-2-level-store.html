@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 2 of 5</p>
       <h1>Level and user store: Drizzle adapters and their row mappers</h1>
       <svg
-        viewBox="0 0 1040 890"
+        viewBox="0 0 1040 922"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad2levelstore-title ad2levelstore-desc"
@@ -137,7 +137,7 @@
           x="24"
           y="24"
           width="992"
-          height="440"
+          height="456"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -145,7 +145,7 @@
         />
         <rect
           x="24"
-          y="480"
+          y="496"
           width="992"
           height="116"
           rx="8"
@@ -155,7 +155,7 @@
         />
         <rect
           x="24"
-          y="612"
+          y="628"
           width="992"
           height="116"
           rx="8"
@@ -212,7 +212,7 @@
           x1="464"
           y1="276"
           x2="464"
-          y2="524"
+          y2="540"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -223,7 +223,7 @@
           x1="864"
           y1="292"
           x2="864"
-          y2="524"
+          y2="540"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -234,7 +234,7 @@
           x1="80"
           y1="276"
           x2="80"
-          y2="656"
+          y2="672"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad2levelstore-open)"
@@ -242,9 +242,9 @@
         <!-- LevelRowMapper restores each row with LevelValidators: use with a verb (parameter) -->
         <line
           x1="176"
-          y1="448"
+          y1="464"
           x2="176"
-          y2="656"
+          y2="672"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad2levelstore-open)"
@@ -252,9 +252,9 @@
         <!-- LevelRowMapper maps LevelDefinition values: use with a verb (parameter and return) -->
         <line
           x1="320"
-          y1="448"
+          y1="464"
           x2="320"
-          y2="656"
+          y2="672"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad2levelstore-open)"
@@ -284,10 +284,10 @@
         >
           USES
         </text>
-        <rect x="86" y="516" width="72" height="12" rx="2" fill="#efe7f8" />
+        <rect x="86" y="532" width="72" height="12" rx="2" fill="#efe7f8" />
         <text
           x="122"
-          y="525"
+          y="541"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -296,10 +296,10 @@
         >
           validators 1
         </text>
-        <rect x="182" y="560" width="84" height="12" rx="2" fill="#efe7f8" />
+        <rect x="182" y="576" width="84" height="12" rx="2" fill="#efe7f8" />
         <text
           x="224"
-          y="569"
+          y="585"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -308,10 +308,10 @@
         >
           RESTORES WITH
         </text>
-        <rect x="326" y="638" width="34" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="326" y="654" width="34" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="343"
-          y="647"
+          y="663"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -333,10 +333,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/persistence/
         </text>
-        <rect x="36" y="491" width="248" height="12" rx="2" fill="#efe7f8" />
+        <rect x="36" y="507" width="248" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
-          y="500"
+          y="516"
           fill="#7e22ce"
           font-size="8"
           font-weight="500"
@@ -345,10 +345,10 @@
         >
           LAYER 2 · USE CASES · src/application/
         </text>
-        <rect x="36" y="623" width="256" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="639" width="256" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="632"
+          y="648"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -501,7 +501,7 @@
           x="112"
           y="316"
           width="328"
-          height="132"
+          height="148"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -542,7 +542,7 @@
         </text>
         <line x1="112" y1="376" x2="440" y2="376" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
-          textLength="304"
+          textLength="300"
           lengthAdjust="spacingAndGlyphs"
           x="128"
           y="392"
@@ -550,23 +550,34 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          + toStoredLevel(row: LevelRow, validators: LevelValidators): StoredLevel
+          + toStoredLevel(row: LevelRow, validators: LevelValidators):
+        </text>
+        <text
+          textLength="282"
+          lengthAdjust="spacingAndGlyphs"
+          x="150"
+          y="408"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Exclude&lt;StoredLevel, { readonly state: 'absent' }&gt;
         </text>
         <text
           textLength="304"
           lengthAdjust="spacingAndGlyphs"
           x="128"
-          y="408"
+          y="424"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
           + toListedLevels(rows: readonly LevelRow[], validators: LevelValidators):
         </text>
-        <text x="150" y="424" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="150" y="440" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ListedLevels
         </text>
-        <text x="128" y="440" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="128" y="456" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toRow(level: LevelDefinition&lt;unknown&gt;): LevelRow
         </text>
         <!-- Class: UserRowMapper («mapper») -->
@@ -612,7 +623,7 @@
         <!-- Class: LevelRepository (PART 2 · VIEW 3) -->
         <rect
           x="352"
-          y="524"
+          y="540"
           width="224"
           height="48"
           rx="6"
@@ -623,7 +634,7 @@
         />
         <text
           x="464"
-          y="542"
+          y="558"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -634,7 +645,7 @@
         </text>
         <text
           x="464"
-          y="560"
+          y="576"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -646,7 +657,7 @@
         <!-- Class: UserRepository (PART 2 · VIEW 4) -->
         <rect
           x="768"
-          y="524"
+          y="540"
           width="224"
           height="48"
           rx="6"
@@ -657,7 +668,7 @@
         />
         <text
           x="880"
-          y="542"
+          y="558"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -668,7 +679,7 @@
         </text>
         <text
           x="880"
-          y="560"
+          y="576"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -680,7 +691,7 @@
         <!-- Class: LevelValidators (PART 1 · VIEW 2) -->
         <rect
           x="64"
-          y="656"
+          y="672"
           width="192"
           height="48"
           rx="6"
@@ -691,7 +702,7 @@
         />
         <text
           x="160"
-          y="674"
+          y="690"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -702,7 +713,7 @@
         </text>
         <text
           x="160"
-          y="692"
+          y="708"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -714,7 +725,7 @@
         <!-- Class: LevelDefinition (PART 1 · VIEW 2) -->
         <rect
           x="304"
-          y="656"
+          y="672"
           width="200"
           height="48"
           rx="6"
@@ -725,7 +736,7 @@
         />
         <text
           x="404"
-          y="674"
+          y="690"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -736,7 +747,7 @@
         </text>
         <text
           x="404"
-          y="692"
+          y="708"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -748,7 +759,7 @@
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
           x="456"
-          y="646"
+          y="662"
           width="56"
           height="18"
           rx="2"
@@ -759,7 +770,7 @@
         />
         <text
           x="484"
-          y="658"
+          y="674"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -770,7 +781,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="752"
+          y="768"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -780,7 +791,7 @@
         </text>
         <text
           x="24"
-          y="768"
+          y="784"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -790,20 +801,28 @@
         </text>
         <text
           x="24"
-          y="784"
+          y="800"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
           A row that no strategy accepts is broken (#147): list() gives it apart, and update()
-          passes it as the broken state to decideReplace() of the incoming level (#174). update()
-          locks each level in one transaction, as the progress store does.
+          passes it as the broken state to decideReplace() of the incoming level (#174).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="808" x2="1016" y2="808" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="826"
+          y="816"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          update() locks each level in one transaction, as the progress store does.
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="840" x2="1016" y2="840" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="858"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -813,9 +832,9 @@
         </text>
         <line
           x1="24"
-          y1="844"
+          y1="876"
           x2="52"
-          y2="844"
+          y2="876"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -823,7 +842,7 @@
         />
         <text
           x="60"
-          y="848"
+          y="880"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -832,16 +851,16 @@
         </text>
         <line
           x1="128"
-          y1="844"
+          y1="876"
           x2="156"
-          y2="844"
+          y2="876"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad2levelstore-open)"
         />
         <text
           x="164"
-          y="848"
+          y="880"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -850,7 +869,7 @@
         </text>
         <rect
           x="480"
-          y="838"
+          y="870"
           width="28"
           height="12"
           rx="2"
@@ -861,7 +880,7 @@
         />
         <text
           x="516"
-          y="848"
+          y="880"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -870,7 +889,7 @@
         </text>
         <rect
           x="24"
-          y="864"
+          y="896"
           width="20"
           height="12"
           rx="2"
@@ -880,7 +899,7 @@
         />
         <rect
           x="48"
-          y="864"
+          y="896"
           width="20"
           height="12"
           rx="2"
@@ -890,7 +909,7 @@
         />
         <rect
           x="72"
-          y="864"
+          y="896"
           width="20"
           height="12"
           rx="2"
@@ -900,7 +919,7 @@
         />
         <text
           x="104"
-          y="873"
+          y="905"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -909,7 +928,7 @@
         </text>
         <rect
           x="288"
-          y="864"
+          y="896"
           width="28"
           height="12"
           rx="2"
@@ -920,7 +939,7 @@
         />
         <text
           x="324"
-          y="873"
+          y="905"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -929,7 +948,7 @@
         </text>
         <rect
           x="494"
-          y="864"
+          y="896"
           width="28"
           height="12"
           rx="2"
@@ -939,7 +958,7 @@
         />
         <text
           x="530"
-          y="873"
+          y="905"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -948,7 +967,7 @@
         </text>
         <rect
           x="640"
-          y="864"
+          y="896"
           width="28"
           height="12"
           rx="2"
@@ -959,7 +978,7 @@
         />
         <text
           x="676"
-          y="873"
+          y="905"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
