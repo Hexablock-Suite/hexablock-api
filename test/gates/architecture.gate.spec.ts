@@ -64,6 +64,18 @@ describe('architecture gate', () => {
     ]);
   });
 
+  it('should_report_persistence_in_http_when_http_adapter_imports_persistence_adapter', () => {
+    expect(violationsOf(report, 'http-adapters-never-import-persistence')).toEqual([
+      'src/adapters/http/imports-persistence.ts -> src/adapters/persistence/imports-drizzle.ts',
+    ]);
+  });
+
+  it('should_report_http_in_persistence_when_persistence_adapter_imports_http_adapter', () => {
+    expect(violationsOf(report, 'persistence-adapters-never-import-http')).toEqual([
+      'src/adapters/persistence/imports-http.ts -> src/adapters/http/imports-nest.ts',
+    ]);
+  });
+
   it('should_report_package_in_adapter_helpers_when_root_adapter_imports_one', () => {
     expect(violationsOf(report, 'other-adapters-import-no-package')).toEqual([
       expect.stringMatching(/^src\/adapters\/imports-package\.ts -> .*@nestjs\/common/),
