@@ -277,23 +277,23 @@
       ],
       "4": [
         {
-          "group": "adapters|src/infrastructure/database",
+          "group": "infrastructure|src/infrastructure/database",
           "types": ["Database", "DatabaseModule"]
         },
         {
-          "group": "adapters|src/infrastructure/logging",
+          "group": "infrastructure|src/infrastructure/logging",
           "types": ["NestLogger"]
         },
         {
-          "group": "adapters|src/infrastructure",
+          "group": "infrastructure|src/infrastructure",
           "types": ["AppModule"]
         },
         {
-          "group": "adapters|src/infrastructure/clock",
+          "group": "infrastructure|src/infrastructure/clock",
           "types": ["SystemClock"]
         },
         {
-          "group": "adapters|src/infrastructure/auth",
+          "group": "infrastructure|src/infrastructure/auth",
           "types": ["JwtTokenIssuer", "ScryptPasswordHasher", "RandomUserIdGenerator"]
         }
       ]
@@ -483,7 +483,7 @@
       ],
       "4": [
         {
-          "group": "ref|adapters",
+          "group": "ref|infrastructure",
           "types": [
             "SystemClock",
             "JwtTokenIssuer",
@@ -645,7 +645,7 @@
       ],
       "4": [
         {
-          "group": "ref|adapters",
+          "group": "ref|infrastructure",
           "types": [
             "JwtTokenIssuer",
             "ScryptPasswordHasher",
@@ -706,9 +706,6 @@
             "Login",
             "ListedLevels",
             "UnavailableLevel",
-            "Logger",
-            "UseCaseLogEntry",
-            "Clock",
             "ProgressProblem",
             "GetProgress",
             "SessionToken",
@@ -720,10 +717,7 @@
             "LeaderboardReader",
             "ProgressRepository",
             "UserRepository",
-            "TokenIssuer",
-            "PasswordHasher",
             "AuthenticateToken",
-            "UserIdGenerator",
             "RegisterUserRequest",
             "AuthorizeLevelEditor",
             "ProgressChange",
@@ -821,26 +815,28 @@
             "LevelResultProblem"
           ]
         }
-      ],
+      ]
+    },
+    "part-infrastructure": {
       "4": [
         {
-          "group": "adapters|src/infrastructure/clock",
+          "group": "infrastructure|src/infrastructure/clock",
           "types": ["SystemClock"]
         },
         {
-          "group": "adapters|src/infrastructure",
+          "group": "infrastructure|src/infrastructure",
           "types": ["AppModule"]
         },
         {
-          "group": "adapters|src/infrastructure/auth",
+          "group": "infrastructure|src/infrastructure/auth",
           "types": ["JwtTokenIssuer", "ScryptPasswordHasher", "RandomUserIdGenerator"]
         },
         {
-          "group": "adapters|src/infrastructure/logging",
+          "group": "infrastructure|src/infrastructure/logging",
           "types": ["NestLogger"]
         },
         {
-          "group": "adapters|src/infrastructure/database",
+          "group": "infrastructure|src/infrastructure/database",
           "types": ["Database", "DatabaseModule"]
         }
       ]

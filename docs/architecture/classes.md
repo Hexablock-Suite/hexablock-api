@@ -6,10 +6,10 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 
 ## Whole model in draw.io
 
-[`classes.drawio`](classes.drawio) holds the whole class model in one draw.io file, with 4 pages. Open it in draw.io or diagrams.net.
+[`classes.drawio`](classes.drawio) holds the whole class model in one draw.io file, with 5 pages. Open it in draw.io or diagrams.net.
 
 - Page 1, `All classes`, holds every class, interface and type of the model once, by layer: layer 4 at the top and layer 1 at the bottom, so every dependency points down.
-- Pages 2 to 4, `Domain`, `Use cases` and `Adapters`, hold one part each. A part page shows the types of its part in full. A grey box with the name only is a type of another part that one of its lines touches, and its eyebrow names the page that details it.
+- Pages 2 to 5, `Domain`, `Use cases`, `Adapters` and `Infrastructure`, hold one part each. A part page shows the types of its part in full. A grey box with the name only is a type of another part that one of its lines touches, and its eyebrow names the page that details it.
 - A solid box is a type that exists in the code at `284c219`. A dashed box with `«planned»` is design from the views of this page that the code does not have yet. It keeps the `«Sprint N»` of its view when the view gives one.
 - `members not designed yet` marks a planned class that no view details.
 - A grey line with `planned` in its label is a line of a view that the code does not have yet. The tool finds a use in the members of a type and in the top-level functions of the same file. It does not follow a function that another file exports. So two lines of view `ad-1-progress-store` stay planned, although the code has them: `ProgressRowMapper` → `PlayerProgressReceiver` and `DrizzleProgressRepository` → `ProgressKeyReceiver`. Each class calls a helper of `src/adapters/received.ts`, `receiveProgressOf()` or `receiveProgressKeyOf()`, and that helper gives the receiver to the domain object ([#196](https://github.com/Hexablock-Suite/hexablock-api/issues/196)).
