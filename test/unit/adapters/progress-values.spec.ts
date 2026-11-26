@@ -1,13 +1,16 @@
 import {
   INCOMING_ID_BOUNDS,
+  elapsedTimeFrom,
   gameIdFrom,
   levelIdFrom,
   movesFrom,
+  MOST_ELAPSED_MS,
   MOST_MOVES,
   MOST_STARS,
   starsFrom,
 } from '../../../src/adapters/http/progress-values.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
+import { ElapsedTime } from '../../../src/domain/progress/elapsed-time.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
 import { Moves } from '../../../src/domain/progress/moves.js';
 import { Stars } from '../../../src/domain/progress/stars.js';
@@ -23,6 +26,7 @@ const gameId = (value: string): GameId => valueOf(GameId.of(value));
 const levelId = (value: string): LevelId => valueOf(LevelId.of(value));
 const stars = (value: number): Stars => valueOf(Stars.of(value));
 const moves = (value: number): Moves => valueOf(Moves.of(value));
+const elapsedTime = (value: number): ElapsedTime => valueOf(ElapsedTime.ofMs(value));
 
 describe('gameIdFrom', () => {
   it.each(['a'.repeat(65), 'a'.repeat(200), 'Lines', '', 'fit\u0000'])(
@@ -110,6 +114,25 @@ describe('movesFrom', () => {
   );
 });
 
+describe('elapsedTimeFrom', () => {
+  it.each([2_147_483_648, 3_000_000_000])(
+    'should_give_the_text_of_the_rule_when_the_time_of_a_play_exceeds_the_column',
+    (bad) => {
+      expect(elapsedTimeFrom(bad)).toEqual({
+        ok: false,
+        error: `elapsedMs must be a non-negative integer of at most 2147483647, got ${String(bad)}.`,
+      });
+    },
+  );
+
+  it.each([0, 45_000, 2_147_483_647])(
+    'should_build_the_time_when_the_time_of_a_play_fits_the_column',
+    (value) => {
+      expect(valueOf(elapsedTimeFrom(value)).equals(elapsedTime(value))).toBe(true);
+    },
+  );
+});
+
 // The DTOs publish the bounds as the OpenAPI limits, and the texts of the
 // rules name them, so the numbers have one home here.
 describe('the bounds of an incoming value', () => {
@@ -117,5 +140,6 @@ describe('the bounds of an incoming value', () => {
     expect(INCOMING_ID_BOUNDS).toEqual({ min: 1, max: 64 });
     expect(MOST_STARS).toBe(2_147_483_647);
     expect(MOST_MOVES).toBe(2_147_483_647);
+    expect(MOST_ELAPSED_MS).toBe(2_147_483_647);
   });
 });
