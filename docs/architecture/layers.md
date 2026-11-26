@@ -10,7 +10,7 @@ This page shows the four Clean layers of the API (statement §3.4 and §4.2). It
 
 Statement §4.2 asks for a visual representation of the four concentric layers. This view draws them as rings, with the legend inside the drawing. Every source dependency points toward the centre. The component diagram below gives the detail of each layer.
 
-The view comes from [`layers/views/layers-1-rings.html`](layers/views/layers-1-rings.html), one inline SVG drawn with the diagram-design skill and the HexaBlock profile, as the class views are. The `.png` image next to it is that SVG rendered at scale 2 by a headless browser. Commit the `.html` file together with its `.png` image.
+The view comes from [`layers/views/layers-1-rings.html`](layers/views/layers-1-rings.html), one inline SVG drawn with the diagram-design skill and the HexaBlock profile, as the class views are. The `.png` image next to it is that SVG rendered at scale 2 by a headless browser, in the page width that [«Render the images» of classes.md](classes.md#render-the-images) gives. Commit the `.html` file together with its `.png` image.
 
 ## Component diagram
 
@@ -163,7 +163,7 @@ Each folder of layer 3 names the one library that it adapts, and a rule of [`.de
 - **Drizzle repositories and row mappers:** `src/adapters/persistence`. The mappers turn rows into entities and back.
 - **JWT guard:** `src/adapters/http`. It calls the `AuthenticateToken` input port, as a controller calls its input ports, and never calls `TokenIssuer`. `AuthenticateTokenUseCase` verifies the token through the `TokenIssuer` port, asks the `UserRepository` port if its user is still stored ([#137](https://github.com/Hexablock-Suite/hexablock-api/issues/137)), and returns the `UserId` or a failed `Result`. The docs named two options, a separate `TokenVerifier` port or an `AuthenticateToken` input port. This draft takes the input port, as an assumption for team review: decision 14 of [classes.md](classes.md).
 - **JWT and password hashing adapters:** `src/infrastructure`, as `SystemClock` does for the `Clock` port.
-- **AOP aspects over use cases:** `src/application/aspects`, as custom decorators, never Nest interceptors (rule `application-imports-only-domain`). `UseCaseAspect` implements the `UseCase` input port, and each aspect extends it. See Q12.
+- **AOP aspects over use cases:** `src/application/aspects`, as custom decorators, never Nest interceptors (rule `application-imports-only-domain`). `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and each aspect extends it. See Q12.
 - **Logging:** the `Logger` port lives in `src/application/ports/logger.ts`. It takes a typed entry (use case name, outcome, and the `kind` of a failure, or the name, string `code` and stack frames of a thrown error, never its message, or the `gameId`, `levelId` and reason code of a stored level row that breaks a rule). `NestLogger` in `src/infrastructure/logging` implements it and writes the text (decision 10 of [classes.md](classes.md)). A failure logs only its `kind`, so a value that the client sent never reaches the log.
 - **Swagger and OpenAPI:** `@nestjs/swagger` decorators on controllers and DTOs in `src/adapters/http`. `src/infrastructure/http-app.ts` builds the document. `openapi/openapi.json` is its committed export.
 - **NestJS modules:** `src/infrastructure`. Nest stays out of `src/domain`, `src/application` and `src/adapters/persistence`. A Nest injection token next to a port is a plain `Symbol`, such as `CLOCK`.
