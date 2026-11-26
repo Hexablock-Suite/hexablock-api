@@ -224,6 +224,25 @@ describe('DrizzleLeaderboardReader', () => {
     );
   });
 
+  // The elapsed time of one play is at most 2147483647 at the border (#167),
+  // so the sum of the times of one player stays a safe integer for any
+  // realistic number of levels, and the board of the standings still reads
+  // it: the mirror of the rejection above.
+  it('should_read_the_standings_when_the_sum_of_the_times_is_a_safe_integer', async () => {
+    const database = await openDatabase([
+      {
+        userId: ADA,
+        gameId: FIT,
+        results: [level('level-01', 1, 1, 2_147_483_647), level('level-02', 1, 1, 2_147_483_647)],
+      },
+    ]);
+    const reader = new DrizzleLeaderboardReader(database.db);
+
+    const board = await reader.standings(FIT);
+
+    expect(byPlayer(board)).toEqual([{ userId: ADA, result: standing(2, 2, 2, 4_294_967_294) }]);
+  });
+
   // The users table belongs to the user module. The reader reads only the
   // tables of the progress module, so it names no table or column of users.
   it('should_name_no_table_or_column_of_users_when_the_reader_source_is_read', () => {

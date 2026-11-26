@@ -86,7 +86,10 @@ describe('ProgressDtoMapper.toRequest', () => {
       { ...LEVEL, moves: -2, elapsedMs: -3 },
       'moves must be a non-negative integer of at most 2147483647, got -2.',
     ],
-    [{ ...LEVEL, elapsedMs: -3 }, 'elapsedMs must be a non-negative integer, got -3.'],
+    [
+      { ...LEVEL, elapsedMs: -3 },
+      'elapsedMs must be a non-negative integer of at most 2147483647, got -3.',
+    ],
     [{}, 'levelId must be a non-blank string of 1 to 64 characters with no control character.'],
     [
       { levelId: 'fit-01' },

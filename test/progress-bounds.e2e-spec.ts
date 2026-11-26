@@ -65,6 +65,11 @@ describe('progress value bounds (#135, API-FR-02, API-FR-06)', () => {
       `moves must be a non-negative integer of at most ${COLUMN_MAX}, got 3000000000.`,
     ],
     [
+      'an elapsed time over the bound',
+      { gameId: 'hexa-fit', results: [{ ...FIT_LEVEL, elapsedMs: 3_000_000_000 }] },
+      `elapsedMs must be a non-negative integer of at most ${COLUMN_MAX}, got 3000000000.`,
+    ],
+    [
       'a levelId with a NUL character',
       { gameId: 'hexa-fit', results: [{ ...FIT_LEVEL, levelId: 'fi\u0000t' }] },
       levelIdProblem,
