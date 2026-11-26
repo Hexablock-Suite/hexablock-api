@@ -75,9 +75,11 @@ points toward the domain.
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
   [.dependency-cruiser.cjs](.dependency-cruiser.cjs): `domain-imports-only-domain`,
   `application-imports-only-domain`, `adapters-never-import-infrastructure`,
+  `http-adapters-never-import-persistence`, `persistence-adapters-never-import-http`,
   `persistence-adapters-never-import-nest`, `http-adapters-import-only-nest`,
   `persistence-adapters-import-only-drizzle` and `other-adapters-import-no-package`. Each folder of
-  layer 3 imports only the library that it adapts. `test/gates/architecture.gate.spec.ts` tests them.
+  layer 3 imports only the library that it adapts, and the HTTP and persistence adapters never
+  import each other. `test/gates/architecture.gate.spec.ts` tests them.
 
 Full layer diagram and the place of each piece: [docs/architecture/layers.md](docs/architecture/layers.md).
 Classes per layer: [docs/architecture/classes.md](docs/architecture/classes.md). The type, the owner

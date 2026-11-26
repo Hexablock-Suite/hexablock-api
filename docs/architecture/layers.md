@@ -137,6 +137,8 @@ Each folder of layer 3 names the one library that it adapts, and a rule of [`.de
 - Every other file of `src/adapters`, today `received.ts` and `built.ts`, imports no package. Rule `other-adapters-import-no-package`. So a new folder of layer 3 gets its own rule before it imports its library.
 - A Node built-in is not a package, and the rules allow it. `http-error.filter.ts` reads `STATUS_CODES` of `node:http`.
 
+The two folders of layer 3 never import each other. A controller talks to use cases only, and a repository knows no request. Rule `http-adapters-never-import-persistence` checks `src/adapters/http`, and rule `persistence-adapters-never-import-http` checks `src/adapters/persistence`.
+
 **The limit.** A replacement of the web framework rewrites the files of `src/adapters/http` that import `@nestjs/*`. A replacement of the database rewrites `src/adapters/persistence`. No code of layers 1 and 2 changes in either case. The app keeps a stricter rule: its layer 3 imports no package at all (rule `adapters-imports-only-inner-layers` of `hexablock-app`). The API cannot follow it at no cost, because a Nest controller needs the decorators of `@nestjs/common`.
 
 ## Layers and allowed dependencies

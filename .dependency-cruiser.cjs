@@ -31,6 +31,22 @@ module.exports = {
       to: { path: '^src/infrastructure/' },
     },
     {
+      name: 'http-adapters-never-import-persistence',
+      comment:
+        'HTTP adapters never import src/adapters/persistence. A controller talks to use cases only, not to the database.',
+      severity: 'error',
+      from: { path: '^src/adapters/http/' },
+      to: { path: '^src/adapters/persistence/' },
+    },
+    {
+      name: 'persistence-adapters-never-import-http',
+      comment:
+        'Persistence adapters never import src/adapters/http. A repository knows no request and no DTO.',
+      severity: 'error',
+      from: { path: '^src/adapters/persistence/' },
+      to: { path: '^src/adapters/http/' },
+    },
+    {
       name: 'persistence-adapters-never-import-nest',
       comment:
         'Persistence adapters may import drizzle-orm but never @nestjs/*. The infrastructure binds them to Nest.',
