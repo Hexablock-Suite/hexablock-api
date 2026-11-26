@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { INCOMING_ID_BOUNDS, MOST_MOVES, MOST_STARS } from './progress-values.js';
+import { INCOMING_ID_BOUNDS, MOST_ELAPSED_MS, MOST_MOVES, MOST_STARS } from './progress-values.js';
 
 // The result of one level (DS-5). The limits of a sync come from the domain
 // (#135): progress-values.ts receives them.
@@ -28,7 +28,12 @@ export class LevelResultDto {
   })
   readonly moves!: number;
 
-  @ApiProperty({ example: 45000, minimum: 0, description: 'A non-negative integer.' })
+  @ApiProperty({
+    example: 45000,
+    minimum: 0,
+    maximum: MOST_ELAPSED_MS,
+    description: `A non-negative integer of at most ${MOST_ELAPSED_MS}, the same largest value as the stars and the moves.`,
+  })
   readonly elapsedMs!: number;
 }
 

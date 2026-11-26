@@ -1,3 +1,4 @@
+import { ElapsedTime } from '../../domain/progress/elapsed-time.js';
 import { GameId, type GameIdProblem } from '../../domain/progress/game-id.js';
 import { LevelId } from '../../domain/progress/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
@@ -20,11 +21,15 @@ import { type Bounds, type LevelResultValues } from '../received.js';
 // is a choice of the API: a slug such as hexa-fit or an id such as fit-01
 // needs far fewer characters. The numbers of the stars and the moves are
 // the largest value of the Postgres integer columns level_results.stars
-// and level_results.moves. The DTOs publish them as the OpenAPI limits,
-// and the texts of the rules name them, so the numbers live here.
+// and level_results.moves. The time takes the same largest value (#167):
+// the column of the store is a bigint, and the sum of the times of one
+// player stays under the largest safe integer for any realistic number of
+// levels. The DTOs publish them as the OpenAPI limits, and the texts of
+// the rules name them, so the numbers live here.
 export const INCOMING_ID_BOUNDS: Readonly<Bounds<number>> = { min: 1, max: 64 };
 export const MOST_STARS = 2_147_483_647;
 export const MOST_MOVES = 2_147_483_647;
+export const MOST_ELAPSED_MS = 2_147_483_647;
 
 // The field of a level result that each code names.
 const RESULT_FIELDS = {
@@ -92,6 +97,13 @@ export function movesFrom(value: unknown): Result<Moves, string> {
     : err(ruleText('invalid-moves', value));
 }
 
+export function elapsedTimeFrom(value: unknown): Result<ElapsedTime, string> {
+  const built = ElapsedTime.ofMs(value as number);
+  return built.ok && (value as number) <= MOST_ELAPSED_MS
+    ? built
+    : err(ruleText('invalid-elapsed-time', value));
+}
+
 // Builds one result of a sync body. The first broken rule in the order of
 // the fields gives the text: the levelId, the stars, the moves, the time.
 // buildLevelResult() builds a result with the rules of a stored row, so the
@@ -109,16 +121,19 @@ export function levelResultFrom(
 }
 
 // The code of the first incoming bound that the values of one play break,
-// in the order of the fields, or undefined. The time has no incoming bound,
-// so buildLevelResult() checks it.
+// in the order of the fields, or undefined. Every field runs through a
+// builder of the border here, the time included (#167), so a play that
+// breaks no incoming bound breaks no rule of a stored row either.
 function incomingProblemOf({
   levelId,
   stars,
   moves,
+  elapsedMs,
 }: LevelResultValues): LevelResultProblem | undefined {
   if (!levelIdFrom(levelId).ok) return 'invalid-level-id';
   if (!starsFrom(stars).ok) return 'invalid-stars';
   if (!movesFrom(moves).ok) return 'invalid-moves';
+  if (!elapsedTimeFrom(elapsedMs).ok) return 'invalid-elapsed-time';
   return undefined;
 }
 
@@ -140,6 +155,6 @@ function ruleText(
     case 'invalid-moves':
       return `moves must be a non-negative integer of at most ${MOST_MOVES}, got ${String(value)}.`;
     case 'invalid-elapsed-time':
-      return `elapsedMs must be a non-negative integer, got ${String(value)}.`;
+      return `elapsedMs must be a non-negative integer of at most ${MOST_ELAPSED_MS}, got ${String(value)}.`;
   }
 }
