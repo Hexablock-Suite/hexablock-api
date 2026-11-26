@@ -31,7 +31,7 @@ The statement gives the example of a fifth variant: «por ejemplo, Hexa Fill: pi
 
 ## View 3: a new database engine
 
-![A new database engine: the four output ports of layer 2, each held by the use cases that need it, GetLeaderboardUseCase holding both LeaderboardReader and LevelRepository, and implemented by one Drizzle repository, and the declared MongoDB repositories, each of which implements the same port as the Drizzle repository above it; the footnote names update(gameId, levelId, change) of LevelRepository and the LeaderboardEntry rows of LeaderboardReader with their Standing](extensibility/views/ext-3-database-engine.png)
+![A new database engine: the four output ports of layer 2, each held by the use cases that need it, GetLeaderboardUseCase holding both LeaderboardReader and LevelRepository, and implemented by one Drizzle repository, and the declared MongoDB repositories, each of which implements the same port as the Drizzle repository above it; each port box shows no members, and the footnote names the views 2.2, 2.3 and 2.4 that detail them, update(gameId, levelId, change) of LevelRepository and the LeaderboardEntry rows of LeaderboardReader with their Standing](extensibility/views/ext-3-database-engine.png)
 
 The database engine row of §8 names MongoDB instead of Postgres (professor, class of 2026-10-26). The `Mongo` class names are placeholders. Each column holds one output port, its Drizzle adapter, its declared Mongo adapter and the use cases that hold it, as views 2.2 to 2.4 of the class diagram show.
 
@@ -49,4 +49,4 @@ The database engine row of §8 names MongoDB instead of Postgres (professor, cla
 
 ## Render the images
 
-The views come from the HTML files in [`extensibility/views/`](extensibility/views/). They follow the same rules as the [class diagram](classes.md): each file holds one inline SVG drawn with the diagram-design skill and the HexaBlock profile. Open the file in a browser to see the drawing. The `.png` image next to it is that SVG rendered at scale 2 by a headless browser. After you edit a file, export the image again with `/diagram-design:export-diagram docs/architecture/extensibility/views/<view>.html --png-only`, then run `pnpm format`. Commit each `.html` file together with its `.png` image.
+The views come from the HTML files in [`extensibility/views/`](extensibility/views/). They follow the same rules as the [class diagram](classes.md): each file holds one inline SVG drawn with the diagram-design skill and the HexaBlock profile. Open the file in a browser to see the drawing. The `.png` image next to it is that SVG rendered at scale 2 by a headless browser, in the page width that [«Render the images» of classes.md](classes.md#render-the-images) gives. After you edit a file, export the image again with `/diagram-design:export-diagram docs/architecture/extensibility/views/<view>.html --png-only`, then run `pnpm format`. Commit each `.html` file together with its `.png` image.

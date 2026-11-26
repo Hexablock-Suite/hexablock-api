@@ -708,7 +708,7 @@
         </text>
         <line x1="48" y1="520" x2="468" y2="520" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="64" y="536" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute(token: SessionToken): Promise&lt;Result&lt;UserId, TokenProblem&gt;&gt;
+          + execute(request: SessionToken): Promise&lt;Result&lt;UserId, TokenProblem&gt;&gt;
         </text>
         <!-- Class: UpdateLevels («interface» «input port») -->
         <rect
@@ -896,7 +896,7 @@
         </text>
         <line x1="760" y1="980" x2="1200" y2="980" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="776" y="996" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - entries: LevelValidatorEntry[]
+          - entries: readonly LevelValidatorEntry[]
         </text>
         <line
           x1="760"
@@ -1221,7 +1221,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          - section: TSection
+          - section: TSection &amp; LevelSection
         </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect

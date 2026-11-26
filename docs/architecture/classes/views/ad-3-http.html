@@ -77,8 +77,9 @@
           answer, the JwtAuthGuard that the controller decorators apply to progress, leaderboard
           reads and level updates and that holds the AuthenticateToken input port, the
           LevelEditorGuard that runs after it on level updates and holds the AuthorizeLevelEditor
-          input port (#145), the LevelDto that carries the section for the validator of its gameId,
-          and the HttpErrorFilter for unexpected errors.
+          input port (#145), the LevelsDto that list() returns and update() takes, whose LevelDto
+          rows each carry the section for the validator of its gameId, and the HttpErrorFilter for
+          unexpected errors.
         </desc>
         <defs>
           <marker
@@ -164,10 +165,20 @@
           stroke-width="1"
           marker-end="url(#ad3http-open)"
         />
-        <!-- LevelsController takes LevelDto as a parameter: use -->
+        <!-- LevelsController takes LevelsDto as the parameter of update() and returns it from list(): use -->
         <line
           x1="868"
           y1="228"
+          x2="868"
+          y2="252"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#ad3http-open)"
+        />
+        <!-- LevelsDto holds levels: LevelDto[]: use with role and multiplicity -->
+        <line
+          x1="868"
+          y1="340"
           x2="868"
           y2="400"
           stroke="#5b6873"
@@ -199,10 +210,10 @@
         >
           USES
         </text>
-        <rect x="874" y="364" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="874" y="234" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="894"
-          y="373"
+          y="243"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -210,6 +221,18 @@
           letter-spacing="0.06em"
         >
           TAKES
+        </text>
+        <rect x="874" y="364" width="64" height="12" rx="2" fill="#e2ebf8" />
+        <text
+          x="906"
+          y="373"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          levels 0..*
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="316" height="12" rx="2" fill="#e2ebf8" />
@@ -732,6 +755,46 @@
           ErrorDto
         </text>
 
+        <!-- Class: LevelsDto («DTO») -->
+        <rect
+          x="736"
+          y="252"
+          width="264"
+          height="88"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="868"
+          y="270"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «DTO»
+        </text>
+        <text
+          x="868"
+          y="288"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelsDto
+        </text>
+        <line x1="736" y1="300" x2="1000" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + levels: LevelDto[]
+        </text>
+        <text x="752" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + unavailable?: UnavailableLevelDto[]
+        </text>
         <!-- Class: LevelDto («DTO») -->
         <rect
           x="736"

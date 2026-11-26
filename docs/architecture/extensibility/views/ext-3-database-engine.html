@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 3 of 3</p>
       <h1>A new database engine: new adapters, same ports</h1>
       <svg
-        viewBox="0 0 1040 828"
+        viewBox="0 0 1040 844"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext3database-title ext3database-desc"
@@ -76,9 +76,11 @@
           that need it and implemented today by one Drizzle repository over Postgres, and the
           declared MongoDB repositories that would implement the same ports with no change to the
           use cases. GetLeaderboardUseCase holds LevelRepository too, to ask whether the definitions
-          hold the level of a level board (#146). The footnote names update(gameId, levelId, change)
-          of LevelRepository and the LeaderboardEntry rows of LeaderboardReader, with their
-          Standing.
+          hold the level of a level board (#146). Each port box shows no members, and the footnote
+          names the views that detail them: view 2.2 for ProgressRepository and LeaderboardReader,
+          view 2.3 for LevelRepository and view 2.4 for UserRepository. It also names update(gameId,
+          levelId, change) of LevelRepository and the LeaderboardEntry rows of LeaderboardReader,
+          with their Standing.
         </desc>
         <defs>
           <marker
@@ -273,7 +275,7 @@
         />
         <!-- SyncProgressUseCase holds ProgressRepository: use -->
         <path
-          d="M141 456 L141 408"
+          d="M141 456 L141 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -281,7 +283,7 @@
         />
         <!-- GetLeaderboardUseCase holds LeaderboardReader: use -->
         <path
-          d="M413 456 L413 424"
+          d="M413 456 L413 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -289,7 +291,7 @@
         />
         <!-- GetLeaderboardUseCase holds LevelRepository: use (#146) -->
         <path
-          d="M498 476 L530 476 L530 440 L590 440 L590 408"
+          d="M498 476 L530 476 L530 440 L590 440 L590 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -297,7 +299,7 @@
         />
         <!-- GetLevelsUseCase holds LevelRepository: use -->
         <path
-          d="M637 456 L637 408"
+          d="M637 456 L637 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -305,7 +307,7 @@
         />
         <!-- RegisterUseCase holds UserRepository: use -->
         <path
-          d="M861 456 L861 408"
+          d="M861 456 L861 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -313,7 +315,7 @@
         />
         <!-- UpdateLevelsUseCase holds LevelRepository: use -->
         <path
-          d="M746 528 L746 408"
+          d="M746 528 L746 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -321,7 +323,7 @@
         />
         <!-- GetProgressUseCase holds ProgressRepository: use -->
         <path
-          d="M298 528 L298 408"
+          d="M298 528 L298 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -329,7 +331,7 @@
         />
         <!-- LoginUseCase holds UserRepository: use -->
         <path
-          d="M970 528 L970 408"
+          d="M970 528 L970 380"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -730,14 +732,13 @@
           x="56"
           y="332"
           width="256"
-          height="76"
+          height="48"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
           stroke-width="1"
         />
         <rect x="56" y="332" width="256" height="48" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="56" y="372" width="256" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="184"
           y="350"
@@ -760,23 +761,18 @@
         >
           ProgressRepository
         </text>
-        <line x1="56" y1="380" x2="312" y2="380" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="72" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + find(), update()
-        </text>
         <!-- Class: LeaderboardReader (focal, the seam) -->
         <rect
           x="328"
           y="332"
           width="208"
-          height="92"
+          height="48"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
           stroke-width="1"
         />
         <rect x="328" y="332" width="208" height="48" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="328" y="372" width="208" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="432"
           y="350"
@@ -799,26 +795,18 @@
         >
           LeaderboardReader
         </text>
-        <line x1="328" y1="380" x2="536" y2="380" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="344" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + levelResults(), highScores(),
-        </text>
-        <text x="366" y="412" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          standings()
-        </text>
         <!-- Class: LevelRepository (focal, the seam) -->
         <rect
           x="552"
           y="332"
           width="208"
-          height="76"
+          height="48"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
           stroke-width="1"
         />
         <rect x="552" y="332" width="208" height="48" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="552" y="372" width="208" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="656"
           y="350"
@@ -841,31 +829,18 @@
         >
           LevelRepository
         </text>
-        <line x1="552" y1="380" x2="760" y2="380" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text
-          x="568"
-          y="396"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-          textLength="186"
-          lengthAdjust="spacingAndGlyphs"
-        >
-          + list(), holds(), find(), update()
-        </text>
         <!-- Class: UserRepository (focal, the seam) -->
         <rect
           x="776"
           y="332"
           width="208"
-          height="76"
+          height="48"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
           stroke-width="1"
         />
         <rect x="776" y="332" width="208" height="48" rx="6" fill="rgba(15,111,116,0.10)" />
-        <rect x="776" y="372" width="208" height="8" fill="rgba(15,111,116,0.10)" />
         <text
           x="880"
           y="350"
@@ -887,10 +862,6 @@
           text-anchor="middle"
         >
           UserRepository
-        </text>
-        <line x1="776" y1="380" x2="984" y2="380" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text x="792" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + findByUsername(), add()
         </text>
         <!-- SyncProgressUseCase -->
         <rect
@@ -1178,8 +1149,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Each port box names its operations only. LevelRepository.update(gameId, levelId, change)
-          changes one level under a lock of its key (view 2.3).
+          Each port box shows no members: view 2.2 details ProgressRepository and LeaderboardReader,
+          view 2.3 details LevelRepository, and view 2.4 details UserRepository.
         </text>
         <text
           x="24"
@@ -1188,14 +1159,24 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
+          LevelRepository.update(gameId, levelId, change) changes one level under a lock of its key
+          (view 2.3).
+        </text>
+        <text
+          x="24"
+          y="716"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
           LeaderboardReader gives LeaderboardEntry rows of layer 2, each with a LevelResult, a Score
           or a Standing of layer 1 (views 1.1 and 2.2).
         </text>
         <!-- Legend -->
-        <line x1="24" y1="724" x2="1016" y2="724" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="740" x2="1016" y2="740" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="742"
+          y="758"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1205,9 +1186,9 @@
         </text>
         <line
           x1="24"
-          y1="760"
+          y1="776"
           x2="52"
-          y2="760"
+          y2="776"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1215,7 +1196,7 @@
         />
         <text
           x="60"
-          y="764"
+          y="780"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1224,16 +1205,16 @@
         </text>
         <line
           x1="128"
-          y1="760"
+          y1="776"
           x2="156"
-          y2="760"
+          y2="776"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext3database-open)"
         />
         <text
           x="164"
-          y="764"
+          y="780"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1242,7 +1223,7 @@
         </text>
         <rect
           x="24"
-          y="776"
+          y="792"
           width="12"
           height="12"
           rx="2"
@@ -1252,7 +1233,7 @@
         />
         <rect
           x="40"
-          y="776"
+          y="792"
           width="12"
           height="12"
           rx="2"
@@ -1262,7 +1243,7 @@
         />
         <text
           x="60"
-          y="786"
+          y="802"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1271,7 +1252,7 @@
         </text>
         <rect
           x="272"
-          y="776"
+          y="792"
           width="28"
           height="12"
           rx="2"
@@ -1282,7 +1263,7 @@
         />
         <text
           x="308"
-          y="786"
+          y="802"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1291,7 +1272,7 @@
         </text>
         <rect
           x="520"
-          y="776"
+          y="792"
           width="28"
           height="12"
           rx="2"
@@ -1301,7 +1282,7 @@
         />
         <text
           x="556"
-          y="786"
+          y="802"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1310,7 +1291,7 @@
         </text>
         <rect
           x="768"
-          y="776"
+          y="792"
           width="28"
           height="12"
           rx="2"
@@ -1321,7 +1302,7 @@
         />
         <text
           x="804"
-          y="786"
+          y="802"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1330,7 +1311,7 @@
         </text>
         <rect
           x="24"
-          y="798"
+          y="814"
           width="28"
           height="12"
           rx="2"
@@ -1341,7 +1322,7 @@
         />
         <text
           x="60"
-          y="808"
+          y="824"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
