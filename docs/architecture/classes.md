@@ -86,7 +86,7 @@ A hand edit of that order survives. Move the boxes in draw.io, run `pin.mjs` of 
 
 ## Part 3: adapters and drivers
 
-Layer 3, `src/adapters/`, and layer 4, `src/infrastructure/`. Adapters never import `src/infrastructure/` (rule `adapters-never-import-infrastructure`). The persistence adapters never import Nest (rule `persistence-adapters-never-import-nest`).
+Layer 3, `src/adapters/`, and layer 4, `src/infrastructure/`. Adapters never import `src/infrastructure/` (rule `adapters-never-import-infrastructure`). The persistence adapters never import Nest (rule `persistence-adapters-never-import-nest`). Each folder of layer 3 imports only the library that it adapts: `src/adapters/http` only `@nestjs/*` (rule `http-adapters-import-only-nest`), `src/adapters/persistence` only `drizzle-orm` (rule `persistence-adapters-import-only-drizzle`), and every other file of `src/adapters` no package (rule `other-adapters-import-no-package`). The role of a class decides its layer (section «Layer 3 or layer 4: the role decides» of [layers.md](layers.md)).
 
 ### View 3.1: progress store
 
