@@ -258,7 +258,7 @@ which the domain computes. The database applies no letter case rule of its own. 
 The migrator runs all pending migrations in one transaction, so a later migration cannot repair
 that database. The repository has no down migrations.
 
-A local compose database created before `0003` reaches the current schema only through a reset
+A local compose database created before `0003` that holds a user reaches the current schema only through a reset; with no user, `pnpm db:migrate` applies `0003` as it is
 ([#172](https://github.com/Hexablock-Suite/hexablock-api/issues/172)). **The reset deletes every
 row of the local database**: every user, every progress entry and every level. Run it from the
 repository root:
