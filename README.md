@@ -162,7 +162,7 @@ Each principle has one example from the progress slice. Each link opens the sour
 ## AOP
 
 The cross-cutting aspects are logging and timing (§3.5, API-NFR-07). They wrap use cases as
-decorators: `UseCaseAspect` implements the input port, and `LoggingAspect` extends it. [View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)
+decorators: `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and `LoggingAspect` extends it. [View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)
 also draws a `TimingAspect`, which is not built yet.
 They are custom decorators or proxies, never Nest interceptors, because `src/application`
 imports no package (rule R-application-pure).
