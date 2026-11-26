@@ -44,6 +44,32 @@ describe('architecture gate', () => {
     expect(fromDrizzleFixture).toEqual([]);
   });
 
+  it('should_report_foreign_package_in_http_when_http_adapter_imports_drizzle', () => {
+    expect(violationsOf(report, 'http-adapters-import-only-nest')).toEqual([
+      expect.stringMatching(/^src\/adapters\/http\/imports-drizzle\.ts -> .*drizzle-orm/),
+    ]);
+  });
+
+  it('should_allow_nest_when_http_adapter_imports_it', () => {
+    const fromNestFixture = report.violations.filter(
+      (violation) => violation.from === 'src/adapters/http/imports-nest.ts',
+    );
+
+    expect(fromNestFixture).toEqual([]);
+  });
+
+  it('should_report_foreign_package_in_persistence_when_persistence_adapter_imports_pg', () => {
+    expect(violationsOf(report, 'persistence-adapters-import-only-drizzle')).toEqual([
+      expect.stringMatching(/^src\/adapters\/persistence\/imports-pg\.ts -> .*\/pg\//),
+    ]);
+  });
+
+  it('should_report_package_in_adapter_helpers_when_root_adapter_imports_one', () => {
+    expect(violationsOf(report, 'other-adapters-import-no-package')).toEqual([
+      expect.stringMatching(/^src\/adapters\/imports-package\.ts -> .*@nestjs\/common/),
+    ]);
+  });
+
   // Persistence adapters cannot import src/infrastructure, so the tables they
   // query live next to them. drizzle-kit reads the same file.
   it('should_read_the_schema_from_the_persistence_adapter_when_drizzle_kit_generates_migrations', async () => {

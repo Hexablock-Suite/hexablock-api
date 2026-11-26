@@ -38,6 +38,29 @@ module.exports = {
       from: { path: '^src/adapters/persistence/' },
       to: { path: '@nestjs/' },
     },
+    {
+      name: 'http-adapters-import-only-nest',
+      comment:
+        'HTTP adapters import only @nestjs/* among packages. A Node built-in is not a package.',
+      severity: 'error',
+      from: { path: '^src/adapters/http/' },
+      to: { path: 'node_modules/', pathNot: 'node_modules/@nestjs/' },
+    },
+    {
+      name: 'persistence-adapters-import-only-drizzle',
+      comment:
+        'Persistence adapters import only drizzle-orm among packages. persistence-adapters-never-import-nest reports @nestjs/*.',
+      severity: 'error',
+      from: { path: '^src/adapters/persistence/' },
+      to: { path: 'node_modules/', pathNot: 'node_modules/(?:drizzle-orm|@nestjs)/' },
+    },
+    {
+      name: 'other-adapters-import-no-package',
+      comment: 'Code of src/adapters outside http/ and persistence/ imports no package.',
+      severity: 'error',
+      from: { path: '^src/adapters/', pathNot: '^src/adapters/(?:http|persistence)/' },
+      to: { path: 'node_modules/' },
+    },
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
