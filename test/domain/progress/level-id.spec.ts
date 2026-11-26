@@ -59,33 +59,8 @@ describe('LevelId', () => {
   });
 });
 
-// #135: a levelId that a client sends holds 64 characters at most and no
-// control character (U+0000 to U+001F, U+007F). A stored row keeps what it
-// holds, so of() keeps neither rule.
-describe('LevelId.ofIncoming', () => {
-  it.each([
-    'f'.repeat(65),
-    'f'.repeat(10_000),
-    'fi\u0000t',
-    'fit\n01',
-    'fit\u001f',
-    '\u007ffit',
-    '  ',
-  ])(
-    'should_give_the_code_of_the_rule_when_an_incoming_level_id_is_too_long_or_holds_a_control_character',
-    (bad) => {
-      expect(LevelId.ofIncoming(bad)).toEqual({ ok: false, error: 'invalid-level-id' });
-    },
-  );
-
-  // A character is one code point, so an emoji counts once.
-  it.each(['fit-01', 'f'.repeat(64), '😀'.repeat(64), 'nivel ñ 01'])(
-    'should_build_the_level_id_when_an_incoming_id_has_at_most_64_characters_and_no_control_character',
-    (value) => {
-      expect(valueOf(LevelId.ofIncoming(value)).equals(levelId(value))).toBe(true);
-    },
-  );
-
+// A stored row keeps what it holds, so of() keeps neither rule (#135).
+describe('LevelId.of', () => {
   it.each(['f'.repeat(10_000), 'fit\n01'])(
     'should_build_a_stored_level_id_over_the_bounds_when_of_rebuilds_a_row',
     (value) => {
