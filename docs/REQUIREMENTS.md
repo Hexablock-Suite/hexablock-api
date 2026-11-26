@@ -5,6 +5,7 @@ This file holds the backend requirements, written in our own words. The canonica
 - **Source:** the course statement "Proyecto Semestral — HexaBlock Suite", version 1.0, issued 2026-10-23. It is not redistributed in this repository. Each item cites its section as `§n`.
 - **Requirement IDs:** **API-FR-n** is a functional requirement: what the API serves. **API-NFR-n** is a non-functional requirement: how the backend is built, tested and documented. The client uses APP-FR-n and APP-NFR-n; its APP-FR-12 to APP-FR-15 are the client side of API-FR-01 to API-FR-04. An ID never changes; a dropped requirement keeps its ID and says "Dropped".
 - **Checks:** each requirement ends with _Check_, the evidence that shows it is met. Where a gate already exists, the check names it. The other checks are a proposal of 2026-10-30 for the team to review.
+- **Business rules:** the type, the owner and the layer of each business rule of this file are in the table «Business rules» of [`architecture/classes.md`](architecture/classes.md#business-rules).
 - **Rule:** when a backend requirement, an assumption or an answer from the professor changes, update this file and the canonical one in the same pair of pull requests.
 
 | Kind                                                 | IDs                      | Sections |
