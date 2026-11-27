@@ -1,5 +1,7 @@
-// The code of the rule that a level breaks (decision 11). The border writes
-// the message, so the code carries no text that a client sent.
+// The code of the rule that a level breaks (decision 11). For a level
+// problem, the code is the message: the border writes the name of the level
+// and the code. The code carries no text that a client sent.
+// A client sees 16 codes through PUT /v1/levels (#223):
 // - game-without-levels: no strategy serves the gameId, as for Lines and Merge.
 // - invalid-order, invalid-version, invalid-topology: a value of the common part.
 // - older-version: the incoming copy of a level has a lower version than the stored copy (S3-10).
@@ -9,7 +11,12 @@
 // - unknown-topology: the code knows no Topology for the topology of a Fit level (decision 6).
 // - unequal-area, inexact-witness: the Fit section fails A5. The pieces do not have the area
 //   of the figure, or the witness does not place each piece once and cover the figure exactly.
-// - The other codes name the value object whose rule breaks, when a caller builds it alone.
+// The other eight codes are part codes: invalid-coordinate, invalid-rotation,
+// invalid-piece, invalid-piece-id, invalid-placement, invalid-star-threshold,
+// invalid-seed and invalid-color. A value object keeps the code of its own
+// rule. The section that reads the part gives the code of its field, so no
+// client sees a part code. test/domain/level/level-problem.spec.ts classifies
+// each code, and a new code fails the type check until it has a class.
 export type LevelProblem =
   | 'game-without-levels'
   | 'invalid-order'

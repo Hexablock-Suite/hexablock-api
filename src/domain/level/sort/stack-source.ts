@@ -23,7 +23,9 @@ export class StackSource {
   private constructor(private readonly supply: SeededStacks | FixedStacks) {}
 
   // Reads { seed, colors } or { stacks }. Each list holds one item or more.
-  // A raw source of neither kind, or of both kinds, gives invalid-source.
+  // A raw source of neither kind, or of both kinds, gives invalid-source. A
+  // broken seed, color or stack gives invalid-source too: the client sees the
+  // field, not the part code (decision 11, #223).
   static of(raw: unknown): Result<StackSource, LevelProblem> {
     const seeded = readFields<SeededStacks>(
       raw,
