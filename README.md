@@ -74,12 +74,14 @@ points toward the domain.
   [#91](https://github.com/Hexablock-Suite/hexablock-api/issues/91)).
 - **A gate enforces the layers.** `pnpm arch` runs dependency-cruiser with the rules in
   [.dependency-cruiser.cjs](.dependency-cruiser.cjs): `domain-imports-only-domain`,
-  `application-imports-only-domain`, `adapters-never-import-infrastructure`,
+  `domain-imports-no-cycle`, `domain-folder-imports-no-subfolder`, `application-imports-only-domain`, `adapters-never-import-infrastructure`,
   `http-adapters-never-import-persistence`, `persistence-adapters-never-import-http`,
   `persistence-adapters-never-import-nest`, `http-adapters-import-only-nest`,
   `persistence-adapters-import-only-drizzle` and `other-adapters-import-no-package`. Each folder of
   layer 3 imports only the library that it adapts, and the HTTP and persistence adapters never
-  import each other. `test/gates/architecture.gate.spec.ts` tests them.
+  import each other. No file of `src/domain` reaches itself through its imports, and a shared file
+  of a domain folder never imports a subfolder of that folder (#221).
+  `test/gates/architecture.gate.spec.ts` tests them.
 
 Full layer diagram and the place of each piece: [docs/architecture/layers.md](docs/architecture/layers.md).
 Classes per layer: [docs/architecture/classes.md](docs/architecture/classes.md). The type, the owner
