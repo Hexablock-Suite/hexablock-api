@@ -87,10 +87,12 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
       - name: start the API
-        # The example values start the app; /v1/health reads no database and no token.
-        run: nohup node --env-file=.env.example dist/main.js > api.log 2>&1 &
+        # The provider composition: AppModule on in-memory PGlite plus the
+        # state-change endpoint of the pact provider states (#151). It runs
+        # from the sources with the example values, so it needs no build and
+        # no Postgres. The production start has no state-change endpoint.
+        run: nohup node --env-file=.env.example scripts/contract/start-provider.js > api.log 2>&1 &
       - name: wait for /v1/health
         run: |
           for _ in $(seq 1 30); do

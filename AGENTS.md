@@ -7,7 +7,7 @@ Rules for every contributor, human or agent, in this repository. Each rule names
 - `pnpm verify`: lint, format:check, typecheck, test, arch, openapi:check, in that order.
 - `pnpm test`: unit and gate tests, then e2e tests.
 - `pnpm arch`: dependency-cruiser layer rules.
-- `pnpm contract:verify`: verify the client pact against the API at `BACKEND_URL`. `PACT_FILE` picks a local pact.
+- `pnpm contract:verify`: verify the client pact against the API at `BACKEND_URL`. `PACT_FILE` picks a local pact. The API must be the provider composition: `node --env-file=.env.example scripts/contract/start-provider.js` starts it with the state-change endpoint of the pact provider states (#151).
 - `pnpm db:generate`: write a migration into `drizzle/` from the schema. `pnpm db:migrate` applies them to `DATABASE_URL`.
 - `pnpm openapi:export`: build the app and write `openapi/openapi.json`. `pnpm openapi:check` fails when that file is stale.
 
@@ -35,7 +35,7 @@ Rules for every contributor, human or agent, in this repository. Each rule names
 - Follow the section «Domain design rules» of `docs/architecture/classes.md` when you add or change a class in `src/domain` or a class view: aggregates, domain services, value objects, time values, ranking orders and names. Rule R-domain-surface checks the private fields, the getters and the primitives in public signatures; no gate checks the other rules. Gate: `test/gates/domain-surface.gate.spec.ts` for the part that rule R-domain-surface checks, no gate for the rest. <!-- rule: R-domain-design -->
 - Keep `pnpm verify` and the CI `verify` job in step. Gate: `.github/workflows/ci.yml`, `test/gates/ci-contract.spec.ts`. <!-- rule: R-verify-parity -->
 - Run `pnpm openapi:export` after every HTTP change and commit `openapi/openapi.json`; the client generates its API types from it. Gate: `scripts/openapi/export.js`, `test/health.e2e-spec.ts`. <!-- rule: R-openapi-drift -->
-- Keep every client pact interaction green against this API; a missing pact fails the job. Gate: the contract job in `.github/workflows/ci.yml`, `scripts/contract/verify-provider.js`, `test/gates/ci-contract.spec.ts`. <!-- rule: R-contract -->
+- Keep every client pact interaction green against this API; a missing pact fails the job. Only the provider composition of `scripts/contract/start-provider.js` mounts the state-change endpoint, never `AppModule` (#151). Gate: the contract job in `.github/workflows/ci.yml`, `scripts/contract/verify-provider.js`, `test/gates/ci-contract.spec.ts`, `test/provider-states.e2e-spec.ts`. <!-- rule: R-contract -->
 - Test repositories on in-memory PGlite through `test/support/test-database.ts`, never on a shared Postgres; change tables only through `drizzle/` migrations. Two exceptions need two real sessions to show an advisory lock, so they run only when `HB_TEST_PG_URL` points at a throwaway Postgres, as in the CI job `postgres-lock`, which runs both: `test/integration/drizzle-progress-repository.concurrency.spec.ts` and `test/integration/drizzle-level-repository.concurrency.spec.ts`. Gate: `test/integration/in-memory-database.spec.ts`, `test/gates/ci-contract.spec.ts`. <!-- rule: R-database-harness -->
 - Never bypass a git hook; CI repeats every hook check. Gate: `.github/workflows/ci.yml`, `test/gates/ci-contract.spec.ts`. <!-- rule: R-no-hook-bypass -->
 - Keep the README and AI_USAGE.md sections of the project statement. Gate: `test/gates/docs-skeleton.spec.ts`. <!-- rule: R-docs-skeleton -->

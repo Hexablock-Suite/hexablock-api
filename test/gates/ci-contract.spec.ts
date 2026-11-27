@@ -29,6 +29,16 @@ describe('CI contract', () => {
     );
   });
 
+  // #151: the verifier posts each provider state to the state-change
+  // endpoint, which only the provider composition mounts. dist/main.js
+  // answers that call with 404, so the contract job never starts it.
+  it('should_start_the_provider_composition_when_contract_job_starts_the_api', () => {
+    const job = /^ {2}contract:\n[\s\S]*?(?=^ {2}[a-z-]+:$|(?![\s\S]))/m.exec(workflow)?.[0] ?? '';
+
+    expect(job).toContain('node --env-file=.env.example scripts/contract/start-provider.js');
+    expect(job).not.toContain('dist/main.js');
+  });
+
   it('should_use_pinned_node_when_ci_sets_up_node', () => {
     expect(read('.node-version').trim()).toBe('26');
     expect(workflow).toContain('node-version-file: .node-version');

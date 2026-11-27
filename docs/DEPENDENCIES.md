@@ -18,7 +18,7 @@ This file explains every entry of the `dependencies` and the `devDependencies` m
 
 - `@commitlint/cli` — the commit-message hook and the CI commitlint run; the pin of the commit rules that `test/gates/commit-message.gate.spec.ts` and the ci-contract gate check.
 - `@commitlint/config-conventional` — the Conventional Commits preset that `commitlint.config.cjs` extends.
-- `@electric-sql/pglite` — the in-memory Postgres that `test/support/test-database.ts` runs every repository test on, so no test touches a shared Postgres (rule R-database-harness).
+- `@electric-sql/pglite` — the in-memory Postgres that `test/support/test-database.ts` runs every repository test on, so no test touches a shared Postgres (rule R-database-harness). The provider composition of the contract job runs on it too, because the CI job has no Postgres (#151).
 - `@nestjs/cli` — the `nest build`, `nest start` and `nest start --watch` scripts of `package.json`.
 - `@nestjs/schematics` — the collection that `nest-cli.json` names for `nest generate`.
 - `@nestjs/testing` — the `Test` module that bootstraps the test app in `test/support/http/test-app.ts` and the gate specs.
@@ -33,5 +33,5 @@ This file explains every entry of the `dependencies` and the `devDependencies` m
 - `source-map-support` — part of the Nest scaffold's dependency set; no source file or test imports it today. Keeping or removing it is a separate decision, recorded on [#84](https://github.com/Hexablock-Suite/hexablock-api/issues/84).
 - `supertest` — the HTTP requests of every e2e spec and of `test/support/http`.
 - `typescript` — the compiler of the `typecheck` script (`tsc --noEmit`), of `nest build` and of the type-aware lint rules.
-- `vite-plus` — the `defineConfig` of `vite.config.ts` and the `vp` formatter and linter that the `format`, `format:check` and `lint` scripts and the git hooks run.
+- `vite-plus` — the `defineConfig` of `vite.config.ts` and the `vp` formatter and linter that the `format`, `format:check` and `lint` scripts and the git hooks run. Its Vite module runner loads the TypeScript sources of the provider composition in `scripts/contract/start-provider.js` (#151).
 - `vitest` — the test runner of the unit, gate and e2e configs, and the `vitest/globals` type set of `tsconfig.json`.
