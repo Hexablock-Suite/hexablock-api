@@ -6,7 +6,6 @@ import { DrizzleLevelRepository } from '../../../src/adapters/persistence/drizzl
 import { DrizzleProgressRepository } from '../../../src/adapters/persistence/drizzle-progress-repository.js';
 import { DrizzleUserRepository } from '../../../src/adapters/persistence/drizzle-user-repository.js';
 import { CLOCK, type Clock } from '../../../src/application/ports/clock.js';
-import { LEADERBOARD_READER } from '../../../src/application/ports/leaderboard-reader.js';
 import { LEVEL_REPOSITORY } from '../../../src/application/ports/level-repository.js';
 import { PROGRESS_REPOSITORY } from '../../../src/application/ports/progress-repository.js';
 import {
@@ -75,7 +74,7 @@ export async function createTestApp(
       inject: [LEVEL_VALIDATORS],
       factory: (validators: LevelValidators) => new DrizzleLevelRepository(database.db, validators),
     })
-    .overrideProvider(LEADERBOARD_READER)
+    .overrideProvider(DrizzleLeaderboardReader)
     .useValue(new DrizzleLeaderboardReader(database.db));
   if (options.clock !== undefined) {
     builder = builder.overrideProvider(CLOCK).useValue(options.clock);
