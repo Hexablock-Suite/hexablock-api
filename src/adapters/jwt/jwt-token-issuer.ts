@@ -1,6 +1,7 @@
 import type { JwtService } from '@nestjs/jwt';
 import { receiveUserOf } from '../received.js';
-import type { SessionToken, TokenIssuer } from '../../application/ports/token-issuer.js';
+import type { SessionToken } from '../../application/auth/session-token.js';
+import type { TokenIssuer } from '../../application/ports/token-issuer.js';
 import type { User } from '../../domain/user/user.js';
 import { UserId } from '../../domain/user/user-id.js';
 

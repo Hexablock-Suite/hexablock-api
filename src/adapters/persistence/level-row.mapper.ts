@@ -1,4 +1,4 @@
-import type { ListedLevels, UnavailableLevel } from '../../application/ports/level-repository.js';
+import type { ListedLevels, UnavailableLevel } from '../../application/levels/listed-levels.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import { LevelOrder } from '../../domain/level/level-order.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';

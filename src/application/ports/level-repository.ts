@@ -1,10 +1,11 @@
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
-import type { StoredLevel, StoredLevelProblem } from '../../domain/level/stored-level.js';
+import type { StoredLevel } from '../../domain/level/stored-level.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { Result } from '../../domain/shared/result.js';
+import type { ListedLevels } from '../levels/listed-levels.js';
 
 // One change of one level. It gets the stored state of the level. It
 // returns the level to save, or a failed Result to save nothing, for
@@ -13,22 +14,6 @@ import type { Result } from '../../domain/shared/result.js';
 // update, and it replaces a valid or a broken row. It is synchronous
 // domain code and does no I/O.
 export type LevelChange = (stored: StoredLevel) => Result<LevelDefinition<unknown>, LevelProblem>;
-
-// A stored level row that breaks a rule (#147). The key is the text of the
-// row, because a broken row can hold a gameId or a levelId that breaks its
-// own rule. The reason is the code of the first broken rule.
-export interface UnavailableLevel {
-  readonly gameId: string;
-  readonly levelId: string;
-  readonly reason: StoredLevelProblem;
-}
-
-// Every stored level row, by gameId and then by levelId: the valid levels
-// and the broken rows apart. One broken row hides no other level (#147).
-export interface ListedLevels {
-  readonly levels: readonly LevelDefinition<unknown>[];
-  readonly unavailable: readonly UnavailableLevel[];
-}
 
 // Port. It lists and changes the LevelDefinition aggregates, one per gameId
 // and levelId (API-FR-04, DS-6). Each level is the root of its own aggregate,

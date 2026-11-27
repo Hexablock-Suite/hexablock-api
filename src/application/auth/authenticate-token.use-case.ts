@@ -1,8 +1,9 @@
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
-import type { SessionToken, TokenIssuer } from '../ports/token-issuer.js';
+import type { TokenIssuer } from '../ports/token-issuer.js';
 import type { UserRepository } from '../ports/user-repository.js';
 import type { UseCase } from '../use-case.js';
+import type { SessionToken } from './session-token.js';
 
 // One problem for a malformed, expired or forged token, and for a valid
 // token whose user is not stored, so the answer does not tell which check

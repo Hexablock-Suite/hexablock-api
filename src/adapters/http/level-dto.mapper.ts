@@ -1,5 +1,5 @@
 import type { LevelProblemReport } from '../../application/levels/invalid-levels.js';
-import type { ListedLevels } from '../../application/ports/level-repository.js';
+import type { ListedLevels } from '../../application/levels/listed-levels.js';
 import type {
   IncomingLevel,
   UpdateLevelsRequest,

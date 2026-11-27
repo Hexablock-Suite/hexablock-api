@@ -8,11 +8,17 @@ export interface RankedBoardReceiver<T> {
   receive(rank: Rank, userId: UserId, result: T): void;
 }
 
-// One row of the board, as the factory of the board keeps it.
-interface Row<T> {
+// One entry of a board: the player and the value that ranks the player.
+// RankedBoard.of() takes these entries, and the LeaderboardEntry type of
+// layer 2 is an alias of this type, so the shape has one declaration (#213).
+// It is a type alias, as Result is: it only carries the two values that the
+// factory reads, and no rule of its own.
+export type BoardEntry<T> = { readonly userId: UserId; readonly result: T };
+
+// One row of the board, as the factory of the board keeps it: an entry and
+// its rank.
+interface Row<T> extends BoardEntry<T> {
   readonly rank: Rank;
-  readonly userId: UserId;
-  readonly result: T;
 }
 
 // The ranked board of one leaderboard. The domain owns the order: the
@@ -27,11 +33,11 @@ interface Row<T> {
 export class RankedBoard<T extends { isBetterThan(other: T): boolean }> {
   private constructor(private readonly rows: readonly Row<T>[]) {}
 
-  // The entries name the player and hold the value that ranks the player,
-  // as LeaderboardEntry does. The factory takes them built and keeps its
-  // own copy, so the caller cannot change the board afterwards.
+  // The entries name the player and hold the value that ranks the player.
+  // The factory takes them built and keeps its own copy, so the caller
+  // cannot change the board afterwards.
   static of<T extends { isBetterThan(other: T): boolean }>(
-    entries: readonly { readonly userId: UserId; readonly result: T }[],
+    entries: readonly BoardEntry<T>[],
   ): RankedBoard<T> {
     const ordered = entries.toSorted((one, other) => {
       if (one.result.isBetterThan(other.result)) return -1;

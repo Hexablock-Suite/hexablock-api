@@ -4,10 +4,11 @@ import type { PasswordAttempt } from '../../domain/user/password-attempt.js';
 import type { PasswordHash } from '../../domain/user/password-hash.js';
 import type { User } from '../../domain/user/user.js';
 import type { PasswordHasher } from '../ports/password-hasher.js';
-import type { SessionToken, TokenIssuer } from '../ports/token-issuer.js';
+import type { TokenIssuer } from '../ports/token-issuer.js';
 import type { UserRepository } from '../ports/user-repository.js';
 import type { UseCase } from '../use-case.js';
 import type { LoginRequest } from './credentials.js';
+import type { SessionToken } from './session-token.js';
 
 // One problem for an unknown username and for a wrong password, so the
 // answer does not tell which usernames exist. It carries a kind, so

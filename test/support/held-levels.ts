@@ -1,7 +1,5 @@
-import type {
-  LevelRepository,
-  ListedLevels,
-} from '../../src/application/ports/level-repository.js';
+import type { ListedLevels } from '../../src/application/levels/listed-levels.js';
+import type { LevelRepository } from '../../src/application/ports/level-repository.js';
 import { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../src/domain/level/level-order.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';

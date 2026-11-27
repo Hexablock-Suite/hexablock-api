@@ -1,8 +1,6 @@
 import type { User } from '../../domain/user/user.js';
 import type { UserId } from '../../domain/user/user-id.js';
-
-// The opaque token that a signed-in client sends with each guarded request.
-export type SessionToken = string;
+import type { SessionToken } from '../auth/session-token.js';
 
 // Port. It issues a SessionToken for a user and reads the id of the user
 // back from a token. issue() takes the User, so the use case reads no field
