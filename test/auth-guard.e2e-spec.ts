@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
 import { DrizzleUserRepository } from '../src/adapters/persistence/drizzle-user-repository.js';
 import { progress, users } from '../src/adapters/persistence/schema.js';
-import { JwtTokenIssuer } from '../src/infrastructure/auth/jwt-token-issuer.js';
+import { JwtTokenIssuer } from '../src/adapters/jwt/jwt-token-issuer.js';
 import { signIn } from './support/http/sign-in.js';
 import { createTestApp, TEST_JWT_SECRET, type TestApp } from './support/http/test-app.js';
 import { testUserId } from './support/user-ids.js';

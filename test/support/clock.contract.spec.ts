@@ -1,4 +1,4 @@
-import { SystemClock } from '../../src/infrastructure/clock/system-clock.js';
+import { SystemClock } from '../../src/adapters/clock/system-clock.js';
 import { describeClockContract } from './clock.contract.js';
 import { FixedClock } from './fixed-clock.js';
 import { syncInstantOf } from './sync-instants.js';

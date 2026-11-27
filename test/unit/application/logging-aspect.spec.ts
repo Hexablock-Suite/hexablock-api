@@ -22,7 +22,7 @@ import { GameId } from '../../../src/domain/progress/game-id.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { NestLogger } from '../../../src/infrastructure/logging/nest-logger.js';
+import { NestLogger } from '../../../src/adapters/logging/nest-logger.js';
 import {
   InMemoryUserRepository,
   PrefixPasswordHasher,

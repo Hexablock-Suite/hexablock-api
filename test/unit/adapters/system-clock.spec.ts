@@ -1,4 +1,4 @@
-import { SystemClock } from '../../../src/infrastructure/clock/system-clock.js';
+import { SystemClock } from '../../../src/adapters/clock/system-clock.js';
 
 // #97: SystemClock builds the SyncInstant from the system clock. The factory
 // returns a failed Result for a reading that is not a valid instant. That

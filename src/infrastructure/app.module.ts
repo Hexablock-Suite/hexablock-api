@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
+import { SystemClock } from '../adapters/clock/system-clock.js';
+import { RandomUserIdGenerator } from '../adapters/crypto/random-user-id-generator.js';
+import { ScryptPasswordHasher } from '../adapters/crypto/scrypt-password-hasher.js';
 import { AuthController } from '../adapters/http/auth.controller.js';
 import { HealthController } from '../adapters/http/health.controller.js';
 import { HttpErrorFilter } from '../adapters/http/http-error.filter.js';
 import { LeaderboardController } from '../adapters/http/leaderboard.controller.js';
 import { LevelsController } from '../adapters/http/levels.controller.js';
 import { ProgressController } from '../adapters/http/progress.controller.js';
+import { JwtTokenIssuer } from '../adapters/jwt/jwt-token-issuer.js';
+import { NestLogger } from '../adapters/logging/nest-logger.js';
 import { DrizzleLeaderboardReader } from '../adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleLevelRepository } from '../adapters/persistence/drizzle-level-repository.js';
 import { DrizzleProgressRepository } from '../adapters/persistence/drizzle-progress-repository.js';
@@ -58,13 +63,8 @@ import { Topologies } from '../domain/level/topologies.js';
 import { TopologyId } from '../domain/level/topology-id.js';
 import { GameId } from '../domain/progress/game-id.js';
 import { createJwtService, readJwtSecret, readLevelEditors } from './auth/auth-config.js';
-import { JwtTokenIssuer } from './auth/jwt-token-issuer.js';
-import { RandomUserIdGenerator } from './auth/random-user-id-generator.js';
-import { ScryptPasswordHasher } from './auth/scrypt-password-hasher.js';
-import { SystemClock } from './clock/system-clock.js';
 import type { Database } from './database/connection.js';
 import { DATABASE, DatabaseModule } from './database/database.module.js';
-import { NestLogger } from './logging/nest-logger.js';
 
 // The token of the one LevelValidators of the API. The level store and
 // UpdateLevels share it.
