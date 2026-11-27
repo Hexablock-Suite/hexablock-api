@@ -1,5 +1,8 @@
 import type { LoggerService } from '@nestjs/common';
-import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
+import {
+  type ExtraLogEntry,
+  LoggingAspect,
+} from '../../../src/application/aspects/logging-aspect.js';
 import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.js';
 import {
   type AuthenticateToken,
@@ -16,6 +19,7 @@ import {
   type GetLevels,
   GetLevelsUseCase,
 } from '../../../src/application/levels/get-levels.use-case.js';
+import { unavailableLevelEntries } from '../../../src/application/levels/unavailable-level-entries.js';
 import { UpdateLevelsUseCase } from '../../../src/application/levels/update-levels.use-case.js';
 import { SyncProgressUseCase } from '../../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
@@ -87,6 +91,118 @@ describe('LoggingAspect', () => {
 
     expect(returned).toBe(result);
     expect(execute).toHaveBeenCalledExactlyOnceWith('ping');
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({ useCase: 'Echo', outcome: 'success' });
+  });
+
+  // #219: a function of the composition root gives extra entries from the
+  // value of a success. The aspect adds the name, and it writes them before
+  // the success entry.
+  it('should_log_each_extra_entry_with_the_name_and_then_success_when_extra_entries_are_given_and_the_call_succeeds', async () => {
+    const result: EchoResult = ok('fit-01,fit-02');
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger, (value: string) =>
+      value.split(',').map((levelId) => ({
+        outcome: 'unavailable-level' as const,
+        gameId: 'hexa-fit',
+        levelId,
+        reason: 'invalid-figure',
+      })),
+    );
+
+    const returned = await aspect.execute('ping');
+
+    expect(returned).toBe(result);
+    expect(logger.log.mock.calls).toEqual([
+      [
+        {
+          useCase: 'Echo',
+          outcome: 'unavailable-level',
+          gameId: 'hexa-fit',
+          levelId: 'fit-01',
+          reason: 'invalid-figure',
+        },
+      ],
+      [
+        {
+          useCase: 'Echo',
+          outcome: 'unavailable-level',
+          gameId: 'hexa-fit',
+          levelId: 'fit-02',
+          reason: 'invalid-figure',
+        },
+      ],
+      [{ useCase: 'Echo', outcome: 'success' }],
+    ]);
+  });
+
+  // The extra entries come from the value of a success only.
+  it('should_ask_no_extra_entry_when_the_inner_use_case_fails', async () => {
+    const result: EchoResult = err({ kind: 'progress-not-found' });
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    const extraEntries = vi.fn<(value: string) => readonly ExtraLogEntry[]>(() => []);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, extraEntries);
+
+    const returned = await aspect.execute('ping');
+
+    expect(returned).toBe(result);
+    expect(extraEntries).not.toHaveBeenCalled();
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'progress-not-found',
+    });
+  });
+
+  // A failed write of one extra entry stops only that write. The caller gets
+  // the result, and the aspect writes the next entries.
+  it('should_return_the_result_and_write_the_next_entries_when_the_logger_throws_on_an_extra_entry', async () => {
+    const result: EchoResult = ok('fit-01,fit-02');
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    logger.log.mockImplementationOnce(() => {
+      throw new Error('the log is full');
+    });
+    const aspect = new LoggingAspect(inner, 'Echo', logger, (value: string) =>
+      value.split(',').map((levelId) => ({
+        outcome: 'unavailable-level' as const,
+        gameId: 'hexa-fit',
+        levelId,
+        reason: 'invalid-figure',
+      })),
+    );
+
+    const returned = await aspect.execute('ping');
+
+    expect(returned).toBe(result);
+    expect(logger.log.mock.calls.slice(1)).toEqual([
+      [
+        {
+          useCase: 'Echo',
+          outcome: 'unavailable-level',
+          gameId: 'hexa-fit',
+          levelId: 'fit-02',
+          reason: 'invalid-figure',
+        },
+      ],
+      [{ useCase: 'Echo', outcome: 'success' }],
+    ]);
+  });
+
+  // A function of extra entries that throws does not change the result, and
+  // the aspect still writes the success entry.
+  it('should_return_the_result_and_log_success_when_the_extra_entries_function_throws', async () => {
+    const result: EchoResult = ok('done');
+    const { inner } = echo(() => Promise.resolve(result));
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger, () => {
+      throw new Error('no entries');
+    });
+
+    const returned = await aspect.execute('ping');
+
+    expect(returned).toBe(result);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({ useCase: 'Echo', outcome: 'success' });
   });
 
@@ -442,9 +558,8 @@ describe('LoggingAspect', () => {
     const logger = recordingLogger();
     const getLevels: GetLevels = new GetLevelsUseCase(
       new InMemoryLevelRepository(levelValidators()),
-      logger,
     );
-    const aspect = new LoggingAspect(getLevels, 'GetLevels', logger);
+    const aspect = new LoggingAspect(getLevels, 'GetLevels', logger, unavailableLevelEntries);
 
     const result = await aspect.execute();
 
