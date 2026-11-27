@@ -1,6 +1,7 @@
 import { receiveValueOf } from '../../../src/adapters/received.js';
+import type { SessionToken } from '../../../src/application/auth/session-token.js';
 import type { PasswordHasher } from '../../../src/application/ports/password-hasher.js';
-import type { SessionToken, TokenIssuer } from '../../../src/application/ports/token-issuer.js';
+import type { TokenIssuer } from '../../../src/application/ports/token-issuer.js';
 import type { UserIdGenerator } from '../../../src/application/ports/user-id-generator.js';
 import type { UserRepository } from '../../../src/application/ports/user-repository.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';

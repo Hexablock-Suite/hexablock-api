@@ -1,10 +1,7 @@
 import { type LevelRow, LevelRowMapper } from '../../src/adapters/persistence/level-row.mapper.js';
 import { receiveLevelResultOf, receiveValueOf } from '../../src/adapters/received.js';
-import type {
-  LevelChange,
-  LevelRepository,
-  ListedLevels,
-} from '../../src/application/ports/level-repository.js';
+import type { ListedLevels } from '../../src/application/levels/listed-levels.js';
+import type { LevelChange, LevelRepository } from '../../src/application/ports/level-repository.js';
 import type { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import type { LevelProblem } from '../../src/domain/level/level-problem.js';
 import type { LevelValidators } from '../../src/domain/level/level-validators.js';

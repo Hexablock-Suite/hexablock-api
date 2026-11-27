@@ -1,9 +1,6 @@
 import { and, asc, eq, sql } from 'drizzle-orm';
-import type {
-  LevelChange,
-  LevelRepository,
-  ListedLevels,
-} from '../../application/ports/level-repository.js';
+import type { ListedLevels } from '../../application/levels/listed-levels.js';
+import type { LevelChange, LevelRepository } from '../../application/ports/level-repository.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';

@@ -1,5 +1,6 @@
 import { ok, type Result } from '../../domain/shared/result.js';
-import type { LevelRepository, ListedLevels } from '../ports/level-repository.js';
+import type { LevelRepository } from '../ports/level-repository.js';
+import type { ListedLevels } from './listed-levels.js';
 import type { Logger } from '../ports/logger.js';
 import type { UseCase } from '../use-case.js';
 

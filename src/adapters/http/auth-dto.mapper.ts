@@ -1,6 +1,6 @@
 import type { LoginRequest, RegisterUserRequest } from '../../application/auth/credentials.js';
 import type { LoginProblem } from '../../application/auth/login.use-case.js';
-import type { SessionToken } from '../../application/ports/token-issuer.js';
+import type { SessionToken } from '../../application/auth/session-token.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import { Password, PASSWORD_LENGTH, type PasswordProblem } from '../../domain/user/password.js';
 import { PasswordAttempt } from '../../domain/user/password-attempt.js';
