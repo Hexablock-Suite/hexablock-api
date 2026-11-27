@@ -12,6 +12,12 @@ const USER_ID = {
   description: 'The player. A full tie lists its players by userId ascending.',
 };
 
+const USERNAME = {
+  example: 'ada',
+  description:
+    'The username of the account of the player, as the player typed it at sign-up (#230).',
+};
+
 // One row of the board of a level: the stored result of one player (DS-4,
 // DS-12).
 export class LevelEntryDto {
@@ -20,6 +26,9 @@ export class LevelEntryDto {
 
   @ApiProperty(USER_ID)
   readonly userId!: string;
+
+  @ApiProperty(USERNAME)
+  readonly username!: string;
 
   @ApiProperty({ example: 3, minimum: 0 })
   readonly stars!: number;
@@ -39,6 +48,9 @@ export class ScoreEntryDto {
   @ApiProperty(USER_ID)
   readonly userId!: string;
 
+  @ApiProperty(USERNAME)
+  readonly username!: string;
+
   @ApiProperty({ example: 2048, minimum: 0 })
   readonly highScore!: number;
 }
@@ -51,6 +63,9 @@ export class StandingEntryDto {
 
   @ApiProperty(USER_ID)
   readonly userId!: string;
+
+  @ApiProperty(USERNAME)
+  readonly username!: string;
 
   @ApiProperty({ example: 9, minimum: 0, description: 'The total of the stars.' })
   readonly stars!: number;

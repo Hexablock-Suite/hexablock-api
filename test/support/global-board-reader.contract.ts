@@ -7,7 +7,7 @@ import { Score } from '../../src/domain/progress/score.js';
 import { Standing } from '../../src/domain/progress/standing.js';
 import { Stars } from '../../src/domain/progress/stars.js';
 import { levelResultOf } from './level-results.js';
-import { byPlayer, type PlayedProgress } from './played-progress.js';
+import { byPlayer, namesOf, type PlayedProgress } from './played-progress.js';
 import { testUserId } from './user-ids.js';
 import { valueOf } from './result.js';
 
@@ -80,6 +80,30 @@ export function describeGlobalBoardReaderContract(
         { userId: ADA, result: standing(5, 2, 32, 100_000) },
         { userId: GRACE, result: standing(1, 1, 30, 90_000) },
       ]);
+    });
+
+    // #230: each entry of both global boards carries the Username of the
+    // account of its player, as the player typed it at sign-up.
+    it('should_give_the_username_of_the_account_of_each_player_when_the_global_boards_are_read', async () => {
+      const reader = await createReader([
+        { userId: ADA, username: 'Ada', gameId: LINES, score: 500 },
+        { userId: GRACE, username: 'grace.h', gameId: LINES, score: 700 },
+        {
+          userId: LINUS,
+          username: 'linus_t',
+          gameId: FIT,
+          results: [level('level-01', 1, 30, 90_000)],
+        },
+      ]);
+
+      const highScores = await reader.highScores(LINES);
+      const standings = await reader.standings(FIT);
+
+      expect(namesOf(highScores)).toEqual([
+        { userId: ADA, username: 'Ada' },
+        { userId: GRACE, username: 'grace.h' },
+      ]);
+      expect(namesOf(standings)).toEqual([{ userId: LINUS, username: 'linus_t' }]);
     });
 
     // A board lists only the players who have something to rank (decision

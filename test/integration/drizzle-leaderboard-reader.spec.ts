@@ -1,7 +1,4 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import ts from 'typescript';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { DrizzleLeaderboardReader } from '../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import {
@@ -11,6 +8,7 @@ import {
 } from '../../src/adapters/persistence/schema.js';
 import { ElapsedTime } from '../../src/domain/progress/elapsed-time.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
+import { LevelId } from '../../src/domain/progress/level-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { LevelsCompleted } from '../../src/domain/progress/levels-completed.js';
 import { Moves } from '../../src/domain/progress/moves.js';
@@ -29,11 +27,8 @@ import { valueOf } from '../support/result.js';
 
 const ADA = testUserId(1);
 const FIT = valueOf(GameId.of('fit'));
+const LINES = valueOf(GameId.of('lines'));
 const AT = syncInstantOf(new Date('2026-11-15T10:00:00.000Z'));
-const READER_SOURCE = resolve(
-  import.meta.dirname,
-  '../../src/adapters/persistence/drizzle-leaderboard-reader.ts',
-);
 
 // One PGlite database serves the whole file. The start of a PGlite database
 // takes more than one second on a slow runner, so one database for each test
@@ -70,7 +65,8 @@ function standing(stars: number, levels: number, moves: number, elapsedMs: numbe
 }
 
 // Empties the shared PGlite database, adds one account for each player of
-// the progresses and stores each progress through DrizzleProgressRepository,
+// the progresses, named by the first username that a progress gives (#230),
+// and stores each progress through DrizzleProgressRepository,
 // the one writer of both tables (R-database-harness).
 async function openDatabase(progresses: readonly PlayedProgress[]): Promise<TestDatabase> {
   const database = shared;
@@ -80,12 +76,12 @@ async function openDatabase(progresses: readonly PlayedProgress[]): Promise<Test
   const players = [...new Set(progresses.map(({ userId }) => userId))];
   if (players.length > 0) {
     await database.db.insert(users).values(
-      players.map((id, index) => ({
-        id,
-        username: `player${index}`,
-        usernameKey: `player${index}`,
-        passwordHash: 'scrypt$hash',
-      })),
+      players.map((id, index) => {
+        const username =
+          progresses.find((played) => played.userId === id && played.username !== undefined)
+            ?.username ?? `player${index}`;
+        return { id, username, usernameKey: username.toLowerCase(), passwordHash: 'scrypt$hash' };
+      }),
     );
   }
   const repository = new DrizzleProgressRepository(database.db);
@@ -103,25 +99,10 @@ async function readerOver(
   return new DrizzleLeaderboardReader((await openDatabase(progresses)).db);
 }
 
-// Every identifier and every text literal of a TypeScript file, comments excluded.
-function namesIn(file: string): string[] {
-  const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest);
-  const names: string[] = [];
-  const visit = (node: ts.Node): void => {
-    if (ts.isIdentifier(node)) {
-      names.push(node.text);
-    } else if (ts.isStringLiteralLike(node) || ts.isTemplateLiteralToken(node)) {
-      names.push(node.text);
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(source);
-  return names;
-}
-
 // API-FR-03: the leaderboards of one gameId, read from the progress and
-// level_results tables of DS-5. One reader implements both board reader
-// ports, so it runs both contracts (#218).
+// level_results tables of DS-5, with the username of each account from the
+// users table (#230). One reader implements both board reader ports, so it
+// runs both contracts (#218).
 describeGlobalBoardReaderContract('DrizzleLeaderboardReader', readerOver);
 describeLevelBoardReaderContract('DrizzleLeaderboardReader', readerOver);
 
@@ -165,13 +146,21 @@ describe('DrizzleLeaderboardReader', () => {
     expect(byPlayer(board)).toEqual([{ userId: ADA, result: standing(2, 2, 2, 4_294_967_294) }]);
   });
 
-  // The users table belongs to the user module. The reader reads only the
-  // tables of the progress module, so it names no table or column of users.
-  it('should_name_no_table_or_column_of_users_when_the_reader_source_is_read', () => {
-    const names = namesIn(READER_SOURCE);
+  // The users table holds no check of the name rule, so a writer that skips
+  // the repository can store a name that breaks it. Username.create()
+  // rejects it, and the reader treats it as a server fault.
+  it('should_reject_each_board_when_a_stored_username_breaks_its_rule', async () => {
+    const database = await openDatabase([
+      { userId: ADA, gameId: FIT, results: [level('level-01', 3, 12, 40_000)] },
+      { userId: ADA, gameId: LINES, score: 500 },
+    ]);
+    await database.db.update(users).set({ username: 'a b' }).where(eq(users.id, ADA));
+    const reader = new DrizzleLeaderboardReader(database.db);
+    const broken = new Error(`The users rows of user ${ADA} break the rule invalid-username.`);
 
-    expect(names).toEqual(expect.arrayContaining(['progress', 'levelResults']));
-    expect(names.filter((name) => /users|username|password/i.test(name))).toEqual([]);
+    await expect(reader.levelResults(FIT, valueOf(LevelId.of('level-01')))).rejects.toThrow(broken);
+    await expect(reader.standings(FIT)).rejects.toThrow(broken);
+    await expect(reader.highScores(LINES)).rejects.toThrow(broken);
   });
 
   // #171: the keyed filters of the reader run on one index of level_results.
