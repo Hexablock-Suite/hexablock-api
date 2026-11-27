@@ -128,6 +128,9 @@ export class SortSectionDto {
 // One level: the common part of DS-6 and the section of its game.
 @ApiExtraModels(FitSectionDto, SortSectionDto)
 export class LevelDto {
+  // GameId.of() checks the same characters in the domain.
+  // test/unit/adapters/id-patterns-dto.spec.ts checks that both accept the
+  // same names (#214).
   @ApiProperty({
     example: 'hexa-fit',
     pattern: '^[a-z][a-z0-9-]*$',
@@ -163,6 +166,9 @@ export class LevelDto {
   })
   readonly version!: number;
 
+  // TopologyId.of() checks the same characters in the domain, not GameId.of().
+  // test/unit/adapters/id-patterns-dto.spec.ts checks that both accept the
+  // same names (#214).
   @ApiProperty({
     example: 'hex',
     pattern: '^[a-z][a-z0-9-]*$',

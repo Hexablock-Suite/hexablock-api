@@ -40,6 +40,9 @@ export class LevelResultDto {
 // The body of POST /progress (API-FR-02). The user comes from the bearer
 // token, so the body has no userId.
 export class SyncProgressDto {
+  // GameId.of() checks the same characters in the domain.
+  // test/unit/adapters/id-patterns-dto.spec.ts checks that both accept the
+  // same names (#214).
   @ApiProperty({
     example: 'hexa-lines',
     pattern: '^[a-z][a-z0-9-]*$',
