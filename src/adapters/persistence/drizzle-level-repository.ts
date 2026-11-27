@@ -1,10 +1,9 @@
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import type { ListedLevels } from '../../application/levels/listed-levels.js';
 import type { LevelChange, LevelRepository } from '../../application/ports/level-repository.js';
-import type { LevelDefinition } from '../../domain/level/level-definition.js';
+import type { LevelDefinition, StoredLevel } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';
-import type { StoredLevel } from '../../domain/level/stored-level.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';

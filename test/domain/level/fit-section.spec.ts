@@ -3,8 +3,8 @@ import { FitSection } from '../../../src/domain/level/fit/fit-section.js';
 import { FitStarThreshold } from '../../../src/domain/level/fit/fit-star-threshold.js';
 import { PieceId } from '../../../src/domain/level/fit/piece-id.js';
 import { Placement } from '../../../src/domain/level/fit/placement.js';
-import { Rotation } from '../../../src/domain/level/fit/rotation.js';
 import { HexTopology } from '../../../src/domain/level/hex-topology.js';
+import { Rotation } from '../../../src/domain/level/rotation.js';
 import { deliveredBy } from '../../support/recording-receiver.js';
 import { levelExample, valueOf } from '../../support/level-format.js';
 

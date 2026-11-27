@@ -64,6 +64,7 @@
             "LevelOrder",
             "LevelVersion",
             "Coordinate",
+            "Rotation",
             "LevelSection",
             "LevelValidatorEntry",
             "Topologies",
@@ -94,7 +95,6 @@
             "Placement",
             "FitStarThreshold",
             "PieceId",
-            "Rotation",
             "FitPiece"
           ]
         },
@@ -330,6 +330,7 @@
             "LevelValidator",
             "TopologyId",
             "Coordinate",
+            "Rotation",
             "StoredLevelProblem"
           ]
         },
@@ -378,7 +379,6 @@
             "FitSection",
             "Placement",
             "FitPiece",
-            "Rotation",
             "PieceId",
             "FitStarThreshold"
           ]

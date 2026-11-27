@@ -15,6 +15,22 @@ module.exports = {
       to: { pathNot: '^src/domain/' },
     },
     {
+      name: 'domain-imports-no-cycle',
+      comment:
+        'No file of src/domain reaches itself through its imports. Type-only imports count, because tsPreCompilationDeps is on. StoredLevel lives in level-definition.ts for this reason (#221).',
+      severity: 'error',
+      from: { path: '^src/domain/' },
+      to: { circular: true },
+    },
+    {
+      name: 'domain-folder-imports-no-subfolder',
+      comment:
+        'A file directly in a folder of src/domain, such as src/domain/level/, never imports a subfolder of that folder, such as level/fit/. A variant subfolder imports its shared part, so the reverse import closes a cycle between the two folders, and domain-imports-no-cycle cannot see it. Rotation lives in src/domain/level/, next to Coordinate, for this reason (#221).',
+      severity: 'error',
+      from: { path: '^src/domain/([^/]+)/[^/]+$' },
+      to: { path: '^src/domain/$1/[^/]+/' },
+    },
+    {
       name: 'application-imports-only-domain',
       comment:
         'The application imports only src/domain and itself: no adapter, no infrastructure and no package such as @nestjs/*. Aspects are custom decorators, not Nest interceptors.',
