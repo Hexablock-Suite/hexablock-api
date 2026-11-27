@@ -13,6 +13,7 @@ import { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import type { Standing } from '../../../src/domain/progress/standing.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { Username } from '../../../src/domain/user/username.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { levelJson, levelValidators } from '../../support/level-format.js';
 import { storeLevel } from '../../support/level-repository.contract.js';
@@ -28,12 +29,16 @@ function player(n: number): UserId {
   return valueOf(UserId.from(testUserId(n)));
 }
 
+function username(n: number): Username {
+  return valueOf(Username.create(`player${n}`));
+}
+
 function levelResult(stars: number, moves: number, elapsedMs: number): LevelResult {
   return levelResultOf({ levelId: 'fit-01', stars, moves, elapsedMs });
 }
 
 function entry<TResult>(n: number, result: TResult): LeaderboardEntry<TResult> {
-  return { userId: player(n), result };
+  return { userId: player(n), username: username(n), result };
 }
 
 interface Rows {
@@ -98,8 +103,8 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
       gameId: FIT,
       levelId: LEVEL,
       entries: RankedBoard.of([
-        { userId: player(2), result: levelResult(3, 10, 40_000) },
-        { userId: player(4), result: levelResult(2, 10, 40_000) },
+        { userId: player(2), username: username(2), result: levelResult(3, 10, 40_000) },
+        { userId: player(4), username: username(4), result: levelResult(2, 10, 40_000) },
       ]),
     });
     expect(reader.levelResults).toHaveBeenCalledExactlyOnceWith(FIT, LEVEL);
@@ -120,8 +125,8 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
       board: 'global',
       gameId: LINES,
       highScores: RankedBoard.of([
-        { userId: player(2), result: valueOf(Score.of(2048)) },
-        { userId: player(1), result: valueOf(Score.of(80)) },
+        { userId: player(2), username: username(2), result: valueOf(Score.of(2048)) },
+        { userId: player(1), username: username(1), result: valueOf(Score.of(80)) },
       ]),
       standings: RankedBoard.of([]),
     });
@@ -184,7 +189,9 @@ describe('GetLeaderboardUseCase (API-FR-03)', () => {
       value: {
         board: 'global',
         gameId: LINES,
-        highScores: RankedBoard.of([{ userId: player(1), result: valueOf(Score.of(120)) }]),
+        highScores: RankedBoard.of([
+          { userId: player(1), username: username(1), result: valueOf(Score.of(120)) },
+        ]),
         standings: RankedBoard.of([]),
       },
     });

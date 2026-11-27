@@ -1,7 +1,4 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import ts from 'typescript';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { DrizzleLeaderboardReader } from '../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import {
@@ -39,10 +36,6 @@ const SORT = valueOf(GameId.of('sort'));
 const LINES = valueOf(GameId.of('lines'));
 const MERGE = valueOf(GameId.of('merge'));
 const AT = syncInstantOf(new Date('2026-11-15T10:00:00.000Z'));
-const READER_SOURCE = resolve(
-  import.meta.dirname,
-  '../../src/adapters/persistence/drizzle-leaderboard-reader.ts',
-);
 
 // One PGlite database serves the whole file. The start of a PGlite database
 // takes more than one second on a slow runner, so one database for each test
@@ -123,24 +116,21 @@ function byPlayer<T>(entries: readonly LeaderboardEntry<T>[]): { userId: string;
     .sort((left, right) => left.userId.localeCompare(right.userId));
 }
 
-// Every identifier and every text literal of a TypeScript file, comments excluded.
-function namesIn(file: string): string[] {
-  const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest);
-  const names: string[] = [];
-  const visit = (node: ts.Node): void => {
-    if (ts.isIdentifier(node)) {
-      names.push(node.text);
-    } else if (ts.isStringLiteralLike(node) || ts.isTemplateLiteralToken(node)) {
-      names.push(node.text);
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(source);
-  return names;
+// The userId and the username of each entry, as text, sorted by player.
+function namesOf<T>(
+  entries: readonly LeaderboardEntry<T>[],
+): { userId: string; username: string }[] {
+  return entries
+    .map(({ userId, username }) => ({
+      userId: receiveValueOf(userId),
+      username: receiveValueOf(username),
+    }))
+    .sort((left, right) => left.userId.localeCompare(right.userId));
 }
 
 // API-FR-03: the leaderboards of one gameId, read from the progress and
-// level_results tables of DS-5.
+// level_results tables of DS-5, with the username of each account from the
+// users table (#230).
 describe('DrizzleLeaderboardReader', () => {
   it('should_give_the_stored_result_of_each_player_when_the_board_of_one_level_is_read', async () => {
     const database = await openDatabase([
@@ -243,13 +233,45 @@ describe('DrizzleLeaderboardReader', () => {
     expect(byPlayer(board)).toEqual([{ userId: ADA, result: standing(2, 2, 2, 4_294_967_294) }]);
   });
 
-  // The users table belongs to the user module. The reader reads only the
-  // tables of the progress module, so it names no table or column of users.
-  it('should_name_no_table_or_column_of_users_when_the_reader_source_is_read', () => {
-    const names = namesIn(READER_SOURCE);
+  // #230: each entry carries the Username of its account. The reader joins
+  // the users table on the userId of each row, so every board names each
+  // player by the name of the account.
+  it('should_give_the_username_of_each_account_when_each_board_is_read', async () => {
+    const database = await openDatabase([
+      { userId: ADA, gameId: FIT, results: [level('level-01', 3, 12, 40_000)] },
+      { userId: GRACE, gameId: FIT, results: [level('level-01', 1, 30, 90_000)] },
+      { userId: LINUS, gameId: LINES, score: 700 },
+    ]);
+    const reader = new DrizzleLeaderboardReader(database.db);
 
-    expect(names).toEqual(expect.arrayContaining(['progress', 'levelResults']));
-    expect(names.filter((name) => /users|username|password/i.test(name))).toEqual([]);
+    const levelBoard = await reader.levelResults(FIT, valueOf(LevelId.of('level-01')));
+    const standings = await reader.standings(FIT);
+    const highScores = await reader.highScores(LINES);
+
+    const fitPlayers = [
+      { userId: ADA, username: 'player0' },
+      { userId: GRACE, username: 'player1' },
+    ];
+    expect(namesOf(levelBoard)).toEqual(fitPlayers);
+    expect(namesOf(standings)).toEqual(fitPlayers);
+    expect(namesOf(highScores)).toEqual([{ userId: LINUS, username: 'player2' }]);
+  });
+
+  // The users table holds no check of the name rule, so a writer that skips
+  // the repository can store a name that breaks it. Username.create()
+  // rejects it, and the reader treats it as a server fault.
+  it('should_reject_each_board_when_a_stored_username_breaks_its_rule', async () => {
+    const database = await openDatabase([
+      { userId: ADA, gameId: FIT, results: [level('level-01', 3, 12, 40_000)] },
+      { userId: ADA, gameId: LINES, score: 500 },
+    ]);
+    await database.db.update(users).set({ username: 'a b' }).where(eq(users.id, ADA));
+    const reader = new DrizzleLeaderboardReader(database.db);
+    const broken = new Error(`The users rows of user ${ADA} break the rule invalid-username.`);
+
+    await expect(reader.levelResults(FIT, valueOf(LevelId.of('level-01')))).rejects.toThrow(broken);
+    await expect(reader.standings(FIT)).rejects.toThrow(broken);
+    await expect(reader.highScores(LINES)).rejects.toThrow(broken);
   });
 
   // #171: the keyed filters of the reader run on one index of level_results.

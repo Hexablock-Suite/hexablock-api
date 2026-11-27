@@ -40,7 +40,8 @@ export const LeaderboardDtoMapper = {
 
   // The mapper receives the values that the board and each value object
   // deliver. The board delivers its rows in the order that the domain gave,
-  // and each rank delivers its number.
+  // each rank delivers its number, and each Username delivers the name as
+  // the player typed it (#230).
   toDto(board: Leaderboard): LeaderboardDto {
     const gameId = receiveValueOf(board.gameId);
     if (board.board === 'level') {
@@ -59,11 +60,12 @@ export const LeaderboardDtoMapper = {
 function levelRows(board: RankedBoard<LevelResult>): LevelEntryDto[] {
   const rows: LevelEntryDto[] = [];
   board.deliverTo({
-    receive(rank, userId, result) {
+    receive(rank, userId, username, result) {
       const { stars, moves, elapsedMs } = receiveLevelResultOf(result);
       rows.push({
         rank: receiveValueOf(rank),
         userId: receiveValueOf(userId),
+        username: receiveValueOf(username),
         stars,
         moves,
         elapsedMs,
@@ -76,10 +78,11 @@ function levelRows(board: RankedBoard<LevelResult>): LevelEntryDto[] {
 function scoreRows(board: RankedBoard<Score>): ScoreEntryDto[] {
   const rows: ScoreEntryDto[] = [];
   board.deliverTo({
-    receive(rank, userId, result) {
+    receive(rank, userId, username, result) {
       rows.push({
         rank: receiveValueOf(rank),
         userId: receiveValueOf(userId),
+        username: receiveValueOf(username),
         highScore: receiveValueOf(result),
       });
     },
@@ -91,13 +94,14 @@ function scoreRows(board: RankedBoard<Score>): ScoreEntryDto[] {
 function standingRows(board: RankedBoard<Standing>): StandingEntryDto[] {
   const rows: StandingEntryDto[] = [];
   board.deliverTo({
-    receive(rank, userId, result) {
+    receive(rank, userId, username, result) {
       const before = rows.length;
       result.deliverTo({
         receive(stars, levelsCompleted, moves, elapsedTime) {
           rows.push({
             rank: receiveValueOf(rank),
             userId: receiveValueOf(userId),
+            username: receiveValueOf(username),
             stars: receiveValueOf(stars),
             levelsCompleted: receiveValueOf(levelsCompleted),
             moves: receiveValueOf(moves),
