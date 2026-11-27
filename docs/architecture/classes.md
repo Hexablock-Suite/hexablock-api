@@ -51,7 +51,7 @@ A hand edit of that order survives. Move the boxes in draw.io, run `pin.mjs` of 
 
 ### View 1.2: the level schema
 
-![Level schema: the LevelDefinition aggregate root with private fields and a typed section, FitSection and SortSection as value objects, the three inside a dashed Aggregate frame, and the LevelValidators domain service, which holds one LevelValidator strategy per gameId and creates each level; LevelDefinition.decideReplace(stored) decides the version rule of S3-10 over the stored state (#174); SortLevelValidator only picks SortSection, and FitLevelValidator holds Topologies, finds the Topology of the level and picks FitSection, which checks A5 on it](classes/views/domain-2-levels.png)
+![Level schema: the LevelDefinition aggregate root with private fields and a typed section, FitSection and SortSection as value objects, the three inside a dashed Aggregate frame, and the LevelValidators domain service, which holds one LevelValidator strategy per gameId and creates each level; LevelDefinition.decideReplace(stored) decides the version rule of S3-10 over the stored state (#174); SortLevelValidator only picks SortSection, and FitLevelValidator holds Topologies, finds the Topology of the level and picks FitSection, which checks A5 on it; a dashed TOPOLOGY frame groups the Topology interface with its three rules holds(), turn() and move(), its implementations HexTopology, SquareTopology and TriangleTopology, and the Topologies domain service, which holds one Topology per topologyId; FitSection asks the Topology of the level, and a triangle move keeps the orientation of the cell (#229)](classes/views/domain-2-levels.png)
 
 ### View 1.3: the user and its credential values
 
