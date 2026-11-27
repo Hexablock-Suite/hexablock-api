@@ -3,6 +3,7 @@ import { GameId } from '../../../src/domain/progress/game-id.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { ProgressKey } from '../../../src/domain/progress/progress-key.js';
 import { Score } from '../../../src/domain/progress/score.js';
+import { Stars } from '../../../src/domain/progress/stars.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { syncInstantOf } from '../../support/sync-instants.js';
@@ -157,5 +158,42 @@ describe('ProgressDtoMapper.toDto', () => {
       updatedAt: '2026-11-06T10:00:00.000Z',
       results: [LEVEL],
     });
+  });
+});
+
+// The mapper writes the text of each failed Result of the progress use
+// cases. The controller only picks the status. The words stay the words of
+// the answers before #215.
+describe('ProgressDtoMapper.toProblemDetails', () => {
+  it('should_name_the_game_id_when_the_user_has_no_progress_for_it', () => {
+    expect(ProgressDtoMapper.toProblemDetails({ kind: 'progress-not-found' }, 'hexa-sort')).toEqual(
+      ['No progress for gameId hexa-sort'],
+    );
+  });
+
+  it('should_give_the_text_of_a_bad_token_when_the_user_went_after_the_guard', () => {
+    expect(ProgressDtoMapper.toProblemDetails({ kind: 'unknown-user' }, 'hexa-fit')).toEqual([
+      'Invalid or expired token',
+    ]);
+  });
+
+  it('should_name_the_level_and_the_game_id_when_the_api_holds_no_level_of_a_result', () => {
+    const problem = { kind: 'unknown-level', result: levelResultOf(LEVEL) } as const;
+
+    expect(ProgressDtoMapper.toProblemDetails(problem, 'hexa-fit')).toEqual([
+      'No level fit-01 for gameId hexa-fit.',
+    ]);
+  });
+
+  it('should_name_the_most_and_the_sent_stars_when_a_result_carries_too_many_stars', () => {
+    const problem = {
+      kind: 'too-many-stars',
+      result: levelResultOf({ ...LEVEL, stars: 4 }),
+      most: valueOf(Stars.of(3)),
+    } as const;
+
+    expect(ProgressDtoMapper.toProblemDetails(problem, 'hexa-fit')).toEqual([
+      'stars of level fit-01 must be at most 3, the count of its star thresholds, got 4.',
+    ]);
   });
 });

@@ -78,7 +78,9 @@ export const LevelDtoMapper = {
   },
 
   // The details of the ErrorDto of a failed update: one line per problem.
-  // The code of the rule is the text that docs/level-format.md names.
+  // The code of the rule is the message. Each line names the level and
+  // gives the code as docs/level-format.md names it. The mapper translates
+  // no code (decision 11, #223).
   toDetails(problems: readonly LevelProblemReport[]): string[] {
     return problems.map(
       ({ gameId, levelId, problem }) =>

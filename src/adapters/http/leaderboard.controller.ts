@@ -25,17 +25,11 @@ import {
   type LevelBoardQuery,
   type UnknownLevel,
 } from '../../application/leaderboard/get-level-leaderboard.use-case.js';
-import { receiveValueOf } from '../received.js';
 import { ErrorDto } from './error.dto.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { LeaderboardDtoMapper } from './leaderboard-dto.mapper.js';
 import { GlobalLeaderboardDto, LevelLeaderboardDto } from './leaderboard.dto.js';
-
-const UNAUTHORIZED = {
-  type: ErrorDto,
-  description:
-    'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
-};
+import { UNAUTHORIZED } from './unauthorized.response.js';
 
 // The leaderboards of one gameId (API-FR-03): both global boards, and the
 // board of one level. Each route calls its own input port (#218). Both
@@ -103,13 +97,12 @@ export class LeaderboardController {
 
 // A path value that breaks its rule stops in LeaderboardDtoMapper, before
 // the use case. So the one expected failure of the use case is a level that
-// the definitions do not hold (#146).
+// the definitions do not hold (#146). LeaderboardDtoMapper writes its text,
+// and this function picks the status (#215). A 404 carries its one line as
+// the message.
 function httpErrorOf(problem: UnknownLevel, query: LevelBoardQuery): Error {
   switch (problem.kind) {
-    case 'unknown-level': {
-      const gameId = receiveValueOf(query.gameId);
-      const levelId = receiveValueOf(query.levelId);
-      return new NotFoundException(`No level ${levelId} for gameId ${gameId}`);
-    }
+    case 'unknown-level':
+      return new NotFoundException(LeaderboardDtoMapper.toProblemDetails(problem, query).join(' '));
   }
 }

@@ -28,6 +28,7 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { LevelEditorGuard } from './level-editor.guard.js';
 import { LevelDtoMapper } from './level-dto.mapper.js';
 import { LevelsDto } from './level.dto.js';
+import { UNAUTHORIZED } from './unauthorized.response.js';
 
 // The level definitions of Fit and Sort (API-FR-04). The read has no guard,
 // and one call gives every level. A stored level that breaks a rule hides no
@@ -75,11 +76,7 @@ export class LevelsController {
     description:
       'The body has the wrong shape, or a level breaks a rule: a value of the common part, its section, A5, a lower version than the stored one, or a gameId with no level files. Over a stored level that breaks a rule, a lower version than its stored version is rejected too, when that stored version is valid. Each detail names one level by its gameId and levelId. A level problem saves no level of the batch, except a lower version, which saves the other levels.',
   })
-  @ApiUnauthorizedResponse({
-    type: ErrorDto,
-    description:
-      'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
-  })
+  @ApiUnauthorizedResponse(UNAUTHORIZED)
   @ApiForbiddenResponse({
     type: ErrorDto,
     description:

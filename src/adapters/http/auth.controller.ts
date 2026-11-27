@@ -34,6 +34,7 @@ import { ErrorDto } from './error.dto.js';
 import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
 import { LoginDto } from './login.dto.js';
 import { TokenDto } from './token.dto.js';
+import { UNAUTHORIZED } from './unauthorized.response.js';
 
 // Sign-up, sign-in and the signed-in user (API-FR-01). Sign-up and sign-in
 // have no token guard, because the player has no token yet. GET /auth/me
@@ -91,11 +92,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: CurrentUserDto, description: 'The token is valid.' })
-  @ApiUnauthorizedResponse({
-    type: ErrorDto,
-    description:
-      'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
-  })
+  @ApiUnauthorizedResponse(UNAUTHORIZED)
   me(@Req() request: AuthenticatedRequest): CurrentUserDto {
     return AuthDtoMapper.toCurrentUserDto(request.userId);
   }
