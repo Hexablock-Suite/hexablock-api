@@ -25,7 +25,7 @@ const FULL_TURN = fixed(Rotation.of(6));
 
 // The hex topology of docs/level-format.md. A cell is [q, r] in axial
 // coordinates. One rotation step turns [q, r] to [-r, q + r], so six steps
-// of 60° make a full turn (A5).
+// of 60° make a full turn (A5). A move adds the offset one value at a time.
 export class HexTopology implements Topology {
   holds(cell: Coordinate): boolean {
     return cell.hasSameLengthAs(ORIGIN);
@@ -33,5 +33,9 @@ export class HexTopology implements Topology {
 
   turn(cell: Coordinate, rotation: Rotation): Coordinate {
     return rotation.turn(cell, (turned) => turned.turnedBy(ONE_STEP), FULL_TURN);
+  }
+
+  move(cell: Coordinate, at: Coordinate): Coordinate {
+    return cell.movedBy(at);
   }
 }

@@ -9,8 +9,10 @@ import type { LevelSection } from '../../src/domain/level/level-section.js';
 import { LevelValidators } from '../../src/domain/level/level-validators.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';
 import { SortLevelValidator } from '../../src/domain/level/sort/sort-level-validator.js';
+import { SquareTopology } from '../../src/domain/level/square-topology.js';
 import { Topologies } from '../../src/domain/level/topologies.js';
 import { TopologyId } from '../../src/domain/level/topology-id.js';
+import { TriangleTopology } from '../../src/domain/level/triangle-topology.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import { Stars } from '../../src/domain/progress/stars.js';
@@ -89,12 +91,16 @@ export function levelFrom<TSection extends LevelSection>(
   );
 }
 
-// The strategies as the composition root registers them: Fit on the hex
-// topology, and Sort.
+// The strategies as the composition root registers them: Fit on the hex,
+// square and triangle topologies, and Sort.
 export function levelValidators(): LevelValidators {
-  const hex = Topologies.of([[valueOf(TopologyId.of('hex')), new HexTopology()]]);
+  const topologies = Topologies.of([
+    [valueOf(TopologyId.of('hex')), new HexTopology()],
+    [valueOf(TopologyId.of('square')), new SquareTopology()],
+    [valueOf(TopologyId.of('triangle')), new TriangleTopology()],
+  ]);
   return LevelValidators.of([
-    [valueOf(GameId.of('hexa-fit')), new FitLevelValidator(hex)],
+    [valueOf(GameId.of('hexa-fit')), new FitLevelValidator(topologies)],
     [valueOf(GameId.of('hexa-sort')), new SortLevelValidator()],
   ]);
 }
