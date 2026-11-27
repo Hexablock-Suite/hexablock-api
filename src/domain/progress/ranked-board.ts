@@ -1,19 +1,26 @@
 import { Rank } from './rank.js';
 import type { UserId } from '../user/user-id.js';
+import type { Username } from '../user/username.js';
 
 // The receiver of the rows of a RankedBoard. RankedBoard.deliverTo() calls it
 // once per row, in board order. Only the border implements it, for example a
 // DTO mapper.
 export interface RankedBoardReceiver<T> {
-  receive(rank: Rank, userId: UserId, result: T): void;
+  receive(rank: Rank, userId: UserId, username: Username, result: T): void;
 }
 
-// One entry of a board: the player and the value that ranks the player.
-// RankedBoard.of() takes these entries, and the LeaderboardEntry type of
-// layer 2 is an alias of this type, so the shape has one declaration (#213).
-// It is a type alias, as Result is: it only carries the two values that the
-// factory reads, and no rule of its own.
-export type BoardEntry<T> = { readonly userId: UserId; readonly result: T };
+// One entry of a board: the player, the name of the account of the player
+// and the value that ranks the player. The name is the Username that the
+// player typed at sign-up, so a client can show it (#230). RankedBoard.of()
+// takes these entries, and the LeaderboardEntry type of layer 2 is an alias
+// of this type, so the shape has one declaration (#213). It is a type alias,
+// as Result is: it only carries the values of a row, and no rule of its own.
+// The order reads only the userId and the result.
+export type BoardEntry<T> = {
+  readonly userId: UserId;
+  readonly username: Username;
+  readonly result: T;
+};
 
 // One row of the board, as the factory of the board keeps it: an entry and
 // its rank.
@@ -46,13 +53,13 @@ export class RankedBoard<T extends { isBetterThan(other: T): boolean }> {
       return other.userId.comesBefore(one.userId) ? 1 : 0;
     });
     const rows: Row<T>[] = [];
-    for (const [index, { userId, result }] of ordered.entries()) {
+    for (const [index, { userId, username, result }] of ordered.entries()) {
       const previous = rows.at(-1);
       const rank =
         previous !== undefined && !previous.result.isBetterThan(result)
           ? previous.rank
           : rankAt(index + 1);
-      rows.push({ rank, userId, result });
+      rows.push({ rank, userId, username, result });
     }
     return new RankedBoard(rows);
   }
@@ -60,8 +67,8 @@ export class RankedBoard<T extends { isBetterThan(other: T): boolean }> {
   // Delivers the rows to a receiver of the border, in board order, one call
   // per row. No operation returns them.
   deliverTo(receiver: RankedBoardReceiver<T>): void {
-    for (const { rank, userId, result } of this.rows) {
-      receiver.receive(rank, userId, result);
+    for (const { rank, userId, username, result } of this.rows) {
+      receiver.receive(rank, userId, username, result);
     }
   }
 }

@@ -140,6 +140,7 @@ describe('progress value bounds (#135, API-FR-02, API-FR-06)', () => {
       {
         rank: 1,
         userId,
+        username: 'ada',
         stars: 2 * COLUMN_MAX,
         levelsCompleted: 2,
         moves: 2 * COLUMN_MAX,

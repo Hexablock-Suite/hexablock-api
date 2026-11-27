@@ -366,11 +366,17 @@
             "description": "The player. A full tie lists its players by userId ascending.",
             "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
             "type": "string"
+          },
+          "username": {
+            "description": "The username of the account of the player, as the player typed it at sign-up (#230).",
+            "example": "ada",
+            "type": "string"
           }
         },
         "required": [
           "rank",
           "userId",
+          "username",
           "stars",
           "moves",
           "elapsedMs"
@@ -529,11 +535,17 @@
             "description": "The player. A full tie lists its players by userId ascending.",
             "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
             "type": "string"
+          },
+          "username": {
+            "description": "The username of the account of the player, as the player typed it at sign-up (#230).",
+            "example": "ada",
+            "type": "string"
           }
         },
         "required": [
           "rank",
           "userId",
+          "username",
           "highScore"
         ],
         "type": "object"
@@ -652,11 +664,17 @@
             "description": "The player. A full tie lists its players by userId ascending.",
             "example": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
             "type": "string"
+          },
+          "username": {
+            "description": "The username of the account of the player, as the player typed it at sign-up (#230).",
+            "example": "ada",
+            "type": "string"
           }
         },
         "required": [
           "rank",
           "userId",
+          "username",
           "stars",
           "levelsCompleted",
           "moves",

@@ -12,6 +12,7 @@ import { Score } from '../../../src/domain/progress/score.js';
 import { Standing } from '../../../src/domain/progress/standing.js';
 import { Stars } from '../../../src/domain/progress/stars.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { Username } from '../../../src/domain/user/username.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
@@ -22,8 +23,13 @@ function player(n: number): UserId {
   return valueOf(UserId.from(testUserId(n)));
 }
 
+// The username of player n. The tests give each player one name (#230).
+function username(n: number): Username {
+  return valueOf(Username.create(`player${n}`));
+}
+
 function entry<TResult>(n: number, result: TResult): LeaderboardEntry<TResult> {
-  return { userId: player(n), result };
+  return { userId: player(n), username: username(n), result };
 }
 
 function standing(stars: number, levels: number): Standing {
@@ -76,12 +82,12 @@ describe('GetGlobalLeaderboardUseCase (API-FR-03)', () => {
       value: {
         gameId: LINES,
         highScores: RankedBoard.of([
-          { userId: player(2), result: valueOf(Score.of(2048)) },
-          { userId: player(1), result: valueOf(Score.of(80)) },
+          { userId: player(2), username: username(2), result: valueOf(Score.of(2048)) },
+          { userId: player(1), username: username(1), result: valueOf(Score.of(80)) },
         ]),
         standings: RankedBoard.of([
-          { userId: player(4), result: standing(5, 2) },
-          { userId: player(3), result: standing(2, 1) },
+          { userId: player(4), username: username(4), result: standing(5, 2) },
+          { userId: player(3), username: username(3), result: standing(2, 1) },
         ]),
       },
     });
@@ -116,7 +122,9 @@ describe('GetGlobalLeaderboardUseCase (API-FR-03)', () => {
       ok: true,
       value: {
         gameId: LINES,
-        highScores: RankedBoard.of([{ userId: player(1), result: valueOf(Score.of(120)) }]),
+        highScores: RankedBoard.of([
+          { userId: player(1), username: username(1), result: valueOf(Score.of(120)) },
+        ]),
         standings: RankedBoard.of([]),
       },
     });

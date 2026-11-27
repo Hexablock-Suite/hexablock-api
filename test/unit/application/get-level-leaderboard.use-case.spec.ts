@@ -11,6 +11,7 @@ import { LevelId } from '../../../src/domain/progress/level-id.js';
 import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
+import { Username } from '../../../src/domain/user/username.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { levelJson, levelValidators } from '../../support/level-format.js';
 import { storeLevel } from '../../support/level-repository.contract.js';
@@ -30,8 +31,13 @@ function levelResult(stars: number, moves: number, elapsedMs: number): LevelResu
   return levelResultOf({ levelId: 'fit-01', stars, moves, elapsedMs });
 }
 
+// The username of player n. The tests give each player one name (#230).
+function username(n: number): Username {
+  return valueOf(Username.create(`player${n}`));
+}
+
 function entry(n: number, result: LevelResult): LeaderboardEntry<LevelResult> {
-  return { userId: player(n), result };
+  return { userId: player(n), username: username(n), result };
 }
 
 // Test double for the LevelBoardReader port. It gives the rows in the order
@@ -79,8 +85,8 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
         gameId: FIT,
         levelId: LEVEL,
         entries: RankedBoard.of([
-          { userId: player(2), result: levelResult(3, 10, 40_000) },
-          { userId: player(4), result: levelResult(2, 10, 40_000) },
+          { userId: player(2), username: username(2), result: levelResult(3, 10, 40_000) },
+          { userId: player(4), username: username(4), result: levelResult(2, 10, 40_000) },
         ]),
       },
     });
@@ -151,7 +157,9 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
       value: {
         gameId: FIT,
         levelId: LEVEL,
-        entries: RankedBoard.of([{ userId: player(1), result: levelResult(3, 10, 40_000) }]),
+        entries: RankedBoard.of([
+          { userId: player(1), username: username(1), result: levelResult(3, 10, 40_000) },
+        ]),
       },
     });
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({

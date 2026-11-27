@@ -2,7 +2,7 @@ import type { LevelBoardReader } from '../../src/application/ports/level-board-r
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import { levelResultOf } from './level-results.js';
-import { byPlayer, type PlayedProgress } from './played-progress.js';
+import { byPlayer, namesOf, type PlayedProgress } from './played-progress.js';
 import { testUserId } from './user-ids.js';
 import { valueOf } from './result.js';
 
@@ -43,6 +43,27 @@ export function describeLevelBoardReaderContract(
       expect(byPlayer(board)).toEqual([
         { userId: ADA, result: level('level-01', 3, 12, 40_000) },
         { userId: GRACE, result: level('level-01', 1, 30, 90_000) },
+      ]);
+    });
+
+    // #230: each entry of the board carries the Username of the account of
+    // its player, as the player typed it at sign-up.
+    it('should_give_the_username_of_the_account_of_each_player_when_the_board_of_one_level_is_read', async () => {
+      const reader = await createReader([
+        { userId: ADA, username: 'Ada', gameId: FIT, results: [level('level-01', 3, 12, 40_000)] },
+        {
+          userId: GRACE,
+          username: 'grace.h',
+          gameId: FIT,
+          results: [level('level-01', 1, 30, 90_000)],
+        },
+      ]);
+
+      const board = await reader.levelResults(FIT, LEVEL_01);
+
+      expect(namesOf(board)).toEqual([
+        { userId: ADA, username: 'Ada' },
+        { userId: GRACE, username: 'grace.h' },
       ]);
     });
 

@@ -38,8 +38,12 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
   const board = (player: SignedInUser, path: string) =>
     request(server()).get(path).set('Authorization', `Bearer ${player.token}`);
 
-  // The users get random ids. A full tie lists its players by userId ascending.
-  const ascending = (...players: SignedInUser[]) => players.map((player) => player.userId).sort();
+  // The users get random ids. A full tie lists its players by userId
+  // ascending. Each player keeps its username next to its userId.
+  const ascending = (...players: (SignedInUser & { username: string })[]) =>
+    players
+      .map(({ userId, username }) => ({ userId, username }))
+      .sort((one, other) => (one.userId < other.userId ? -1 : 1));
 
   // The #19 check: the board of a level holds only the results of that level
   // of that game, and the global board of a game holds only that game.
@@ -68,15 +72,17 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       gameId: 'hexa-fit',
       levelId: 'fit-01',
       entries: [
-        { rank: 1, userId: grace.userId, stars: 3, moves: 10, elapsedMs: 45000 },
-        { rank: 2, userId: ada.userId, stars: 3, moves: 12, elapsedMs: 45000 },
+        { rank: 1, userId: grace.userId, username: 'grace', stars: 3, moves: 10, elapsedMs: 45000 },
+        { rank: 2, userId: ada.userId, username: 'ada', stars: 3, moves: 12, elapsedMs: 45000 },
       ],
     });
     expect(level02.status).toBe(200);
     expect(level02.body).toEqual({
       gameId: 'hexa-fit',
       levelId: 'fit-02',
-      entries: [{ rank: 1, userId: ada.userId, stars: 2, moves: 20, elapsedMs: 60000 }],
+      entries: [
+        { rank: 1, userId: ada.userId, username: 'ada', stars: 2, moves: 20, elapsedMs: 60000 },
+      ],
     });
     expect(fit.status).toBe(200);
     expect(fit.body).toEqual({
@@ -86,6 +92,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
         {
           rank: 1,
           userId: ada.userId,
+          username: 'ada',
           stars: 5,
           levelsCompleted: 2,
           moves: 32,
@@ -94,6 +101,7 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
         {
           rank: 2,
           userId: grace.userId,
+          username: 'grace',
           stars: 3,
           levelsCompleted: 1,
           moves: 10,
@@ -104,9 +112,57 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     expect(lines.status).toBe(200);
     expect(lines.body).toEqual({
       gameId: 'hexa-lines',
-      highScores: [{ rank: 1, userId: linus.userId, highScore: 120 }],
+      highScores: [{ rank: 1, userId: linus.userId, username: 'linus', highScore: 120 }],
       standings: [],
     });
+  });
+
+  // #230: each row of both boards carries the username of its account
+  // beside its userId, as the player typed it at sign-up (option A of
+  // hexablock-app#47). The board of a level, the standings and the high
+  // scores each give the name of the account of each row.
+  it('should_give_each_row_the_username_of_its_account_when_both_boards_are_read', async () => {
+    const ada = await signIn('Ada');
+    const grace = await signIn('grace.h');
+    await storeLevels(testApp, levelJson('hexa-fit', 'fit-01'));
+    await sync(ada, { gameId: 'hexa-fit', results: [FIT_01] });
+    await sync(grace, { gameId: 'hexa-fit', results: [{ ...FIT_01, stars: 2 }] });
+    await sync(grace, { gameId: 'hexa-lines', score: 120 });
+
+    const level = await board(ada, '/v1/leaderboard/hexa-fit/levels/fit-01');
+    const fit = await board(ada, '/v1/leaderboard/hexa-fit');
+    const lines = await board(ada, '/v1/leaderboard/hexa-lines');
+
+    expect(level.status).toBe(200);
+    expect(level.body.entries).toEqual([
+      { rank: 1, userId: ada.userId, username: 'Ada', stars: 3, moves: 12, elapsedMs: 45000 },
+      { rank: 2, userId: grace.userId, username: 'grace.h', stars: 2, moves: 12, elapsedMs: 45000 },
+    ]);
+    expect(fit.status).toBe(200);
+    expect(fit.body.standings).toEqual([
+      {
+        rank: 1,
+        userId: ada.userId,
+        username: 'Ada',
+        stars: 3,
+        levelsCompleted: 1,
+        moves: 12,
+        elapsedMs: 45000,
+      },
+      {
+        rank: 2,
+        userId: grace.userId,
+        username: 'grace.h',
+        stars: 2,
+        levelsCompleted: 1,
+        moves: 12,
+        elapsedMs: 45000,
+      },
+    ]);
+    expect(lines.status).toBe(200);
+    expect(lines.body.highScores).toEqual([
+      { rank: 1, userId: grace.userId, username: 'grace.h', highScore: 120 },
+    ]);
   });
 
   // #142: DS-4 ranks a level by stars, then moves, then time. Two results
@@ -126,8 +182,8 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
       gameId: 'hexa-fit',
       levelId: 'fit-01',
       entries: [
-        { rank: 1, userId: grace.userId, stars: 3, moves: 12, elapsedMs: 40000 },
-        { rank: 2, userId: ada.userId, stars: 3, moves: 12, elapsedMs: 50000 },
+        { rank: 1, userId: grace.userId, username: 'grace', stars: 3, moves: 12, elapsedMs: 40000 },
+        { rank: 2, userId: ada.userId, username: 'ada', stars: 3, moves: 12, elapsedMs: 50000 },
       ],
     });
   });
@@ -144,7 +200,15 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
     expect(fit.status).toBe(200);
     expect(fit.body.highScores).toEqual([]);
     expect(fit.body.standings).toEqual([
-      { rank: 1, userId: ada.userId, stars: 3, levelsCompleted: 1, moves: 12, elapsedMs: 45000 },
+      {
+        rank: 1,
+        userId: ada.userId,
+        username: 'ada',
+        stars: 3,
+        levelsCompleted: 1,
+        moves: 12,
+        elapsedMs: 45000,
+      },
     ]);
   });
 
@@ -160,14 +224,17 @@ describe('leaderboard endpoints (API-FR-03, API-FR-06)', () => {
 
     const lines = await board(linus, '/v1/leaderboard/hexa-lines');
 
-    const [firstTied, secondTied] = ascending(ada, grace);
+    const [firstTied, secondTied] = ascending(
+      { ...ada, username: 'ada' },
+      { ...grace, username: 'grace' },
+    );
     expect(lines.status).toBe(200);
     expect(lines.body).toEqual({
       gameId: 'hexa-lines',
       highScores: [
-        { rank: 1, userId: firstTied, highScore: 120 },
-        { rank: 1, userId: secondTied, highScore: 120 },
-        { rank: 3, userId: linus.userId, highScore: 80 },
+        { rank: 1, ...firstTied, highScore: 120 },
+        { rank: 1, ...secondTied, highScore: 120 },
+        { rank: 3, userId: linus.userId, username: 'linus', highScore: 80 },
       ],
       standings: [],
     });
