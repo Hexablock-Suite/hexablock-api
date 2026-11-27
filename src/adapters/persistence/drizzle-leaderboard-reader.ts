@@ -1,6 +1,7 @@
 import { and, eq, isNotNull, sql } from 'drizzle-orm';
 import type { LeaderboardEntry } from '../../application/ports/leaderboard-entry.js';
-import type { LeaderboardReader } from '../../application/ports/leaderboard-reader.js';
+import type { GlobalBoardReader } from '../../application/ports/global-board-reader.js';
+import type { LevelBoardReader } from '../../application/ports/level-board-reader.js';
 import { ElapsedTime } from '../../domain/progress/elapsed-time.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
@@ -17,13 +18,14 @@ import type { PersistenceDatabase } from './drizzle-user-repository.js';
 import { levelResults, progress } from './schema.js';
 import { storedValue } from './stored-value.js';
 
-// Adapter of the LeaderboardReader port over the progress and level_results
-// tables of DS-5 (API-FR-03). It reads only the tables of the progress
-// module. It filters by gameId and by level, and it sums the totals of a
+// Adapter of the GlobalBoardReader and LevelBoardReader ports over the
+// progress and level_results tables of DS-5 (API-FR-03). One class serves
+// both ports, because both read the same tables (#218). It reads only the
+// tables of the progress module. It filters by gameId and by level, and it sums the totals of a
 // standing. It adds no order: the use case orders the entries with the
 // comparisons of the domain (classes.md decision 2). A stored value that
 // breaks a rule of the domain is a server fault, so the reader throws.
-export class DrizzleLeaderboardReader implements LeaderboardReader {
+export class DrizzleLeaderboardReader implements GlobalBoardReader, LevelBoardReader {
   constructor(private readonly db: PersistenceDatabase) {}
 
   async levelResults(gameId: GameId, levelId: LevelId): Promise<LeaderboardEntry<LevelResult>[]> {

@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 1 of 4</p>
       <h1>The use case contract and the aspects that wrap it</h1>
       <svg
-        viewBox="0 0 1040 1036"
+        viewBox="0 0 1040 1052"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc1contract-title uc1contract-desc"
@@ -685,7 +685,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           Each input port of layers.md binds UseCase, so one aspect class wraps any use case (§3.5,
-          A2). SyncProgress stands for the eight input
+          A2). SyncProgress stands for the nine input
         </text>
         <text
           x="24"
@@ -694,8 +694,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          ports: RegisterUser, Login, AuthenticateToken, SyncProgress, GetProgress, GetLeaderboard,
-          GetLevels and UpdateLevels. The aspects sit in layer 2 (Q12).
+          ports: RegisterUser, Login, AuthenticateToken, SyncProgress, GetProgress,
+          GetGlobalLeaderboard, GetLevelLeaderboard, GetLevels and UpdateLevels. The aspects sit in
+          layer 2 (Q12).
         </text>
         <text
           x="24"
@@ -734,9 +735,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          GetLeaderboard binds UseCase with TRequest → LeaderboardQuery and TResponse →
-          Result&lt;Leaderboard, UnknownLevel&gt;, and AppModule wraps it in LoggingAspect too
-          (#83).
+          GetGlobalLeaderboard binds UseCase with TRequest → GameId and TResponse →
+          Result&lt;GlobalLeaderboard, never&gt;. GetLevelLeaderboard binds
         </text>
         <text
           x="24"
@@ -745,12 +745,22 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelsController and LeaderboardController call these three ports, and LevelDtoMapper and
-          LeaderboardDtoMapper translate their DTOs (Part 3, views 3 and 5).
+          it with TRequest → LevelBoardQuery and TResponse → Result&lt;LevelLeaderboard,
+          UnknownLevel&gt;. AppModule wraps both in LoggingAspect (#83, #218).
         </text>
         <text
           x="24"
           y="892"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelsController and LeaderboardController call these four ports, and LevelDtoMapper and
+          LeaderboardDtoMapper translate their DTOs (Part 3, views 3 and 5).
+        </text>
+        <text
+          x="24"
+          y="908"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -760,7 +770,7 @@
         </text>
         <text
           x="24"
-          y="908"
+          y="924"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -769,10 +779,10 @@
           wrap it.
         </text>
         <!-- Legend -->
-        <line x1="24" y1="932" x2="1016" y2="932" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="948" x2="1016" y2="948" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="950"
+          y="966"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -782,16 +792,16 @@
         </text>
         <line
           x1="24"
-          y1="968"
+          y1="984"
           x2="52"
-          y2="968"
+          y2="984"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#uc1contract-triangle)"
         />
         <text
           x="60"
-          y="972"
+          y="988"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -800,9 +810,9 @@
         </text>
         <line
           x1="128"
-          y1="968"
+          y1="984"
           x2="156"
-          y2="968"
+          y2="984"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -810,7 +820,7 @@
         />
         <text
           x="164"
-          y="972"
+          y="988"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -819,16 +829,16 @@
         </text>
         <line
           x1="232"
-          y1="968"
+          y1="984"
           x2="260"
-          y2="968"
+          y2="984"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc1contract-open)"
         />
         <text
           x="268"
-          y="972"
+          y="988"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -837,16 +847,16 @@
         </text>
         <line
           x1="536"
-          y1="968"
+          y1="984"
           x2="564"
-          y2="968"
+          y2="984"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#uc1contract-diamond-hollow)"
         />
         <text
           x="572"
-          y="972"
+          y="988"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -855,7 +865,7 @@
         </text>
         <rect
           x="24"
-          y="988"
+          y="1004"
           width="20"
           height="12"
           rx="2"
@@ -865,7 +875,7 @@
         />
         <text
           x="56"
-          y="997"
+          y="1013"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -874,7 +884,7 @@
         </text>
         <rect
           x="264"
-          y="988"
+          y="1004"
           width="28"
           height="12"
           rx="2"
@@ -885,7 +895,7 @@
         />
         <text
           x="300"
-          y="997"
+          y="1013"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -894,7 +904,7 @@
         </text>
         <rect
           x="470"
-          y="988"
+          y="1004"
           width="28"
           height="12"
           rx="2"
@@ -904,7 +914,7 @@
         />
         <text
           x="506"
-          y="997"
+          y="1013"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -913,7 +923,7 @@
         </text>
         <rect
           x="616"
-          y="988"
+          y="1004"
           width="28"
           height="12"
           rx="2"
@@ -924,7 +934,7 @@
         />
         <text
           x="652"
-          y="997"
+          y="1013"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -933,7 +943,7 @@
         </text>
         <rect
           x="24"
-          y="1010"
+          y="1026"
           width="28"
           height="12"
           rx="2"
@@ -944,7 +954,7 @@
         />
         <text
           x="60"
-          y="1019"
+          y="1035"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
