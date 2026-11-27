@@ -76,10 +76,10 @@
           of app.module.ts: the drivers and the adapters on the left, among them the Drizzle
           adapters over DATABASE and LevelValidators, with the two board reader tokens that alias
           one DrizzleLeaderboardReader (#218), and the input ports and the filter on the right.
-          LoggingAspect wraps SyncProgress, UpdateLevels, GetGlobalLeaderboard and
-          GetLevelLeaderboard. The AuthorizeLevelEditor input port binds to
-          AuthorizeLevelEditorUseCase with the LevelEditors of LEVEL_EDITOR_IDS (#145); the Nest
-          container creates each adapter once.
+          LoggingAspect wraps SyncProgress, GetLevels, UpdateLevels, GetGlobalLeaderboard and
+          GetLevelLeaderboard; for GetLevels it also logs each broken level row (#219). The
+          AuthorizeLevelEditor input port binds to AuthorizeLevelEditorUseCase with the LevelEditors
+          of LEVEL_EDITOR_IDS (#145); the Nest container creates each adapter once.
         </desc>
         <defs>
           <marker
@@ -355,7 +355,7 @@
           GET_PROGRESS → GetProgressUseCase
         </text>
         <text x="536" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GET_LEVELS → GetLevelsUseCase
+          GET_LEVELS → LoggingAspect(GetLevelsUseCase)
         </text>
         <text x="536" y="244" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           UPDATE_LEVELS → LoggingAspect(UpdateLevelsUseCase)
@@ -660,8 +660,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LoggingAspect wraps SyncProgress, UpdateLevels and both leaderboard use cases (#218). Each
-          chain reads from the outside in. Both board reader tokens alias one
+          LoggingAspect wraps SyncProgress, GetLevels, UpdateLevels and both boards (#218, #219).
+          Each chain reads from the outside in. Both board reader tokens alias one
           DrizzleLeaderboardReader.
         </text>
         <text

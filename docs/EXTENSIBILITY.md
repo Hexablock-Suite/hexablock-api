@@ -58,7 +58,7 @@ In the frame `DRIVERS · ADAPTER`, the ports keep `«interface»` `«port»`, as
 ## An aspect
 
 - **Add:** a subclass of [`UseCaseAspect`](../src/application/aspects/use-case-aspect.ts) in `src/application/aspects/`, as [`LoggingAspect`](../src/application/aspects/logging-aspect.ts). It overrides `execute()` and adds its concern around `super.execute()`. It is a plain class, not a Nest interceptor (rule R-application-pure). `LoggingAspect` is the only aspect in the code.
-- **Register:** wrap the use case in its provider in [`app.module.ts`](../src/infrastructure/app.module.ts), as `LoggingAspect` wraps `SyncProgressUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and `GetLevelLeaderboardUseCase`. The use case does not change.
+- **Register:** wrap the use case in its provider in [`app.module.ts`](../src/infrastructure/app.module.ts), as `LoggingAspect` wraps `SyncProgressUseCase`, `GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and `GetLevelLeaderboardUseCase`. The use case does not change.
 - **Test:** as [`logging-aspect.spec.ts`](../test/unit/application/logging-aspect.spec.ts) does: wrap a fake use case and check that the response does not change.
 
 ## An HTTP controller
