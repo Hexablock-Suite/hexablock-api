@@ -411,7 +411,7 @@ describe('SyncProgressUseCase and the stars of a level (DS-6)', () => {
   // A sync with no result reads no level, so Lines and Merge need no level (#171).
   it('should_read_no_level_when_the_sync_has_no_result', async () => {
     const levels = heldLevels([]);
-    const find = vi.spyOn(levels, 'find');
+    const findFor = vi.spyOn(levels, 'findFor');
     const sync = new SyncProgressUseCase(
       new InMemoryProgressRepository(),
       levels,
@@ -421,42 +421,80 @@ describe('SyncProgressUseCase and the stars of a level (DS-6)', () => {
     const result = await sync.execute(syncRequest({ gameId: 'hexa-lines', score: 120 }));
 
     expect(result.ok).toBe(true);
-    expect(find).not.toHaveBeenCalled();
+    expect(findFor).not.toHaveBeenCalled();
   });
 
-  // One level per result: the sync asks find() once, with the gameId and
-  // that result, and never lists every stored level (#171).
-  it('should_find_one_level_of_each_result_when_the_sync_has_one_result', async () => {
-    const levels = heldLevels([['hexa-fit', ['fit-01']]]);
-    const find = vi.spyOn(levels, 'find');
-    const sync = new SyncProgressUseCase(
-      new InMemoryProgressRepository(),
-      levels,
-      new FixedClock(AT),
-    );
-    const result = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
-
-    await sync.execute(syncRequest({ gameId: 'hexa-fit', results: [result] }));
-
-    expect(find).toHaveBeenCalledTimes(1);
-    expect(find).toHaveBeenCalledWith(valueOf(GameId.of('hexa-fit')), levelResultOf(result));
-  });
-
-  it('should_find_one_level_of_each_result_when_the_sync_has_two_results', async () => {
+  // One read per sync (#217): the sync asks findFor() once, with the gameId
+  // and every result in the order of the request, and never lists every
+  // stored level (#171).
+  it('should_read_the_levels_with_one_call_when_the_sync_has_two_results', async () => {
     const levels = heldLevels([['hexa-fit', ['fit-01', 'fit-02']]]);
-    const find = vi.spyOn(levels, 'find');
+    const findFor = vi.spyOn(levels, 'findFor');
     const sync = new SyncProgressUseCase(
       new InMemoryProgressRepository(),
       levels,
       new FixedClock(AT),
     );
-    const first = { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 };
-    const second = { levelId: 'fit-02', stars: 3, moves: 9, elapsedMs: 30000 };
+    const first = { levelId: 'fit-02', stars: 1, moves: 20, elapsedMs: 60000 };
+    const second = { levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 30000 };
 
-    await sync.execute(syncRequest({ gameId: 'hexa-fit', results: [first, second] }));
+    const result = await sync.execute(
+      syncRequest({ gameId: 'hexa-fit', results: [first, second] }),
+    );
 
-    expect(find).toHaveBeenCalledTimes(2);
-    expect(find).toHaveBeenNthCalledWith(1, valueOf(GameId.of('hexa-fit')), levelResultOf(first));
-    expect(find).toHaveBeenNthCalledWith(2, valueOf(GameId.of('hexa-fit')), levelResultOf(second));
+    expect(result.ok).toBe(true);
+    expect(findFor).toHaveBeenCalledTimes(1);
+    expect(findFor).toHaveBeenCalledWith(valueOf(GameId.of('hexa-fit')), [
+      levelResultOf(first),
+      levelResultOf(second),
+    ]);
   });
+
+  it('should_read_the_levels_with_one_call_when_the_sync_has_three_results', async () => {
+    const levels = heldLevels([['hexa-fit', ['fit-01', 'fit-02', 'fit-03']]]);
+    const findFor = vi.spyOn(levels, 'findFor');
+    const progress = new InMemoryProgressRepository();
+    const sync = new SyncProgressUseCase(progress, levels, new FixedClock(AT));
+    const results = [
+      { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 },
+      { levelId: 'fit-02', stars: 2, moves: 15, elapsedMs: 50000 },
+      { levelId: 'fit-03', stars: 3, moves: 9, elapsedMs: 30000 },
+    ];
+
+    const result = await sync.execute(syncRequest({ gameId: 'hexa-fit', results }));
+
+    expect(result.ok).toBe(true);
+    expect(findFor).toHaveBeenCalledTimes(1);
+    expect(findFor).toHaveBeenCalledWith(
+      valueOf(GameId.of('hexa-fit')),
+      results.map((values) => levelResultOf(values)),
+    );
+    expect(progressPartsOf(await progress.find(keyOf('hexa-fit')))?.results).toEqual(
+      results.map((values) => levelResultOf(values)),
+    );
+  });
+
+  // The order of the request decides the first failure, not the order in
+  // which the repository gives the levels. A row gives the two broken
+  // results in the order of the request.
+  const overStars = play('fit-02', 4);
+  const unknownLevel = play('fit-99', 1);
+  it.each([
+    [
+      [overStars, unknownLevel],
+      { kind: 'too-many-stars', result: levelResultOf(overStars), most: valueOf(Stars.of(3)) },
+    ],
+    [[unknownLevel, overStars], { kind: 'unknown-level', result: levelResultOf(unknownLevel) }],
+  ])(
+    'should_fail_with_the_first_broken_result_of_the_request_when_two_results_break_a_rule',
+    async (results, error) => {
+      const progress = new InMemoryProgressRepository();
+      const sync = new SyncProgressUseCase(progress, LEVELS, new FixedClock(AT));
+
+      const result = await sync.execute(syncRequest({ gameId: 'hexa-fit', results }));
+
+      expect(result).toEqual({ ok: false, error });
+      expect(await progress.find(keyOf('hexa-fit'))).toBeNull();
+    },
+  );
 });

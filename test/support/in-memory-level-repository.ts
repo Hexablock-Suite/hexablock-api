@@ -32,17 +32,23 @@ export class InMemoryLevelRepository implements LevelRepository {
     return Promise.resolve(this.rowsByKey.has(keyOf(gameId, levelId)));
   }
 
-  // One level per synced result (#171), with the answer of the Drizzle
-  // adapter: the level of a valid row, and undefined for a row that is
-  // absent or that breaks a rule.
-  async find(gameId: GameId, result: LevelResult): Promise<LevelDefinition<unknown> | undefined> {
-    const levelId = receiveLevelResultOf(result).levelId;
-    const row = await Promise.resolve(this.rowsByKey.get(rowKey(receiveValueOf(gameId), levelId)));
-    if (row === undefined) {
-      return undefined;
-    }
-    const stored = LevelRowMapper.toStoredLevel(row, this.validators);
-    return stored.state === 'valid' ? stored.level : undefined;
+  // The levels of every result of one sync (#217), with the answer of the
+  // Drizzle adapter: the level of each valid row of the gameId whose levelId
+  // a result names, by levelId, each level once.
+  async findFor(
+    gameId: GameId,
+    results: readonly LevelResult[],
+  ): Promise<readonly LevelDefinition<unknown>[]> {
+    const levelIds = new Set(results.map((result) => receiveLevelResultOf(result).levelId));
+    const game = receiveValueOf(gameId);
+    const rows = await Promise.resolve([...this.rowsByKey.values()]);
+    return rows
+      .filter((row) => row.gameId === game && levelIds.has(row.levelId))
+      .toSorted(byGameAndLevelId)
+      .flatMap((row) => {
+        const stored = LevelRowMapper.toStoredLevel(row, this.validators);
+        return stored.state === 'valid' ? [stored.level] : [];
+      });
   }
 
   // Writes one row as it is, with no check, as a manual change of the

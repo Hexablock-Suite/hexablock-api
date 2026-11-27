@@ -13,6 +13,9 @@ const USE_THE_PORT =
   'Take the instant as a parameter in src/domain or from the Clock port in src/application, and inject a seeded random source.';
 const NO_AMBIENT_GLOBAL =
   'Take randomness, time or configuration from an injected port or parameter.';
+// A use case reads all items of a request in one call of a port, so the
+// cost of a request does not grow with its count of items (#217).
+const APPLICATION_FILES = ['**/src/application/**'];
 
 export default defineConfig({
   lint: {
@@ -54,6 +57,12 @@ export default defineConfig({
           ],
           'hexablock/no-current-date': 'error',
           'hexablock/no-delivery-call': 'error',
+        },
+      },
+      {
+        files: APPLICATION_FILES,
+        rules: {
+          'no-await-in-loop': 'error',
         },
       },
     ],

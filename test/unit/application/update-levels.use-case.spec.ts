@@ -166,7 +166,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     let calls = 0;
     const flaky: LevelRepository = {
       list: () => levels.list(),
-      find: (gameId: GameId, result: LevelResult) => levels.find(gameId, result),
+      findFor: (gameId: GameId, results: readonly LevelResult[]) => levels.findFor(gameId, results),
       holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
       update: (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         calls += 1;
@@ -203,7 +203,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
     const newer = new UpdateLevelsUseCase(levels, levelValidators());
     const racing: LevelRepository = {
       list: () => levels.list(),
-      find: (gameId: GameId, result: LevelResult) => levels.find(gameId, result),
+      findFor: (gameId: GameId, results: readonly LevelResult[]) => levels.findFor(gameId, results),
       holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
       update: async (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         await newer.execute(batchOf(levelJson('hexa-fit', 'fit-01', 3)));
