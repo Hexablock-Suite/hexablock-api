@@ -60,7 +60,7 @@ export class DrizzleLevelRepository implements LevelRepository {
   async findFor(
     gameId: GameId,
     results: readonly LevelResult[],
-  ): Promise<readonly LevelDefinition<unknown>[]> {
+  ): Promise<readonly LevelDefinition[]> {
     const levelIds = [...new Set(results.map((result) => receiveLevelResultOf(result).levelId))];
     if (levelIds.length === 0) {
       return [];
@@ -90,7 +90,7 @@ export class DrizzleLevelRepository implements LevelRepository {
     gameId: GameId,
     levelId: LevelId,
     change: LevelChange,
-  ): Promise<Result<LevelDefinition<unknown>, LevelProblem>> {
+  ): Promise<Result<LevelDefinition, LevelProblem>> {
     return this.db.transaction(async (tx) => {
       // A gameId is a lowercase slug and holds no colon, so the text names
       // one level. The levels: prefix keeps the key apart from the progress
@@ -128,7 +128,7 @@ async function write(
   db: Pick<PersistenceDatabase, 'insert'>,
   gameId: GameId,
   levelId: LevelId,
-  level: LevelDefinition<unknown>,
+  level: LevelDefinition,
 ): Promise<void> {
   if (!level.isIdentifiedBy(gameId, levelId)) {
     throw new RangeError('The change must return the level that update() locks.');

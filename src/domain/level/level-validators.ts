@@ -44,7 +44,7 @@ export class LevelValidators {
     version: LevelVersion,
     topology: TopologyId,
     section: unknown,
-  ): Result<LevelDefinition<unknown>, LevelProblem> {
+  ): Result<LevelDefinition, LevelProblem> {
     const entry = this.entries.find(([served]) => served.equals(gameId));
     if (entry === undefined) {
       return err('game-without-levels');

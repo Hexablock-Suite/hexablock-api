@@ -303,19 +303,11 @@
           - topology: TopologyId
         </text>
         <text x="380" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - section: TSection &amp; LevelSection
+          - section: TSection
         </text>
         <line x1="364" y1="260" x2="660" y2="260" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
-        <text
-          textLength="274"
-          lengthAdjust="spacingAndGlyphs"
-          x="380"
-          y="276"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + equals(other: LevelDefinition&lt;unknown&gt;): boolean
+        <text x="380" y="276" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: LevelDefinition): boolean
         </text>
         <!-- Class: LevelOrder («value object») -->
         <rect
@@ -668,9 +660,9 @@
         </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
-          x="612"
+          x="500"
           y="86"
-          width="56"
+          width="168"
           height="18"
           rx="2"
           fill="#ffffff"
@@ -679,14 +671,14 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="640"
+          x="584"
           y="98"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          TSection
+          TSection extends LevelSection
         </text>
         <!-- Footnote -->
         <text

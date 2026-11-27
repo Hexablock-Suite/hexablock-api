@@ -95,11 +95,18 @@ How one request crosses the layers, as a class view and a sequence diagram:
 The API has no game engine; the generic engine lives in the app. The API stores the level
 definitions that the engine plays, with generic types (decision D6):
 
-- **`LevelDefinition<TSection>`** holds the common part (`gameId`, `levelId`, `order`, `version`,
-  `topology`) and one typed section per `gameId` (DS-6). `TSection` is `FitSection` or
-  `SortSection`. Lines and Merge have no level files.
-- **`LevelValidator<TSection>`** checks the shape and the rules of one section, for example the
-  A5 check of a Fit level. `LevelValidators` registers one validator per `gameId`.
+- **`LevelDefinition<TSection extends LevelSection = LevelSection>`** holds the common part
+  (`gameId`, `levelId`, `order`, `version`, `topology`) and one typed section per `gameId` (DS-6).
+  `TSection` is `FitSection` or `SortSection`. Lines and Merge have no level files. The bound is
+  on the class because the class holds the section in a field of type `TSection` and asks it
+  `mostStars()`, the count of its star thresholds; `LevelSection` is the interface of every
+  section. The default `LevelSection` names a level of any game, so a list of levels of several
+  games is a `LevelDefinition[]`: only the strategy of each game knows its section type (#222).
+- **`LevelValidator<TSection extends LevelSection>`** checks the shape and the rules of one
+  section, for example the A5 check of a Fit level. `LevelValidators` registers one validator per
+  `gameId`. The bound says that each strategy builds a section that a `LevelDefinition` can hold,
+  so `LevelValidators` keeps every strategy as a `LevelValidator<LevelSection>` and builds the level
+  from it.
 - **`UseCase<TRequest, TResponse>`** is the one generic input port. Every use case binds it, and
   every failure type has a `kind`, so one aspect class wraps any use case.
 - **`Result<T, E>`** carries an expected failure as a value, never as an exception.
