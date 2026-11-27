@@ -229,7 +229,7 @@ pnpm start:dev
 
 An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` gets
 403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
-does. The account that a deploy uses to send the levels must be in the list.
+does. The account that a deploy uses to send the levels must be in the list (see [Deploy](#deploy)).
 
 For database work, start the local Postgres from `compose.yaml` and point `DATABASE_URL` at it:
 
@@ -284,6 +284,30 @@ repository has no procedure for a deployed database with users. Before such a da
 `src/adapters/persistence/schema.ts` declares four tables: `users` (API-FR-01), `progress`
 (API-FR-02), `level_results` (the level results of a progress entry, DS-5) and `levels`
 (API-FR-04).
+
+### Deploy
+
+The repository has no deploy workflow, so the person who deploys runs these steps by hand, in this order
+([#158](https://github.com/Hexablock-Suite/hexablock-api/issues/158), decision of 2026-11-27):
+
+1. Apply the `drizzle/` migrations to the target database with `pnpm db:migrate`.
+2. Start the new API with `LEVEL_EDITOR_IDS` that holds the id of the deploy account. Do not route
+   traffic to it yet. On a new database the account does not exist yet: sign it up on the new API,
+   read its id from `GET /v1/auth/me`, and restart the API with that id, as the paragraph on
+   `LEVEL_EDITOR_IDS` above says.
+3. In a checkout of hexablock-app at the release that players get, run `pnpm levels:load` against
+   the new API with the token of the deploy account. The command sends the bundled level files of
+   `src/adapters/levels/` to `PUT /v1/levels` as they are (S3-02).
+4. In the same checkout, run `pnpm levels:check` against the new API. It fails when a bundled file
+   differs from the stored copy. A stored copy with a higher `version` than its bundled file is not
+   a drift: the version rule of S3-10 keeps the higher copy.
+5. Route traffic to the new API only after both commands pass.
+
+The order counts. Until the load runs, the board of a bundled level answers 404 (API-FR-03), and a
+sync that carries a result of a bundled level answers 400 with `unknown-level` and stores nothing
+of that sync (DS-6). The load is safe to repeat: an equal `version` replaces the stored copy with the
+same level, and a lower `version` keeps the stored copy and gets `older-version`. The README of
+hexablock-app gives the options of both commands.
 
 ## Running Tests
 
