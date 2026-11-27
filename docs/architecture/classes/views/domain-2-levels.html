@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 2 of 5</p>
       <h1>Level schema: one aggregate root per level and a typed section per gameId</h1>
       <svg
-        viewBox="0 0 1040 1509"
+        viewBox="0 0 1040 1525"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain2levels-title domain2levels-desc"
@@ -71,22 +71,23 @@
         <title id="domain2levels-title">HexaBlock API level schema · UML class diagram</title>
         <desc id="domain2levels-desc">
           Class diagram of layer 1 showing the LevelDefinition aggregate root with private fields:
-          its common part and a section of type TSection, which the class bounds by LevelSection,
-          bound to the FitSection or the SortSection value object. The LevelValidators domain
-          service holds one LevelValidator strategy per gameId in a list of entries, finds it with
-          GameId.equals() and creates each level. FitLevelValidator and SortLevelValidator implement
-          the LevelValidator interface and pick their section type. SortLevelValidator only picks
-          SortSection, which holds its rules. FitLevelValidator holds Topologies, finds the Topology
-          of the level and picks FitSection, which checks A5 on that Topology. A dashed frame
-          labelled Aggregate encloses LevelDefinition and its section types, FitSection and
-          SortSection. LevelDefinition.decideReplace(stored), called on the incoming copy, decides
-          the version rule of S3-10 over the stored state (#174). A dashed frame labelled TOPOLOGY
-          groups the Topology interface, with its three rules holds(), turn() and move(), its three
-          implementations HexTopology, SquareTopology and TriangleTopology, and the Topologies
-          domain service, which holds one Topology per topologyId and finds it with
-          TopologyId.equals(). A triangle move keeps the orientation of the cell (#229). A dashed
-          Rotation box in the TOPOLOGY frame stands for the Rotation value object of
-          src/domain/level/, which view 5 details: Topology turns a cell by it (#221).
+          its common part and a section of type TSection, which the class bounds by LevelSection, so
+          a use arrow joins it to the LevelSection interface, which the FitSection and the
+          SortSection value objects implement (#224). The LevelValidators domain service holds one
+          LevelValidator strategy per gameId in a list of entries, finds it with GameId.equals() and
+          creates each level. FitLevelValidator and SortLevelValidator implement the LevelValidator
+          interface and pick their section type. SortLevelValidator only picks SortSection, which
+          holds its rules. FitLevelValidator holds Topologies, finds the Topology of the level and
+          picks FitSection, which checks A5 on that Topology. A dashed frame labelled Aggregate
+          encloses LevelDefinition and its section types, FitSection and SortSection; the
+          LevelSection interface stays outside it. LevelDefinition.decideReplace(stored), called on
+          the incoming copy, decides the version rule of S3-10 over the stored state (#174). A
+          dashed frame labelled TOPOLOGY groups the Topology interface, with its three rules
+          holds(), turn() and move(), its three implementations HexTopology, SquareTopology and
+          TriangleTopology, and the Topologies domain service, which holds one Topology per
+          topologyId and finds it with TopologyId.equals(). A triangle move keeps the orientation of
+          the cell (#229). A dashed Rotation box in the TOPOLOGY frame stands for the Rotation value
+          object of src/domain/level/, which view 5 details: Topology turns a cell by it (#221).
         </desc>
         <defs>
           <marker
@@ -124,7 +125,7 @@
           stroke="rgba(180,83,9,0.45)"
           stroke-width="1"
         />
-        <!-- Pattern and group frames: the STRATEGY frame, and the Aggregate frame of LevelDefinition, which encloses the root and its section types -->
+        <!-- Pattern and group frames: the STRATEGY frame, and the Aggregate frame of LevelDefinition, which encloses the root and its section types. LevelSection, an interface, stays outside (#224). -->
         <rect
           x="536"
           y="304"
@@ -150,7 +151,7 @@
         <rect
           x="36"
           y="72"
-          width="374"
+          width="340"
           height="788"
           rx="8"
           fill="none"
@@ -193,21 +194,31 @@
           TOPOLOGY · D4 · §8 · decision 6
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- LevelDefinition&lt;FitSection&gt; holds section: FitSection: a value object, so a use arrow with role and multiplicity (decision 13) -->
+        <!-- LevelDefinition holds section: TSection, and TSection extends LevelSection: a use arrow to LevelSection with role and multiplicity (decision 13, #224) -->
         <path
-          d="M184 400 L184 440"
+          d="M340 400 L340 448 Q340 456 348 456 L388 456"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain2levels-open)"
         />
-        <!-- LevelDefinition&lt;SortSection&gt; holds section: SortSection: a value object, so a use arrow with role and multiplicity (decision 13) -->
+        <!-- FitSection implements LevelSection: realization (#224) -->
         <path
-          d="M340 400 L340 742 Q340 750 332 750 L320 750"
+          d="M320 540 L412 540 Q420 540 420 532 L420 504"
           fill="none"
-          stroke="#5b6873"
+          stroke="#17212a"
           stroke-width="1"
-          marker-end="url(#domain2levels-open)"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
+        />
+        <!-- SortSection implements LevelSection: realization (#224) -->
+        <path
+          d="M320 740 L480 740 Q488 740 488 732 L488 504"
+          fill="none"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
         />
         <!-- LevelValidators creates each LevelDefinition with LevelDefinition.of(): use with a verb -->
         <path
@@ -327,22 +338,10 @@
           marker-end="url(#domain2levels-open)"
         />
         <!-- Arrow labels and multiplicities -->
-        <rect x="188" y="411" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="280" y="411" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
-          x="192"
+          x="284"
           y="420"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="start"
-          letter-spacing="0.06em"
-        >
-          section 1
-        </text>
-        <rect x="344" y="619" width="56" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="348"
-          y="628"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -789,6 +788,54 @@
         </text>
         <text x="64" y="836" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + equals(other: SortSection): boolean
+        </text>
+        <!-- Class: LevelSection («interface», #224) -->
+        <rect
+          x="388"
+          y="420"
+          width="140"
+          height="84"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="458"
+          y="438"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface»
+        </text>
+        <text
+          x="458"
+          y="456"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelSection
+        </text>
+        <text
+          x="458"
+          y="470"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          DS-6 · decision 22
+        </text>
+        <line x1="388" y1="480" x2="528" y2="480" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="398" y="496" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + mostStars(): Stars
         </text>
         <!-- Class: LevelValidators («domain service») -->
         <rect
@@ -1522,18 +1569,28 @@
           Topology turns a cell by a Rotation, a value object of src/domain/level/, so no shared
           file of the level imports level/fit/ (#221).
         </text>
+        <text
+          x="24"
+          y="1424"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          LevelDefinition holds a section of type TSection, so its use arrow goes to LevelSection,
+          the bound of TSection. FitSection and SortSection implement LevelSection (#224).
+        </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1432"
+          y1="1448"
           x2="1016"
-          y2="1432"
+          y2="1448"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1450"
+          y="1466"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1543,9 +1600,9 @@
         </text>
         <line
           x1="24"
-          y1="1468"
+          y1="1484"
           x2="52"
-          y2="1468"
+          y2="1484"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1553,7 +1610,7 @@
         />
         <text
           x="60"
-          y="1472"
+          y="1488"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1562,16 +1619,16 @@
         </text>
         <line
           x1="128"
-          y1="1468"
+          y1="1484"
           x2="156"
-          y2="1468"
+          y2="1484"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain2levels-open)"
         />
         <text
           x="164"
-          y="1472"
+          y="1488"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1580,7 +1637,7 @@
         </text>
         <text
           x="420"
-          y="1472"
+          y="1488"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1589,7 +1646,7 @@
         </text>
         <rect
           x="572"
-          y="1460"
+          y="1476"
           width="28"
           height="12"
           rx="2"
@@ -1600,7 +1657,7 @@
         />
         <text
           x="608"
-          y="1472"
+          y="1488"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1609,7 +1666,7 @@
         </text>
         <rect
           x="24"
-          y="1485"
+          y="1501"
           width="20"
           height="12"
           rx="2"
@@ -1619,7 +1676,7 @@
         />
         <text
           x="56"
-          y="1497"
+          y="1513"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1628,7 +1685,7 @@
         </text>
         <rect
           x="166"
-          y="1485"
+          y="1501"
           width="28"
           height="12"
           rx="2"
@@ -1639,7 +1696,7 @@
         />
         <text
           x="202"
-          y="1497"
+          y="1513"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1648,7 +1705,7 @@
         </text>
         <rect
           x="372"
-          y="1485"
+          y="1501"
           width="28"
           height="12"
           rx="2"
@@ -1658,7 +1715,7 @@
         />
         <text
           x="408"
-          y="1497"
+          y="1513"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1667,7 +1724,7 @@
         </text>
         <rect
           x="518"
-          y="1485"
+          y="1501"
           width="28"
           height="12"
           rx="2"
@@ -1678,7 +1735,7 @@
         />
         <text
           x="554"
-          y="1497"
+          y="1513"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1687,7 +1744,7 @@
         </text>
         <rect
           x="700"
-          y="1485"
+          y="1501"
           width="28"
           height="12"
           rx="2"
@@ -1698,7 +1755,7 @@
         />
         <text
           x="736"
-          y="1497"
+          y="1513"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

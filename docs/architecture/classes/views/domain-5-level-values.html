@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 5 of 5</p>
       <h1>Level values: the common part of a level, its cell and its rotation</h1>
       <svg
-        viewBox="0 0 1040 1041"
+        viewBox="0 0 1040 1057"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain5levelvalues-title domain5levelvalues-desc"
@@ -77,7 +77,8 @@
           delivers its value to a receiver with deliverTo(). The Rotation value object counts the
           steps of a topology and turns a Coordinate; it lives next to Coordinate in
           src/domain/level/ (#221). A dashed frame labelled Aggregate encloses LevelDefinition and
-          every value object of the view.
+          every value object of the view. View 2 draws how the root holds its section: a use arrow
+          to the LevelSection interface, which FitSection implements (#224).
         </desc>
         <defs>
           <marker
@@ -152,14 +153,6 @@
           stroke-width="1"
           marker-end="url(#domain5levelvalues-open)"
         />
-        <!-- LevelDefinition&lt;FitSection&gt; holds section: FitSection (view 2): use arrow with role and multiplicity -->
-        <path
-          d="M512 284 L512 380"
-          fill="none"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#domain5levelvalues-open)"
-        />
         <!-- FitSection holds figure: Coordinate[]: a value object, so a use arrow with role and multiplicity (decision 13) -->
         <path
           d="M600 404 L712 404"
@@ -212,18 +205,6 @@
           letter-spacing="0.06em"
         >
           topology 1
-        </text>
-        <rect x="516" y="327" width="56" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="520"
-          y="336"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="start"
-          letter-spacing="0.06em"
-        >
-          section 1
         </text>
         <rect x="623" y="386" width="66" height="12" rx="2" fill="#f9f4dc" />
         <text
@@ -860,11 +841,21 @@
           of the FitSection witness holds one. So Rotation lives next to Coordinate in
           src/domain/level/, not in level/fit/ (#221).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="964" x2="1016" y2="964" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="982"
+          y="948"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          View 1.2 draws how the root holds its section: a use arrow to LevelSection, the bound of
+          TSection, which FitSection implements (#224).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="980" x2="1016" y2="980" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="998"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -874,16 +865,16 @@
         </text>
         <line
           x1="24"
-          y1="1000"
+          y1="1016"
           x2="52"
-          y2="1000"
+          y2="1016"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain5levelvalues-open)"
         />
         <text
           x="60"
-          y="1004"
+          y="1020"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -892,7 +883,7 @@
         </text>
         <text
           x="300"
-          y="1004"
+          y="1020"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -901,7 +892,7 @@
         </text>
         <rect
           x="24"
-          y="1017"
+          y="1033"
           width="20"
           height="12"
           rx="2"
@@ -911,7 +902,7 @@
         />
         <text
           x="56"
-          y="1029"
+          y="1045"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -920,7 +911,7 @@
         </text>
         <rect
           x="166"
-          y="1017"
+          y="1033"
           width="28"
           height="12"
           rx="2"
@@ -930,7 +921,7 @@
         />
         <text
           x="202"
-          y="1029"
+          y="1045"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -939,7 +930,7 @@
         </text>
         <rect
           x="312"
-          y="1017"
+          y="1033"
           width="28"
           height="12"
           rx="2"
@@ -950,7 +941,7 @@
         />
         <text
           x="348"
-          y="1029"
+          y="1045"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -959,7 +950,7 @@
         </text>
         <rect
           x="518"
-          y="1017"
+          y="1033"
           width="28"
           height="12"
           rx="2"
@@ -970,7 +961,7 @@
         />
         <text
           x="554"
-          y="1029"
+          y="1045"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -979,7 +970,7 @@
         </text>
         <rect
           x="700"
-          y="1017"
+          y="1033"
           width="28"
           height="12"
           rx="2"
@@ -990,7 +981,7 @@
         />
         <text
           x="736"
-          y="1029"
+          y="1045"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
