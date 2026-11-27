@@ -12,11 +12,13 @@ export interface SignedInUser {
 
 // Signs up and signs in through the auth endpoints. It returns the bearer
 // token and the userId of its subject.
-export async function signIn(server: App, username: string): Promise<SignedInUser> {
-  await request(server).post('/v1/auth/register').send({ username, password: TEST_PASSWORD });
-  const login = await request(server)
-    .post('/v1/auth/login')
-    .send({ username, password: TEST_PASSWORD });
+export async function signIn(
+  server: App,
+  username: string,
+  password = TEST_PASSWORD,
+): Promise<SignedInUser> {
+  await request(server).post('/v1/auth/register').send({ username, password });
+  const login = await request(server).post('/v1/auth/login').send({ username, password });
   const token: string = login.body.accessToken;
   const userId = new JwtService({ secret: TEST_JWT_SECRET }).decode<{ sub: string }>(token).sub;
   return { token, userId };
