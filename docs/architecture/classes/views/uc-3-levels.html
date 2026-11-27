@@ -78,11 +78,12 @@
           holds one problem per broken level with its gameId and levelId, so a level that fails its
           check is never saved and no exception reaches the HTTP layer. GetLevelsUseCase takes no
           request and has no expected failure; it gives the valid levels and the broken rows apart,
-          and logs each broken row through the Logger port (#147). AuthorizeLevelEditorUseCase holds
-          the LevelEditors value object of layer 1, the user ids of the configuration, and fails
-          with not-a-level-editor for any other id, so an empty list lets no account update (#145).
-          A footnote names LevelDtoMapper, which builds the UpdateLevelsRequest, and LevelRowMapper,
-          which restores each stored row through LevelValidators.
+          and holds no logger: LoggingAspect wraps it and logs each broken row (#147, #219).
+          AuthorizeLevelEditorUseCase holds the LevelEditors value object of layer 1, the user ids
+          of the configuration, and fails with not-a-level-editor for any other id, so an empty list
+          lets no account update (#145). A footnote names LevelDtoMapper, which builds the
+          UpdateLevelsRequest, and LevelRowMapper, which restores each stored row through
+          LevelValidators.
         </desc>
         <defs>
           <marker
@@ -362,7 +363,7 @@
           x="64"
           y="120"
           width="376"
-          height="124"
+          height="108"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -405,11 +406,8 @@
         <text x="80" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - levels: LevelRepository
         </text>
-        <text x="80" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - logger: Logger
-        </text>
-        <line x1="64" y1="220" x2="440" y2="220" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="204" x2="440" y2="204" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + execute(): Promise&lt;Result&lt;ListedLevels, never&gt;&gt;
         </text>
         <!-- Class: UpdateLevelsUseCase (focal, «use case») -->

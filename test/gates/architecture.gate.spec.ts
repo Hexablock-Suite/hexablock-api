@@ -138,6 +138,22 @@ describe('architecture gate', () => {
     ]);
   });
 
+  // #219: only the aspects write to the Logger port. A use case or any other
+  // file of src/application that imports the port breaks the rule.
+  it('should_report_logger_in_use_case_when_a_file_of_application_outside_aspects_imports_the_logger_port', () => {
+    expect(violationsOf(report, 'only-aspects-import-logger-port')).toEqual([
+      'src/application/levels/imports-logger.ts -> src/application/ports/logger.ts',
+    ]);
+  });
+
+  it('should_allow_the_logger_port_when_an_aspect_imports_it', () => {
+    const fromAspectFixture = report.violations.filter(
+      (violation) => violation.from === 'src/application/aspects/imports-logger.ts',
+    );
+
+    expect(fromAspectFixture).toEqual([]);
+  });
+
   // Persistence adapters cannot import src/infrastructure, so the tables they
   // query live next to them. drizzle-kit reads the same file.
   it('should_read_the_schema_from_the_persistence_adapter_when_drizzle_kit_generates_migrations', async () => {

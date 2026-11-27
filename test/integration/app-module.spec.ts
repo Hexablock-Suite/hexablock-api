@@ -13,7 +13,7 @@ import {
   GET_LEVEL_LEADERBOARD,
   type GetLevelLeaderboard,
 } from '../../src/application/leaderboard/get-level-leaderboard.use-case.js';
-import { GET_LEVELS, GetLevelsUseCase } from '../../src/application/levels/get-levels.use-case.js';
+import { GET_LEVELS, type GetLevels } from '../../src/application/levels/get-levels.use-case.js';
 import { UPDATE_LEVELS } from '../../src/application/levels/update-levels.use-case.js';
 import { GLOBAL_BOARD_READER } from '../../src/application/ports/global-board-reader.js';
 import { LEVEL_BOARD_READER } from '../../src/application/ports/level-board-reader.js';
@@ -45,7 +45,8 @@ import { NestLogger } from '../../src/adapters/logging/nest-logger.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
 import { InMemoryLevelRepository } from '../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../support/in-memory-progress-repository.js';
-import { levelValidators } from '../support/level-format.js';
+import { levelJson, levelValidators } from '../support/level-format.js';
+import { brokenRow } from '../support/level-repository.contract.js';
 import { testUserId } from '../support/user-ids.js';
 import { valueOf } from '../support/result.js';
 
@@ -104,14 +105,42 @@ describe('AppModule account wiring', () => {
   });
 
   // AppModule registers the Fit and Sort strategies once. The level store
-  // and UpdateLevels share them, and LoggingAspect wraps UpdateLevels.
-  it('should_bind_level_ports_and_wrap_update_levels_in_logging_aspect_when_app_module_compiles', async () => {
+  // and UpdateLevels share them. LoggingAspect wraps GetLevels (#219) and
+  // UpdateLevels.
+  it('should_bind_level_ports_and_wrap_get_levels_and_update_levels_in_logging_aspect_when_app_module_compiles', async () => {
     stubTestEnvironment();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
     expect(moduleRef.get(LEVEL_REPOSITORY)).toBeInstanceOf(DrizzleLevelRepository);
-    expect(moduleRef.get(GET_LEVELS)).toBeInstanceOf(GetLevelsUseCase);
+    expect(moduleRef.get(GET_LEVELS)).toBeInstanceOf(LoggingAspect);
     expect(moduleRef.get(UPDATE_LEVELS)).toBeInstanceOf(LoggingAspect);
+    await moduleRef.close();
+  });
+
+  // #219: the aspect writes the line of each broken row and then the line of
+  // the call, both through NestLogger under the context LoggingAspect (#216).
+  // The spies start after the module is built, so they see only these lines.
+  it('should_write_the_broken_row_line_and_then_the_success_line_under_the_logging_aspect_context_when_get_levels_reads_a_broken_row', async () => {
+    stubTestEnvironment();
+    const levels = new InMemoryLevelRepository(levelValidators());
+    levels.storeRow(brokenRow(levelJson('hexa-fit')));
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(LEVEL_REPOSITORY)
+      .useValue(levels)
+      .compile();
+    const getLevels = moduleRef.get<GetLevels>(GET_LEVELS);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+
+    const result = await getLevels.execute();
+
+    expect(result.ok).toBe(true);
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=GetLevels outcome=unavailable-level gameId="hexa-fit" levelId="fit-01" reason=invalid-figure',
+    );
+    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetLevels outcome=success');
+    expect(warn.mock.invocationCallOrder[0]).toBeLessThan(log.mock.invocationCallOrder[0] ?? 0);
+    expect(warn.mock.contexts[0]).toMatchObject({ context: 'LoggingAspect' });
     await moduleRef.close();
   });
 
