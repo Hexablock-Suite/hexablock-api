@@ -23,9 +23,13 @@ import { LOGIN, LoginUseCase } from '../application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../application/auth/register.use-case.js';
 import { LoggingAspect } from '../application/aspects/logging-aspect.js';
 import {
-  GET_LEADERBOARD,
-  GetLeaderboardUseCase,
-} from '../application/leaderboard/get-leaderboard.use-case.js';
+  GET_GLOBAL_LEADERBOARD,
+  GetGlobalLeaderboardUseCase,
+} from '../application/leaderboard/get-global-leaderboard.use-case.js';
+import {
+  GET_LEVEL_LEADERBOARD,
+  GetLevelLeaderboardUseCase,
+} from '../application/leaderboard/get-level-leaderboard.use-case.js';
 import {
   AUTHORIZE_LEVEL_EDITOR,
   AuthorizeLevelEditorUseCase,
@@ -37,9 +41,13 @@ import {
 } from '../application/levels/update-levels.use-case.js';
 import { CLOCK, type Clock } from '../application/ports/clock.js';
 import {
-  LEADERBOARD_READER,
-  type LeaderboardReader,
-} from '../application/ports/leaderboard-reader.js';
+  GLOBAL_BOARD_READER,
+  type GlobalBoardReader,
+} from '../application/ports/global-board-reader.js';
+import {
+  LEVEL_BOARD_READER,
+  type LevelBoardReader,
+} from '../application/ports/level-board-reader.js';
 import { LEVEL_REPOSITORY, type LevelRepository } from '../application/ports/level-repository.js';
 import { LOGGER, type Logger } from '../application/ports/logger.js';
 import { PASSWORD_HASHER, type PasswordHasher } from '../application/ports/password-hasher.js';
@@ -192,16 +200,31 @@ function levelValidators(): LevelValidators {
       provide: AUTHORIZE_LEVEL_EDITOR,
       useFactory: () => new AuthorizeLevelEditorUseCase(readLevelEditors()),
     },
+    // One DrizzleLeaderboardReader implements both board reader ports. Each
+    // port token is an alias of the class token, so both give the same
+    // instance (#218).
     {
-      provide: LEADERBOARD_READER,
+      provide: DrizzleLeaderboardReader,
       inject: [DATABASE],
-      useFactory: (database: Database): LeaderboardReader => new DrizzleLeaderboardReader(database),
+      useFactory: (database: Database) => new DrizzleLeaderboardReader(database),
+    },
+    { provide: GLOBAL_BOARD_READER, useExisting: DrizzleLeaderboardReader },
+    { provide: LEVEL_BOARD_READER, useExisting: DrizzleLeaderboardReader },
+    {
+      provide: GET_GLOBAL_LEADERBOARD,
+      inject: [GLOBAL_BOARD_READER, LOGGER],
+      useFactory: (boards: GlobalBoardReader, logger: Logger) =>
+        new LoggingAspect(new GetGlobalLeaderboardUseCase(boards), 'GetGlobalLeaderboard', logger),
     },
     {
-      provide: GET_LEADERBOARD,
-      inject: [LEADERBOARD_READER, LEVEL_REPOSITORY, LOGGER],
-      useFactory: (leaderboard: LeaderboardReader, levels: LevelRepository, logger: Logger) =>
-        new LoggingAspect(new GetLeaderboardUseCase(leaderboard, levels), 'GetLeaderboard', logger),
+      provide: GET_LEVEL_LEADERBOARD,
+      inject: [LEVEL_BOARD_READER, LEVEL_REPOSITORY, LOGGER],
+      useFactory: (boards: LevelBoardReader, levels: LevelRepository, logger: Logger) =>
+        new LoggingAspect(
+          new GetLevelLeaderboardUseCase(boards, levels),
+          'GetLevelLeaderboard',
+          logger,
+        ),
     },
     // Every route, also the routes of later modules, answers errors with ErrorDto.
     { provide: APP_FILTER, useClass: HttpErrorFilter },

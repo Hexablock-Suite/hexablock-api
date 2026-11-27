@@ -71,15 +71,15 @@
         <title id="ad3http-title">HexaBlock API HTTP adapters · UML class diagram</title>
         <desc id="ad3http-desc">
           Class diagram of layer 3 showing the Auth, Progress, Leaderboard and Levels controllers,
-          each holding the input ports it calls, the AuthDtoMapper that AuthController uses to build
-          each request and each answer, among them the RegisterUserRequest and the LoginRequest, the
-          LeaderboardDtoMapper that LeaderboardController uses to build each board query and each
-          answer, the JwtAuthGuard that the controller decorators apply to progress, leaderboard
-          reads and level updates and that holds the AuthenticateToken input port, the
-          LevelEditorGuard that runs after it on level updates and holds the AuthorizeLevelEditor
-          input port (#145), the LevelsDto that list() returns and update() takes, whose LevelDto
-          rows each carry the section for the validator of its gameId, and the HttpErrorFilter for
-          unexpected errors.
+          each holding the input ports it calls, the Leaderboard controller with one input port per
+          board (#218), the AuthDtoMapper that AuthController uses to build each request and each
+          answer, among them the RegisterUserRequest and the LoginRequest, the LeaderboardDtoMapper
+          that LeaderboardController uses to build each board request and each answer, the
+          JwtAuthGuard that the controller decorators apply to progress, leaderboard reads and level
+          updates and that holds the AuthenticateToken input port, the LevelEditorGuard that runs
+          after it on level updates and holds the AuthorizeLevelEditor input port (#145), the
+          LevelsDto that list() returns and update() takes, whose LevelDto rows each carry the
+          section for the validator of its gameId, and the HttpErrorFilter for unexpected errors.
         </desc>
         <defs>
           <marker
@@ -524,23 +524,23 @@
         </text>
         <line x1="40" y1="432" x2="380" y2="432" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="56" y="448" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - getLeaderboard: GetLeaderboard
+          - getGlobalLeaderboard: GetGlobalLeaderboard
         </text>
-        <line x1="40" y1="456" x2="380" y2="456" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="56" y="472" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + top(gameId: string): Promise&lt;LeaderboardDto&gt;
+        <text x="56" y="464" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - getLevelLeaderboard: GetLevelLeaderboard
         </text>
+        <line x1="40" y1="472" x2="380" y2="472" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="56" y="488" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + topOfLevel(gameId: string, levelId: string):
+          + top(gameId: string):
         </text>
         <text x="78" y="504" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;LeaderboardDto&gt;
+          Promise&lt;GlobalLeaderboardDto&gt;
         </text>
         <text x="56" y="520" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - answer(query: Result&lt;LeaderboardQuery, string[]&gt;):
+          + topOfLevel(gameId: string, levelId: string):
         </text>
         <text x="78" y="536" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;LeaderboardDto&gt;
+          Promise&lt;LevelLeaderboardDto&gt;
         </text>
         <!-- Class: LeaderboardDtoMapper (PART 3 · VIEW 5) -->
         <rect

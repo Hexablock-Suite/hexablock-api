@@ -6,12 +6,17 @@ import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzl
 import { DrizzleUserRepository } from '../../src/adapters/persistence/drizzle-user-repository.js';
 import { LoggingAspect } from '../../src/application/aspects/logging-aspect.js';
 import {
-  GET_LEADERBOARD,
-  type GetLeaderboard,
-} from '../../src/application/leaderboard/get-leaderboard.use-case.js';
+  GET_GLOBAL_LEADERBOARD,
+  type GetGlobalLeaderboard,
+} from '../../src/application/leaderboard/get-global-leaderboard.use-case.js';
+import {
+  GET_LEVEL_LEADERBOARD,
+  type GetLevelLeaderboard,
+} from '../../src/application/leaderboard/get-level-leaderboard.use-case.js';
 import { GET_LEVELS, GetLevelsUseCase } from '../../src/application/levels/get-levels.use-case.js';
 import { UPDATE_LEVELS } from '../../src/application/levels/update-levels.use-case.js';
-import { LEADERBOARD_READER } from '../../src/application/ports/leaderboard-reader.js';
+import { GLOBAL_BOARD_READER } from '../../src/application/ports/global-board-reader.js';
+import { LEVEL_BOARD_READER } from '../../src/application/ports/level-board-reader.js';
 import { LEVEL_REPOSITORY } from '../../src/application/ports/level-repository.js';
 import { LOGGER } from '../../src/application/ports/logger.js';
 import { PROGRESS_REPOSITORY } from '../../src/application/ports/progress-repository.js';
@@ -24,6 +29,7 @@ import {
   type SyncProgress,
 } from '../../src/application/progress/sync-progress.use-case.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
+import { LevelId } from '../../src/domain/progress/level-id.js';
 import { UserId } from '../../src/domain/user/user-id.js';
 import { LOGIN, LoginUseCase } from '../../src/application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../../src/application/auth/register.use-case.js';
@@ -37,7 +43,9 @@ import { RandomUserIdGenerator } from '../../src/adapters/crypto/random-user-id-
 import { ScryptPasswordHasher } from '../../src/adapters/crypto/scrypt-password-hasher.js';
 import { NestLogger } from '../../src/adapters/logging/nest-logger.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
+import { InMemoryLevelRepository } from '../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../support/in-memory-progress-repository.js';
+import { levelValidators } from '../support/level-format.js';
 import { testUserId } from '../support/user-ids.js';
 import { valueOf } from '../support/result.js';
 
@@ -107,35 +115,64 @@ describe('AppModule account wiring', () => {
     await moduleRef.close();
   });
 
-  it('should_bind_the_leaderboard_reader_and_wrap_get_leaderboard_in_logging_aspect_when_app_module_compiles', async () => {
+  // #218: each board has its own reader port and its own input port. One
+  // DrizzleLeaderboardReader implements both reader ports, so both tokens
+  // give the same instance.
+  it('should_bind_both_board_readers_to_one_drizzle_reader_and_wrap_both_leaderboard_ports_in_logging_aspect_when_app_module_compiles', async () => {
     stubTestEnvironment();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
-    expect(moduleRef.get(LEADERBOARD_READER)).toBeInstanceOf(DrizzleLeaderboardReader);
-    expect(moduleRef.get(GET_LEADERBOARD)).toBeInstanceOf(LoggingAspect);
+    const globalReader = moduleRef.get(GLOBAL_BOARD_READER);
+    expect(globalReader).toBeInstanceOf(DrizzleLeaderboardReader);
+    expect(moduleRef.get(LEVEL_BOARD_READER)).toBe(globalReader);
+    expect(moduleRef.get(GET_GLOBAL_LEADERBOARD)).toBeInstanceOf(LoggingAspect);
+    expect(moduleRef.get(GET_LEVEL_LEADERBOARD)).toBeInstanceOf(LoggingAspect);
     await moduleRef.close();
   });
 
   // The stub reader takes the place of the Drizzle one, so no database is
   // needed. The spy starts after the module is built, so it sees only the
   // line of the aspect.
-  it('should_run_get_leaderboard_inside_logging_aspect_when_get_leaderboard_port_is_called', async () => {
+  it('should_run_get_global_leaderboard_inside_logging_aspect_when_get_global_leaderboard_port_is_called', async () => {
     stubTestEnvironment();
     const empty = () => Promise.resolve([]);
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(LEADERBOARD_READER)
+      .overrideProvider(DrizzleLeaderboardReader)
       .useValue({ levelResults: empty, highScores: empty, standings: empty })
       .compile();
-    const getLeaderboard = moduleRef.get<GetLeaderboard>(GET_LEADERBOARD);
+    const getGlobalLeaderboard = moduleRef.get<GetGlobalLeaderboard>(GET_GLOBAL_LEADERBOARD);
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
 
-    const result = await getLeaderboard.execute({
-      board: 'global',
-      gameId: valueOf(GameId.of('hexa-fit')),
-    });
+    const result = await getGlobalLeaderboard.execute(valueOf(GameId.of('hexa-fit')));
 
     expect(result.ok).toBe(true);
-    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetLeaderboard outcome=success');
+    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetGlobalLeaderboard outcome=success');
+    await moduleRef.close();
+  });
+
+  // The empty in-memory level store holds no level, so the read fails with
+  // unknown-level, and the aspect writes the failure at warn level.
+  it('should_run_get_level_leaderboard_inside_logging_aspect_when_get_level_leaderboard_port_is_called', async () => {
+    stubTestEnvironment();
+    const empty = () => Promise.resolve([]);
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(DrizzleLeaderboardReader)
+      .useValue({ levelResults: empty, highScores: empty, standings: empty })
+      .overrideProvider(LEVEL_REPOSITORY)
+      .useValue(new InMemoryLevelRepository(levelValidators()))
+      .compile();
+    const getLevelLeaderboard = moduleRef.get<GetLevelLeaderboard>(GET_LEVEL_LEADERBOARD);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+
+    const result = await getLevelLeaderboard.execute({
+      gameId: valueOf(GameId.of('hexa-fit')),
+      levelId: valueOf(LevelId.of('fit-01')),
+    });
+
+    expect(result).toEqual({ ok: false, error: { kind: 'unknown-level' } });
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=GetLevelLeaderboard outcome=failure kind=unknown-level',
+    );
     await moduleRef.close();
   });
 

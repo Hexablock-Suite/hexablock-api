@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 2 of 4</p>
       <h1>Progress and leaderboard: use cases over output ports</h1>
       <svg
-        viewBox="0 0 1040 902"
+        viewBox="0 0 1040 1078"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc2progress-title uc2progress-desc"
@@ -71,16 +71,18 @@
         <title id="uc2progress-title">HexaBlock API progress use cases · UML class diagram</title>
         <desc id="uc2progress-desc">
           Class diagram of layer 2 showing SyncProgressUseCase, which holds the ProgressRepository
-          port for the whole progress aggregate and the Clock port, and GetLeaderboardUseCase, which
-          holds the LeaderboardReader port and the LevelRepository port. Before the board of a
-          level, the use case asks LevelRepository.holds() whether the definitions hold the level,
-          and fails with UnknownLevel when they do not (#146). The reader only filters and sums, and
-          the RankedBoard value object of the domain ranks the entries that the reader gives: the
-          use case builds no order. Each progress use case joins the userId and the gameId of its
-          request in a ProgressKey, and ProgressRepository finds and updates one progress by that
-          key. A footnote names LeaderboardController and LeaderboardDtoMapper of layer 3, which
-          call GetLeaderboard and translate its query and answer, and says that LeaderboardEntry is
-          a response type of layer 2 with no tactical stereotype.
+          port for the whole progress aggregate and the Clock port, and the two leaderboard use
+          cases (#218). GetLevelLeaderboardUseCase holds the LevelBoardReader port and the
+          LevelRepository port: before the board of a level, it asks LevelRepository.holds() whether
+          the definitions hold the level, and fails with UnknownLevel when they do not (#146).
+          GetGlobalLeaderboardUseCase holds the GlobalBoardReader port and never fails. Each reader
+          only filters and sums, and the RankedBoard value object of the domain ranks the entries
+          that the reader gives: the use cases build no order. Each progress use case joins the
+          userId and the gameId of its request in a ProgressKey, and ProgressRepository finds and
+          updates one progress by that key. A footnote names LeaderboardController and
+          LeaderboardDtoMapper of layer 3, which call each port from its own route and translate its
+          request and answer, and says that LeaderboardEntry is a response type of layer 2 with no
+          tactical stereotype.
         </desc>
         <defs>
           <marker
@@ -139,7 +141,7 @@
           x="24"
           y="24"
           width="992"
-          height="636"
+          height="796"
           rx="8"
           fill="#efe7f8"
           stroke="rgba(126,34,206,0.40)"
@@ -150,7 +152,7 @@
           x="552"
           y="64"
           width="448"
-          height="580"
+          height="732"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -195,17 +197,23 @@
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
-        <!-- GetLeaderboardUseCase holds LeaderboardReader: use -->
-        <line
-          x1="448"
-          y1="584"
-          x2="568"
-          y2="584"
+        <!-- GetLevelLeaderboardUseCase holds LevelBoardReader: use -->
+        <path
+          d="M448 584 L568 584"
+          fill="none"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
-        <!-- GetLeaderboardUseCase holds LevelRepository: use -->
+        <!-- GetGlobalLeaderboardUseCase holds GlobalBoardReader: use -->
+        <path
+          d="M448 752 L568 752"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#uc2progress-open)"
+        />
+        <!-- GetLevelLeaderboardUseCase holds LevelRepository: use -->
         <path
           d="M448 568 L520 568 L520 388 L568 388"
           fill="none"
@@ -257,7 +265,7 @@
         >
           clock 1
         </text>
-        <rect x="468" y="588" width="80" height="12" rx="2" fill="#efe7f8" />
+        <rect x="480" y="588" width="56" height="12" rx="2" fill="#efe7f8" />
         <text
           x="508"
           y="597"
@@ -267,7 +275,19 @@
           text-anchor="middle"
           letter-spacing="0.06em"
         >
-          leaderboard 1
+          boards 1
+        </text>
+        <rect x="480" y="756" width="56" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="508"
+          y="765"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          boards 1
         </text>
         <rect x="456" y="338" width="64" height="12" rx="2" fill="#efe7f8" />
         <text
@@ -370,7 +390,7 @@
           Promise&lt;Result&lt;PlayerProgress, ProgressProblem&gt;&gt;
         </text>
 
-        <!-- Class: GetLeaderboardUseCase («use case») -->
+        <!-- Class: GetLevelLeaderboardUseCase («use case») -->
         <rect
           x="64"
           y="488"
@@ -401,7 +421,7 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          GetLeaderboardUseCase
+          GetLevelLeaderboardUseCase
         </text>
         <text
           x="256"
@@ -412,21 +432,76 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-03
+          API-FR-03 · #146 · #218
         </text>
         <line x1="64" y1="548" x2="448" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - levels: LevelRepository
         </text>
         <text x="80" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - leaderboard: LeaderboardReader
+          - boards: LevelBoardReader
         </text>
         <line x1="64" y1="588" x2="448" y2="588" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="604" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute(query: LeaderboardQuery):
+          + execute(query: LevelBoardQuery):
         </text>
         <text x="102" y="620" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;Result&lt;Leaderboard, UnknownLevel&gt;&gt;
+          Promise&lt;Result&lt;LevelLeaderboard, UnknownLevel&gt;&gt;
+        </text>
+        <!-- Class: GetGlobalLeaderboardUseCase («use case») -->
+        <rect
+          x="64"
+          y="680"
+          width="384"
+          height="124"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="256"
+          y="698"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «use case»
+        </text>
+        <text
+          x="256"
+          y="716"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          GetGlobalLeaderboardUseCase
+        </text>
+        <text
+          x="256"
+          y="730"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · S3-03 · #218
+        </text>
+        <line x1="64" y1="740" x2="448" y2="740" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="756" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - boards: GlobalBoardReader
+        </text>
+        <line x1="64" y1="764" x2="448" y2="764" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="780" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(gameId: GameId):
+        </text>
+        <text x="102" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;GlobalLeaderboard, never&gt;&gt;
         </text>
         <!-- Class: LevelRepository («interface» «port» «repository»): only the operation of this view -->
         <rect
@@ -567,12 +642,12 @@
         <text x="584" y="288" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + now(): SyncInstant
         </text>
-        <!-- Class: LeaderboardReader («interface» «port») -->
+        <!-- Class: LevelBoardReader («interface» «port») -->
         <rect
           x="568"
           y="504"
           width="416"
-          height="132"
+          height="100"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -598,7 +673,7 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          LeaderboardReader
+          LevelBoardReader
         </text>
         <text
           x="776"
@@ -609,7 +684,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-03 · DS-5 · filters and sums
+          API-FR-03 · DS-5 · filters
         </text>
         <line x1="568" y1="564" x2="984" y2="564" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="584" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -618,10 +693,55 @@
         <text x="606" y="596" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;LeaderboardEntry&lt;LevelResult&gt;[]&gt;
         </text>
-        <text x="584" y="612" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <!-- Class: GlobalBoardReader («interface» «port») -->
+        <rect
+          x="568"
+          y="680"
+          width="416"
+          height="100"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="776"
+          y="698"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="776"
+          y="716"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          GlobalBoardReader
+        </text>
+        <text
+          x="776"
+          y="730"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-03 · DS-5 · S3-03 · filters and sums
+        </text>
+        <line x1="568" y1="740" x2="984" y2="740" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="584" y="756" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + highScores(gameId: GameId): Promise&lt;LeaderboardEntry&lt;Score&gt;[]&gt;
         </text>
-        <text x="584" y="628" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="584" y="772" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + standings(gameId: GameId): Promise&lt;LeaderboardEntry&lt;Standing&gt;[]&gt;
         </text>
         <!-- Class: GetProgressUseCase («use case») -->
@@ -693,12 +813,17 @@
         <line x1="80" y1="488" x2="80" y2="472" stroke="#17212a" stroke-width="1" />
         <circle cx="80" cy="467" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text x="91" y="470" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GetLeaderboard
+          GetLevelLeaderboard
+        </text>
+        <line x1="80" y1="680" x2="80" y2="664" stroke="#17212a" stroke-width="1" />
+        <circle cx="80" cy="659" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <text x="91" y="662" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          GetGlobalLeaderboard
         </text>
         <!-- Footnote -->
         <text
           x="24"
-          y="684"
+          y="844"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -708,7 +833,7 @@
         </text>
         <text
           x="24"
-          y="700"
+          y="860"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -718,37 +843,37 @@
         </text>
         <text
           x="24"
-          y="716"
+          y="876"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          under a lock per ProgressKey, and passes it to the domain. LeaderboardReader only filters
-          and sums: RankedBoard of the domain ranks the entries
+          under a lock per ProgressKey, and passes it to the domain. GlobalBoardReader and
+          LevelBoardReader only filter and sum: RankedBoard of the domain ranks
         </text>
         <text
           x="24"
-          y="732"
+          y="892"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          with the comparisons of the domain: LevelResult.isBetterThan() (DS-4),
-          Score.isHigherThan() and Standing.isBetterThan() (S3-03). The use case builds no order,
+          the entries with the comparisons of the domain: LevelResult.isBetterThan() (DS-4),
+          Score.isHigherThan() and Standing.isBetterThan() (S3-03). The use cases build
         </text>
         <text
           x="24"
-          y="748"
+          y="908"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          and the adapter adds none. Each row gets a rank: 1 plus the entries that are strictly
-          better. A full tie shares the rank, and the next rank skips: 1, 1, 3 (#83).
+          no order, and the adapter adds none. Each row gets a rank: 1 plus the entries that are
+          strictly better. A full tie shares the rank, and the next rank skips: 1, 1, 3 (#83).
         </text>
         <text
           x="24"
-          y="764"
+          y="924"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -758,17 +883,27 @@
         </text>
         <text
           x="24"
-          y="780"
+          y="940"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          In layer 3, LeaderboardController calls GetLeaderboard, and LeaderboardDtoMapper builds
-          its LeaderboardQuery and its LeaderboardDto (Part 3, views 3 and 5).
+          Each board has its own input port and its own reader port (#218). Only GetLevelLeaderboard
+          fails: UnknownLevel, when the definitions do not hold the level (#146).
         </text>
         <text
           x="24"
-          y="796"
+          y="956"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          In layer 3, LeaderboardController calls each port from its own route, and
+          LeaderboardDtoMapper builds each request and each DTO (Part 3, views 3 and 5).
+        </text>
+        <text
+          x="24"
+          y="972"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -777,10 +912,10 @@
           stereotype (Part 1, view 1).
         </text>
         <!-- Legend -->
-        <line x1="24" y1="820" x2="1016" y2="820" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="996" x2="1016" y2="996" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="838"
+          y="1014"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -790,16 +925,16 @@
         </text>
         <line
           x1="24"
-          y1="856"
+          y1="1032"
           x2="52"
-          y2="856"
+          y2="1032"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
         <text
           x="60"
-          y="860"
+          y="1036"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -808,7 +943,7 @@
         </text>
         <rect
           x="24"
-          y="876"
+          y="1052"
           width="20"
           height="12"
           rx="2"
@@ -818,7 +953,7 @@
         />
         <text
           x="56"
-          y="885"
+          y="1061"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -827,7 +962,7 @@
         </text>
         <rect
           x="166"
-          y="876"
+          y="1052"
           width="28"
           height="12"
           rx="2"
@@ -838,7 +973,7 @@
         />
         <text
           x="202"
-          y="885"
+          y="1061"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -847,7 +982,7 @@
         </text>
         <rect
           x="372"
-          y="876"
+          y="1052"
           width="28"
           height="12"
           rx="2"
@@ -857,18 +992,18 @@
         />
         <text
           x="408"
-          y="885"
+          y="1061"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
           Teal · focal class
         </text>
-        <line x1="518" y1="882" x2="534" y2="882" stroke="#17212a" stroke-width="1" />
-        <circle cx="539" cy="882" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+        <line x1="518" y1="1058" x2="534" y2="1058" stroke="#17212a" stroke-width="1" />
+        <circle cx="539" cy="1058" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
         <text
           x="554"
-          y="885"
+          y="1061"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

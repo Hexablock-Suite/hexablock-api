@@ -120,5 +120,3 @@ export class LevelLeaderboardDto {
   })
   readonly entries!: LevelEntryDto[];
 }
-
-export type LeaderboardDto = GlobalLeaderboardDto | LevelLeaderboardDto;

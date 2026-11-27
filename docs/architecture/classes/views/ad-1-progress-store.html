@@ -72,18 +72,18 @@
           HexaBlock API progress persistence · UML class diagram
         </title>
         <desc id="ad1progressstore-desc">
-          Class diagram of layers 3, 2 and 1 showing DrizzleProgressRepository and
-          DrizzleLeaderboardReader, which implement the two progress ports of layer 2, and
-          ProgressRowMapper, which turns the rows of both progress tables into the PlayerProgress
-          aggregate and back. The mapper receives the parts of the aggregate through
-          PlayerProgressReceiver, an interface of layer 1, and builds the aggregate again from those
-          parts with restore(). DrizzleProgressRepository finds and updates one progress by its
-          ProgressKey and receives the userId and the gameId of the key through ProgressKeyReceiver,
-          another interface of layer 1, for its lock key and its SQL filters.
-          DrizzleLeaderboardReader filters by gameId and level, sums the totals of each Standing,
-          joins the users table for the username of each row and adds no order. A footnote says that
-          LeaderboardEntry is a response type of layer 2 with no tactical stereotype and that
-          Standing is a value object of layer 1.
+          Class diagram of layers 3, 2 and 1 showing DrizzleProgressRepository, which implements
+          ProgressRepository, and DrizzleLeaderboardReader, which implements both board reader ports
+          of layer 2, GlobalBoardReader and LevelBoardReader (#218), and ProgressRowMapper, which
+          turns the rows of both progress tables into the PlayerProgress aggregate and back. The
+          mapper receives the parts of the aggregate through PlayerProgressReceiver, an interface of
+          layer 1, and builds the aggregate again from those parts with restore().
+          DrizzleProgressRepository finds and updates one progress by its ProgressKey and receives
+          the userId and the gameId of the key through ProgressKeyReceiver, another interface of
+          layer 1, for its lock key and its SQL filters. DrizzleLeaderboardReader filters by gameId
+          and level, sums the totals of each Standing, joins the users table for the username of
+          each row and adds no order. A footnote says that LeaderboardEntry is a response type of
+          layer 2 with no tactical stereotype and that Standing is a value object of layer 1.
         </desc>
         <defs>
           <marker
@@ -233,11 +233,22 @@
           stroke-dasharray="5,4"
           marker-end="url(#ad1progressstore-triangle)"
         />
-        <!-- DrizzleLeaderboardReader implements LeaderboardReader: realization -->
+        <!-- DrizzleLeaderboardReader implements GlobalBoardReader: realization -->
         <line
-          x1="688"
+          x1="640"
           y1="244"
-          x2="688"
+          x2="640"
+          y2="560"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#ad1progressstore-triangle)"
+        />
+        <!-- DrizzleLeaderboardReader implements LevelBoardReader: realization -->
+        <line
+          x1="840"
+          y1="244"
+          x2="840"
           y2="560"
           stroke="#17212a"
           stroke-width="1"
@@ -526,11 +537,11 @@
         >
           ProgressRepository
         </text>
-        <!-- Class: LeaderboardReader (PART 2 · VIEW 2) -->
+        <!-- Class: GlobalBoardReader (PART 2 · VIEW 2) -->
         <rect
-          x="584"
+          x="548"
           y="560"
-          width="208"
+          width="184"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -539,7 +550,7 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="688"
+          x="640"
           y="578"
           fill="#5b6873"
           font-size="8"
@@ -550,7 +561,7 @@
           PART 2 · VIEW 2
         </text>
         <text
-          x="688"
+          x="640"
           y="596"
           fill="#17212a"
           font-size="12"
@@ -558,7 +569,41 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          LeaderboardReader
+          GlobalBoardReader
+        </text>
+        <!-- Class: LevelBoardReader (PART 2 · VIEW 2) -->
+        <rect
+          x="748"
+          y="560"
+          width="184"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="840"
+          y="578"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 2
+        </text>
+        <text
+          x="840"
+          y="596"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelBoardReader
         </text>
         <!-- Class: PlayerProgressReceiver («interface» of layer 1, no tactical stereotype) -->
         <rect
@@ -696,8 +741,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          DrizzleLeaderboardReader reads both, and the username of each player from users (#230). It
-          filters by gameId and level, sums each Standing and adds no order (decision 2).
+          DrizzleLeaderboardReader implements both board readers (#218) and joins users for each
+          username (#230). It filters, sums each Standing and adds no order (decision 2).
         </text>
         <text
           x="24"
