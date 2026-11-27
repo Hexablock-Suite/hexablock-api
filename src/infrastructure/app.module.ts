@@ -67,8 +67,10 @@ import { FitLevelValidator } from '../domain/level/fit/fit-level-validator.js';
 import { HexTopology } from '../domain/level/hex-topology.js';
 import { LevelValidators } from '../domain/level/level-validators.js';
 import { SortLevelValidator } from '../domain/level/sort/sort-level-validator.js';
+import { SquareTopology } from '../domain/level/square-topology.js';
 import { Topologies } from '../domain/level/topologies.js';
 import { TopologyId } from '../domain/level/topology-id.js';
+import { TriangleTopology } from '../domain/level/triangle-topology.js';
 import { GameId } from '../domain/progress/game-id.js';
 import { createJwtService, readJwtSecret, readLevelEditors } from './auth/auth-config.js';
 import type { Database } from './database/connection.js';
@@ -80,12 +82,15 @@ export const LEVEL_VALIDATORS = Symbol('LevelValidators');
 
 // The strategies of the variants with level files (decision 5), under the
 // game ids of the product: hexa-fit and hexa-sort. Fit reads the rotation
-// steps of the hex topology (decision 6). hexa-lines and hexa-merge have no
-// level files, so they have no entry (API-FR-04).
+// steps and the moves of the hex, square and triangle topologies (decision 6,
+// #229). hexa-lines and hexa-merge have no level files, so they have no entry
+// (API-FR-04).
 function levelValidators(): LevelValidators {
   const hex = TopologyId.of('hex');
-  if (!hex.ok) {
-    throw new Error('The topology id hex must be valid.');
+  const square = TopologyId.of('square');
+  const triangle = TopologyId.of('triangle');
+  if (!hex.ok || !square.ok || !triangle.ok) {
+    throw new Error('The topology ids hex, square and triangle must be valid.');
   }
   const fit = GameId.of('hexa-fit');
   const sort = GameId.of('hexa-sort');
@@ -93,7 +98,16 @@ function levelValidators(): LevelValidators {
     throw new Error('The game ids hexa-fit and hexa-sort must be valid.');
   }
   return LevelValidators.of([
-    [fit.value, new FitLevelValidator(Topologies.of([[hex.value, new HexTopology()]]))],
+    [
+      fit.value,
+      new FitLevelValidator(
+        Topologies.of([
+          [hex.value, new HexTopology()],
+          [square.value, new SquareTopology()],
+          [triangle.value, new TriangleTopology()],
+        ]),
+      ),
+    ],
     [sort.value, new SortLevelValidator()],
   ]);
 }

@@ -55,12 +55,12 @@ export class Coordinate {
     );
   }
 
-  // Gives the cell that this cell becomes after one rotation step of a
-  // topology. `turnedUnits` holds where the step takes each unit cell: first
-  // [1, 0, ...], then [0, 1, ...], and so on. The turned cell adds each turned
-  // unit cell times the value of this cell at its place. For example, the hex
-  // step takes [1, 0] to [0, 1] and [0, 1] to [-1, 1], so [q, r] becomes
-  // [-r, q + r]. Cells of another length are a defect of the code.
+  // Gives the cell that this cell becomes under a linear map of a topology,
+  // such as one rotation step. `turnedUnits` holds where the map takes each
+  // unit cell: first [1, 0, ...], then [0, 1, ...], and so on. The turned cell
+  // adds each turned unit cell times the value of this cell at its place. For
+  // example, the hex step takes [1, 0] to [0, 1] and [0, 1] to [-1, 1], so
+  // [q, r] becomes [-r, q + r]. Cells of another length are a defect of the code.
   turnedBy(turnedUnits: readonly Coordinate[]): Coordinate {
     if (
       turnedUnits.length !== this.values.length ||
@@ -74,5 +74,20 @@ export class Coordinate {
       turnedUnits.reduce((sum, unit, index) => sum + unit.values[place] * this.values[index], 0),
     );
     return new Coordinate(Object.freeze(turned));
+  }
+
+  // Tells if the sum of the values is even. The triangle topology reads it
+  // as the orientation of a cell: an even sum points up.
+  hasEvenSum(): boolean {
+    return this.values.reduce((sum, value) => sum + value, 0) % 2 === 0;
+  }
+
+  // Gives the cell with half of each value. A topology halves only a cell
+  // with even values, so an odd value is a defect of the code.
+  halved(): Coordinate {
+    if (!this.values.every((value) => value % 2 === 0)) {
+      throw new RangeError('A cell is halved only when each of its values is even.');
+    }
+    return new Coordinate(Object.freeze(this.values.map((value) => 0 + value / 2)));
   }
 }

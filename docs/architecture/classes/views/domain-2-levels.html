@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 2 of 5</p>
       <h1>Level schema: one aggregate root per level and a typed section per gameId</h1>
       <svg
-        viewBox="0 0 1040 1065"
+        viewBox="0 0 1040 1493"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain2levels-title domain2levels-desc"
@@ -80,7 +80,11 @@
           of the level and picks FitSection, which checks A5 on that Topology. A dashed frame
           labelled Aggregate encloses LevelDefinition and its section types, FitSection and
           SortSection. LevelDefinition.decideReplace(stored), called on the incoming copy, decides
-          the version rule of S3-10 over the stored state (#174).
+          the version rule of S3-10 over the stored state (#174). A dashed frame labelled TOPOLOGY
+          groups the Topology interface, with its three rules holds(), turn() and move(), its three
+          implementations HexTopology, SquareTopology and TriangleTopology, and the Topologies
+          domain service, which holds one Topology per topologyId and finds it with
+          TopologyId.equals(). A triangle move keeps the orientation of the cell (#229).
         </desc>
         <defs>
           <marker
@@ -112,7 +116,7 @@
           x="24"
           y="24"
           width="992"
-          height="852"
+          height="1248"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -162,6 +166,29 @@
           letter-spacing="0.14em"
         >
           Aggregate · LevelDefinition · decision 4
+        </text>
+        <!-- Group frame: the TOPOLOGY group, the rules of each topology and the collection that finds them -->
+        <rect
+          x="36"
+          y="880"
+          width="972"
+          height="380"
+          rx="8"
+          fill="none"
+          stroke="rgba(91,104,115,0.55)"
+          stroke-width="1"
+          stroke-dasharray="4,4"
+        />
+        <text
+          x="48"
+          y="896"
+          fill="#5b6873"
+          font-size="8"
+          font-weight="500"
+          font-family="'IBM Plex Mono', monospace"
+          letter-spacing="0.14em"
+        >
+          TOPOLOGY · D4 · §8 · decision 6
         </text>
         <!-- Relationships (drawn before boxes) -->
         <!-- LevelDefinition&lt;FitSection&gt; holds section: FitSection: a value object, so a use arrow with role and multiplicity (decision 13) -->
@@ -234,11 +261,66 @@
           stroke-width="1"
           marker-end="url(#domain2levels-open)"
         />
+        <!-- FitLevelValidator holds topologies: Topologies: an attribute, so a use arrow with role and multiplicity (decision 13) -->
+        <path
+          d="M748 624 L748 908"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain2levels-open)"
+        />
+        <!-- Topologies holds entries: one Topology per topologyId: use arrow with role and multiplicity, no diamond (decision 13) -->
+        <path
+          d="M720 960 L640 960"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain2levels-open)"
+        />
+        <!-- FitSection asks the Topology of the level: a parameter of of(), so a use with a verb -->
+        <path
+          d="M320 600 L432 600 Q440 600 440 608 L440 908"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain2levels-open)"
+        />
+        <!-- HexTopology implements Topology: realization -->
+        <line
+          x1="300"
+          y1="1096"
+          x2="300"
+          y2="1012"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
+        />
+        <!-- SquareTopology implements Topology: realization -->
+        <line
+          x1="520"
+          y1="1096"
+          x2="520"
+          y2="1012"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
+        />
+        <!-- TriangleTopology implements Topology: realization, routed under Topologies -->
+        <path
+          d="M760 1096 L760 1088 Q760 1080 752 1080 L628 1080 Q620 1080 620 1072 L620 1012"
+          fill="none"
+          stroke="#17212a"
+          stroke-width="1"
+          stroke-dasharray="5,4"
+          marker-end="url(#domain2levels-triangle)"
+        />
         <!-- Arrow labels and multiplicities -->
-        <rect x="188" y="387" width="56" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="188" y="411" width="56" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="192"
-          y="396"
+          y="420"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -330,6 +412,42 @@
           letter-spacing="0.06em"
         >
           «bind» TSection → SortSection
+        </text>
+        <rect x="752" y="859" width="76" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="756"
+          y="868"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="start"
+          letter-spacing="0.06em"
+        >
+          topologies 1
+        </text>
+        <rect x="644" y="945" width="72" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="648"
+          y="954"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="start"
+          letter-spacing="0.06em"
+        >
+          entries 0..*
+        </text>
+        <rect x="446" y="820" width="32" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="462"
+          y="829"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          ASKS
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
@@ -864,6 +982,365 @@
         >
           Result&lt;SortSection, LevelProblem&gt;
         </text>
+        <!-- Class: Topology («interface») -->
+        <rect
+          x="200"
+          y="908"
+          width="440"
+          height="104"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="420"
+          y="926"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface»
+        </text>
+        <text
+          x="420"
+          y="944"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Topology
+        </text>
+        <line x1="200" y1="956" x2="640" y2="956" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="216" y="972" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + holds(cell: Coordinate): boolean
+        </text>
+        <text x="216" y="988" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + turn(cell: Coordinate, rotation: Rotation): Coordinate
+        </text>
+        <text
+          x="216"
+          y="1004"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + move(cell: Coordinate, at: Coordinate): Coordinate
+        </text>
+        <!-- Class: Topologies («domain service») -->
+        <rect
+          x="720"
+          y="908"
+          width="280"
+          height="156"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="860"
+          y="926"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «domain service»
+        </text>
+        <text
+          x="860"
+          y="944"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Topologies
+        </text>
+        <text
+          x="860"
+          y="958"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          DS-6 · decision 6
+        </text>
+        <line x1="720" y1="968" x2="1000" y2="968" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="736" y="984" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - entries: readonly TopologyEntry[]
+        </text>
+        <line x1="720" y1="992" x2="1000" y2="992" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          text-decoration="underline"
+          x="736"
+          y="1008"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + of(entries: readonly TopologyEntry[]):
+        </text>
+        <text
+          text-decoration="underline"
+          x="758"
+          y="1024"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Topologies
+        </text>
+        <text
+          x="736"
+          y="1040"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + find(id: TopologyId):
+        </text>
+        <text
+          x="758"
+          y="1056"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Result&lt;Topology, LevelProblem&gt;
+        </text>
+        <!-- Class: HexTopology (no stereotype, as in classes.drawio) -->
+        <rect
+          x="48"
+          y="1096"
+          width="304"
+          height="136"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="200"
+          y="1120"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          HexTopology
+        </text>
+        <text
+          x="200"
+          y="1134"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          A5 · decision 6
+        </text>
+        <line x1="48" y1="1144" x2="352" y2="1144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="1160" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + holds(cell: Coordinate): boolean
+        </text>
+        <text x="64" y="1176" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + turn(cell: Coordinate,
+        </text>
+        <text x="86" y="1192" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          rotation: Rotation): Coordinate
+        </text>
+        <text x="64" y="1208" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + move(cell: Coordinate,
+        </text>
+        <text x="86" y="1224" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          at: Coordinate): Coordinate
+        </text>
+        <!-- Class: SquareTopology (no stereotype, as in classes.drawio) -->
+        <rect
+          x="368"
+          y="1096"
+          width="304"
+          height="136"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="520"
+          y="1120"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          SquareTopology
+        </text>
+        <text
+          x="520"
+          y="1134"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          A5 · D4 · #229
+        </text>
+        <line x1="368" y1="1144" x2="672" y2="1144" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          x="384"
+          y="1160"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + holds(cell: Coordinate): boolean
+        </text>
+        <text
+          x="384"
+          y="1176"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + turn(cell: Coordinate,
+        </text>
+        <text
+          x="406"
+          y="1192"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          rotation: Rotation): Coordinate
+        </text>
+        <text
+          x="384"
+          y="1208"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + move(cell: Coordinate,
+        </text>
+        <text
+          x="406"
+          y="1224"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          at: Coordinate): Coordinate
+        </text>
+        <!-- Class: TriangleTopology (no stereotype, as in classes.drawio) -->
+        <rect
+          x="688"
+          y="1096"
+          width="312"
+          height="152"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="844"
+          y="1120"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          TriangleTopology
+        </text>
+        <text
+          x="844"
+          y="1134"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          A5 · D4 · #229
+        </text>
+        <line
+          x1="688"
+          y1="1144"
+          x2="1000"
+          y2="1144"
+          stroke="rgba(23,33,42,0.22)"
+          stroke-width="1"
+        />
+        <text
+          x="704"
+          y="1160"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + holds(cell: Coordinate): boolean
+        </text>
+        <text
+          x="704"
+          y="1176"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + turn(cell: Coordinate,
+        </text>
+        <text
+          x="726"
+          y="1192"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          rotation: Rotation): Coordinate
+        </text>
+        <text
+          x="704"
+          y="1208"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + move(cell: Coordinate,
+        </text>
+        <text
+          x="726"
+          y="1224"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          at: Coordinate): Coordinate
+        </text>
+        <text
+          x="704"
+          y="1240"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          - stepOf(cell: Coordinate): Coordinate
+        </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
           x="200"
@@ -910,7 +1387,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="884"
+          y="1296"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -920,7 +1397,7 @@
         </text>
         <text
           x="24"
-          y="900"
+          y="1312"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -930,7 +1407,7 @@
         </text>
         <text
           x="24"
-          y="916"
+          y="1328"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -940,7 +1417,7 @@
         </text>
         <text
           x="24"
-          y="932"
+          y="1344"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -950,7 +1427,7 @@
         </text>
         <text
           x="24"
-          y="948"
+          y="1360"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -960,7 +1437,7 @@
         </text>
         <text
           x="24"
-          y="964"
+          y="1376"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -969,11 +1446,28 @@
           rule of S3-10 over the stored state (#174). docs/level-format.md gives the shared level
           format.
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="988" x2="1016" y2="988" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="1006"
+          y="1392"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          Topology holds, turns and moves a cell. A triangle move keeps the orientation of the cell
+          (#229). A new topology adds one class and one entry of Topologies.
+        </text>
+        <!-- Legend -->
+        <line
+          x1="24"
+          y1="1416"
+          x2="1016"
+          y2="1416"
+          stroke="rgba(23,33,42,0.10)"
+          stroke-width="0.8"
+        />
+        <text
+          x="24"
+          y="1434"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -983,9 +1477,9 @@
         </text>
         <line
           x1="24"
-          y1="1024"
+          y1="1452"
           x2="52"
-          y2="1024"
+          y2="1452"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -993,7 +1487,7 @@
         />
         <text
           x="60"
-          y="1028"
+          y="1456"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1002,16 +1496,16 @@
         </text>
         <line
           x1="128"
-          y1="1024"
+          y1="1452"
           x2="156"
-          y2="1024"
+          y2="1452"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain2levels-open)"
         />
         <text
           x="164"
-          y="1028"
+          y="1456"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1020,7 +1514,7 @@
         </text>
         <text
           x="420"
-          y="1028"
+          y="1456"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1029,7 +1523,7 @@
         </text>
         <rect
           x="24"
-          y="1041"
+          y="1469"
           width="20"
           height="12"
           rx="2"
@@ -1039,7 +1533,7 @@
         />
         <text
           x="56"
-          y="1053"
+          y="1481"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1048,7 +1542,7 @@
         </text>
         <rect
           x="166"
-          y="1041"
+          y="1469"
           width="28"
           height="12"
           rx="2"
@@ -1059,7 +1553,7 @@
         />
         <text
           x="202"
-          y="1053"
+          y="1481"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1068,7 +1562,7 @@
         </text>
         <rect
           x="372"
-          y="1041"
+          y="1469"
           width="28"
           height="12"
           rx="2"
@@ -1078,7 +1572,7 @@
         />
         <text
           x="408"
-          y="1053"
+          y="1481"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1087,7 +1581,7 @@
         </text>
         <rect
           x="518"
-          y="1041"
+          y="1469"
           width="28"
           height="12"
           rx="2"
@@ -1098,7 +1592,7 @@
         />
         <text
           x="554"
-          y="1053"
+          y="1481"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1107,7 +1601,7 @@
         </text>
         <rect
           x="700"
-          y="1041"
+          y="1469"
           width="28"
           height="12"
           rx="2"
@@ -1118,7 +1612,7 @@
         />
         <text
           x="736"
-          y="1053"
+          y="1481"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

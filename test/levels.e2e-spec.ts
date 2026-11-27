@@ -4,6 +4,7 @@ import { levels } from '../src/adapters/persistence/schema.js';
 import { signIn as signInTo } from './support/http/sign-in.js';
 import { SequenceUserIdGenerator } from './support/auth/fakes.js';
 import { createTestApp, type TestApp } from './support/http/test-app.js';
+import { appLevelJson, SQUARE_AND_TRIANGLE_FIT_LEVELS } from './support/app-levels.js';
 import { levelJson } from './support/level-format.js';
 import { a5FailingFitJson } from './support/level-update.js';
 import { testUserId } from './support/user-ids.js';
@@ -119,6 +120,19 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     expect(updated.text).toBe('');
     expect(read.status).toBe(200);
     expect(read.body).toEqual({ levels: [levelJson('hexa-fit'), levelJson('hexa-sort')] });
+  });
+
+  // #229: the composition root knows the square and the triangle topologies,
+  // so one update with the bundled files of the app saves each of them.
+  it('should_save_every_level_when_the_update_holds_the_bundled_square_and_triangle_fit_files', async () => {
+    const token = await tokenOf('ada');
+    const bundled = SQUARE_AND_TRIANGLE_FIT_LEVELS.map((name) => appLevelJson(name));
+
+    const updated = await update(token, { levels: bundled });
+    const read = await list();
+
+    expect(updated.status).toBe(204);
+    expect(read.body).toEqual({ levels: bundled });
   });
 
   it('should_answer_ok_with_no_level_when_no_level_is_stored', async () => {

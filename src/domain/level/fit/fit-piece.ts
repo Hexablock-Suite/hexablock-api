@@ -56,9 +56,10 @@ export class FitPiece {
   }
 
   // Gives the cells that the piece covers when it turns around its origin by
-  // `rotation` steps of the topology and then moves by `at` (A5). Each cell
-  // of the piece must be a cell of the topology.
+  // `rotation` steps of the topology and then moves by `at` (A5). The
+  // topology moves each cell, because an offset of triangles is no plain sum
+  // (#229). Each cell of the piece must be a cell of the topology.
   coveredCells(rotation: Rotation, at: Coordinate, topology: Topology): readonly Coordinate[] {
-    return this.cells.map((cell) => topology.turn(cell, rotation).movedBy(at));
+    return this.cells.map((cell) => topology.move(topology.turn(cell, rotation), at));
   }
 }

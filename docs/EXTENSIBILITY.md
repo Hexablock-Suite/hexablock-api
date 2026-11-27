@@ -24,9 +24,9 @@ A variant with no level files, as Lines and Merge, adds nothing. `GameId` is an 
 
 ## A topology
 
-- **Add:** a class that implements [`Topology`](../src/domain/level/topology.ts), as [`HexTopology`](../src/domain/level/hex-topology.ts) does. It says which coordinates are its cells (`holds()`) and how a rotation turns a cell (`turn()`).
+- **Add:** a class that implements [`Topology`](../src/domain/level/topology.ts), as [`HexTopology`](../src/domain/level/hex-topology.ts), [`SquareTopology`](../src/domain/level/square-topology.ts) and [`TriangleTopology`](../src/domain/level/triangle-topology.ts) do. It says which coordinates are its cells (`holds()`), how a rotation turns a cell (`turn()`) and how the offset of a placement moves a cell (`move()`).
 - **Register:** one `[TopologyId, topology]` entry in the `Topologies.of()` list inside `levelValidators()` of [`app.module.ts`](../src/infrastructure/app.module.ts). [`Topologies.of()`](../src/domain/level/topologies.ts) throws a `RangeError` when two entries name one topology. A level whose `topology` has no entry gives `unknown-topology`.
-- **Test:** as [`topology.spec.ts`](../test/domain/level/topology.spec.ts) does for `HexTopology`.
+- **Test:** as [`topology.spec.ts`](../test/domain/level/topology.spec.ts) does for `HexTopology`, `SquareTopology` and `TriangleTopology`.
 
 ## A database engine
 
