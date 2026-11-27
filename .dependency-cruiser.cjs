@@ -23,6 +23,14 @@ module.exports = {
       to: { pathNot: '^src/(application|domain)/' },
     },
     {
+      name: 'only-aspects-import-logger-port',
+      comment:
+        'Only src/application/aspects imports the Logger port of src/application/ports/logger.ts. A use case holds no logger call: LoggingAspect writes every entry (statement §3.5, #219).',
+      severity: 'error',
+      from: { path: '^src/application/', pathNot: '^src/application/aspects/' },
+      to: { path: '^src/application/ports/logger[.]ts$' },
+    },
+    {
       name: 'adapters-never-import-infrastructure',
       comment:
         'Adapters never import src/infrastructure. The infrastructure wires adapters, not the reverse.',

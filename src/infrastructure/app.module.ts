@@ -35,6 +35,7 @@ import {
   AuthorizeLevelEditorUseCase,
 } from '../application/levels/authorize-level-editor.use-case.js';
 import { GET_LEVELS, GetLevelsUseCase } from '../application/levels/get-levels.use-case.js';
+import { unavailableLevelEntries } from '../application/levels/unavailable-level-entries.js';
 import {
   UPDATE_LEVELS,
   UpdateLevelsUseCase,
@@ -187,7 +188,14 @@ function levelValidators(): LevelValidators {
     {
       provide: GET_LEVELS,
       inject: [LEVEL_REPOSITORY, LOGGER],
-      useFactory: (levels: LevelRepository, logger: Logger) => new GetLevelsUseCase(levels, logger),
+      // The aspect also writes one entry per broken level row (#219).
+      useFactory: (levels: LevelRepository, logger: Logger) =>
+        new LoggingAspect(
+          new GetLevelsUseCase(levels),
+          'GetLevels',
+          logger,
+          unavailableLevelEntries,
+        ),
     },
     {
       provide: UPDATE_LEVELS,
