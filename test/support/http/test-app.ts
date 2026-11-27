@@ -1,5 +1,5 @@
-import type { INestApplication, Type } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import type { INestApplication, Provider, Type } from '@nestjs/common';
+import { Test, type TestingModuleBuilder } from '@nestjs/testing';
 import type { App } from 'supertest/types.js';
 import { DrizzleLeaderboardReader } from '../../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleLevelRepository } from '../../../src/adapters/persistence/drizzle-level-repository.js';
@@ -41,30 +41,36 @@ export interface TestApp {
   close(): Promise<void>;
 }
 
-export interface TestAppOptions {
+export interface TestModuleOptions {
+  // Extra controllers and providers of the root module of the test.
+  readonly controllers?: Type<unknown>[];
+  readonly providers?: Provider[];
   // Replaces the system clock, so a test can assert the stored instants.
   readonly clock?: Clock;
   // Replaces the random user ids, so a test knows the id of each account
   // before it signs up.
   readonly userIds?: UserIdGenerator;
+}
+
+export interface TestAppOptions extends Pick<TestModuleOptions, 'clock' | 'userIds'> {
   // The user ids that may update the levels (#145). Without it, no account may.
   readonly levelEditorIds?: readonly string[];
 }
 
-// Starts AppModule with the test configuration. The user, progress and level
-// repositories and the leaderboard reader run on the in-memory PGlite
-// database, so a test can read the stored rows. The level repository keeps
-// the LevelValidators of AppModule.
-export async function createTestApp(
-  controllers: Type<unknown>[] = [],
-  options: TestAppOptions = {},
-): Promise<TestApp> {
-  stubTestEnvironment();
-  if (options.levelEditorIds !== undefined) {
-    vi.stubEnv('LEVEL_EDITOR_IDS', options.levelEditorIds.join(','));
-  }
-  const database = await createTestDatabase();
-  let builder = Test.createTestingModule({ imports: [AppModule], controllers })
+// Builds the module of AppModule on the given database. The user, progress
+// and level repositories and the leaderboard reader run on that database.
+// The level repository keeps the LevelValidators of AppModule. The function
+// stubs no environment, so the provider composition of the contract job
+// calls it outside Vitest too (#151).
+export function testModuleOf(
+  database: TestDatabase,
+  options: TestModuleOptions = {},
+): TestingModuleBuilder {
+  let builder = Test.createTestingModule({
+    imports: [AppModule],
+    controllers: options.controllers ?? [],
+    providers: options.providers ?? [],
+  })
     .overrideProvider(USER_REPOSITORY)
     .useValue(new DrizzleUserRepository(database.db))
     .overrideProvider(PROGRESS_REPOSITORY)
@@ -82,7 +88,26 @@ export async function createTestApp(
   if (options.userIds !== undefined) {
     builder = builder.overrideProvider(USER_ID_GENERATOR).useValue(options.userIds);
   }
-  const moduleRef = await builder.compile();
+  return builder;
+}
+
+// Starts AppModule with the test configuration. The user, progress and level
+// repositories and the leaderboard reader run on the in-memory PGlite
+// database, so a test can read the stored rows.
+export async function createTestApp(
+  controllers: Type<unknown>[] = [],
+  options: TestAppOptions = {},
+): Promise<TestApp> {
+  stubTestEnvironment();
+  if (options.levelEditorIds !== undefined) {
+    vi.stubEnv('LEVEL_EDITOR_IDS', options.levelEditorIds.join(','));
+  }
+  const database = await createTestDatabase();
+  const moduleRef = await testModuleOf(database, {
+    controllers,
+    clock: options.clock,
+    userIds: options.userIds,
+  }).compile();
   const app = moduleRef.createNestApplication<INestApplication<App>>({ logger: false });
   configureHttpApp(app);
   await app.init();

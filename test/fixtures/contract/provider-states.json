@@ -1,0 +1,376 @@
+{
+  "consumer": {
+    "name": "hexablock-app"
+  },
+  "provider": {
+    "name": "hexablock-api"
+  },
+  "interactions": [
+    {
+      "description": "a sign-in",
+      "providerStates": [
+        {
+          "name": "an account exists",
+          "params": {
+            "username": "ada",
+            "password": "correct horse battery"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/auth/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "ada",
+          "password": "correct horse battery"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "accessToken": "a-token"
+        },
+        "matchingRules": {
+          "body": {
+            "$.accessToken": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "a sign-up with a taken username",
+      "providerStates": [
+        {
+          "name": "an account exists",
+          "params": {
+            "username": "ada",
+            "password": "correct horse battery"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/auth/register",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "ada",
+          "password": "correct horse battery"
+        }
+      },
+      "response": {
+        "status": 409,
+        "body": {
+          "statusCode": 409
+        }
+      }
+    },
+    {
+      "description": "a sign-up with a free username",
+      "providerStates": [
+        {
+          "name": "no account exists"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/auth/register",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "ada",
+          "password": "correct horse battery"
+        }
+      },
+      "response": {
+        "status": 201
+      }
+    },
+    {
+      "description": "the signed-in user",
+      "providerStates": [
+        {
+          "name": "a signed-in account exists",
+          "params": {
+            "username": "ada"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/auth/me",
+        "headers": {
+          "Authorization": "Bearer a-token"
+        },
+        "generators": {
+          "header": {
+            "Authorization": {
+              "type": "ProviderState",
+              "expression": "Bearer ${accessToken}",
+              "dataType": "STRING"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": "00000000-0000-4000-8000-000000000001"
+        },
+        "matchingRules": {
+          "body": {
+            "$.userId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "the stored levels",
+      "providerStates": [
+        {
+          "name": "a level is stored",
+          "params": {
+            "gameId": "hexa-fit",
+            "levelId": "fit-01"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/levels"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "levels": [
+            {
+              "gameId": "hexa-fit",
+              "levelId": "fit-01"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "a progress sync",
+      "providerStates": [
+        {
+          "name": "a level is stored",
+          "params": {
+            "gameId": "hexa-fit",
+            "levelId": "fit-01"
+          }
+        },
+        {
+          "name": "a signed-in account exists"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/progress",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer a-token"
+        },
+        "generators": {
+          "header": {
+            "Authorization": {
+              "type": "ProviderState",
+              "expression": "Bearer ${accessToken}",
+              "dataType": "STRING"
+            }
+          }
+        },
+        "body": {
+          "gameId": "hexa-fit",
+          "results": [
+            {
+              "levelId": "fit-01",
+              "stars": 3,
+              "moves": 12,
+              "elapsedMs": 45000
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "gameId": "hexa-fit",
+          "results": [
+            {
+              "levelId": "fit-01",
+              "stars": 3,
+              "moves": 12,
+              "elapsedMs": 45000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "the stored progress",
+      "providerStates": [
+        {
+          "name": "the signed-in account has progress on a stored level",
+          "params": {
+            "gameId": "hexa-fit",
+            "levelId": "fit-01"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/progress/hexa-fit",
+        "headers": {
+          "Authorization": "Bearer a-token"
+        },
+        "generators": {
+          "header": {
+            "Authorization": {
+              "type": "ProviderState",
+              "expression": "Bearer ${accessToken}",
+              "dataType": "STRING"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "gameId": "hexa-fit",
+          "results": [
+            {
+              "levelId": "fit-01"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "the board of a level",
+      "providerStates": [
+        {
+          "name": "several accounts have results on a stored level",
+          "params": {
+            "gameId": "hexa-fit",
+            "levelId": "fit-01"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/leaderboard/hexa-fit/levels/fit-01",
+        "headers": {
+          "Authorization": "Bearer a-token"
+        },
+        "generators": {
+          "header": {
+            "Authorization": {
+              "type": "ProviderState",
+              "expression": "Bearer ${accessToken}",
+              "dataType": "STRING"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "gameId": "hexa-fit",
+          "levelId": "fit-01",
+          "entries": [
+            {
+              "rank": 1
+            }
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.entries": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "the global board of a game",
+      "providerStates": [
+        {
+          "name": "several accounts have results on a stored level",
+          "params": {
+            "gameId": "hexa-fit",
+            "levelId": "fit-01"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/leaderboard/hexa-fit",
+        "headers": {
+          "Authorization": "Bearer a-token"
+        },
+        "generators": {
+          "header": {
+            "Authorization": {
+              "type": "ProviderState",
+              "expression": "Bearer ${accessToken}",
+              "dataType": "STRING"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "gameId": "hexa-fit",
+          "standings": [
+            {
+              "rank": 1
+            }
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.standings": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  }
+}

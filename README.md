@@ -331,15 +331,34 @@ After every HTTP change, run `pnpm openapi:export` and commit `openapi/openapi.j
 generates its API types from it, and `pnpm openapi:check` fails when the file drifts.
 
 Contract tests verify the client pact against a running API. The CI job `contract` runs them on
-every pull request with the pact from the client `main` branch.
+every pull request with the pact from the client `main` branch. They run against the provider
+composition of [start-provider.js](scripts/contract/start-provider.js): `AppModule` on an
+in-memory PGlite database, plus the state-change endpoint `POST /v1/_pact/provider-states`.
+Before and after each interaction, the verifier posts the provider state of the interaction to
+that endpoint (#151). Only this composition mounts the endpoint: the production `AppModule` and
+`dist/main.js` never do, because the endpoint writes any data for anyone.
 
 ```bash
-pnpm build && PORT=3000 node dist/main.js &   # start the API
+PORT=3000 node --env-file=.env.example scripts/contract/start-provider.js &   # start the provider composition
 pnpm contract:verify                          # pact from hexablock-app main, API at BACKEND_URL
-PACT_FILE=test/fixtures/contract/hexablock-app-hexablock-api.json pnpm contract:verify
+PACT_FILE=test/fixtures/contract/provider-states.json pnpm contract:verify
 ```
 
 `BACKEND_URL` defaults to `http://localhost:3000`. A missing pact fails the run.
+
+The provider states of the client interactions (app #45 to #48). Each param is optional. A
+request takes a value of the setup through a provider-state expression, such as
+`fromProviderState('Bearer ${accessToken}', …)`. The states of one interaction add up, and the
+teardown after each interaction removes every row.
+
+| State                                                  | Params (default)                                                         | Values                                                   | Client     |
+| ------------------------------------------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------- | ---------- |
+| `no account exists`                                    | none                                                                     | none                                                     | #45        |
+| `an account exists`                                    | `username` (`ada`), `password` (`correct horse battery`)                 | `username`                                               | #45        |
+| `a signed-in account exists`                           | `username`, `password`                                                   | `accessToken`, `userId`, `username`                      | #45 to #47 |
+| `a level is stored`                                    | `gameId` (`hexa-fit` or `hexa-sort`; `hexa-fit`), `levelId` (`fit-01`)   | `gameId`, `levelId`                                      | #46, #48   |
+| `the signed-in account has progress on a stored level` | the params of the two states above; the result has 3 stars and 12 moves  | `accessToken`, `userId`, `username`, `gameId`, `levelId` | #46        |
+| `several accounts have results on a stored level`      | `gameId`, `levelId`; `ada`, `grace` and `linus` sync 10, 12 and 14 moves | `accessToken` of `ada`, `gameId`, `levelId`              | #47        |
 
 ## AI Usage Documentation
 
