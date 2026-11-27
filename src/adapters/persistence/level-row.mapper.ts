@@ -38,7 +38,7 @@ export const LevelRowMapper = {
 
   // Sorts nothing: the rows come in the order of the port.
   toListedLevels(rows: readonly LevelRow[], validators: LevelValidators): ListedLevels {
-    const levels: LevelDefinition<unknown>[] = [];
+    const levels: LevelDefinition[] = [];
     const unavailable: UnavailableLevel[] = [];
     for (const row of rows) {
       const stored = LevelRowMapper.toStoredLevel(row, validators);
@@ -51,7 +51,7 @@ export const LevelRowMapper = {
     return { levels, unavailable };
   },
 
-  toRow(level: LevelDefinition<unknown>): LevelRow {
+  toRow(level: LevelDefinition): LevelRow {
     const { gameId, levelId, order, version, topology, section } = receiveValueOf(level);
     return {
       gameId: receiveValueOf(gameId),
@@ -68,7 +68,7 @@ export const LevelRowMapper = {
 function restored(
   row: LevelRow,
   validators: LevelValidators,
-): Result<LevelDefinition<unknown>, StoredLevelProblem> {
+): Result<LevelDefinition, StoredLevelProblem> {
   const gameId = GameId.of(row.gameId);
   if (!gameId.ok) return gameId;
   const levelId = LevelId.of(row.levelId);

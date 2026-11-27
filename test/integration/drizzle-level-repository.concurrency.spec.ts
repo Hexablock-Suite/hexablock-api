@@ -69,7 +69,7 @@ describe.skipIf(!PG_URL)('DrizzleLevelRepository on a real Postgres', () => {
     return new DrizzleLevelRepository(db, levelValidators());
   }
 
-  function versionOf(level: LevelDefinition<unknown>): number {
+  function versionOf(level: LevelDefinition): number {
     return receiveValueOf(receiveValueOf(level).version);
   }
 

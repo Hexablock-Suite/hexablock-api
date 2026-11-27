@@ -19,7 +19,7 @@ export type StoredLevelProblem = GameIdProblem | LevelIdProblem | LevelProblem;
 //   passes as no row.
 export type StoredLevel =
   | { readonly state: 'absent' }
-  | { readonly state: 'valid'; readonly level: LevelDefinition<unknown> }
+  | { readonly state: 'valid'; readonly level: LevelDefinition }
   | {
       readonly state: 'broken';
       readonly reason: StoredLevelProblem;

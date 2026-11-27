@@ -116,7 +116,7 @@ export function levelJson(
 export function checkedLevel(
   json: LevelJson,
   validators: LevelValidators = levelValidators(),
-): LevelDefinition<unknown> {
+): LevelDefinition {
   return valueOf(
     validators.check(
       valueOf(GameId.of(json.gameId)),

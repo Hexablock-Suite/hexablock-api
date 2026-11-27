@@ -51,7 +51,7 @@ export const LevelDtoMapper = {
   // The level delivers its parts in the fields of the shared level format.
   // receiveJsonOf() gives the JSON of the section, so the mapper names no
   // section type.
-  toDto(level: LevelDefinition<unknown>): LevelDto {
+  toDto(level: LevelDefinition): LevelDto {
     const { gameId, levelId, order, version, topology, section } = receiveValueOf(level);
     return {
       gameId: receiveValueOf(gameId),

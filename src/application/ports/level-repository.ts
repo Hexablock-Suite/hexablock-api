@@ -13,7 +13,7 @@ import type { ListedLevels } from '../levels/listed-levels.js';
 // #174). The level that it returns has the gameId and the levelId of the
 // update, and it replaces a valid or a broken row. It is synchronous
 // domain code and does no I/O.
-export type LevelChange = (stored: StoredLevel) => Result<LevelDefinition<unknown>, LevelProblem>;
+export type LevelChange = (stored: StoredLevel) => Result<LevelDefinition, LevelProblem>;
 
 // Port. It lists and changes the LevelDefinition aggregates, one per gameId
 // and levelId (API-FR-04, DS-6). Each level is the root of its own aggregate,
@@ -40,10 +40,7 @@ export interface LevelRepository {
   // delivery out of layer 2: each adapter receives the levelIds in the
   // border (decision 22, #217). A sync reads no level that its results do
   // not name (#171). It takes no lock and saves no level.
-  findFor(
-    gameId: GameId,
-    results: readonly LevelResult[],
-  ): Promise<readonly LevelDefinition<unknown>[]>;
+  findFor(gameId: GameId, results: readonly LevelResult[]): Promise<readonly LevelDefinition[]>;
 
   // Runs the change while it holds a lock for the gameId and the levelId,
   // and saves the level that the change returns. Two updates of one level
@@ -56,7 +53,7 @@ export interface LevelRepository {
     gameId: GameId,
     levelId: LevelId,
     change: LevelChange,
-  ): Promise<Result<LevelDefinition<unknown>, LevelProblem>>;
+  ): Promise<Result<LevelDefinition, LevelProblem>>;
 }
 
 // Nest injection token for the LevelRepository port.

@@ -21,7 +21,7 @@ const SORT_01 = valueOf(LevelId.of('sort-01'));
 export function storeLevel(
   repository: LevelRepository,
   json: LevelJson,
-): Promise<Result<LevelDefinition<unknown>, unknown>> {
+): Promise<Result<LevelDefinition, unknown>> {
   const level = checkedLevel(json);
   return repository.update(valueOf(GameId.of(json.gameId)), valueOf(LevelId.of(json.levelId)), () =>
     ok(level),
@@ -52,7 +52,7 @@ function seenState(stored: StoredLevel): unknown {
 }
 
 // The version of a level as a number, so a test can count the updates.
-function versionOf(level: LevelDefinition<unknown>): number {
+function versionOf(level: LevelDefinition): number {
   return receiveValueOf(receiveValueOf(level).version);
 }
 

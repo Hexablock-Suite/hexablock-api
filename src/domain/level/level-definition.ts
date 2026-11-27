@@ -14,6 +14,9 @@ import type { TopologyId } from './topology-id.js';
 // Entity and aggregate root of one level definition (DS-6, API-FR-04, decision
 // 4). Its identity is the gameId plus the levelId. It holds the common part
 // and the section of its game: TSection is FitSection or SortSection.
+// The class bounds TSection by LevelSection, because the level asks its
+// section mostStars(). LevelSection is the default, so a level of any game
+// is a LevelDefinition (decision 4, #222).
 // A level is born valid. of() builds a level only from a section that its
 // section type accepted, so no level with an unchecked section exists.
 // The boundary is one level. The section rules hold inside one level, and so
@@ -21,14 +24,14 @@ import type { TopologyId } from './topology-id.js';
 // No requirement links two levels (DS-6, DS-11, S3-02, S3-10).
 // The level has no getter. deliverTo() gives its parts to a receiver of the
 // border, in the fields of the shared level format (docs/level-format.md).
-export class LevelDefinition<TSection> {
+export class LevelDefinition<TSection extends LevelSection = LevelSection> {
   private constructor(
     private readonly gameId: GameId,
     private readonly levelId: LevelId,
     private readonly order: LevelOrder,
     private readonly version: LevelVersion,
     private readonly topology: TopologyId,
-    private readonly section: TSection & LevelSection,
+    private readonly section: TSection,
   ) {}
 
   // Takes the Result of the section factory. A failed section gives its level
@@ -50,7 +53,7 @@ export class LevelDefinition<TSection> {
   // Two levels are the same level when they have the same gameId and the
   // same levelId. The other data does not count: two copies of one level can
   // have two versions (DS-11).
-  equals(other: LevelDefinition<unknown>): boolean {
+  equals(other: LevelDefinition): boolean {
     return this.isIdentifiedBy(other.gameId, other.levelId);
   }
 
@@ -76,7 +79,7 @@ export class LevelDefinition<TSection> {
   // This level is the incoming copy: an absent store takes it, a valid
   // stored level decides through accepts(), and a broken row compares only
   // its version, when the row holds one. The use case only coordinates.
-  decideReplace(stored: StoredLevel): Result<LevelDefinition<unknown>, LevelProblem> {
+  decideReplace(stored: StoredLevel): Result<LevelDefinition, LevelProblem> {
     switch (stored.state) {
       case 'absent':
         return ok(this);

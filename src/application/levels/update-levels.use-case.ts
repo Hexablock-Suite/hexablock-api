@@ -38,7 +38,7 @@ export const UPDATE_LEVELS = Symbol('UpdateLevels');
 interface CheckedLevel {
   readonly gameId: GameId;
   readonly levelId: LevelId;
-  readonly level: LevelDefinition<unknown>;
+  readonly level: LevelDefinition;
 }
 
 // Checks every level of the batch through LevelValidators before it saves
