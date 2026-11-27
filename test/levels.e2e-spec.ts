@@ -215,6 +215,59 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     },
   );
 
+  // #223: each level problem that a client sees reaches it through the
+  // update, and the other tests of this file reach the rest. A broken part
+  // of a field gives the code of the field, never a part code: a cell of 0.5
+  // gives invalid-figure, a rotation of 1.5 gives invalid-witness, a negative
+  // star limit gives invalid-stars, and a negative seed gives invalid-source
+  // (decision 11). The Fit example with no piece c covers five of the six
+  // cells of its figure, so A5 fails on the area.
+  const fit = levelJson('hexa-fit');
+  const sort = levelJson('hexa-sort');
+  const fitWithoutPieceC = {
+    ...fit,
+    section: {
+      ...fit.section,
+      pieces: (fit.section.pieces as unknown[]).slice(0, 2),
+      witness: (fit.section.witness as unknown[]).slice(0, 2),
+    },
+  };
+  it.each([
+    [{ ...fit, version: 0 }, 'invalid-version'],
+    [{ ...fit, topology: 'Hex' }, 'invalid-topology'],
+    [{ ...fit, topology: 'cube' }, 'unknown-topology'],
+    [{ ...fit, section: { ...fit.section, figure: [[0.5, 0]] } }, 'invalid-figure'],
+    [
+      { ...fit, section: { ...fit.section, witness: [{ piece: 'a', rotation: 1.5, at: [0, 0] }] } },
+      'invalid-witness',
+    ],
+    [
+      { ...fit, section: { ...fit.section, stars: [{ maxMoves: -1, maxElapsedMs: 0 }] } },
+      'invalid-stars',
+    ],
+    [fitWithoutPieceC, 'unequal-area'],
+    [{ ...sort, section: { ...sort.section, radius: 0 } }, 'invalid-radius'],
+    [{ ...sort, section: { ...sort.section, goals: 0 } }, 'invalid-goals'],
+    [
+      { ...sort, section: { ...sort.section, source: { seed: -1, colors: ['red'] } } },
+      'invalid-source',
+    ],
+  ])(
+    'should_answer_bad_request_with_the_code_of_the_broken_field_and_save_nothing_when_a_level_breaks_a_rule_that_a_client_sees',
+    async (level, problem) => {
+      const token = await tokenOf('ada');
+
+      const rejected = await update(token, { levels: [level] });
+      const read = await list();
+
+      expect(rejected.status).toBe(400);
+      expect(rejected.body).toEqual(
+        badRequest(`gameId "${level.gameId}", levelId "${level.levelId}": ${problem}`),
+      );
+      expect(read.body).toEqual({ levels: [] });
+    },
+  );
+
   // A gameId or a levelId that is not a string has no name, so its problem
   // names its place in the list, as for a string that breaks the rule.
   const GAME_ID_PROBLEM = 'levels[0]: gameId must be a lowercase slug of 1 to 64 characters, got';

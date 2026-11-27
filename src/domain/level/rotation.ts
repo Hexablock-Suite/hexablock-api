@@ -1,11 +1,13 @@
-import { err, ok, type Result } from '../../shared/result.js';
-import type { ValueReceiver } from '../../shared/value-receiver.js';
-import type { Coordinate } from '../coordinate.js';
-import type { LevelProblem } from '../level-problem.js';
+import { err, ok, type Result } from '../shared/result.js';
+import type { ValueReceiver } from '../shared/value-receiver.js';
+import type { Coordinate } from './coordinate.js';
+import type { LevelProblem } from './level-problem.js';
 
-// Value object for the rotation of a piece in the witness of a Fit level: a
-// count of rotation steps of the level topology, never degrees (A5). The hex
-// topology has six steps of 60°. A negative count turns the other way.
+// Value object for a rotation: a count of rotation steps of the level
+// topology, never degrees (A5). The hex topology has six steps of 60°. A
+// negative count turns the other way. The Topology contract turns a cell by a
+// rotation, and the witness of a Fit level places each piece with one. So the
+// rotation lives next to Coordinate, not in level/fit/ (#221).
 export class Rotation {
   private constructor(private readonly steps: number) {}
 

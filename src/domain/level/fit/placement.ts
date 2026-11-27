@@ -2,11 +2,11 @@ import { ok, type Result } from '../../shared/result.js';
 import { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
 import { readFields } from '../parts.js';
+import { Rotation } from '../rotation.js';
 import type { Topology } from '../topology.js';
 import type { ValueReceiver } from '../../shared/value-receiver.js';
 import type { FitPiece } from './fit-piece.js';
 import { PieceId } from './piece-id.js';
-import { Rotation } from './rotation.js';
 
 // Value object for one entry of the witness of a Fit level, the solution of
 // the designer (A5): the piece, its rotation and the offset where it lies.

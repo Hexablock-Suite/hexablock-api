@@ -1,8 +1,7 @@
 import type { LevelRow } from '../../src/adapters/persistence/level-row.mapper.js';
 import { receiveJsonOf, receiveValueOf } from '../../src/adapters/received.js';
 import type { LevelRepository } from '../../src/application/ports/level-repository.js';
-import type { LevelDefinition } from '../../src/domain/level/level-definition.js';
-import type { StoredLevel } from '../../src/domain/level/stored-level.js';
+import type { LevelDefinition, StoredLevel } from '../../src/domain/level/level-definition.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';

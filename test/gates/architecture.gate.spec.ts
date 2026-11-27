@@ -15,6 +15,40 @@ describe('architecture gate', () => {
     ]);
   });
 
+  // #221: an import cycle in src/domain fails the gate, type-only imports
+  // included. A one-way import between two domain files passes.
+  it('should_report_import_cycle_when_two_domain_files_import_each_other', () => {
+    expect(violationsOf(report, 'domain-imports-no-cycle')).toEqual([
+      'src/domain/cycle-first.ts -> src/domain/cycle-second.ts',
+    ]);
+  });
+
+  it('should_allow_a_one_way_import_when_a_domain_file_imports_another_domain_file', () => {
+    const fromOneWayFixture = report.violations.filter(
+      (violation) => violation.from === 'src/domain/imports-domain.ts',
+    );
+
+    expect(fromOneWayFixture).toEqual([]);
+  });
+
+  // #221: a shared file of a domain folder never imports a variant subfolder
+  // of that folder. The variant imports the shared part, so the reverse import
+  // closes a cycle between the two folders. dependency-cruiser folds a
+  // subfolder into its parent, so the cycle rule above cannot see it.
+  it('should_report_variant_import_when_a_shared_domain_file_imports_a_subfolder_of_its_folder', () => {
+    expect(violationsOf(report, 'domain-folder-imports-no-subfolder')).toEqual([
+      'src/domain/level/imports-variant.ts -> src/domain/level/fit/variant.ts',
+    ]);
+  });
+
+  it('should_allow_the_shared_part_when_a_variant_subfolder_imports_its_own_folder', () => {
+    const fromVariantFixture = report.violations.filter(
+      (violation) => violation.from === 'src/domain/level/fit/imports-area.ts',
+    );
+
+    expect(fromVariantFixture).toEqual([]);
+  });
+
   it('should_report_application_purity_when_application_imports_beyond_domain', () => {
     expect(violationsOf(report, 'application-imports-only-domain')).toEqual([
       'src/application/imports-adapter.ts -> src/adapters/http/imports-infrastructure.ts',
