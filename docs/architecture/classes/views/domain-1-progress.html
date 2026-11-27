@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 1 · View 1 of 5</p>
       <h1>Progress: one aggregate per user and gameId, and the values that rank a leaderboard</h1>
       <svg
-        viewBox="0 0 1040 1362"
+        viewBox="0 0 1040 1378"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain1progress-title domain1progress-desc"
@@ -79,17 +79,18 @@
           restore() from those parts and keeps its LevelResult values, each one with the
           isBetterThan order of DS-4. The Standing value object holds the totals of a player in one
           game, a Stars, a LevelsCompleted, a Moves and an ElapsedTime, and the isBetterThan order
-          of S3-03. In layer 2, the LeaderboardEntry response type names the player by UserId and
-          holds the value that ranks the player: a LevelResult, a Score or a Standing. ProgressKey
-          takes the UserId and the GameId built in of(), which returns the key itself, compares them
-          in equals() and delivers both to a ProgressKeyReceiver with deliverTo(). GameId, Score,
-          SyncInstant and UserId keep their value private and deliver it to a receiver with
-          deliverTo(). Each of their factories returns a Result with the code of a broken rule.
-          LevelResult keeps its four value objects private, takes them built in of(), and delivers
-          all four to a LevelResultReceiver with deliverTo(). A dashed frame labelled Aggregate
-          encloses PlayerProgress and the value objects that it holds: ProgressKey, UserId, GameId,
-          LevelResult, Score and SyncInstant. A footnote gives the port signatures find(key:
-          ProgressKey) and update(key: ProgressKey, change: ProgressChange) of ProgressRepository.
+          of S3-03. In layer 2, the LeaderboardEntry response type names the player by UserId, names
+          the account by Username (#230), and holds the value that ranks the player: a LevelResult,
+          a Score or a Standing. ProgressKey takes the UserId and the GameId built in of(), which
+          returns the key itself, compares them in equals() and delivers both to a
+          ProgressKeyReceiver with deliverTo(). GameId, Score, SyncInstant and UserId keep their
+          value private and deliver it to a receiver with deliverTo(). Each of their factories
+          returns a Result with the code of a broken rule. LevelResult keeps its four value objects
+          private, takes them built in of(), and delivers all four to a LevelResultReceiver with
+          deliverTo(). A dashed frame labelled Aggregate encloses PlayerProgress and the value
+          objects that it holds: ProgressKey, UserId, GameId, LevelResult, Score and SyncInstant. A
+          footnote gives the port signatures find(key: ProgressKey) and update(key: ProgressKey,
+          change: ProgressChange) of ProgressRepository.
         </desc>
         <defs>
           <marker
@@ -224,7 +225,7 @@
         <!-- LeaderboardEntry<LevelResult> holds result on the board of a level: use with role and multiplicity -->
         <line
           x1="540"
-          y1="164"
+          y1="180"
           x2="540"
           y2="288"
           stroke="#5b6873"
@@ -434,7 +435,7 @@
           x="400"
           y="64"
           width="280"
-          height="100"
+          height="116"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -478,6 +479,9 @@
           + userId: UserId {readOnly}
         </text>
         <text x="416" y="156" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + username: Username {readOnly}
+        </text>
+        <text x="416" y="172" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + result: TResult {readOnly}
         </text>
         <!-- Class: UserId («value object») -->
@@ -1404,21 +1408,31 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
+          LeaderboardEntry also names the account of the player by its Username, which view 1.3
+          draws (#230).
+        </text>
+        <text
+          x="24"
+          y="1272"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
           ProgressRepository finds the aggregate with find(key: ProgressKey) and changes it with
           update(key: ProgressKey, change: ProgressChange) (#107).
         </text>
         <!-- Legend -->
         <line
           x1="24"
-          y1="1280"
+          y1="1296"
           x2="1016"
-          y2="1280"
+          y2="1296"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1298"
+          y="1314"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1428,16 +1442,16 @@
         </text>
         <line
           x1="24"
-          y1="1316"
+          y1="1332"
           x2="52"
-          y2="1316"
+          y2="1332"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
         <text
           x="60"
-          y="1320"
+          y="1336"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1446,7 +1460,7 @@
         </text>
         <text
           x="299"
-          y="1320"
+          y="1336"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1455,7 +1469,7 @@
         </text>
         <rect
           x="24"
-          y="1336"
+          y="1352"
           width="20"
           height="12"
           rx="2"
@@ -1465,7 +1479,7 @@
         />
         <rect
           x="48"
-          y="1336"
+          y="1352"
           width="20"
           height="12"
           rx="2"
@@ -1475,7 +1489,7 @@
         />
         <text
           x="80"
-          y="1345"
+          y="1361"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1484,7 +1498,7 @@
         </text>
         <rect
           x="240"
-          y="1336"
+          y="1352"
           width="28"
           height="12"
           rx="2"
@@ -1495,7 +1509,7 @@
         />
         <text
           x="276"
-          y="1345"
+          y="1361"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1504,7 +1518,7 @@
         </text>
         <rect
           x="446"
-          y="1336"
+          y="1352"
           width="28"
           height="12"
           rx="2"
@@ -1514,7 +1528,7 @@
         />
         <text
           x="482"
-          y="1345"
+          y="1361"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1523,7 +1537,7 @@
         </text>
         <rect
           x="592"
-          y="1336"
+          y="1352"
           width="28"
           height="12"
           rx="2"
@@ -1534,7 +1548,7 @@
         />
         <text
           x="628"
-          y="1345"
+          y="1361"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

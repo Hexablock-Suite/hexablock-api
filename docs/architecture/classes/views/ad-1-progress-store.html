@@ -80,9 +80,10 @@
           parts with restore(). DrizzleProgressRepository finds and updates one progress by its
           ProgressKey and receives the userId and the gameId of the key through ProgressKeyReceiver,
           another interface of layer 1, for its lock key and its SQL filters.
-          DrizzleLeaderboardReader filters by gameId and level, sums the totals of each Standing and
-          adds no order. A footnote says that LeaderboardEntry is a response type of layer 2 with no
-          tactical stereotype and that Standing is a value object of layer 1.
+          DrizzleLeaderboardReader filters by gameId and level, sums the totals of each Standing,
+          joins the users table for the username of each row and adds no order. A footnote says that
+          LeaderboardEntry is a response type of layer 2 with no tactical stereotype and that
+          Standing is a value object of layer 1.
         </desc>
         <defs>
           <marker
@@ -695,8 +696,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          DrizzleLeaderboardReader reads both: it filters by gameId and level, sums the totals of
-          each Standing and adds no order (decision 2).
+          DrizzleLeaderboardReader reads both, and the username of each player from users (#230). It
+          filters by gameId and level, sums each Standing and adds no order (decision 2).
         </text>
         <text
           x="24"

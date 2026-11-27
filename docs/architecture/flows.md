@@ -125,7 +125,8 @@ The other five use cases follow a path that one of the three flows already draws
 | `GET /v1/leaderboard/{gameId}`                  | `top()`        | `gameId`, a lowercase slug                                          | `GlobalLeaderboardDto`: `gameId`, `highScores` (`ScoreEntryDto[]`) and `standings` (`StandingEntryDto[]`) |
 | `GET /v1/leaderboard/{gameId}/levels/{levelId}` | `topOfLevel()` | `gameId`, a lowercase slug, and `levelId`, a text that is not blank | `LevelLeaderboardDto`: `gameId`, `levelId` and `entries` (`LevelEntryDto[]`)                              |
 
-- A `ScoreEntryDto` row holds `rank`, `userId` and `highScore`. A `StandingEntryDto` row holds `rank`, `userId`, `stars`, `levelsCompleted`, `moves` and `elapsedMs`, the totals of the stored level results of the player. A `LevelEntryDto` row holds `rank`, `userId`, `stars`, `moves` and `elapsedMs`.
+- A `ScoreEntryDto` row holds `rank`, `userId`, `username` and `highScore`. A `StandingEntryDto` row holds `rank`, `userId`, `username`, `stars`, `levelsCompleted`, `moves` and `elapsedMs`, the totals of the stored level results of the player. A `LevelEntryDto` row holds `rank`, `userId`, `username`, `stars`, `moves` and `elapsedMs`.
+- `username` is the name of the account of the player, as the player typed it at sign-up ([#230](https://github.com/Hexablock-Suite/hexablock-api/issues/230)). `DrizzleLeaderboardReader` joins the `users` table on the `userId` of each row and builds a `Username`, and the mapper receives the name that it delivers. A stored name that breaks the rule of `Username` is a server fault, a 500.
 - `highScores` ranks by `Score.isHigherThan()`, `standings` by `Standing.isBetterThan()` (S3-03), and `entries` by `LevelResult.isBetterThan()` (DS-4). `GameId` is open (decision 5 of [classes.md](classes.md)), so the global route gives both lists for every game, and no list of `gameId` exists. A list holds only the players who have a result to rank (decision of [#82](https://github.com/Hexablock-Suite/hexablock-api/issues/82)): `highScores` of Fit and Sort is empty, and `standings` of Lines and Merge is empty.
 - `rank` is 1 plus the number of rows of the same list that are strictly better. A full tie shares a rank, and the next rank skips: 1, 1, 3. The tied rows come out by `userId` ascending, through `UserId.comesBefore()`.
 - No query parameter and no page size: a list holds every player who has a result to rank.
@@ -137,9 +138,24 @@ Example answer of `GET /v1/leaderboard/hexa-lines`:
 {
   "gameId": "hexa-lines",
   "highScores": [
-    { "rank": 1, "userId": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b", "highScore": 120 },
-    { "rank": 1, "userId": "6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01", "highScore": 120 },
-    { "rank": 3, "userId": "9a3e5c7d-4b2f-4e1a-8c6d-2f4b6d8e0a1c", "highScore": 80 }
+    {
+      "rank": 1,
+      "userId": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+      "username": "ada",
+      "highScore": 120
+    },
+    {
+      "rank": 1,
+      "userId": "6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01",
+      "username": "Grace",
+      "highScore": 120
+    },
+    {
+      "rank": 3,
+      "userId": "9a3e5c7d-4b2f-4e1a-8c6d-2f4b6d8e0a1c",
+      "username": "linus",
+      "highScore": 80
+    }
   ],
   "standings": []
 }
@@ -155,6 +171,7 @@ Example answer of `GET /v1/leaderboard/hexa-fit/levels/fit-01`:
     {
       "rank": 1,
       "userId": "0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+      "username": "ada",
       "stars": 3,
       "moves": 10,
       "elapsedMs": 45000
@@ -162,6 +179,7 @@ Example answer of `GET /v1/leaderboard/hexa-fit/levels/fit-01`:
     {
       "rank": 2,
       "userId": "6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01",
+      "username": "Grace",
       "stars": 3,
       "moves": 12,
       "elapsedMs": 45000
