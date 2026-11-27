@@ -61,7 +61,7 @@
   <body>
     <div class="frame">
       <p class="eyebrow">Class diagram · Use case slice 2 of 3</p>
-      <h1>Login: one sign-in request through the four layers</h1>
+      <h1>Login: one sign-in request through three layers</h1>
       <svg
         viewBox="0 0 1240 1686"
         xmlns="http://www.w3.org/2000/svg"
@@ -70,17 +70,17 @@
       >
         <title id="flow2login-title">HexaBlock API login use case · UML class diagram</title>
         <desc id="flow2login-desc">
-          Cross-layer class diagram of the login use case. In layer 4, ScryptPasswordHasher
-          implements PasswordHasher and JwtTokenIssuer implements TokenIssuer. In layer 3,
-          AuthController holds the Login input port and uses AuthDtoMapper, which builds the
-          LoginRequest from the body: a Username and a PasswordAttempt, which the request holds
-          through a use arrow attempt 1. DrizzleUserRepository implements UserRepository. In layer
-          2, LoginUseCase implements Login, takes the LoginRequest and holds the UserRepository,
-          PasswordHasher and TokenIssuer ports. In layer 1, the use case asks the PasswordAttempt if
-          it is longer than any password, and it asks the User aggregate root that the repository
-          returns to check the attempt. User.passwordMatches() asks the PasswordVerifier interface
-          of the domain, which the PasswordHasher port extends. A dashed frame labelled Aggregate
-          marks the boundary of User; view 3 of Part 1 draws its members.
+          Cross-layer class diagram of the login use case. In layer 3, ScryptPasswordHasher
+          implements PasswordHasher and JwtTokenIssuer implements TokenIssuer, and AuthController
+          holds the Login input port and uses AuthDtoMapper, which builds the LoginRequest from the
+          body: a Username and a PasswordAttempt, which the request holds through a use arrow
+          attempt 1. DrizzleUserRepository implements UserRepository. In layer 2, LoginUseCase
+          implements Login, takes the LoginRequest and holds the UserRepository, PasswordHasher and
+          TokenIssuer ports. In layer 1, the use case asks the PasswordAttempt if it is longer than
+          any password, and it asks the User aggregate root that the repository returns to check the
+          attempt. User.passwordMatches() asks the PasswordVerifier interface of the domain, which
+          the PasswordHasher port extends. A dashed frame labelled Aggregate marks the boundary of
+          User; view 3 of Part 1 draws its members.
         </desc>
         <defs>
           <marker
@@ -108,21 +108,12 @@
         </defs>
         <rect width="100%" height="100%" fill="#f3f5f6" />
         <!-- Layer zones: outer to inner, top to bottom -->
+        <!-- Layer 4 has no class in this view -->
         <rect
           x="24"
           y="24"
           width="1192"
-          height="172"
-          rx="8"
-          fill="#cfdcf3"
-          stroke="rgba(30,58,138,0.50)"
-          stroke-width="1"
-        />
-        <rect
-          x="24"
-          y="208"
-          width="1192"
-          height="240"
+          height="424"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -446,22 +437,10 @@
           attempt 1
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
-        <rect x="36" y="35" width="327" height="12" rx="2" fill="#cfdcf3" />
+        <rect x="36" y="35" width="268" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="40"
           y="44"
-          fill="#1e3a8a"
-          font-size="8"
-          font-weight="500"
-          font-family="'IBM Plex Mono', monospace"
-          letter-spacing="0.18em"
-        >
-          LAYER 4 · FRAMEWORKS AND DRIVERS · src/infrastructure/
-        </text>
-        <rect x="36" y="219" width="268" height="12" rx="2" fill="#e2ebf8" />
-        <text
-          x="40"
-          y="228"
           fill="#1d4ed8"
           font-size="8"
           font-weight="500"
@@ -470,6 +449,7 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/
         </text>
+
         <rect x="36" y="471" width="232" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
@@ -525,7 +505,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          node:crypto
+          node:crypto · src/adapters/crypto/
         </text>
         <line x1="540" y1="116" x2="880" y2="116" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="556" y="132" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -568,7 +548,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-01
+          API-FR-01 · src/adapters/jwt/
         </text>
         <line x1="900" y1="116" x2="1192" y2="116" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="916" y="132" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -1556,18 +1536,9 @@
         >
           Inheritance
         </text>
+
         <rect
           x="24"
-          y="1660"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#cfdcf3"
-          stroke="rgba(30,58,138,0.50)"
-          stroke-width="1"
-        />
-        <rect
-          x="48"
           y="1660"
           width="20"
           height="12"
@@ -1577,7 +1548,7 @@
           stroke-width="1"
         />
         <rect
-          x="72"
+          x="48"
           y="1660"
           width="20"
           height="12"
@@ -1587,7 +1558,7 @@
           stroke-width="1"
         />
         <rect
-          x="96"
+          x="72"
           y="1660"
           width="20"
           height="12"
@@ -1597,13 +1568,13 @@
           stroke-width="1"
         />
         <text
-          x="128"
+          x="104"
           y="1669"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Zones · Clean layers 4, 3, 2 and 1, outer on top
+          Zones · Clean layers 3, 2 and 1, outer on top
         </text>
         <rect
           x="352"

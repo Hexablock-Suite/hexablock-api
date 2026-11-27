@@ -4,9 +4,9 @@ This file explains every entry of the `dependencies` and the `devDependencies` m
 
 ## Dependencies
 
-- `@nestjs/common` — the Nest framework surface: the decorators, controllers, guards, pipes and `HttpException` types used across `src/adapters/http`, `src/infrastructure` and the wiring of the modules.
+- `@nestjs/common` — the Nest framework surface: the decorators, controllers, guards, pipes and `HttpException` types used across `src/adapters/http`, `src/infrastructure` and the wiring of the modules, and the logger that `NestLogger` in `src/adapters/logging` writes through.
 - `@nestjs/core` — the Nest runtime: `NestFactory` bootstraps the app in `src/main.ts` and `scripts/openapi/export.js`, and `APP_FILTER` binds the `HttpErrorFilter` in `src/infrastructure/app.module.ts`.
-- `@nestjs/jwt` — token issuing and verification: `JwtTokenIssuer` and `AuthConfig` in `src/infrastructure/auth` build on its `JwtService`, and the e2e specs sign test tokens with it.
+- `@nestjs/jwt` — token issuing and verification: `JwtTokenIssuer` in `src/adapters/jwt` and `auth-config.ts` in `src/infrastructure/auth` build on its `JwtService`, and the e2e specs sign test tokens with it.
 - `@nestjs/platform-express` — the HTTP adapter that Nest resolves implicitly at `NestFactory.create(AppModule)`; no source file imports it by design, the platform is chosen at bootstrap.
 - `@nestjs/swagger` — `ApiProperty` on every HTTP DTO, plus the OpenAPI document and the Swagger UI built in `src/infrastructure/http-app.ts` with `DocumentBuilder` and `SwaggerModule`.
 - `drizzle-orm` — the ORM of the persistence adapters (`src/adapters/persistence`, the one non-Nest dependency rule R-persistence-no-nest allows there): the schema, the queries and the connection.

@@ -71,11 +71,56 @@ module.exports = {
       to: { path: 'node_modules/', pathNot: 'node_modules/(?:drizzle-orm|@nestjs)/' },
     },
     {
-      name: 'other-adapters-import-no-package',
-      comment: 'Code of src/adapters outside http/ and persistence/ imports no package.',
+      name: 'jwt-adapters-import-only-nest-jwt',
+      comment: 'JWT adapters import only @nestjs/jwt among packages.',
       severity: 'error',
-      from: { path: '^src/adapters/', pathNot: '^src/adapters/(?:http|persistence)/' },
+      from: { path: '^src/adapters/jwt/' },
+      to: { path: 'node_modules/', pathNot: 'node_modules/@nestjs/jwt/' },
+    },
+    {
+      name: 'logging-adapters-import-only-nest-common',
+      comment: 'Logging adapters import only @nestjs/common among packages.',
+      severity: 'error',
+      from: { path: '^src/adapters/logging/' },
+      to: { path: 'node_modules/', pathNot: 'node_modules/@nestjs/common/' },
+    },
+    {
+      name: 'crypto-adapters-import-only-node-crypto',
+      comment:
+        'Crypto adapters import only node:crypto among Node built-ins. other-adapters-import-no-package keeps every package out.',
+      severity: 'error',
+      from: { path: '^src/adapters/crypto/' },
+      to: { dependencyTypes: ['core'], pathNot: '^crypto$' },
+    },
+    {
+      name: 'clock-adapters-import-no-built-in',
+      comment:
+        'Clock adapters import no Node built-in: the system clock is a global of JavaScript. other-adapters-import-no-package keeps every package out.',
+      severity: 'error',
+      from: { path: '^src/adapters/clock/' },
+      to: { dependencyTypes: ['core'] },
+    },
+    {
+      name: 'other-adapters-import-no-package',
+      comment:
+        'Code of src/adapters outside the folders with a package rule (http/, persistence/, jwt/ and logging/) imports no package.',
+      severity: 'error',
+      from: {
+        path: '^src/adapters/',
+        pathNot: '^src/adapters/(?:http|persistence|jwt|logging)/',
+      },
       to: { path: 'node_modules/' },
+    },
+    {
+      name: 'infrastructure-imports-no-port',
+      comment:
+        'No file of src/infrastructure except app.module.ts imports src/application/ports/. A class that implements a port is an adapter of layer 3 (#212). AppModule imports the tokens and the types of the ports to bind them.',
+      severity: 'error',
+      from: {
+        path: '^src/infrastructure/',
+        pathNot: '^src/infrastructure/app[.]module[.]ts$',
+      },
+      to: { path: '^src/application/ports/' },
     },
   ],
   options: {

@@ -4,7 +4,7 @@ import { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
 import { createJwtService } from '../../../src/infrastructure/auth/auth-config.js';
-import { JwtTokenIssuer } from '../../../src/infrastructure/auth/jwt-token-issuer.js';
+import { JwtTokenIssuer } from '../../../src/adapters/jwt/jwt-token-issuer.js';
 import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';
 import { valueOf } from '../../support/result.js';
 

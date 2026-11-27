@@ -61,7 +61,7 @@
   <body>
     <div class="frame">
       <p class="eyebrow">Sequence diagram · Use case 2 of 3</p>
-      <h1>Login: one sign-in request through the four layers</h1>
+      <h1>Login: one sign-in request through three layers</h1>
       <svg
         viewBox="0 0 1420 1048"
         xmlns="http://www.w3.org/2000/svg"
@@ -344,7 +344,7 @@
         >
           aggregate root
         </text>
-        <!-- Lifeline: ScryptPasswordHasher (layer 4) -->
+        <!-- Lifeline: ScryptPasswordHasher (layer 3) -->
         <line
           x1="1120"
           y1="116"
@@ -360,21 +360,21 @@
           width="144"
           height="58"
           rx="6"
-          fill="#cfdcf3"
-          stroke="rgba(30,58,138,0.50)"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
           stroke-width="1"
         />
         <text
           x="1120"
           y="73"
-          fill="#1e3a8a"
+          fill="#1d4ed8"
           font-size="7.5"
           font-weight="500"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.12em"
         >
-          LAYER 4 · DRIVERS
+          LAYER 3 · ADAPTERS
         </text>
         <text
           x="1120"
@@ -398,7 +398,7 @@
         >
           implements PasswordHasher
         </text>
-        <!-- Lifeline: JwtTokenIssuer (layer 4) -->
+        <!-- Lifeline: JwtTokenIssuer (layer 3) -->
         <line
           x1="1300"
           y1="116"
@@ -414,21 +414,21 @@
           width="144"
           height="58"
           rx="6"
-          fill="#cfdcf3"
-          stroke="rgba(30,58,138,0.50)"
+          fill="#e2ebf8"
+          stroke="rgba(29,78,216,0.40)"
           stroke-width="1"
         />
         <text
           x="1300"
           y="73"
-          fill="#1e3a8a"
+          fill="#1d4ed8"
           font-size="7.5"
           font-weight="500"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.12em"
         >
-          LAYER 4 · DRIVERS
+          LAYER 3 · ADAPTERS
         </text>
         <text
           x="1300"
@@ -1187,18 +1187,9 @@
         >
           Fragment · alt with a guard, one operand per branch
         </text>
+
         <rect
           x="24"
-          y="1024"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#cfdcf3"
-          stroke="rgba(30,58,138,0.50)"
-          stroke-width="1"
-        />
-        <rect
-          x="48"
           y="1024"
           width="20"
           height="12"
@@ -1208,7 +1199,7 @@
           stroke-width="1"
         />
         <rect
-          x="72"
+          x="48"
           y="1024"
           width="20"
           height="12"
@@ -1218,7 +1209,7 @@
           stroke-width="1"
         />
         <rect
-          x="96"
+          x="72"
           y="1024"
           width="20"
           height="12"
@@ -1228,13 +1219,13 @@
           stroke-width="1"
         />
         <text
-          x="128"
+          x="104"
           y="1033"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Lifeline header · layer 4, 3, 2 or 1 of its class
+          Lifeline header · layer 3, 2 or 1 of its class
         </text>
         <rect
           x="352"

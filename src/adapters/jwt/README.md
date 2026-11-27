@@ -1,0 +1,3 @@
+# adapters/jwt
+
+`JwtTokenIssuer` implements the `TokenIssuer` port with `@nestjs/jwt`. It signs the id that a `User` delivers as the subject of the token, and it gives the `UserId` of a valid token or `null`. It receives a configured `JwtService` through its constructor and reads no configuration: `createJwtService()` of `src/infrastructure/auth/auth-config.ts` sets the algorithm and the lifetime, and `AppModule` passes the service. Imports `src/application`, `src/domain`, `../received.ts` and `@nestjs/jwt`, the one package it may import (rule `jwt-adapters-import-only-nest-jwt`); never `src/infrastructure`.

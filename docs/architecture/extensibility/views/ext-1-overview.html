@@ -71,10 +71,10 @@
         <title id="ext1overview-title">HexaBlock API extensibility overview</title>
         <desc id="ext1overview-desc">
           Extensibility diagram of the API showing the UseCase contract and the use cases in the
-          center, with five extension axes around them: drivers in layer 4, HTTP controllers and
-          Drizzle repositories in layer 3, aspects in layer 2 (Q12), and level validators per
-          variant in layer 1. Each driver and each Drizzle repository implements its own port, and
-          no line starts or ends on a dashed frame. UseCase carries only the interface stereotype.
+          center, with five extension axes around them: drivers, HTTP controllers and Drizzle
+          repositories in layer 3, aspects in layer 2 (Q12), and level validators per variant in
+          layer 1. Each driver and each Drizzle repository implements its own port, and no line
+          starts or ends on a dashed frame. UseCase carries only the interface stereotype.
           UpdateLevelsUseCase holds LevelRepository through a use arrow levels 1, and
           LevelValidators holds LevelValidator through a use arrow entries 0..*. A dashed frame
           labelled Aggregate encloses the LevelDefinition root alone. The footnote says that every
@@ -137,21 +137,12 @@
         </defs>
         <rect width="100%" height="100%" fill="#f3f5f6" />
         <!-- Layer zones: outer to inner, top to bottom -->
+        <!-- Layer 4 has no class in this view -->
         <rect
           x="24"
           y="24"
           width="992"
-          height="148"
-          rx="8"
-          fill="#cfdcf3"
-          stroke="rgba(30,58,138,0.50)"
-          stroke-width="1"
-        />
-        <rect
-          x="24"
-          y="188"
-          width="992"
-          height="280"
+          height="444"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -519,22 +510,10 @@
           entries 0..*
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
-        <rect x="36" y="35" width="345" height="12" rx="2" fill="#cfdcf3" />
+        <rect x="36" y="35" width="268" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="40"
           y="44"
-          fill="#1e3a8a"
-          font-size="8"
-          font-weight="500"
-          font-family="'IBM Plex Mono', monospace"
-          letter-spacing="0.18em"
-        >
-          LAYER 4 · FRAMEWORKS AND DRIVERS · src/infrastructure/
-        </text>
-        <rect x="36" y="199" width="283" height="12" rx="2" fill="#e2ebf8" />
-        <text
-          x="40"
-          y="208"
           fill="#1d4ed8"
           font-size="8"
           font-weight="500"
@@ -543,6 +522,7 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/
         </text>
+
         <rect x="36" y="495" width="245" height="12" rx="2" fill="#efe7f8" />
         <text
           x="40"
@@ -1485,7 +1465,7 @@
           font-family="'IBM Plex Sans', sans-serif"
         >
           member of an axis is one more class in its frame. No line starts or ends on a frame. Every
-          arrow from layers 3 and 4 points to the core, so the core does not change.
+          arrow from layer 3 points to the core, so the core does not change.
         </text>
         <text
           x="24"
@@ -1673,18 +1653,9 @@
         >
           Use · attribute, parameter, return, local or new
         </text>
+
         <rect
           x="24"
-          y="1364"
-          width="12"
-          height="12"
-          rx="2"
-          fill="#cfdcf3"
-          stroke="rgba(30,58,138,0.50)"
-          stroke-width="1"
-        />
-        <rect
-          x="40"
           y="1364"
           width="12"
           height="12"
@@ -1694,7 +1665,7 @@
           stroke-width="1"
         />
         <rect
-          x="56"
+          x="40"
           y="1364"
           width="12"
           height="12"
@@ -1704,7 +1675,7 @@
           stroke-width="1"
         />
         <rect
-          x="72"
+          x="56"
           y="1364"
           width="12"
           height="12"
@@ -1714,7 +1685,7 @@
           stroke-width="1"
         />
         <text
-          x="92"
+          x="76"
           y="1374"
           fill="#5b6873"
           font-size="8.5"

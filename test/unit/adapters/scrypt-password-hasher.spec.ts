@@ -2,7 +2,7 @@ import { receiveValueOf } from '../../../src/adapters/received.js';
 import { Password } from '../../../src/domain/user/password.js';
 import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
-import { ScryptPasswordHasher } from '../../../src/infrastructure/auth/scrypt-password-hasher.js';
+import { ScryptPasswordHasher } from '../../../src/adapters/crypto/scrypt-password-hasher.js';
 import { valueOf } from '../../support/result.js';
 
 const PLAIN = 'correct horse battery';

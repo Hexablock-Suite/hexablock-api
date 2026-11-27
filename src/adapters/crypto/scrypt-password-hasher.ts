@@ -1,5 +1,5 @@
 import { randomBytes, scrypt, type ScryptOptions, timingSafeEqual } from 'node:crypto';
-import { receiveValueOf } from '../../adapters/received.js';
+import { receiveValueOf } from '../received.js';
 import type { PasswordHasher } from '../../application/ports/password-hasher.js';
 import type { Password } from '../../domain/user/password.js';
 import type { PasswordAttempt } from '../../domain/user/password-attempt.js';

@@ -239,6 +239,14 @@
           "change": "describe the OpenAPI schema without @nestjs/swagger"
         },
         {
+          "file": "src/adapters/logging/nest-logger.ts",
+          "change": "write the log entries through the logger of the new framework"
+        },
+        {
+          "file": "src/adapters/jwt/jwt-token-issuer.ts",
+          "change": "sign and verify the token without @nestjs/jwt"
+        },
+        {
           "file": "src/infrastructure/app.module.ts",
           "change": "bind the ports and list the handlers with the container of the new framework"
         },
@@ -255,16 +263,8 @@
           "change": "log the pool errors without the Logger of @nestjs/common"
         },
         {
-          "file": "src/infrastructure/logging/nest-logger.ts",
-          "change": "write the log entries through the logger of the new framework"
-        },
-        {
           "file": "src/infrastructure/auth/auth-config.ts",
           "change": "build the JWT service without @nestjs/jwt"
-        },
-        {
-          "file": "src/infrastructure/auth/jwt-token-issuer.ts",
-          "change": "sign and verify the token without @nestjs/jwt"
         },
         {
           "file": "src/main.ts",
@@ -272,7 +272,7 @@
         },
         {
           "file": ".dependency-cruiser.cjs",
-          "change": "the rule http-adapters-import-only-nest names the packages of the new framework"
+          "change": "the rules http-adapters-import-only-nest, jwt-adapters-import-only-nest-jwt and logging-adapters-import-only-nest-common name the packages of the new framework"
         },
         {
           "file": "package.json",

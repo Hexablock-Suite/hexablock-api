@@ -1,5 +1,5 @@
 import { Logger as NestBuiltInLogger, type LoggerService } from '@nestjs/common';
-import { NestLogger } from '../../../src/infrastructure/logging/nest-logger.js';
+import { NestLogger } from '../../../src/adapters/logging/nest-logger.js';
 
 type LogCall = (message: unknown, ...rest: unknown[]) => void;
 

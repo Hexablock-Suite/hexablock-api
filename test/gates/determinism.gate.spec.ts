@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { CLOCK } from '../../src/application/ports/clock.js';
 import { AppModule } from '../../src/infrastructure/app.module.js';
-import { SystemClock } from '../../src/infrastructure/clock/system-clock.js';
+import { SystemClock } from '../../src/adapters/clock/system-clock.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
 import { codesOf, lintFile } from '../support/lint.js';
 

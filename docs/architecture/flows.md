@@ -11,11 +11,11 @@ The layers themselves are in [layers.md](layers.md). The full class diagram is i
 
 ## Use case 1: sync progress
 
-The app calls this endpoint when it syncs its progress and its leaderboard: `SaveProgress` in `hexablock-app` sends the progress through its `ApiProgressRepository`. The endpoint is `ProgressController.sync()` (API-FR-02). It is the only endpoint that receives data from the app on each game, and it crosses all four layers: a guard, a controller and a mapper in layer 3, a use case and its ports in layer 2, the progress aggregate in layer 1, and a driver in layer 4.
+The app calls this endpoint when it syncs its progress and its leaderboard: `SaveProgress` in `hexablock-app` sends the progress through its `ApiProgressRepository`. The endpoint is `ProgressController.sync()` (API-FR-02). It is the only endpoint that receives data from the app on each game, and it crosses three layers: a guard, a controller, a mapper and the adapters of its ports in layer 3, a use case and its ports in layer 2, and the progress aggregate in layer 1.
 
 ### Class view
 
-![Sync progress class view: JwtAuthGuard, ProgressController, ProgressDtoMapper and DrizzleProgressRepository in layer 3, SystemClock in layer 4, SyncProgressUseCase with the SyncProgress and AuthenticateToken input ports, SyncProgressRequest, which holds its LevelResult values through a use arrow results 0..*, and the ProgressRepository and Clock ports in layer 2, and PlayerProgress, ProgressKey, LevelResult and SyncInstant in one dashed Aggregate frame in layer 1](classes/views/flow-1-sync-progress.png)
+![Sync progress class view: JwtAuthGuard, ProgressController, ProgressDtoMapper and DrizzleProgressRepository and SystemClock in layer 3, SyncProgressUseCase with the SyncProgress and AuthenticateToken input ports, SyncProgressRequest, which holds its LevelResult values through a use arrow results 0..*, and the ProgressRepository and Clock ports in layer 2, and PlayerProgress, ProgressKey, LevelResult and SyncInstant in one dashed Aggregate frame in layer 1](classes/views/flow-1-sync-progress.png)
 
 ### Sequence diagram
 
@@ -27,11 +27,11 @@ A token whose user has no stored row gets a 401, not a 500 ([#137](https://githu
 
 ## Use case 2: login
 
-The app calls this endpoint when a player signs in. The endpoint is `AuthController.signIn()` (API-FR-01). Its path is new in two ways. First, it has no guard, because the player has no token yet. Second, the use case holds three ports, and two of their adapters live in layer 4: `ScryptPasswordHasher` checks the password and `JwtTokenIssuer` issues the `SessionToken` that every guarded request then carries. The use case answers no in two places, an unknown username and a wrong password, so the sequence diagram has two `alt` fragments. `AuthDtoMapper` builds the `LoginRequest` from the body: a `Username` and a `PasswordAttempt` ([#105](https://github.com/Hexablock-Suite/hexablock-api/issues/105)). A username that breaks its rule stops in the mapper with the 401 of a wrong password. The use case asks `isLongerThanAnyPassword()` before any port call ([#98](https://github.com/Hexablock-Suite/hexablock-api/issues/98)). It never opens the `User`: it asks `user.passwordMatches()` with the attempt and the `PasswordHasher` port, the user passes its own hash to `verify()`, and `TokenIssuer.issue()` takes the `User` (decision 16 of [classes.md](classes.md)).
+The app calls this endpoint when a player signs in. The endpoint is `AuthController.signIn()` (API-FR-01). Its path is new in two ways. First, it has no guard, because the player has no token yet. Second, the use case holds three ports, and all three adapters live in layer 3: `ScryptPasswordHasher` checks the password and `JwtTokenIssuer` issues the `SessionToken` that every guarded request then carries. The use case answers no in two places, an unknown username and a wrong password, so the sequence diagram has two `alt` fragments. `AuthDtoMapper` builds the `LoginRequest` from the body: a `Username` and a `PasswordAttempt` ([#105](https://github.com/Hexablock-Suite/hexablock-api/issues/105)). A username that breaks its rule stops in the mapper with the 401 of a wrong password. The use case asks `isLongerThanAnyPassword()` before any port call ([#98](https://github.com/Hexablock-Suite/hexablock-api/issues/98)). It never opens the `User`: it asks `user.passwordMatches()` with the attempt and the `PasswordHasher` port, the user passes its own hash to `verify()`, and `TokenIssuer.issue()` takes the `User` (decision 16 of [classes.md](classes.md)).
 
 ### Class view
 
-![Login class view: ScryptPasswordHasher and JwtTokenIssuer in layer 4, AuthController, AuthDtoMapper and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port, the LoginRequest that AuthDtoMapper builds, which holds its PasswordAttempt through a use arrow attempt 1, and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User aggregate root in a dashed Aggregate frame, the PasswordAttempt value object of the request and the PasswordVerifier interface in layer 1](classes/views/flow-2-login.png)
+![Login class view: ScryptPasswordHasher, JwtTokenIssuer, AuthController, AuthDtoMapper and DrizzleUserRepository in layer 3, LoginUseCase with the Login input port, the LoginRequest that AuthDtoMapper builds, which holds its PasswordAttempt through a use arrow attempt 1, and the UserRepository, PasswordHasher and TokenIssuer ports in layer 2, and the User aggregate root in a dashed Aggregate frame, the PasswordAttempt value object of the request and the PasswordVerifier interface in layer 1](classes/views/flow-2-login.png)
 
 ### Sequence diagram
 
@@ -172,13 +172,13 @@ Example answer of `GET /v1/leaderboard/hexa-fit/levels/fit-01`:
 
 ## How to read the class view
 
-- The zones are the Clean layers, with the colors of [layers.md](layers.md): dark blue for layer 4, light blue for layer 3, purple for layer 2 and yellow for layer 1. The outer layer is at the top, so every dependency between layers points down.
+- The zones are the Clean layers, with the colors of [layers.md](layers.md): light blue for layer 3, purple for layer 2 and yellow for layer 1. Dark blue marks layer 4, which no flow touches. The outer layer is at the top, so every dependency between layers points down.
 - The lines follow the notation of [classes.md](classes.md). A use arrow joins two layers. A realization joins an adapter to its port. A filled diamond joins the root of an aggregate to each internal entity, a hollow diamond joins a decorator to the type that it wraps, and every other attribute, another GoF pattern included, is a use arrow (decision 13 of [classes.md](classes.md)). The flows draw no internal entity and no decorator, so they draw no diamond: `PlayerProgress` keeps its `LevelResult` values through a use arrow labelled `levelResults 0..*`. Flow 3 draws a use arrow `entries 0..*` from `LevelValidators` to `LevelValidator`.
 - A dashed frame labelled `Aggregate` marks the boundary of an aggregate, as in [classes.md](classes.md). Flow 1 frames `PlayerProgress` with `ProgressKey`, `LevelResult` and `SyncInstant`. Flows 2 and 3 draw the root of their aggregate, `User` or `LevelDefinition`, as a full class with no member, so the frame encloses the root alone. Views 1.3, 1.2 and 1.5 of [classes.md](classes.md) draw the members.
 - The views draw the input ports, such as `SyncProgress`, `Login`, `UpdateLevels` and `AuthenticateToken`, as interface boxes, not as lollipops. A box lets the controller and the guard point at the port they hold. The `execute()` member of each input port is the one of its use case: every input port binds `UseCase` (decision 7).
 - The teal class is the focal class: the use case.
 - A flow view shows more than the seven classes of the other views, because it follows one request through every layer.
-- A flow view draws only the bands of the layers that its use case touches. Flow 3 has no class in layer 4, so it draws three bands.
+- A flow view draws only the bands of the layers that its use case touches. No flow has a class in layer 4: every adapter of a port lives in layer 3 (#212, option C). So each flow draws three bands.
 
 ## How to read the sequence diagram
 
