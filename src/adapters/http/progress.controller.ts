@@ -30,17 +30,11 @@ import {
   SYNC_PROGRESS,
   type SyncProgress,
 } from '../../application/progress/sync-progress.use-case.js';
-import { receiveLevelResultOf, receiveValueOf } from '../received.js';
 import { ErrorDto } from './error.dto.js';
 import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
 import { ProgressDtoMapper } from './progress-dto.mapper.js';
 import { ProgressDto, SyncProgressDto } from './progress.dto.js';
-
-const UNAUTHORIZED = {
-  type: ErrorDto,
-  description:
-    'The bearer token is missing, malformed, expired, signed with another key or names a user that is not stored.',
-};
+import { UNAUTHORIZED } from './unauthorized.response.js';
 
 // Progress sync and read, one entry per user and gameId (API-FR-02). Both
 // routes are behind JwtAuthGuard, and the userId comes from the token.
@@ -104,26 +98,21 @@ export class ProgressController {
 
 // A value that breaks its rule stops in ProgressDtoMapper, before any use
 // case. The use cases fail on a missing progress, on a user that went after
-// the guard, or on a result that its level does not admit (#135). The gone
-// user gets the 401 of a bad token, with the same message as JwtAuthGuard
-// (#137). A result of the wrong level breaks the body, not the route, so it
-// answers 400 with one detail, as a broken value does.
+// the guard, or on a result that its level does not admit (#135).
+// ProgressDtoMapper writes the text of each failure, and this function picks
+// the status (#215). The gone user gets the 401 of a bad token (#137). A 404
+// and a 401 carry their one line as the message. A result of the wrong
+// level breaks the body, not the route, so it answers 400 with one detail,
+// as a broken value does.
 function httpErrorOf(problem: ProgressProblem, gameId: string): Error {
+  const lines = ProgressDtoMapper.toProblemDetails(problem, gameId);
   switch (problem.kind) {
     case 'progress-not-found':
-      return new NotFoundException(`No progress for gameId ${gameId}`);
+      return new NotFoundException(lines.join(' '));
     case 'unknown-user':
-      return new UnauthorizedException('Invalid or expired token');
-    case 'unknown-level': {
-      const { levelId } = receiveLevelResultOf(problem.result);
-      return new BadRequestException([`No level ${levelId} for gameId ${gameId}.`]);
-    }
-    case 'too-many-stars': {
-      const { levelId, stars } = receiveLevelResultOf(problem.result);
-      const most = receiveValueOf(problem.most);
-      return new BadRequestException([
-        `stars of level ${levelId} must be at most ${most}, the count of its star thresholds, got ${stars}.`,
-      ]);
-    }
+      return new UnauthorizedException(lines.join(' '));
+    case 'unknown-level':
+    case 'too-many-stars':
+      return new BadRequestException(lines);
   }
 }

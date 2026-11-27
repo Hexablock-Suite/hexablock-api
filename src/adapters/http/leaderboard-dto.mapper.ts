@@ -2,6 +2,7 @@ import type { GlobalLeaderboard } from '../../application/leaderboard/get-global
 import type {
   LevelBoardQuery,
   LevelLeaderboard,
+  UnknownLevel,
 } from '../../application/leaderboard/get-level-leaderboard.use-case.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
@@ -24,7 +25,9 @@ import { gameIdFrom, levelIdFrom } from './progress-values.js';
 // controller holds no translation code. The mapper builds the domain values
 // of each request, so the use case gets them built. A value that breaks
 // its rule gives the text of the rule as the one problem: the factory gives
-// the code, and progress-values.ts writes the text.
+// the code, and progress-values.ts writes the text. The mapper also writes
+// the text of a failed Result, and the controller only picks the status
+// (#215).
 export const LeaderboardDtoMapper = {
   // The gameId of a global board comes from the path. It is the whole
   // request of GetGlobalLeaderboard.
@@ -61,6 +64,18 @@ export const LeaderboardDtoMapper = {
       levelId: receiveValueOf(board.levelId),
       entries: levelRows(board.entries),
     };
+  },
+
+  // The lines of the ErrorDto of a failed read of a level board, one line
+  // per problem. The one problem is a level that the definitions do not
+  // hold (#146), and its line names the levelId and the gameId of the query.
+  toProblemDetails(problem: UnknownLevel, query: LevelBoardQuery): string[] {
+    switch (problem.kind) {
+      case 'unknown-level':
+        return [
+          `No level ${receiveValueOf(query.levelId)} for gameId ${receiveValueOf(query.gameId)}`,
+        ];
+    }
   },
 };
 

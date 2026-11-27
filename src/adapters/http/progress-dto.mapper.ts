@@ -1,10 +1,11 @@
 import type { GetProgressRequest } from '../../application/progress/get-progress.use-case.js';
+import type { ProgressProblem } from '../../application/progress/progress-problem.js';
 import type { SyncProgressRequest } from '../../application/progress/sync-progress.use-case.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
-import { receiveProgressOf } from '../received.js';
+import { receiveLevelResultOf, receiveProgressOf, receiveValueOf } from '../received.js';
 import type { ProgressDto } from './progress.dto.js';
 import { gameIdFrom, levelResultFrom, scoreFrom } from './progress-values.js';
 
@@ -15,7 +16,9 @@ type SyncValues = Omit<SyncProgressRequest, 'userId'>;
 // (decision 12). The controller holds no translation code. The mapper builds
 // the domain values of each request, so a use case gets them built. A value
 // that breaks its rule gives the text of the rule as the one problem: the
-// factory gives the code, and progress-values.ts writes the text.
+// factory gives the code, and progress-values.ts writes the text. The
+// mapper also writes the text of each failed Result, and the controller
+// only picks the status (#215).
 export const ProgressDtoMapper = {
   // The app has no validation pipe, so the mapper checks the body shape. The
   // domain checks the rules of each value. The userId comes from the token.
@@ -52,6 +55,30 @@ export const ProgressDtoMapper = {
   toDto(progress: PlayerProgress): ProgressDto {
     const { gameId, highScore, updatedAt, results } = receiveProgressOf(progress);
     return { gameId, highScore, updatedAt: updatedAt.toISOString(), results };
+  },
+
+  // The lines of the ErrorDto of a failed Result, one line per problem. The
+  // gameId is the text of the request. A gone user gets the text of a bad
+  // token, the same text as JwtAuthGuard (#137). A result that its level
+  // does not admit names its levelId (#135).
+  toProblemDetails(problem: ProgressProblem, gameId: string): string[] {
+    switch (problem.kind) {
+      case 'progress-not-found':
+        return [`No progress for gameId ${gameId}`];
+      case 'unknown-user':
+        return ['Invalid or expired token'];
+      case 'unknown-level': {
+        const { levelId } = receiveLevelResultOf(problem.result);
+        return [`No level ${levelId} for gameId ${gameId}.`];
+      }
+      case 'too-many-stars': {
+        const { levelId, stars } = receiveLevelResultOf(problem.result);
+        const most = receiveValueOf(problem.most);
+        return [
+          `stars of level ${levelId} must be at most ${most}, the count of its star thresholds, got ${stars}.`,
+        ];
+      }
+    }
   },
 };
 
