@@ -113,13 +113,14 @@
         {
           "group": "usecases|src/application/leaderboard",
           "types": [
-            "GetLeaderboardUseCase",
+            "GetGlobalLeaderboardUseCase",
+            "GetLevelLeaderboardUseCase",
             "UnknownLevel",
             "GlobalLeaderboard",
-            "GetLeaderboard",
+            "GetGlobalLeaderboard",
+            "GetLevelLeaderboard",
             "LevelLeaderboard",
-            "Leaderboard",
-            "LeaderboardQuery"
+            "LevelBoardQuery"
           ]
         },
         {
@@ -175,7 +176,8 @@
             "TokenIssuer",
             "UserIdGenerator",
             "ProgressRepository",
-            "LeaderboardReader",
+            "GlobalBoardReader",
+            "LevelBoardReader",
             "Clock",
             "Logger",
             "UserRepository",
@@ -215,7 +217,6 @@
             "CurrentUserDto",
             "LevelsDto",
             "ScoreEntryDto",
-            "LeaderboardDto",
             "LevelLeaderboardDto",
             "LevelDtoMapper",
             "ProgressDto",
@@ -422,9 +423,11 @@
             "ListedLevels",
             "SyncProgressUseCase",
             "SyncProgress",
-            "GetLeaderboard",
-            "GetLeaderboardUseCase",
-            "LeaderboardQuery",
+            "GetGlobalLeaderboard",
+            "GetLevelLeaderboard",
+            "GetGlobalLeaderboardUseCase",
+            "GetLevelLeaderboardUseCase",
+            "LevelBoardQuery",
             "AuthorizeLevelEditor",
             "UserRepository",
             "LevelChange",
@@ -432,7 +435,8 @@
             "ProgressProblem",
             "GetProgressUseCase",
             "ProgressRepository",
-            "LeaderboardReader",
+            "GlobalBoardReader",
+            "LevelBoardReader",
             "AuthorizeLevelEditorUseCase",
             "RegisterUseCase",
             "GetLevels",
@@ -532,11 +536,12 @@
         {
           "group": "usecases|src/application/leaderboard",
           "types": [
-            "GetLeaderboardUseCase",
-            "Leaderboard",
+            "GetGlobalLeaderboardUseCase",
+            "GetLevelLeaderboardUseCase",
             "UnknownLevel",
-            "LeaderboardQuery",
-            "GetLeaderboard",
+            "LevelBoardQuery",
+            "GetGlobalLeaderboard",
+            "GetLevelLeaderboard",
             "LevelLeaderboard",
             "GlobalLeaderboard"
           ]
@@ -567,7 +572,8 @@
           "types": [
             "LeaderboardEntry",
             "ProgressRepository",
-            "LeaderboardReader",
+            "GlobalBoardReader",
+            "LevelBoardReader",
             "UserRepository",
             "Logger",
             "UseCaseLogEntry",
@@ -707,7 +713,8 @@
             "LevelChange",
             "TokenProblem",
             "NotALevelEditor",
-            "LeaderboardReader",
+            "GlobalBoardReader",
+            "LevelBoardReader",
             "ProgressRepository",
             "UserRepository",
             "AuthenticateToken",
@@ -719,8 +726,8 @@
             "UpdateLevelsRequest",
             "IncomingLevel",
             "RegisterProblem",
-            "Leaderboard",
-            "GetLeaderboard",
+            "GetGlobalLeaderboard",
+            "GetLevelLeaderboard",
             "UnknownLevel",
             "LevelProblemReport",
             "InvalidLevels",
@@ -728,7 +735,7 @@
             "GlobalLeaderboard",
             "ThrownValue",
             "RegisterUser",
-            "LeaderboardQuery",
+            "LevelBoardQuery",
             "LevelLeaderboard"
           ]
         }
@@ -757,7 +764,6 @@
             "ProgressDtoMapper",
             "AuthenticatedRequest",
             "FitPlacementDto",
-            "LeaderboardDto",
             "LevelLeaderboardDto",
             "HealthResponse",
             "HealthController",

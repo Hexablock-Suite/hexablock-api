@@ -8,7 +8,8 @@
         "UserRepository",
         "ProgressRepository",
         "LevelRepository",
-        "LeaderboardReader"
+        "GlobalBoardReader",
+        "LevelBoardReader"
       ],
       "adds": [
         {
@@ -33,17 +34,24 @@
           "implements": "LevelRepository"
         },
         {
-          "name": "MongoLeaderboardReader",
+          "name": "MongoGlobalBoardReader",
           "kind": "class",
           "stereotypes": [],
-          "file": "src/adapters/persistence/mongo-leaderboard-reader.ts",
-          "implements": "LeaderboardReader"
+          "file": "src/adapters/persistence/mongo-global-board-reader.ts",
+          "implements": "GlobalBoardReader"
+        },
+        {
+          "name": "MongoLevelBoardReader",
+          "kind": "class",
+          "stereotypes": [],
+          "file": "src/adapters/persistence/mongo-level-board-reader.ts",
+          "implements": "LevelBoardReader"
         }
       ],
       "edits": [
         {
           "file": "src/infrastructure/app.module.ts",
-          "change": "the useFactory of USER_REPOSITORY, PROGRESS_REPOSITORY, LEVEL_REPOSITORY and LEADERBOARD_READER builds the Mongo adapter"
+          "change": "the providers of USER_REPOSITORY, PROGRESS_REPOSITORY, LEVEL_REPOSITORY, GLOBAL_BOARD_READER and LEVEL_BOARD_READER build the Mongo adapters"
         },
         {
           "file": "src/infrastructure/database/database.module.ts",
@@ -63,7 +71,8 @@
         "User",
         "LoggingAspect",
         "LoginUseCase",
-        "GetLeaderboardUseCase",
+        "GetGlobalLeaderboardUseCase",
+        "GetLevelLeaderboardUseCase",
         "UpdateLevelsUseCase",
         "Clock",
         "SyncProgressUseCase",
@@ -85,7 +94,8 @@
         "GetLevels",
         "UpdateLevels",
         "AuthorizeLevelEditor",
-        "GetLeaderboard"
+        "GetGlobalLeaderboard",
+        "GetLevelLeaderboard"
       ],
       "adds": [
         {
@@ -142,7 +152,8 @@
         "User",
         "LoggingAspect",
         "LoginUseCase",
-        "GetLeaderboardUseCase",
+        "GetGlobalLeaderboardUseCase",
+        "GetLevelLeaderboardUseCase",
         "UpdateLevelsUseCase",
         "Clock",
         "SyncProgressUseCase",
@@ -165,7 +176,8 @@
         "GetLevels",
         "UpdateLevels",
         "AuthorizeLevelEditor",
-        "GetLeaderboard",
+        "GetGlobalLeaderboard",
+        "GetLevelLeaderboard",
         "Logger"
       ],
       "adds": [],
@@ -288,7 +300,8 @@
         "User",
         "LoggingAspect",
         "LoginUseCase",
-        "GetLeaderboardUseCase",
+        "GetGlobalLeaderboardUseCase",
+        "GetLevelLeaderboardUseCase",
         "UpdateLevelsUseCase",
         "Clock",
         "SyncProgressUseCase",

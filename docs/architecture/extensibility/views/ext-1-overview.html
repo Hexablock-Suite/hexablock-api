@@ -63,7 +63,7 @@
       <p class="eyebrow">Extensibility diagram · View 1 of 2</p>
       <h1>The application core and its extension axes</h1>
       <svg
-        viewBox="0 0 1040 1428"
+        viewBox="0 0 1040 1480"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ext1overview-title ext1overview-desc"
@@ -73,9 +73,10 @@
           Extensibility diagram of the API showing the UseCase contract and the use cases in the
           center, with five extension axes around them: drivers, HTTP controllers and Drizzle
           repositories in layer 3, aspects in layer 2 (Q12), and level validators per variant in
-          layer 1. Each driver and each Drizzle repository implements its own port, and no line
-          starts or ends on a dashed frame. UseCase carries only the interface stereotype.
-          UpdateLevelsUseCase holds LevelRepository through a use arrow levels 1, and
+          layer 1. Each driver and each Drizzle adapter has its own line for each port that it
+          implements, and DrizzleLeaderboardReader implements GlobalBoardReader and LevelBoardReader
+          (#218). No line starts or ends on a dashed frame. UseCase carries only the interface
+          stereotype. UpdateLevelsUseCase holds LevelRepository through a use arrow levels 1, and
           LevelValidators holds LevelValidator through a use arrow entries 0..*. A dashed frame
           labelled Aggregate encloses the LevelDefinition root alone. The footnote says that every
           input port binds UseCase, that LevelDefinition keeps its fields private, that FitSection
@@ -152,7 +153,7 @@
           x="24"
           y="484"
           width="992"
-          height="364"
+          height="416"
           rx="8"
           fill="#efe7f8"
           stroke="rgba(126,34,206,0.40)"
@@ -160,7 +161,7 @@
         />
         <rect
           x="24"
-          y="864"
+          y="916"
           width="992"
           height="184"
           rx="8"
@@ -193,7 +194,7 @@
         </text>
         <rect
           x="680"
-          y="728"
+          y="780"
           width="324"
           height="96"
           rx="8"
@@ -204,7 +205,7 @@
         />
         <text
           x="764"
-          y="744"
+          y="796"
           fill="#5b6873"
           font-size="8"
           font-weight="500"
@@ -217,7 +218,7 @@
           x="392"
           y="224"
           width="336"
-          height="164"
+          height="180"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -259,7 +260,7 @@
         </text>
         <rect
           x="48"
-          y="888"
+          y="940"
           width="952"
           height="144"
           rx="8"
@@ -270,7 +271,7 @@
         />
         <text
           x="60"
-          y="904"
+          y="956"
           fill="#5b6873"
           font-size="8"
           font-weight="500"
@@ -282,7 +283,7 @@
         <!-- Aggregate frame of LevelDefinition. This view draws the root alone; views 1.2 and 1.5 of classes.md draw its members. -->
         <rect
           x="60"
-          y="916"
+          y="968"
           width="276"
           height="100"
           rx="8"
@@ -293,7 +294,7 @@
         />
         <text
           x="76"
-          y="932"
+          y="984"
           fill="#17212a"
           font-size="8"
           font-weight="600"
@@ -342,7 +343,7 @@
         />
         <!-- UseCaseAspect implements UseCase and wraps an inner one: realization (Part 2, view 1) -->
         <path
-          d="M752 756 L752 600 L720 600"
+          d="M752 808 L752 600 L720 600"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -351,7 +352,7 @@
         />
         <!-- Every controller holds 1 or 2 input ports, and each input port binds UseCase: use (Part 3, view 3; Part 2, view 1) -->
         <path
-          d="M560 372 L560 528"
+          d="M560 388 L560 528"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -367,7 +368,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
-        <!-- DrizzleLeaderboardReader implements LeaderboardReader -->
+        <!-- DrizzleLeaderboardReader implements GlobalBoardReader -->
         <path
           d="M944 368 L980 368 L980 600 L944 600"
           fill="none"
@@ -376,9 +377,18 @@
           stroke-dasharray="5,4"
           marker-end="url(#ext1overview-triangle)"
         />
+        <!-- DrizzleLeaderboardReader implements LevelBoardReader (#218) -->
+        <path
+          d="M944 368 L980 368 L980 652 L944 652"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
         <!-- DrizzleUserRepository implements UserRepository (second store) -->
         <path
-          d="M944 320 L988 320 L988 652 L944 652"
+          d="M944 320 L988 320 L988 704 L944 704"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -387,7 +397,7 @@
         />
         <!-- DrizzleLevelRepository implements LevelRepository -->
         <path
-          d="M944 272 L996 272 L996 704 L944 704"
+          d="M944 272 L996 272 L996 756 L944 756"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -414,7 +424,7 @@
         />
         <!-- UpdateLevelsUseCase holds LevelValidators: use (Part 2, view 3) -->
         <path
-          d="M668 704 L668 956"
+          d="M668 704 L668 1008"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -422,7 +432,7 @@
         />
         <!-- UpdateLevelsUseCase holds levels: LevelRepository: use with role and multiplicity (decision 13) -->
         <path
-          d="M744 696 L816 696"
+          d="M744 696 L792 696 L792 756 L816 756"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -430,7 +440,7 @@
         />
         <!-- LevelValidators holds entries: one LevelValidator per gameId with level files: use with role and multiplicity, no diamond (decision 13) -->
         <path
-          d="M736 980 L824 980"
+          d="M736 1032 L824 1032"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -473,10 +483,10 @@
         >
           IMPLEMENT INPUT PORTS
         </text>
-        <rect x="674" y="894" width="45" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="674" y="946" width="45" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="696.5"
-          y="903"
+          y="955"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -497,10 +507,10 @@
         >
           levels 1
         </text>
-        <rect x="742" y="964" width="76" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="742" y="1016" width="76" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="780"
-          y="973"
+          y="1025"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -535,10 +545,10 @@
         >
           LAYER 2 · USE CASES · src/application/
         </text>
-        <rect x="36" y="875" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="927" width="208" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="884"
+          y="936"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -638,7 +648,7 @@
         <!-- UseCaseAspect -->
         <rect
           x="692"
-          y="756"
+          y="808"
           width="96"
           height="48"
           rx="6"
@@ -648,7 +658,7 @@
         />
         <text
           x="740"
-          y="774"
+          y="826"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -659,7 +669,7 @@
         </text>
         <text
           x="740"
-          y="790"
+          y="842"
           fill="#17212a"
           font-size="11"
           font-weight="600"
@@ -672,7 +682,7 @@
         <!-- LoggingAspect -->
         <rect
           x="796"
-          y="756"
+          y="808"
           width="96"
           height="48"
           rx="6"
@@ -682,7 +692,7 @@
         />
         <text
           x="844"
-          y="784"
+          y="836"
           fill="#17212a"
           font-size="11"
           font-weight="600"
@@ -694,7 +704,7 @@
         <!-- TimingAspect -->
         <rect
           x="900"
-          y="756"
+          y="808"
           width="96"
           height="48"
           rx="6"
@@ -704,7 +714,7 @@
         />
         <text
           x="948"
-          y="784"
+          y="836"
           fill="#17212a"
           font-size="11"
           font-weight="600"
@@ -718,7 +728,7 @@
           x="408"
           y="252"
           width="304"
-          height="120"
+          height="136"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -754,9 +764,12 @@
           ProgressController: syncProgress, getProgress
         </text>
         <text x="424" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          LeaderboardController: getLeaderboard
+          LeaderboardController: getGlobalLeaderboard,
         </text>
-        <text x="424" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="446" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          getLevelLeaderboard
+        </text>
+        <text x="424" y="380" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           LevelsController: getLevels, updateLevels
         </text>
         <!-- DrizzleLevelRepository -->
@@ -1062,7 +1075,7 @@
         >
           ProgressRepository
         </text>
-        <!-- LeaderboardReader -->
+        <!-- GlobalBoardReader -->
         <rect
           x="816"
           y="580"
@@ -1093,9 +1106,9 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          LeaderboardReader
+          GlobalBoardReader
         </text>
-        <!-- UserRepository -->
+        <!-- LevelBoardReader -->
         <rect
           x="816"
           y="632"
@@ -1126,9 +1139,9 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          UserRepository
+          LevelBoardReader
         </text>
-        <!-- LevelRepository -->
+        <!-- UserRepository -->
         <rect
           x="816"
           y="684"
@@ -1159,14 +1172,47 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
+          UserRepository
+        </text>
+        <!-- LevelRepository -->
+        <rect
+          x="816"
+          y="736"
+          width="128"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="880"
+          y="751"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="880"
+          y="767"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
           LevelRepository
         </text>
         <!-- Use cases: every listed class implements its input port -->
         <rect
           x="400"
           y="664"
-          width="176"
-          height="168"
+          width="184"
+          height="184"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -1181,7 +1227,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «use case» × 7
+          «use case» × 8
         </text>
         <text
           x="488"
@@ -1194,7 +1240,7 @@
         >
           Use cases
         </text>
-        <line x1="400" y1="712" x2="576" y2="712" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="400" y1="712" x2="584" y2="712" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="416" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           RegisterUseCase
         </text>
@@ -1211,9 +1257,12 @@
           GetProgressUseCase
         </text>
         <text x="416" y="808" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GetLeaderboardUseCase
+          GetGlobalLeaderboardUseCase
         </text>
         <text x="416" y="824" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          GetLevelLeaderboardUseCase
+        </text>
+        <text x="416" y="840" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           GetLevelsUseCase
         </text>
         <!-- UpdateLevelsUseCase -->
@@ -1252,7 +1301,7 @@
         <!-- LevelDefinition -->
         <rect
           x="76"
-          y="956"
+          y="1008"
           width="244"
           height="48"
           rx="6"
@@ -1262,7 +1311,7 @@
         />
         <text
           x="198"
-          y="974"
+          y="1026"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1273,7 +1322,7 @@
         </text>
         <text
           x="198"
-          y="990"
+          y="1042"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1285,7 +1334,7 @@
         <!-- FillLevelValidator -->
         <rect
           x="360"
-          y="956"
+          y="1008"
           width="136"
           height="48"
           rx="6"
@@ -1296,7 +1345,7 @@
         />
         <text
           x="428"
-          y="974"
+          y="1026"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1307,7 +1356,7 @@
         </text>
         <text
           x="428"
-          y="990"
+          y="1042"
           fill="#5b6873"
           font-size="12"
           font-weight="600"
@@ -1319,7 +1368,7 @@
         <!-- LevelValidators -->
         <rect
           x="600"
-          y="956"
+          y="1008"
           width="136"
           height="48"
           rx="6"
@@ -1329,7 +1378,7 @@
         />
         <text
           x="668"
-          y="974"
+          y="1026"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1340,7 +1389,7 @@
         </text>
         <text
           x="668"
-          y="990"
+          y="1042"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1352,7 +1401,7 @@
         <!-- LevelValidator -->
         <rect
           x="824"
-          y="956"
+          y="1008"
           width="152"
           height="48"
           rx="6"
@@ -1362,7 +1411,7 @@
         />
         <text
           x="900"
-          y="974"
+          y="1026"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1373,7 +1422,7 @@
         </text>
         <text
           x="900"
-          y="990"
+          y="1042"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -1406,7 +1455,7 @@
         </text>
         <rect
           x="160"
-          y="946"
+          y="998"
           width="168"
           height="18"
           rx="2"
@@ -1417,7 +1466,7 @@
         />
         <text
           x="244"
-          y="958"
+          y="1010"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -1427,7 +1476,7 @@
         </text>
         <rect
           x="816"
-          y="946"
+          y="998"
           width="168"
           height="18"
           rx="2"
@@ -1438,7 +1487,7 @@
         />
         <text
           x="900"
-          y="958"
+          y="1010"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -1449,17 +1498,17 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="1076"
+          y="1128"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          The application core sits in the center: UseCase, the eight use cases and the ports they
+          The application core sits in the center: UseCase, the nine use cases and the ports they
           own (Q10). Each dashed frame is one extension axis, and a new
         </text>
         <text
           x="24"
-          y="1092"
+          y="1144"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1469,17 +1518,17 @@
         </text>
         <text
           x="24"
-          y="1108"
+          y="1160"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Each driver and each Drizzle repository implements one port, so each one has its own line.
+          Each driver and each Drizzle adapter has one line for each port that it implements (#218).
           A box with a plural name lists classes that all have its relation:
         </text>
         <text
           x="24"
-          y="1124"
+          y="1176"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1489,7 +1538,7 @@
         </text>
         <text
           x="24"
-          y="1140"
+          y="1192"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1499,7 +1548,7 @@
         </text>
         <text
           x="24"
-          y="1156"
+          y="1208"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1509,7 +1558,7 @@
         </text>
         <text
           x="24"
-          y="1172"
+          y="1224"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1520,7 +1569,7 @@
         </text>
         <text
           x="24"
-          y="1188"
+          y="1240"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1530,17 +1579,17 @@
         </text>
         <text
           x="24"
-          y="1204"
+          y="1256"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LeaderboardController serves both routes of GetLeaderboard, and LeaderboardDtoMapper
-          builds its query and its answer (decision 12, #83).
+          LeaderboardController calls GetGlobalLeaderboard and GetLevelLeaderboard, one for each
+          route, and LeaderboardDtoMapper builds each request and answer (decision 12, #83, #218).
         </text>
         <text
           x="24"
-          y="1220"
+          y="1272"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1549,7 +1598,7 @@
         </text>
         <text
           x="24"
-          y="1236"
+          y="1288"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1559,7 +1608,7 @@
         </text>
         <text
           x="24"
-          y="1252"
+          y="1304"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1569,7 +1618,7 @@
         </text>
         <text
           x="24"
-          y="1268"
+          y="1320"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1579,17 +1628,17 @@
         </text>
         <text
           x="24"
-          y="1284"
+          y="1336"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LeaderboardReader gives LeaderboardEntry rows. LeaderboardEntry is a response type of
-          layer 2, with no tactical stereotype (views 1.1 and 2.2).
+          GlobalBoardReader and LevelBoardReader give LeaderboardEntry rows. LeaderboardEntry is a
+          response type of layer 2, with no tactical stereotype (views 1.1 and 2.2).
         </text>
         <text
           x="24"
-          y="1300"
+          y="1352"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1600,15 +1649,15 @@
         <!-- Legend -->
         <line
           x1="24"
-          y1="1312"
+          y1="1364"
           x2="1016"
-          y2="1312"
+          y2="1364"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1330"
+          y="1382"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -1618,9 +1667,9 @@
         </text>
         <line
           x1="24"
-          y1="1348"
+          y1="1400"
           x2="52"
-          y2="1348"
+          y2="1400"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -1628,7 +1677,7 @@
         />
         <text
           x="60"
-          y="1352"
+          y="1404"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1637,16 +1686,16 @@
         </text>
         <line
           x1="128"
-          y1="1348"
+          y1="1400"
           x2="156"
-          y2="1348"
+          y2="1400"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ext1overview-open)"
         />
         <text
           x="164"
-          y="1352"
+          y="1404"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1656,7 +1705,7 @@
 
         <rect
           x="24"
-          y="1364"
+          y="1416"
           width="12"
           height="12"
           rx="2"
@@ -1666,7 +1715,7 @@
         />
         <rect
           x="40"
-          y="1364"
+          y="1416"
           width="12"
           height="12"
           rx="2"
@@ -1676,7 +1725,7 @@
         />
         <rect
           x="56"
-          y="1364"
+          y="1416"
           width="12"
           height="12"
           rx="2"
@@ -1686,7 +1735,7 @@
         />
         <text
           x="76"
-          y="1374"
+          y="1426"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1695,7 +1744,7 @@
         </text>
         <rect
           x="272"
-          y="1364"
+          y="1416"
           width="28"
           height="12"
           rx="2"
@@ -1706,7 +1755,7 @@
         />
         <text
           x="308"
-          y="1374"
+          y="1426"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1715,7 +1764,7 @@
         </text>
         <rect
           x="520"
-          y="1364"
+          y="1416"
           width="28"
           height="12"
           rx="2"
@@ -1725,7 +1774,7 @@
         />
         <text
           x="556"
-          y="1374"
+          y="1426"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1734,7 +1783,7 @@
         </text>
         <rect
           x="768"
-          y="1364"
+          y="1416"
           width="28"
           height="12"
           rx="2"
@@ -1745,7 +1794,7 @@
         />
         <text
           x="804"
-          y="1374"
+          y="1426"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1754,7 +1803,7 @@
         </text>
         <rect
           x="24"
-          y="1386"
+          y="1438"
           width="28"
           height="12"
           rx="2"
@@ -1765,7 +1814,7 @@
         />
         <text
           x="60"
-          y="1396"
+          y="1448"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -1774,7 +1823,7 @@
         </text>
         <rect
           x="272"
-          y="1386"
+          y="1438"
           width="28"
           height="12"
           rx="2"
@@ -1785,7 +1834,7 @@
         />
         <text
           x="308"
-          y="1396"
+          y="1448"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
