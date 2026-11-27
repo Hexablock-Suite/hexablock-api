@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 5 of 5</p>
       <h1>HTTP mappers: the controllers translate between DTOs and entities</h1>
       <svg
-        viewBox="0 0 1040 1206"
+        viewBox="0 0 1040 1238"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad5httpmappers-title ad5httpmappers-desc"
@@ -78,7 +78,9 @@
           LevelsController uses LevelDtoMapper to build the update request from the body, to turn
           each LevelDefinition into a LevelDto and to write the error details of a failed Result,
           and LeaderboardController uses LeaderboardDtoMapper to build the request of each board
-          port from the path and to turn each board into its DTO (#218).
+          port from the path and to turn each board into its DTO (#218). ProgressDtoMapper and
+          LeaderboardDtoMapper also write the lines of a failed Result, and the controller picks the
+          status (#215).
         </desc>
         <defs>
           <marker
@@ -137,7 +139,7 @@
           x="24"
           y="24"
           width="992"
-          height="840"
+          height="872"
           rx="8"
           fill="#e2ebf8"
           stroke="rgba(29,78,216,0.40)"
@@ -145,7 +147,7 @@
         />
         <rect
           x="24"
-          y="880"
+          y="912"
           width="992"
           height="116"
           rx="8"
@@ -197,9 +199,9 @@
         <!-- ProgressDtoMapper takes PlayerProgress as a parameter: use -->
         <line
           x1="144"
-          y1="528"
+          y1="560"
           x2="144"
-          y2="924"
+          y2="956"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -207,9 +209,9 @@
         <!-- ProgressDtoMapper receives the parts of PlayerProgress through PlayerProgressReceiver: use -->
         <line
           x1="424"
-          y1="528"
+          y1="560"
           x2="424"
-          y2="924"
+          y2="956"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -219,7 +221,7 @@
           x1="640"
           y1="512"
           x2="640"
-          y2="924"
+          y2="956"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
@@ -322,10 +324,10 @@
         >
           LAYER 3 · INTERFACE ADAPTERS · src/adapters/http/
         </text>
-        <rect x="36" y="891" width="208" height="12" rx="2" fill="#f9f4dc" />
+        <rect x="36" y="923" width="208" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="40"
-          y="900"
+          y="932"
           fill="#b45309"
           font-size="8"
           font-weight="500"
@@ -504,7 +506,7 @@
           x="64"
           y="376"
           width="376"
-          height="152"
+          height="184"
           rx="6"
           fill="rgba(15,111,116,0.05)"
           stroke="#0f6f74"
@@ -560,6 +562,12 @@
         </text>
         <text x="80" y="516" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDto(progress: PlayerProgress): ProgressDto
+        </text>
+        <text x="80" y="532" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toProblemDetails(problem: ProgressProblem,
+        </text>
+        <text x="102" y="548" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          gameId: string): string[]
         </text>
         <!-- Class: LevelDtoMapper («mapper») -->
         <rect
@@ -657,7 +665,7 @@
           x="672"
           y="640"
           width="312"
-          height="196"
+          height="228"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -721,10 +729,16 @@
         <text x="710" y="828" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           LevelLeaderboardDto
         </text>
+        <text x="688" y="844" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toProblemDetails(problem: UnknownLevel,
+        </text>
+        <text x="710" y="860" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          query: LevelBoardQuery): string[]
+        </text>
         <!-- Class: PlayerProgress (PART 1 · VIEW 1) -->
         <rect
           x="64"
-          y="924"
+          y="956"
           width="304"
           height="48"
           rx="6"
@@ -735,7 +749,7 @@
         />
         <text
           x="216"
-          y="942"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -746,7 +760,7 @@
         </text>
         <text
           x="216"
-          y="960"
+          y="992"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -758,7 +772,7 @@
         <!-- Class: PlayerProgressReceiver (PART 3 · VIEW 1) -->
         <rect
           x="380"
-          y="924"
+          y="956"
           width="168"
           height="48"
           rx="6"
@@ -769,7 +783,7 @@
         />
         <text
           x="464"
-          y="942"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -780,7 +794,7 @@
         </text>
         <text
           x="464"
-          y="960"
+          y="992"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -792,7 +806,7 @@
         <!-- Class: LevelDefinition (PART 1 · VIEW 2) -->
         <rect
           x="560"
-          y="924"
+          y="956"
           width="304"
           height="48"
           rx="6"
@@ -803,7 +817,7 @@
         />
         <text
           x="712"
-          y="942"
+          y="974"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -814,7 +828,7 @@
         </text>
         <text
           x="712"
-          y="960"
+          y="992"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -826,7 +840,7 @@
         <!-- UML template box: the type parameter on the top-right corner -->
         <rect
           x="816"
-          y="914"
+          y="946"
           width="56"
           height="18"
           rx="2"
@@ -837,7 +851,7 @@
         />
         <text
           x="844"
-          y="926"
+          y="958"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -848,7 +862,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="1020"
+          y="1052"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -858,7 +872,7 @@
         </text>
         <text
           x="24"
-          y="1036"
+          y="1068"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -868,7 +882,7 @@
         </text>
         <text
           x="24"
-          y="1052"
+          y="1084"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -879,7 +893,7 @@
         </text>
         <text
           x="24"
-          y="1068"
+          y="1100"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -889,17 +903,17 @@
         </text>
         <text
           x="24"
-          y="1084"
+          y="1116"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          A failed Result of UpdateLevels becomes the details of the 400 body of API-FR-06 through
-          toDetails(). The mappers hold no state.
+          A failed Result becomes the lines of the API-FR-06 body through toDetails() or
+          toProblemDetails(); the controller picks the status (#215). The mappers hold no state.
         </text>
         <text
           x="24"
-          y="1100"
+          y="1132"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -911,15 +925,15 @@
         <!-- Legend -->
         <line
           x1="24"
-          y1="1124"
+          y1="1156"
           x2="1016"
-          y2="1124"
+          y2="1156"
           stroke="rgba(23,33,42,0.10)"
           stroke-width="0.8"
         />
         <text
           x="24"
-          y="1142"
+          y="1174"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -929,16 +943,16 @@
         </text>
         <line
           x1="24"
-          y1="1160"
+          y1="1192"
           x2="52"
-          y2="1160"
+          y2="1192"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad5httpmappers-open)"
         />
         <text
           x="60"
-          y="1164"
+          y="1196"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -947,7 +961,7 @@
         </text>
         <rect
           x="24"
-          y="1180"
+          y="1212"
           width="20"
           height="12"
           rx="2"
@@ -957,7 +971,7 @@
         />
         <rect
           x="48"
-          y="1180"
+          y="1212"
           width="20"
           height="12"
           rx="2"
@@ -967,7 +981,7 @@
         />
         <text
           x="80"
-          y="1189"
+          y="1221"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -976,7 +990,7 @@
         </text>
         <rect
           x="470"
-          y="1180"
+          y="1212"
           width="28"
           height="12"
           rx="2"
@@ -986,7 +1000,7 @@
         />
         <text
           x="506"
-          y="1189"
+          y="1221"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -995,7 +1009,7 @@
         </text>
         <rect
           x="616"
-          y="1180"
+          y="1212"
           width="28"
           height="12"
           rx="2"
@@ -1006,7 +1020,7 @@
         />
         <text
           x="652"
-          y="1189"
+          y="1221"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
