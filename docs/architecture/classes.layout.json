@@ -273,6 +273,22 @@
             "UserValues",
             "LevelResultProblem"
           ]
+        },
+        {
+          "group": "adapters|src/adapters/jwt",
+          "types": ["JwtTokenIssuer"]
+        },
+        {
+          "group": "adapters|src/adapters/crypto",
+          "types": ["ScryptPasswordHasher", "RandomUserIdGenerator"]
+        },
+        {
+          "group": "adapters|src/adapters/clock",
+          "types": ["SystemClock"]
+        },
+        {
+          "group": "adapters|src/adapters/logging",
+          "types": ["NestLogger"]
         }
       ],
       "4": [
@@ -281,20 +297,8 @@
           "types": ["Database", "DatabaseModule"]
         },
         {
-          "group": "infrastructure|src/infrastructure/logging",
-          "types": ["NestLogger"]
-        },
-        {
           "group": "infrastructure|src/infrastructure",
           "types": ["AppModule"]
-        },
-        {
-          "group": "infrastructure|src/infrastructure/clock",
-          "types": ["SystemClock"]
-        },
-        {
-          "group": "infrastructure|src/infrastructure/auth",
-          "types": ["JwtTokenIssuer", "ScryptPasswordHasher", "RandomUserIdGenerator"]
         }
       ]
     },
@@ -477,14 +481,7 @@
             "LevelResultProblem",
             "DrizzleUserRepository",
             "LevelDtoMapper",
-            "ProgressDtoMapper"
-          ]
-        }
-      ],
-      "4": [
-        {
-          "group": "ref|infrastructure",
-          "types": [
+            "ProgressDtoMapper",
             "SystemClock",
             "JwtTokenIssuer",
             "RandomUserIdGenerator",
@@ -639,14 +636,7 @@
             "ProgressDtoMapper",
             "LevelEditorGuard",
             "AuthDtoMapper",
-            "JwtAuthGuard"
-          ]
-        }
-      ],
-      "4": [
-        {
-          "group": "ref|infrastructure",
-          "types": [
+            "JwtAuthGuard",
             "JwtTokenIssuer",
             "ScryptPasswordHasher",
             "RandomUserIdGenerator",
@@ -814,26 +804,30 @@
             "UserValues",
             "LevelResultProblem"
           ]
+        },
+        {
+          "group": "adapters|src/adapters/jwt",
+          "types": ["JwtTokenIssuer"]
+        },
+        {
+          "group": "adapters|src/adapters/crypto",
+          "types": ["ScryptPasswordHasher", "RandomUserIdGenerator"]
+        },
+        {
+          "group": "adapters|src/adapters/clock",
+          "types": ["SystemClock"]
+        },
+        {
+          "group": "adapters|src/adapters/logging",
+          "types": ["NestLogger"]
         }
       ]
     },
     "part-infrastructure": {
       "4": [
         {
-          "group": "infrastructure|src/infrastructure/clock",
-          "types": ["SystemClock"]
-        },
-        {
           "group": "infrastructure|src/infrastructure",
           "types": ["AppModule"]
-        },
-        {
-          "group": "infrastructure|src/infrastructure/auth",
-          "types": ["JwtTokenIssuer", "ScryptPasswordHasher", "RandomUserIdGenerator"]
-        },
-        {
-          "group": "infrastructure|src/infrastructure/logging",
-          "types": ["NestLogger"]
         },
         {
           "group": "infrastructure|src/infrastructure/database",

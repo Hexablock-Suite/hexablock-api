@@ -40,18 +40,18 @@ In the frame `DATABASE ENGINE · ADAPTER`, the ports keep `«interface»` `«por
 
 ## A driver
 
-View 1 draws four driver ports. Each one has one adapter in `src/infrastructure/`:
+View 1 draws four driver ports. Each one has one adapter in a folder of `src/adapters/` named for the library that it adapts (#212, option C):
 
-| Port                                                            | Adapter                                                                        | Binding           |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------- |
-| [`Clock`](../src/application/ports/clock.ts)                    | [`SystemClock`](../src/infrastructure/clock/system-clock.ts)                   | `CLOCK`           |
-| [`Logger`](../src/application/ports/logger.ts)                  | [`NestLogger`](../src/infrastructure/logging/nest-logger.ts)                   | `LOGGER`          |
-| [`PasswordHasher`](../src/application/ports/password-hasher.ts) | [`ScryptPasswordHasher`](../src/infrastructure/auth/scrypt-password-hasher.ts) | `PASSWORD_HASHER` |
-| [`TokenIssuer`](../src/application/ports/token-issuer.ts)       | [`JwtTokenIssuer`](../src/infrastructure/auth/jwt-token-issuer.ts)             | `TOKEN_ISSUER`    |
+| Port                                                            | Adapter                                                                    | Binding           |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------- |
+| [`Clock`](../src/application/ports/clock.ts)                    | [`SystemClock`](../src/adapters/clock/system-clock.ts)                     | `CLOCK`           |
+| [`Logger`](../src/application/ports/logger.ts)                  | [`NestLogger`](../src/adapters/logging/nest-logger.ts)                     | `LOGGER`          |
+| [`PasswordHasher`](../src/application/ports/password-hasher.ts) | [`ScryptPasswordHasher`](../src/adapters/crypto/scrypt-password-hasher.ts) | `PASSWORD_HASHER` |
+| [`TokenIssuer`](../src/application/ports/token-issuer.ts)       | [`JwtTokenIssuer`](../src/adapters/jwt/jwt-token-issuer.ts)                | `TOKEN_ISSUER`    |
 
-- **Add:** a class in `src/infrastructure/` that implements the port.
+- **Add:** a class in `src/adapters/<library>/` that implements the port, and a rule in [`.dependency-cruiser.cjs`](../.dependency-cruiser.cjs) for that folder before it imports its library (rule R-other-adapters-no-package of [`AGENTS.md`](../AGENTS.md)).
 - **Register:** change the provider of its binding in [`app.module.ts`](../src/infrastructure/app.module.ts) to the new class.
-- **Test:** a new clock runs `describeClockContract` of [`clock.contract.ts`](../test/support/clock.contract.ts), as [`clock.contract.spec.ts`](../test/support/clock.contract.spec.ts) does for `SystemClock`. The tests of the other adapters are in [`test/unit/infrastructure/`](../test/unit/infrastructure/).
+- **Test:** a new clock runs `describeClockContract` of [`clock.contract.ts`](../test/support/clock.contract.ts), as [`clock.contract.spec.ts`](../test/support/clock.contract.spec.ts) does for `SystemClock`. The tests of the other adapters are in [`test/unit/adapters/`](../test/unit/adapters/).
 
 In the frame `DRIVERS · ADAPTER`, the ports keep `«interface»` `«port»`, as in the database engine frame.
 
