@@ -1,11 +1,10 @@
 import { FitSection } from '../../../src/domain/level/fit/fit-section.js';
 import { HexTopology } from '../../../src/domain/level/hex-topology.js';
-import { LevelDefinition } from '../../../src/domain/level/level-definition.js';
+import { LevelDefinition, type StoredLevel } from '../../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../../src/domain/level/level-order.js';
 import type { LevelSection } from '../../../src/domain/level/level-section.js';
 import { LevelVersion } from '../../../src/domain/level/level-version.js';
 import { SortSection } from '../../../src/domain/level/sort/sort-section.js';
-import type { StoredLevel } from '../../../src/domain/level/stored-level.js';
 import { TopologyId } from '../../../src/domain/level/topology-id.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';

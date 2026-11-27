@@ -1,5 +1,5 @@
 import type { Coordinate } from './coordinate.js';
-import type { Rotation } from './fit/rotation.js';
+import type { Rotation } from './rotation.js';
 
 // The rules of one topology (decision 6). TopologyId only names a topology.
 // A Topology knows which coordinates are its cells, how a rotation turns a

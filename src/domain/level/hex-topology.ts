@@ -1,7 +1,7 @@
 import type { Result } from '../shared/result.js';
 import { Coordinate } from './coordinate.js';
-import { Rotation } from './fit/rotation.js';
 import type { LevelProblem } from './level-problem.js';
+import { Rotation } from './rotation.js';
 import type { Topology } from './topology.js';
 
 // The value of a constant of this file. The constants are fixed, so a failed
