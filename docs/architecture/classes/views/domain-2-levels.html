@@ -71,16 +71,16 @@
         <title id="domain2levels-title">HexaBlock API level schema · UML class diagram</title>
         <desc id="domain2levels-desc">
           Class diagram of layer 1 showing the LevelDefinition aggregate root with private fields:
-          its common part and a section of type TSection, bound to the FitSection or the SortSection
-          value object. The LevelValidators domain service holds one LevelValidator strategy per
-          gameId in a list of entries, finds it with GameId.equals() and creates each level.
-          FitLevelValidator and SortLevelValidator implement the LevelValidator interface and pick
-          their section type. SortLevelValidator only picks SortSection, which holds its rules.
-          FitLevelValidator holds Topologies, finds the Topology of the level and picks FitSection,
-          which checks A5 on that Topology. A dashed frame labelled Aggregate encloses
-          LevelDefinition and its section types, FitSection and SortSection.
-          LevelDefinition.decideReplace(stored), called on the incoming copy, decides the version
-          rule of S3-10 over the stored state (#174).
+          its common part and a section of type TSection, which the class bounds by LevelSection,
+          bound to the FitSection or the SortSection value object. The LevelValidators domain
+          service holds one LevelValidator strategy per gameId in a list of entries, finds it with
+          GameId.equals() and creates each level. FitLevelValidator and SortLevelValidator implement
+          the LevelValidator interface and pick their section type. SortLevelValidator only picks
+          SortSection, which holds its rules. FitLevelValidator holds Topologies, finds the Topology
+          of the level and picks FitSection, which checks A5 on that Topology. A dashed frame
+          labelled Aggregate encloses LevelDefinition and its section types, FitSection and
+          SortSection. LevelDefinition.decideReplace(stored), called on the incoming copy, decides
+          the version rule of S3-10 over the stored state (#174).
         </desc>
         <defs>
           <marker
@@ -407,7 +407,7 @@
           - topology: TopologyId
         </text>
         <text x="64" y="256" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - section: TSection &amp; LevelSection
+          - section: TSection
         </text>
         <line x1="48" y1="264" x2="360" y2="264" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text
@@ -462,23 +462,13 @@
         >
           Result&lt;LevelDefinition&lt;TSection&gt;, LevelProblem&gt;
         </text>
-        <text
-          textLength="290"
-          lengthAdjust="spacingAndGlyphs"
-          x="64"
-          y="360"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + equals(other: LevelDefinition&lt;unknown&gt;): boolean
+        <text x="64" y="360" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: LevelDefinition): boolean
         </text>
         <text x="64" y="376" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + decideReplace(stored: StoredLevel):
         </text>
         <text
-          textLength="268"
-          lengthAdjust="spacingAndGlyphs"
           text-decoration="underline"
           x="86"
           y="392"
@@ -486,7 +476,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;
+          Result&lt;LevelDefinition, LevelProblem&gt;
         </text>
         <!-- Class: FitSection («value object») -->
         <rect
@@ -726,7 +716,7 @@
           version: LevelVersion, topology: TopologyId, section: unknown):
         </text>
         <text x="598" y="248" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;
+          Result&lt;LevelDefinition, LevelProblem&gt;
         </text>
         <!-- Class: LevelValidator («interface») -->
         <rect
@@ -876,9 +866,9 @@
         </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
-          x="312"
+          x="200"
           y="90"
-          width="56"
+          width="168"
           height="18"
           rx="2"
           fill="#ffffff"
@@ -887,19 +877,19 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="340"
+          x="284"
           y="102"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          TSection
+          TSection extends LevelSection
         </text>
         <rect
-          x="952"
+          x="840"
           y="318"
-          width="56"
+          width="168"
           height="18"
           rx="2"
           fill="#ffffff"
@@ -908,14 +898,14 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="980"
+          x="924"
           y="330"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          TSection
+          TSection extends LevelSection
         </text>
         <!-- Footnote -->
         <text

@@ -38,7 +38,7 @@ export class InMemoryLevelRepository implements LevelRepository {
   async findFor(
     gameId: GameId,
     results: readonly LevelResult[],
-  ): Promise<readonly LevelDefinition<unknown>[]> {
+  ): Promise<readonly LevelDefinition[]> {
     const levelIds = new Set(results.map((result) => receiveLevelResultOf(result).levelId));
     const game = receiveValueOf(gameId);
     const rows = await Promise.resolve([...this.rowsByKey.values()]);
@@ -61,7 +61,7 @@ export class InMemoryLevelRepository implements LevelRepository {
     gameId: GameId,
     levelId: LevelId,
     change: LevelChange,
-  ): Promise<Result<LevelDefinition<unknown>, LevelProblem>> {
+  ): Promise<Result<LevelDefinition, LevelProblem>> {
     const key = keyOf(gameId, levelId);
     const previous = this.lastUpdateByKey.get(key) ?? Promise.resolve();
     const current = previous

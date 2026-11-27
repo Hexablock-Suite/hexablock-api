@@ -614,7 +614,7 @@
           change: LevelChange):
         </text>
         <text x="234" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;&gt;
+          Promise&lt;Result&lt;LevelDefinition, LevelProblem&gt;&gt;
         </text>
         <!-- Class: LevelDtoMapper («mapper») -->
         <rect
@@ -665,7 +665,7 @@
           + toRequest(body: unknown): Result&lt;UpdateLevelsRequest, string[]&gt;
         </text>
         <text x="776" y="324" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toDto(level: LevelDefinition&lt;unknown&gt;): LevelDto
+          + toDto(level: LevelDefinition): LevelDto
         </text>
         <text x="776" y="340" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toLevelsDto(listed: ListedLevels): LevelsDto
@@ -848,7 +848,7 @@
           + update(gameId: GameId, levelId: LevelId, change: LevelChange):
         </text>
         <text x="338" y="844" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;&gt;
+          Promise&lt;Result&lt;LevelDefinition, LevelProblem&gt;&gt;
         </text>
         <!-- Class: LevelValidators («domain service») -->
         <rect
@@ -931,7 +931,7 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          Result&lt;LevelDefinition&lt;unknown&gt;, LevelProblem&gt;
+          Result&lt;LevelDefinition, LevelProblem&gt;
         </text>
         <!-- Class: LevelValidator («interface») -->
         <rect
@@ -1221,13 +1221,13 @@
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
         >
-          - section: TSection &amp; LevelSection
+          - section: TSection
         </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
-          x="612"
+          x="500"
           y="926"
-          width="56"
+          width="168"
           height="18"
           rx="2"
           fill="#ffffff"
@@ -1236,19 +1236,19 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="640"
+          x="584"
           y="938"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          TSection
+          TSection extends LevelSection
         </text>
         <rect
-          x="1092"
+          x="980"
           y="1118"
-          width="56"
+          width="168"
           height="18"
           rx="2"
           fill="#ffffff"
@@ -1257,14 +1257,14 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="1120"
+          x="1064"
           y="1130"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          TSection
+          TSection extends LevelSection
         </text>
         <!-- Footnote -->
         <text
@@ -1335,9 +1335,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelDefinition&lt;unknown&gt; is a valid level whose section type only its strategy
-          knows. DrizzleLevelRepository saves one level per transaction and restores each row
-          through LevelValidators (view 3.2).
+          A LevelDefinition is a valid level whose section type only its strategy knows.
+          DrizzleLevelRepository saves one level per transaction and restores each row through
+          LevelValidators (view 3.2).
         </text>
         <text
           x="24"

@@ -15,6 +15,6 @@ export interface UnavailableLevel {
 // It is the response of the GetLevels input port, so it lives next to that
 // use case. The LevelRepository port imports it from here (#213).
 export interface ListedLevels {
-  readonly levels: readonly LevelDefinition<unknown>[];
+  readonly levels: readonly LevelDefinition[];
   readonly unavailable: readonly UnavailableLevel[];
 }
