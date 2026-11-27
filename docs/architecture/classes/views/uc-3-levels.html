@@ -518,10 +518,10 @@
           + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
         </text>
         <text x="552" y="256" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + find(gameId: GameId, result: LevelResult):
+          + findFor(gameId: GameId, results: readonly LevelResult[]):
         </text>
         <text x="574" y="272" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;LevelDefinition&lt;unknown&gt; | undefined&gt;
+          Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
         </text>
         <text x="552" y="288" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId,

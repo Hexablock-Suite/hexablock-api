@@ -480,10 +480,10 @@
           + list(): Promise&lt;ListedLevels&gt;
         </text>
         <text x="584" y="446" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + find(gameId: GameId, result: LevelResult):
+          + findFor(gameId: GameId, results: readonly LevelResult[]):
         </text>
         <text x="606" y="462" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;LevelDefinition&lt;unknown&gt; | undefined&gt;
+          Promise&lt;readonly LevelDefinition&lt;unknown&gt;[]&gt;
         </text>
 
         <!-- Class: ProgressRepository («interface» «port») -->
