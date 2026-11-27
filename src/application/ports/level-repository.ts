@@ -31,12 +31,19 @@ export interface LevelRepository {
   // that level exists (#146). It takes no lock and restores no level.
   holds(gameId: GameId, levelId: LevelId): Promise<boolean>;
 
-  // Gives the one valid level of the gameId and the levelId of one result,
-  // or undefined: the level of a stored valid row, and undefined for a row
-  // that is absent or that breaks a rule (decision 19, #147), which holds
-  // no star thresholds. A sync reads one level per result and no level that
-  // its results do not name (#171). It takes no lock and saves no level.
-  find(gameId: GameId, result: LevelResult): Promise<LevelDefinition<unknown> | undefined>;
+  // Gives the valid levels of the gameId that the results name, by levelId,
+  // in one read: the level of each stored valid row whose levelId one result
+  // names. A row that is absent or that breaks a rule (decision 19, #147)
+  // gives no level, and two results of one level give that level once. The
+  // query takes the results because the domain gives no getter of the
+  // levelId of a LevelResult, and rule R-no-delivery-call keeps its
+  // delivery out of layer 2: each adapter receives the levelIds in the
+  // border (decision 22, #217). A sync reads no level that its results do
+  // not name (#171). It takes no lock and saves no level.
+  findFor(
+    gameId: GameId,
+    results: readonly LevelResult[],
+  ): Promise<readonly LevelDefinition<unknown>[]>;
 
   // Runs the change while it holds a lock for the gameId and the levelId,
   // and saves the level that the change returns. Two updates of one level

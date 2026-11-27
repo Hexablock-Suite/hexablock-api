@@ -283,60 +283,98 @@ export function describeLevelRepositoryContract(
       });
     });
 
-    // #171: find() gives the one valid level of the gameId and the levelId
-    // of one result, in place of the list() of the sync before it. The row
-    // of the key is valid, so the level is a copy of the stored one.
-    it('should_give_the_stored_level_of_the_result_when_the_row_of_its_key_is_valid', async () => {
+    // #217: findFor() reads the valid levels of every result of one sync in
+    // one query. It gives them by levelId, and no level that the results do
+    // not name leaves the repository (#171).
+    it('should_give_the_stored_levels_by_level_id_when_the_rows_of_the_keys_of_the_results_are_valid', async () => {
       const repository = await createRepository();
-      await storeLevel(repository, levelJson('hexa-fit'));
-      const result = levelResultOf({ levelId: 'fit-01', stars: 1, moves: 12, elapsedMs: 45000 });
+      await storeLevel(repository, levelJson('hexa-fit', 'fit-01'));
+      await storeLevel(repository, levelJson('hexa-fit', 'fit-02'));
+      await storeLevel(repository, levelJson('hexa-fit', 'fit-03'));
+      const results = [
+        levelResultOf({ levelId: 'fit-03', stars: 1, moves: 12, elapsedMs: 45000 }),
+        levelResultOf({ levelId: 'fit-01', stars: 2, moves: 10, elapsedMs: 30000 }),
+      ];
 
-      const found = await repository.find(FIT, result);
+      const found = await repository.findFor(FIT, results);
 
-      expect(found && receiveJsonOf(found)).toEqual(levelJson('hexa-fit'));
+      expect(found.map((level) => receiveJsonOf(level))).toEqual([
+        levelJson('hexa-fit', 'fit-01'),
+        levelJson('hexa-fit', 'fit-03'),
+      ]);
     });
 
     // The sync of a result that no stored level names fails before the lock,
-    // so find() answers undefined and no level leaves the repository.
-    it('should_answer_undefined_when_no_row_is_stored_for_the_key_of_a_result', async () => {
+    // so findFor() gives no level for it.
+    it('should_give_no_level_when_no_row_is_stored_for_the_keys_of_the_results', async () => {
       const repository = await createRepository();
       const result = levelResultOf({ levelId: 'fit-01', stars: 1, moves: 12, elapsedMs: 45000 });
 
-      const found = await repository.find(FIT, result);
+      const found = await repository.findFor(FIT, [result]);
 
-      expect(found).toBeUndefined();
+      expect(found).toEqual([]);
     });
 
     // A stored row that breaks a rule holds no level and no star thresholds
-    // (#147), so find() answers undefined for it, as list() keeps it apart.
-    it('should_answer_undefined_when_the_stored_row_of_the_key_breaks_a_rule', async () => {
+    // (#147), so findFor() leaves it out, as list() keeps it apart.
+    it('should_leave_out_the_row_when_the_stored_row_of_the_key_of_a_result_breaks_a_rule', async () => {
       const repository = await createRepository();
-      await storeRow(repository, brokenRow(levelJson('hexa-fit')));
-      const result = levelResultOf({ levelId: 'fit-01', stars: 1, moves: 12, elapsedMs: 45000 });
+      await storeRow(repository, brokenRow(levelJson('hexa-fit', 'fit-01')));
+      await storeLevel(repository, levelJson('hexa-fit', 'fit-02'));
+      const results = [
+        levelResultOf({ levelId: 'fit-01', stars: 1, moves: 12, elapsedMs: 45000 }),
+        levelResultOf({ levelId: 'fit-02', stars: 1, moves: 12, elapsedMs: 45000 }),
+      ];
 
-      const found = await repository.find(FIT, result);
+      const found = await repository.findFor(FIT, results);
 
-      expect(found).toBeUndefined();
+      expect(found.map((level) => receiveJsonOf(level))).toEqual([levelJson('hexa-fit', 'fit-02')]);
     });
 
-    // The key of the query joins the gameId and the levelId of the result: a
-    // result of another game and a result of a level with no row answer
-    // undefined, as holds() answers false for both keys.
-    it('should_answer_undefined_when_the_result_names_another_game_or_an_unknown_level', async () => {
+    // The key of the query joins the gameId of the sync and the levelId of
+    // each result: a level of another game and a level with no row stay
+    // out, as holds() answers false for both keys.
+    it('should_leave_out_the_level_when_a_result_names_another_game_or_an_unknown_level', async () => {
+      const repository = await createRepository();
+      await storeLevel(repository, levelJson('hexa-fit'));
+      await storeLevel(repository, levelJson('hexa-sort'));
+      const fit01 = levelResultOf({ levelId: 'fit-01', stars: 1, moves: 12, elapsedMs: 45000 });
+      const unknown = levelResultOf({
+        levelId: 'no-such-level',
+        stars: 1,
+        moves: 12,
+        elapsedMs: 45000,
+      });
+
+      const otherGame = await repository.findFor(SORT, [fit01]);
+      const unknownLevel = await repository.findFor(FIT, [unknown, fit01]);
+
+      expect(otherGame).toEqual([]);
+      expect(unknownLevel.map((level) => receiveJsonOf(level))).toEqual([levelJson('hexa-fit')]);
+    });
+
+    // Two results of one level name one row, so the level comes once.
+    it('should_give_the_level_once_when_two_results_name_the_same_level', async () => {
+      const repository = await createRepository();
+      await storeLevel(repository, levelJson('hexa-fit'));
+      const results = [
+        levelResultOf({ levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 }),
+        levelResultOf({ levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 30000 }),
+      ];
+
+      const found = await repository.findFor(FIT, results);
+
+      expect(found.map((level) => receiveJsonOf(level))).toEqual([levelJson('hexa-fit')]);
+    });
+
+    // No result names no level, so no level leaves the repository.
+    it('should_give_no_level_when_the_list_of_results_is_empty', async () => {
       const repository = await createRepository();
       await storeLevel(repository, levelJson('hexa-fit'));
 
-      const otherGame = await repository.find(
-        SORT,
-        levelResultOf({ levelId: 'fit-01', stars: 1, moves: 12, elapsedMs: 45000 }),
-      );
-      const unknownLevel = await repository.find(
-        FIT,
-        levelResultOf({ levelId: 'no-such-level', stars: 1, moves: 12, elapsedMs: 45000 }),
-      );
+      const found = await repository.findFor(FIT, []);
 
-      expect(otherGame).toBeUndefined();
-      expect(unknownLevel).toBeUndefined();
+      expect(found).toEqual([]);
     });
   });
 }

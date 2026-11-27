@@ -1,4 +1,4 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import type { ListedLevels } from '../../application/levels/listed-levels.js';
 import type { LevelChange, LevelRepository } from '../../application/ports/level-repository.js';
 import type { LevelDefinition } from '../../domain/level/level-definition.js';
@@ -21,7 +21,7 @@ type Queries = Pick<PersistenceDatabase, 'select'>;
 // (API-FR-04). LevelRowMapper restores each row through the strategy that
 // LevelValidators finds for its gameId, so every level that it gives is valid.
 // A row that no strategy accepts is a broken row: list() gives it apart,
-// find() answers no level for it, and update() passes it to the change as
+// findFor() gives no level for it, and update() passes it to the change as
 // the broken state (#147).
 export class DrizzleLevelRepository implements LevelRepository {
   constructor(
@@ -51,23 +51,29 @@ export class DrizzleLevelRepository implements LevelRepository {
     return rows.length > 0;
   }
 
-  // One level per synced result (#171). The adapter receives the levelId of
-  // the result in the border, so no primitive crosses the port. The query
-  // reads one row by its key, as holds() does, and LevelRowMapper restores
-  // it: the level of a valid row, and undefined for a row that is absent or
-  // that breaks a rule, which holds no star thresholds (decision 19, #147).
-  async find(gameId: GameId, result: LevelResult): Promise<LevelDefinition<unknown> | undefined> {
-    const levelId = receiveLevelResultOf(result).levelId;
-    const [row] = await this.db
+  // The levels of every result of one sync in one query (#217). The adapter
+  // receives the levelIds of the results in the border, because the domain
+  // gives no getter of them (decision 22). An empty list runs no query. The
+  // IN filter reads no row that the results do not name (#171), and each
+  // row comes once. LevelRowMapper restores each row: a broken row gives no
+  // level (decision 19, #147).
+  async findFor(
+    gameId: GameId,
+    results: readonly LevelResult[],
+  ): Promise<readonly LevelDefinition<unknown>[]> {
+    const levelIds = [...new Set(results.map((result) => receiveLevelResultOf(result).levelId))];
+    if (levelIds.length === 0) {
+      return [];
+    }
+    const rows = await this.db
       .select()
       .from(levels)
-      .where(and(eq(levels.gameId, receiveValueOf(gameId)), eq(levels.levelId, levelId)))
-      .limit(1);
-    if (row === undefined) {
-      return undefined;
-    }
-    const stored = LevelRowMapper.toStoredLevel(row, this.validators);
-    return stored.state === 'valid' ? stored.level : undefined;
+      .where(and(eq(levels.gameId, receiveValueOf(gameId)), inArray(levels.levelId, levelIds)))
+      .orderBy(asc(levels.levelId));
+    return rows.flatMap((row) => {
+      const stored = LevelRowMapper.toStoredLevel(row, this.validators);
+      return stored.state === 'valid' ? [stored.level] : [];
+    });
   }
 
   // The lock pattern of DrizzleProgressRepository.update() (decision 2). One

@@ -73,6 +73,7 @@ export class UpdateLevelsUseCase implements UpdateLevels {
     for (const { gameId, levelId, level } of checked.value) {
       // The saves run one after the other, in the order of the batch, so a
       // failed save keeps exactly the levels before it.
+      // oxlint-disable-next-line no-await-in-loop -- Each save waits for the save before it.
       const saved = await this.levels.update(gameId, levelId, (stored) =>
         level.decideReplace(stored),
       );
