@@ -23,7 +23,7 @@ This page answers statement §4.1 for the API, as decision D6 asks (it replaces 
 - Inside a group of 12 boxes or more, a frame holds the boxes of one view of this page. The frame title is the file name of the view in [`classes/views/`](classes/views/), for example `view ad-3-http` for `ad-3-http.png`.
 - The pages follow the reading rules of the next section, and each page has a legend.
 
-The file is generated from the code at `25bbcd2` plus the views of this page, by the tool [`drawio-clases`](https://github.com/Hexablock-Suite/.github/tree/main/tools/drawio-clases) of the organization repository. The README of the tool gives the commands. [`classes.config.json`](classes.config.json) maps the folders and the views to layers and parts. [`classes.layout.json`](classes.layout.json) fixes the order of the groups of each band and of the boxes of each group.
+The file is generated from the code at `410a267` plus the views of this page, by the tool [`drawio-clases`](https://github.com/Hexablock-Suite/.github/tree/main/tools/drawio-clases) of the organization repository. The README of the tool gives the commands. [`classes.config.json`](classes.config.json) maps the folders and the views to layers and parts. [`classes.layout.json`](classes.layout.json) fixes the order of the groups of each band and of the boxes of each group.
 
 A hand edit of that order survives. Move the boxes in draw.io, run `pin.mjs` of the tool to write the order into `classes.layout.json`, and generate the file again. Commit `classes.drawio` and `classes.layout.json` together. Any other hand edit is lost at the next generation: a pixel position, a line route, a text or a style.
 
@@ -100,7 +100,7 @@ Layer 3, `src/adapters/`, and layer 4, `src/infrastructure/`. Adapters never imp
 
 ### View 3.2: level and user store
 
-![Level and user store: DrizzleLevelRepository and DrizzleUserRepository with their row mappers; DrizzleLevelRepository lists, holds and updates the levels and holds LevelValidators, and LevelRowMapper restores each stored row into a valid LevelDefinition through the strategy of the row's gameId, or into a broken row with its reason and its stored version, and lists the valid levels and the broken rows apart](classes/views/ad-2-level-store.png)
+![Level and user store: DrizzleLevelRepository and DrizzleUserRepository with their row mappers; DrizzleLevelRepository implements the four operations of the LevelRepository port, which the view draws on the port and on the adapter: list(), holds(gameId, levelId), findFor(gameId, results), the query that finds the levels of the results of one sync, and update(gameId, levelId, change); DrizzleLevelRepository holds LevelValidators, and LevelRowMapper restores each stored row into a valid LevelDefinition through the strategy of the row's gameId, or into a broken row with its reason and its stored version, and lists the valid levels and the broken rows apart; a note says, as the comment of the adapter does, that list() gives a broken row apart, findFor() gives no level for it, and update() passes it to the change as the broken state (#147)](classes/views/ad-2-level-store.png)
 
 ### View 3.3: HTTP
 
@@ -128,7 +128,7 @@ One use case can cross every layer. [flows.md](flows.md) follows one request thr
 
 ### Slice 3: update levels
 
-![Update levels slice: JwtAuthGuard and LevelsController in layer 3 call the AuthenticateToken and UpdateLevels input ports; UpdateLevelsUseCase holds the LevelRepository port, whose list(), holds() and update() DrizzleLevelRepository implements, and the LevelValidators domain service, which DrizzleLevelRepository holds too, which holds one LevelValidator strategy per gameId and creates each LevelDefinition aggregate root, alone in a dashed Aggregate frame; FitLevelValidator holds Topologies, which gives it the Topology of the level; notes say that a level that fails its check leaves the stored levels unchanged, that each save asks decideReplace() of the incoming level (S3-10, #174), that FitSection and SortSection are value objects of the aggregate of LevelDefinition and that LevelValidator and its validators form the Strategy pattern, and name Coordinate, one cell of a FitSection, which view 1.5 draws](classes/views/flow-3-update-levels.png)
+![Update levels slice: JwtAuthGuard and LevelsController in layer 3 call the AuthenticateToken and UpdateLevels input ports; UpdateLevelsUseCase holds the LevelRepository port, whose list(), holds(), findFor(gameId, results) and update() DrizzleLevelRepository implements, and the view draws all four on the port and on the adapter, and the LevelValidators domain service, which DrizzleLevelRepository holds too, which holds one LevelValidator strategy per gameId and creates each LevelDefinition aggregate root, alone in a dashed Aggregate frame; FitLevelValidator holds Topologies, which gives it the Topology of the level; notes say that a level that fails its check leaves the stored levels unchanged, that each save asks decideReplace() of the incoming level (S3-10, #174), that FitSection and SortSection are value objects of the aggregate of LevelDefinition and that LevelValidator and its validators form the Strategy pattern, and name Coordinate, one cell of a FitSection, which view 1.5 draws](classes/views/flow-3-update-levels.png)
 
 ## Data shapes
 
