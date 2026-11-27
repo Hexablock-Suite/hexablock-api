@@ -40,7 +40,8 @@ export function readFields<T>(
 
 // Reads a raw list with one item or more. A raw value that is not a list, an
 // empty list, or a list with an item that `readItem` rejects gives `problem`.
-// The list that it gives is frozen.
+// The code of a rejected item is a part code, so the list gives the code of
+// its field to the client (decision 11, #223). The list that it gives is frozen.
 export function readList<T>(
   raw: unknown,
   readItem: PartReader<T>,

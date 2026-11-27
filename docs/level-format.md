@@ -63,7 +63,34 @@ A coordinate is a JSON list of whole numbers, such as `[2, 1]`. The `topology` o
 - Each object holds exactly the fields of its table. A missing field and another field are both a wrong shape.
 - Each list holds one item or more: the figure, the pieces, the cells of a piece, the witness, the stars, the colors, the stacks and each stack.
 - A whole number is a JSON number with no fraction, inside the safe integer range of JavaScript.
-- The API answers a level that breaks a rule with a level problem, never with a server error. The problem names the broken field, for example `invalid-figure` or `invalid-source` (type `LevelProblem` in `src/domain/level/level-problem.ts`).
+- The API answers a level that breaks a rule with a level problem, never with a server error. The problem names the broken field, for example `invalid-figure` or `invalid-source`. The next section lists every code that a client sees.
+
+## Level problems
+
+`PUT /v1/levels` answers a level that breaks a rule with a 400 and the error body of API-FR-06. Each detail names one level and gives the code of the first rule that it breaks, for example `gameId "hexa-fit", levelId "fit-01": invalid-figure`. The code is the whole message: the API adds no text to it (decision 11 of [`architecture/classes.md`](architecture/classes.md)). A client sees these 16 codes of the type `LevelProblem` in `src/domain/level/level-problem.ts`:
+
+| Code                  | Field or rule       | The level breaks the rule when                                                                                          |
+| --------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `invalid-order`       | `order`             | The order is not a whole number of 1 or more.                                                                           |
+| `invalid-version`     | `version`           | The version is not a whole number of 1 or more.                                                                         |
+| `invalid-topology`    | `topology`          | The topology is not a lowercase slug.                                                                                   |
+| `game-without-levels` | `gameId`            | The game has no level files, such as `hexa-lines` (API-FR-04).                                                          |
+| `unknown-topology`    | `topology`          | A Fit level names a topology that the API does not know. The API knows `hex`, `square` and `triangle`.                  |
+| `invalid-section`     | `section`           | The section is not an object with exactly the fields of the section of its game.                                        |
+| `invalid-figure`      | Fit `figure`        | The figure is not a list of one cell or more, or one of its cells is not a cell of the topology.                        |
+| `invalid-pieces`      | Fit `pieces`        | The pieces are not a list of one piece or more, or a piece breaks a rule of its `id` or of its `cells`.                 |
+| `invalid-witness`     | Fit `witness`       | The witness is not a list of one entry or more, or an entry breaks a rule of its `piece`, its `rotation` or its `at`.   |
+| `invalid-stars`       | Fit or Sort `stars` | The stars are not a list of one threshold or more, or a threshold breaks a rule of its limits.                          |
+| `unequal-area`        | Fit, A5             | The witness places each piece once, but the cells that it covers do not have the area of the figure.                    |
+| `inexact-witness`     | Fit, A5             | The witness does not place each piece once, or it does not cover each cell of the figure once.                          |
+| `invalid-radius`      | Sort `radius`       | The radius is not a whole number of 1 or more.                                                                          |
+| `invalid-goals`       | Sort `goals`        | The goal is not a whole number of 1 or more.                                                                            |
+| `invalid-source`      | Sort `source`       | The source is neither a seeded source nor a fixed source, or it is both, or its seed, a color or a stack breaks a rule. |
+| `older-version`       | `version`           | The version is lower than the stored version of the level (S3-10).                                                      |
+
+- A part of a field gives the code of its field, so the code names the field that the author fixes. For example, a witness entry with the rotation `1.5` gives `invalid-witness`, and a source with the seed `-1` gives `invalid-source`.
+- A body of the wrong shape, a level with a missing or an extra field, and a `gameId` or a `levelId` that breaks its rule give a sentence, not a code.
+- `GET /v1/levels` names a stored level that breaks a rule in `unavailable`, with the code of its first broken rule in `reason`. That code is one of the codes above except `older-version`, or `invalid-game-id` or `invalid-level-id` when the stored `gameId` or `levelId` breaks its rule.
 
 ## Complete Fit example
 
