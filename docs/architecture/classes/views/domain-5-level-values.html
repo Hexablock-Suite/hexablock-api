@@ -61,9 +61,9 @@
   <body>
     <div class="frame">
       <p class="eyebrow">Class diagram · Part 1 · View 5 of 5</p>
-      <h1>Level values: the common part of a level and its cell</h1>
+      <h1>Level values: the common part of a level, its cell and its rotation</h1>
       <svg
-        viewBox="0 0 1040 741"
+        viewBox="0 0 1040 1041"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="domain5levelvalues-title domain5levelvalues-desc"
@@ -74,8 +74,10 @@
           LevelOrder, a LevelVersion and a TopologyId value object in private fields, and the
           Coordinate value object that the FitSection of view 2 holds for its cells. Each value
           object checks its rule in a factory method that returns a Result, compares by value and
-          delivers its value to a receiver with deliverTo(). A dashed frame labelled Aggregate
-          encloses LevelDefinition and every value object of the view.
+          delivers its value to a receiver with deliverTo(). The Rotation value object counts the
+          steps of a topology and turns a Coordinate; it lives next to Coordinate in
+          src/domain/level/ (#221). A dashed frame labelled Aggregate encloses LevelDefinition and
+          every value object of the view.
         </desc>
         <defs>
           <marker
@@ -96,7 +98,7 @@
           x="24"
           y="24"
           width="992"
-          height="512"
+          height="780"
           rx="8"
           fill="#f9f4dc"
           stroke="rgba(180,83,9,0.45)"
@@ -107,7 +109,7 @@
           x="40"
           y="66"
           width="964"
-          height="454"
+          height="722"
           rx="8"
           fill="none"
           stroke="rgba(23,33,42,0.65)"
@@ -161,6 +163,14 @@
         <!-- FitSection holds figure: Coordinate[]: a value object, so a use arrow with role and multiplicity (decision 13) -->
         <path
           d="M600 404 L712 404"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#domain5levelvalues-open)"
+        />
+        <!-- Rotation turns a Coordinate: a parameter and the return of turn(), so a use with a verb (#221) -->
+        <path
+          d="M852 552 L852 504"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -226,6 +236,18 @@
           letter-spacing="0.06em"
         >
           figure 1..*
+        </text>
+        <rect x="856" y="522" width="34" height="12" rx="2" fill="#f9f4dc" />
+        <text
+          x="860"
+          y="531"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="start"
+          letter-spacing="0.06em"
+        >
+          TURNS
         </text>
         <!-- Zone labels: drawn over the connectors, on a mask of the zone fill -->
         <rect x="36" y="35" width="208" height="12" rx="2" fill="#f9f4dc" />
@@ -624,6 +646,93 @@
         <text x="750" y="496" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           ValueReceiver&lt;readonly number[]&gt;): void
         </text>
+        <!-- Class: Rotation («value object»), next to Coordinate in src/domain/level/ (#221) -->
+        <rect
+          x="712"
+          y="552"
+          width="280"
+          height="220"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="852"
+          y="570"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «value object»
+        </text>
+        <text
+          x="852"
+          y="588"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Rotation
+        </text>
+        <text
+          x="852"
+          y="602"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          A5 · decision 6 · #221
+        </text>
+        <line x1="712" y1="612" x2="992" y2="612" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="728" y="628" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - steps: number
+        </text>
+        <line x1="712" y1="636" x2="992" y2="636" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          text-decoration="underline"
+          x="728"
+          y="652"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + of(raw: unknown):
+        </text>
+        <text
+          text-decoration="underline"
+          x="750"
+          y="668"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          Result&lt;Rotation, LevelProblem&gt;
+        </text>
+        <text x="728" y="684" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + equals(other: Rotation): boolean
+        </text>
+        <text x="728" y="700" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + turn(cell: Coordinate,
+        </text>
+        <text x="750" y="716" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          step: (cell: Coordinate) =&gt; Coordinate,
+        </text>
+        <text x="750" y="732" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          fullTurn: Rotation): Coordinate
+        </text>
+        <text x="728" y="748" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + deliverTo(receiver:
+        </text>
+        <text x="750" y="764" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          ValueReceiver&lt;number&gt;): void
+        </text>
         <!-- Class: FitSection (PART 1 · VIEW 2) -->
         <rect
           x="424"
@@ -683,7 +792,7 @@
         <!-- Footnote -->
         <text
           x="24"
-          y="568"
+          y="836"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -693,7 +802,7 @@
         </text>
         <text
           x="24"
-          y="584"
+          y="852"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -703,7 +812,7 @@
         </text>
         <text
           x="24"
-          y="600"
+          y="868"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -713,7 +822,7 @@
         </text>
         <text
           x="24"
-          y="616"
+          y="884"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -723,7 +832,7 @@
         </text>
         <text
           x="24"
-          y="632"
+          y="900"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -731,11 +840,31 @@
           deliverTo() delivers it to a receiver of layer 3, and no operation returns it. The level
           JSON keeps numbers and text (docs/level-format.md).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="664" x2="1016" y2="664" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="682"
+          y="916"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          A Rotation counts the steps of a topology, never degrees (A5). The Topology of view 1.2
+          turns a cell by it, and each Placement
+        </text>
+        <text
+          x="24"
+          y="932"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          of the FitSection witness holds one. So Rotation lives next to Coordinate in
+          src/domain/level/, not in level/fit/ (#221).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="964" x2="1016" y2="964" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="982"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -745,16 +874,16 @@
         </text>
         <line
           x1="24"
-          y1="700"
+          y1="1000"
           x2="52"
-          y2="700"
+          y2="1000"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#domain5levelvalues-open)"
         />
         <text
           x="60"
-          y="704"
+          y="1004"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -763,7 +892,7 @@
         </text>
         <text
           x="300"
-          y="704"
+          y="1004"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -772,7 +901,7 @@
         </text>
         <rect
           x="24"
-          y="717"
+          y="1017"
           width="20"
           height="12"
           rx="2"
@@ -782,7 +911,7 @@
         />
         <text
           x="56"
-          y="729"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -791,7 +920,7 @@
         </text>
         <rect
           x="166"
-          y="717"
+          y="1017"
           width="28"
           height="12"
           rx="2"
@@ -801,7 +930,7 @@
         />
         <text
           x="202"
-          y="729"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -810,7 +939,7 @@
         </text>
         <rect
           x="312"
-          y="717"
+          y="1017"
           width="28"
           height="12"
           rx="2"
@@ -821,7 +950,7 @@
         />
         <text
           x="348"
-          y="729"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -830,7 +959,7 @@
         </text>
         <rect
           x="518"
-          y="717"
+          y="1017"
           width="28"
           height="12"
           rx="2"
@@ -841,7 +970,7 @@
         />
         <text
           x="554"
-          y="729"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -850,7 +979,7 @@
         </text>
         <rect
           x="700"
-          y="717"
+          y="1017"
           width="28"
           height="12"
           rx="2"
@@ -861,7 +990,7 @@
         />
         <text
           x="736"
-          y="729"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"

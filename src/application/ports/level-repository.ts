@@ -1,6 +1,5 @@
-import type { LevelDefinition } from '../../domain/level/level-definition.js';
+import type { LevelDefinition, StoredLevel } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
-import type { StoredLevel } from '../../domain/level/stored-level.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';

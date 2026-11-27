@@ -8,8 +8,27 @@ import type { LevelOrder } from './level-order.js';
 import type { LevelProblem } from './level-problem.js';
 import type { LevelSection } from './level-section.js';
 import type { LevelVersion } from './level-version.js';
-import type { StoredLevel } from './stored-level.js';
+import type { StoredLevelProblem } from './stored-level.js';
 import type { TopologyId } from './topology-id.js';
+
+// What the store holds for one gameId and levelId, read under the lock of
+// update() (#147). It lives in this file because the valid state holds a
+// level and decideReplace() takes it, so two files would import each other
+// (#221). The three states are closed, so a change handles each:
+// - absent: no row.
+// - valid: a row that the strategy of its gameId restores into a level.
+// - broken: a row that breaks a rule. It has no level. It gives the code of
+//   its first broken rule and its stored version, or null when the version
+//   column itself breaks the rule of LevelVersion. So a broken row never
+//   passes as no row.
+export type StoredLevel =
+  | { readonly state: 'absent' }
+  | { readonly state: 'valid'; readonly level: LevelDefinition }
+  | {
+      readonly state: 'broken';
+      readonly reason: StoredLevelProblem;
+      readonly version: LevelVersion | null;
+    };
 
 // Entity and aggregate root of one level definition (DS-6, API-FR-04, decision
 // 4). Its identity is the gameId plus the levelId. It holds the common part

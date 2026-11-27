@@ -1,6 +1,6 @@
 import { Coordinate } from '../../../src/domain/level/coordinate.js';
-import { Rotation } from '../../../src/domain/level/fit/rotation.js';
 import { HexTopology } from '../../../src/domain/level/hex-topology.js';
+import { Rotation } from '../../../src/domain/level/rotation.js';
 import { SquareTopology } from '../../../src/domain/level/square-topology.js';
 import { Topologies } from '../../../src/domain/level/topologies.js';
 import type { Topology } from '../../../src/domain/level/topology.js';

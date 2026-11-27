@@ -2,10 +2,10 @@ import { ok, type Result } from '../../shared/result.js';
 import { Coordinate } from '../coordinate.js';
 import type { LevelProblem } from '../level-problem.js';
 import { readFields, readList, sameItems } from '../parts.js';
+import type { Rotation } from '../rotation.js';
 import type { Topology } from '../topology.js';
 import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { PieceId } from './piece-id.js';
-import type { Rotation } from './rotation.js';
 
 // Value object for one piece of a Fit level: its id and its cells. Each cell
 // is relative to the origin of the piece, so a placement turns the piece
