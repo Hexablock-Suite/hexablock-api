@@ -317,13 +317,31 @@ hexablock-app gives the options of both commands.
 ## Running Tests
 
 ```bash
-pnpm test          # unit, gate and integration tests, then e2e tests
-pnpm test:unit     # unit, gate and integration tests only
-pnpm test:e2e      # HTTP end-to-end tests only
-pnpm verify        # lint, format:check, typecheck, test, arch, openapi:check (the CI gate)
-pnpm openapi:check # fails when openapi/openapi.json differs from the built app
+pnpm test           # both suites: unit, integration and gate tests, then e2e tests
+pnpm test:behavior  # behavior suite: unit, integration and e2e tests, without the gates
+pnpm test:gates     # gate suite only
+pnpm test:unit      # unit, integration and gate tests only
+pnpm test:e2e       # HTTP end-to-end tests only
+pnpm verify         # lint, format:check, typecheck, test, arch, openapi:check (the CI gate)
+pnpm openapi:check  # fails when openapi/openapi.json differs from the built app
 pnpm openapi:export # rewrites openapi/openapi.json after an HTTP change
 ```
+
+The tests form two suites. A behavior test runs the code and checks what it does. A gate test reads
+the code, the documents or the configuration to hold a rule of design or of process. The gate suite
+holds the files of `test/gates/` and three gates that live with behavior tests:
+`test/integration/in-memory-database.spec.ts` (rule R-database-harness),
+`test/domain/level/level-problem.spec.ts` (it compares `docs/level-format.md` and
+`openapi/openapi.json` with the code) and the OpenAPI drift test of `test/health.e2e-spec.ts` (rule
+R-openapi-drift). `vitest.gates.config.ts` lists the gates, and `vitest.behavior.config.ts`
+selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm verify` and the CI
+`verify` job run every gate. The gate `test/gates/test-suites.gate.spec.ts` fails when a test file
+of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
+to the other suite as skipped.
+
+On 2026-11-28 the Vitest JSON reporter counts 1,372 tests in `pnpm test`: 1,271 behavior tests and
+101 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
 Name each test `should_<expected_result>_when_<condition>`. The gate
 `test/gates/test-name.gate.spec.ts` fails on any other name.
