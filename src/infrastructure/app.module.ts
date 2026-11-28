@@ -137,23 +137,34 @@ function levelValidators(): LevelValidators {
       inject: [DATABASE],
       useFactory: (database: Database): UserRepository => new DrizzleUserRepository(database),
     },
+    // LoggingAspect wraps each use case under the name of its input port, so
+    // the use case holds no logging code. AuthorizeLevelEditorUseCase is the
+    // one use case without it (#170).
     {
       provide: REGISTER_USER,
-      inject: [USER_REPOSITORY, PASSWORD_HASHER, USER_ID_GENERATOR],
-      useFactory: (users: UserRepository, hasher: PasswordHasher, ids: UserIdGenerator) =>
-        new RegisterUseCase(users, hasher, ids),
+      inject: [USER_REPOSITORY, PASSWORD_HASHER, USER_ID_GENERATOR, LOGGER],
+      useFactory: (
+        users: UserRepository,
+        hasher: PasswordHasher,
+        ids: UserIdGenerator,
+        logger: Logger,
+      ) => new LoggingAspect(new RegisterUseCase(users, hasher, ids), 'RegisterUser', logger),
     },
     {
       provide: LOGIN,
-      inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_ISSUER],
-      useFactory: (users: UserRepository, hasher: PasswordHasher, tokens: TokenIssuer) =>
-        new LoginUseCase(users, hasher, tokens),
+      inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_ISSUER, LOGGER],
+      useFactory: (
+        users: UserRepository,
+        hasher: PasswordHasher,
+        tokens: TokenIssuer,
+        logger: Logger,
+      ) => new LoggingAspect(new LoginUseCase(users, hasher, tokens), 'Login', logger),
     },
     {
       provide: AUTHENTICATE_TOKEN,
-      inject: [TOKEN_ISSUER, USER_REPOSITORY],
-      useFactory: (tokens: TokenIssuer, users: UserRepository) =>
-        new AuthenticateTokenUseCase(tokens, users),
+      inject: [TOKEN_ISSUER, USER_REPOSITORY, LOGGER],
+      useFactory: (tokens: TokenIssuer, users: UserRepository, logger: Logger) =>
+        new LoggingAspect(new AuthenticateTokenUseCase(tokens, users), 'AuthenticateToken', logger),
     },
     {
       provide: PROGRESS_REPOSITORY,
@@ -161,7 +172,6 @@ function levelValidators(): LevelValidators {
       useFactory: (database: Database): ProgressRepository =>
         new DrizzleProgressRepository(database),
     },
-    // LoggingAspect wraps the use case, so the use case holds no logging code.
     {
       provide: SYNC_PROGRESS,
       inject: [PROGRESS_REPOSITORY, LEVEL_REPOSITORY, CLOCK, LOGGER],
@@ -175,8 +185,9 @@ function levelValidators(): LevelValidators {
     },
     {
       provide: GET_PROGRESS,
-      inject: [PROGRESS_REPOSITORY],
-      useFactory: (progress: ProgressRepository) => new GetProgressUseCase(progress),
+      inject: [PROGRESS_REPOSITORY, LOGGER],
+      useFactory: (progress: ProgressRepository, logger: Logger) =>
+        new LoggingAspect(new GetProgressUseCase(progress), 'GetProgress', logger),
     },
     { provide: LEVEL_VALIDATORS, useFactory: (): LevelValidators => levelValidators() },
     {

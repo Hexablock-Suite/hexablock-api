@@ -183,8 +183,9 @@ belong there, built as decorators with one interface common to the use cases, wi
 `LoggingAspect` writes a typed entry to the `Logger` port
 ([src/application/ports/logger.ts](src/application/ports/logger.ts)), and `NestLogger` in
 [src/adapters/logging](src/adapters/logging) implements it and writes the text.
-`AppModule` wraps `SyncProgressUseCase`, `GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and
-`GetLevelLeaderboardUseCase` in `LoggingAspect`, each under the name of its input port. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
+`AppModule` wraps `RegisterUseCase`, `LoginUseCase`, `AuthenticateTokenUseCase`, `SyncProgressUseCase`, `GetProgressUseCase`,
+`GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and `GetLevelLeaderboardUseCase` in `LoggingAspect`,
+each under the name of its input port, so a failed sign-in leaves a log entry (#170). `AuthorizeLevelEditorUseCase` has no aspect. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
 value that the client sent never reaches the log. For `GetLevels`, the aspect also writes one entry per stored level
 row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section, from `unavailableLevelEntries()`.
 No use case imports the `Logger` port (rule `only-aspects-import-logger-port`, #219). A request value that breaks its rule stops in its

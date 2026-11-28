@@ -20,10 +20,7 @@ import { LEVEL_BOARD_READER } from '../../src/application/ports/level-board-read
 import { LEVEL_REPOSITORY } from '../../src/application/ports/level-repository.js';
 import { LOGGER } from '../../src/application/ports/logger.js';
 import { PROGRESS_REPOSITORY } from '../../src/application/ports/progress-repository.js';
-import {
-  GET_PROGRESS,
-  GetProgressUseCase,
-} from '../../src/application/progress/get-progress.use-case.js';
+import { GET_PROGRESS } from '../../src/application/progress/get-progress.use-case.js';
 import {
   SYNC_PROGRESS,
   type SyncProgress,
@@ -31,8 +28,9 @@ import {
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import { UserId } from '../../src/domain/user/user-id.js';
-import { LOGIN, LoginUseCase } from '../../src/application/auth/login.use-case.js';
-import { REGISTER_USER, RegisterUseCase } from '../../src/application/auth/register.use-case.js';
+import { AUTHENTICATE_TOKEN } from '../../src/application/auth/authenticate-token.use-case.js';
+import { LOGIN } from '../../src/application/auth/login.use-case.js';
+import { REGISTER_USER } from '../../src/application/auth/register.use-case.js';
 import { PASSWORD_HASHER } from '../../src/application/ports/password-hasher.js';
 import { TOKEN_ISSUER } from '../../src/application/ports/token-issuer.js';
 import { USER_ID_GENERATOR } from '../../src/application/ports/user-id-generator.js';
@@ -57,7 +55,9 @@ describe('AppModule account wiring', () => {
     vi.restoreAllMocks();
   });
 
-  it('should_bind_account_ports_to_their_adapters_when_app_module_compiles', async () => {
+  // #170: LoggingAspect wraps the three account use cases, so a failed
+  // sign-in leaves a log entry.
+  it('should_bind_account_ports_to_their_adapters_and_wrap_the_account_use_cases_in_logging_aspect_when_app_module_compiles', async () => {
     stubTestEnvironment();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
@@ -65,19 +65,20 @@ describe('AppModule account wiring', () => {
     expect(moduleRef.get(TOKEN_ISSUER)).toBeInstanceOf(JwtTokenIssuer);
     expect(moduleRef.get(USER_ID_GENERATOR)).toBeInstanceOf(RandomUserIdGenerator);
     expect(moduleRef.get(USER_REPOSITORY)).toBeInstanceOf(DrizzleUserRepository);
-    expect(moduleRef.get(REGISTER_USER)).toBeInstanceOf(RegisterUseCase);
-    expect(moduleRef.get(LOGIN)).toBeInstanceOf(LoginUseCase);
+    expect(moduleRef.get(REGISTER_USER)).toBeInstanceOf(LoggingAspect);
+    expect(moduleRef.get(LOGIN)).toBeInstanceOf(LoggingAspect);
+    expect(moduleRef.get(AUTHENTICATE_TOKEN)).toBeInstanceOf(LoggingAspect);
     await moduleRef.close();
   });
 
-  it('should_bind_progress_ports_to_their_adapters_when_app_module_compiles', async () => {
+  it('should_bind_progress_ports_and_wrap_both_progress_use_cases_in_logging_aspect_when_app_module_compiles', async () => {
     stubTestEnvironment();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
     expect(moduleRef.get(PROGRESS_REPOSITORY)).toBeInstanceOf(DrizzleProgressRepository);
     expect(moduleRef.get(LOGGER)).toBeInstanceOf(NestLogger);
     expect(moduleRef.get(SYNC_PROGRESS)).toBeInstanceOf(LoggingAspect);
-    expect(moduleRef.get(GET_PROGRESS)).toBeInstanceOf(GetProgressUseCase);
+    expect(moduleRef.get(GET_PROGRESS)).toBeInstanceOf(LoggingAspect);
     await moduleRef.close();
   });
 

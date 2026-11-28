@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { sql } from 'drizzle-orm';
 import request from 'supertest';
@@ -18,6 +19,7 @@ describe('auth endpoints (API-FR-01)', () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await testApp.close();
   });
 
@@ -168,6 +170,51 @@ describe('auth endpoints (API-FR-01)', () => {
       details: [],
       path: '/v1/auth/login',
     });
+  });
+
+  // #170: LoggingAspect wraps LoginUseCase, so a failed sign-in leaves one
+  // entry under the context LoggingAspect. The entry holds the kind of the
+  // failure and no typed value. The spy starts after the sign-up, so it sees
+  // only the entry of the sign-in.
+  it('should_log_the_failure_kind_and_no_typed_value_when_password_is_wrong', async () => {
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+
+    const response = await post('/v1/auth/login', {
+      username: USERNAME,
+      password: 'wrong password',
+    });
+
+    expect(response.status).toBe(401);
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=Login outcome=failure kind=invalid-credentials',
+    );
+    expect(warn.mock.contexts[0]).toMatchObject({ context: 'LoggingAspect' });
+  });
+
+  // #170: each call of an account use case and of GetProgress leaves one
+  // entry under the name of its input port. The token check of the guard
+  // runs before GetProgress. A new player has no progress, so GetProgress
+  // fails with progress-not-found.
+  it('should_log_one_entry_per_use_case_under_its_port_name_when_a_player_signs_up_signs_in_and_reads_progress', async () => {
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+
+    await post('/v1/auth/register', { username: USERNAME, password: PASSWORD });
+    const login = await post('/v1/auth/login', { username: USERNAME, password: PASSWORD });
+    const read = await request(testApp.app.getHttpServer())
+      .get('/v1/progress/hexa-lines')
+      .set('Authorization', `Bearer ${login.body.accessToken}`);
+
+    expect(read.status).toBe(404);
+    expect(log.mock.calls).toEqual([
+      ['useCase=RegisterUser outcome=success'],
+      ['useCase=Login outcome=success'],
+      ['useCase=AuthenticateToken outcome=success'],
+    ]);
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=GetProgress outcome=failure kind=progress-not-found',
+    );
   });
 
   it('should_return_unauthorized_error_body_when_username_is_unknown', async () => {
