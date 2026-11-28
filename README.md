@@ -365,12 +365,25 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,414 tests in `pnpm test`: 1,312 behavior tests and
+On 2026-11-28 the Vitest JSON reporter counts 1,427 tests in `pnpm test`: 1,325 behavior tests and
 102 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
 Name each test `should_<expected_result>_when_<condition>`. The gate
 `test/gates/test-name.gate.spec.ts` fails on any other name.
+
+A use case test of `test/unit/application/` has three layers (API-NFR-01, #254). The test case
+reads Given / When / Then in the words of the domain and names no test double. It calls the
+Testing API of its use case in `test/support/testing-api/`, such as `LoginTestApi`: the `given…`
+steps return the Testing API, the `when…` steps are `async`, call the use case and return
+`Promise<this>`, and the `then…` steps assert. The Testing API builds the use case and holds its
+test doubles as private fields, so a new collaborator of a use case changes only its Testing API.
+Below it, the Object Mothers of `test/support/object-mother/`, such as `UserMother`, build
+domain data with the public factories and know no double. Each `then…` step fails when no
+`when…` step ran. `pnpm lint` fails on a test that asserts neither with `expect` nor through a
+`then…` step (`vitest/expect-expect`), and on a `when…` step without `await`
+(`typescript/no-floating-promises`). `update-levels.use-case.spec.ts` and
+`logging-aspect.spec.ts` still build their doubles in the test; a later change of #254 moves them.
 
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.
