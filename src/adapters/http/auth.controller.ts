@@ -19,8 +19,10 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { LOGIN, type Login } from '../../application/auth/login.use-case.js';
 import {
   REGISTER_USER,
@@ -33,12 +35,17 @@ import { CurrentUserDto } from './current-user.dto.js';
 import { ErrorDto } from './error.dto.js';
 import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
 import { LoginDto } from './login.dto.js';
+import { RATE_LIMIT_HEADERS } from './rate-limit.headers.js';
 import { TokenDto } from './token.dto.js';
+import { TOO_MANY_REQUESTS } from './too-many-requests.response.js';
 import { UNAUTHORIZED } from './unauthorized.response.js';
 
 // Sign-up, sign-in and the signed-in user (API-FR-01). Sign-up and sign-in
 // have no token guard, because the player has no token yet. GET /auth/me
-// has the guard. AuthDtoMapper builds the request of each use case and each
+// has the guard. ThrottlerGuard limits the requests of each client to
+// sign-up and to sign-in, so a client cannot spend the CPU of the scrypt hash
+// without bound (#170). A request over the limit answers 429 before the
+// use case runs. AppModule reads the limit from the configuration. AuthDtoMapper builds the request of each use case and each
 // answer, so the controller holds no translation code (decision 12). A
 // request that the mapper rejects and a failed Result become an
 // HttpException, and HttpErrorFilter answers it with ErrorDto (API-FR-06).
@@ -51,12 +58,22 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @ApiCreatedResponse({ description: 'The user exists. The body is empty.' })
-  @ApiBadRequestResponse({ type: ErrorDto, description: 'A field is missing or breaks its rule.' })
+  @UseGuards(ThrottlerGuard)
+  @ApiCreatedResponse({
+    description: 'The user exists. The body is empty.',
+    headers: RATE_LIMIT_HEADERS,
+  })
+  @ApiBadRequestResponse({
+    type: ErrorDto,
+    description: 'A field is missing or breaks its rule.',
+    headers: RATE_LIMIT_HEADERS,
+  })
   @ApiConflictResponse({
     type: ErrorDto,
+    headers: RATE_LIMIT_HEADERS,
     description: 'Another user has this username, or one that differs only in letter case.',
   })
+  @ApiTooManyRequestsResponse(TOO_MANY_REQUESTS)
   async signUp(@Body() body: CredentialsDto): Promise<void> {
     const request = AuthDtoMapper.toRegisterRequest(body);
     if (!request.ok) {
@@ -70,12 +87,23 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: TokenDto, description: 'The credentials are valid.' })
-  @ApiBadRequestResponse({ type: ErrorDto, description: 'A field is missing or is not a string.' })
+  @UseGuards(ThrottlerGuard)
+  @ApiOkResponse({
+    type: TokenDto,
+    description: 'The credentials are valid.',
+    headers: RATE_LIMIT_HEADERS,
+  })
+  @ApiBadRequestResponse({
+    type: ErrorDto,
+    description: 'A field is missing or is not a string.',
+    headers: RATE_LIMIT_HEADERS,
+  })
   @ApiUnauthorizedResponse({
     type: ErrorDto,
+    headers: RATE_LIMIT_HEADERS,
     description: 'The username or the password is wrong.',
   })
+  @ApiTooManyRequestsResponse(TOO_MANY_REQUESTS)
   async signIn(@Body() body: LoginDto): Promise<TokenDto> {
     const request = AuthDtoMapper.toLoginRequest(body);
     if (!request.ok) {

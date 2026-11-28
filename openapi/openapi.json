@@ -1,5 +1,31 @@
 {
   "components": {
+    "headers": {
+      "Retry-After": {
+        "description": "The seconds until this client may send a request to this route again.",
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "X-RateLimit-Limit": {
+        "description": "The requests that this client may send to this route in one minute.",
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "X-RateLimit-Remaining": {
+        "description": "The requests that this client may still send to this route in the current minute.",
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "X-RateLimit-Reset": {
+        "description": "The seconds until the current minute of the rate limit ends.",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
     "schemas": {
       "CredentialsDto": {
         "properties": {
@@ -799,7 +825,18 @@
                 }
               }
             },
-            "description": "The credentials are valid."
+            "description": "The credentials are valid.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            }
           },
           "400": {
             "content": {
@@ -809,7 +846,18 @@
                 }
               }
             },
-            "description": "A field is missing or is not a string."
+            "description": "A field is missing or is not a string.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            }
           },
           "401": {
             "content": {
@@ -819,7 +867,33 @@
                 }
               }
             },
-            "description": "The username or the password is wrong."
+            "description": "The username or the password is wrong.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "This client sent more requests to this route in one minute than the rate limit allows (AUTH_RATE_LIMIT, 10 by default). The use case does not run. The Retry-After header gives the seconds to wait.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
           }
         },
         "tags": [
@@ -879,7 +953,18 @@
         },
         "responses": {
           "201": {
-            "description": "The user exists. The body is empty."
+            "description": "The user exists. The body is empty.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            }
           },
           "400": {
             "content": {
@@ -889,7 +974,18 @@
                 }
               }
             },
-            "description": "A field is missing or breaks its rule."
+            "description": "A field is missing or breaks its rule.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            }
           },
           "409": {
             "content": {
@@ -899,7 +995,33 @@
                 }
               }
             },
-            "description": "Another user has this username, or one that differs only in letter case."
+            "description": "Another user has this username, or one that differs only in letter case.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            },
+            "description": "This client sent more requests to this route in one minute than the rate limit allows (AUTH_RATE_LIMIT, 10 by default). The use case does not run. The Retry-After header gives the seconds to wait.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
           }
         },
         "tags": [
