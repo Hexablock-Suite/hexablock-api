@@ -341,7 +341,14 @@ composition of [start-provider.js](scripts/contract/start-provider.js): `AppModu
 in-memory PGlite database, plus the state-change endpoint `POST /v1/_pact/provider-states`.
 Before and after each interaction, the verifier posts the provider state of the interaction to
 that endpoint (#151). Only this composition mounts the endpoint: the production `AppModule` and
-`dist/main.js` never do, because the endpoint writes any data for anyone.
+`dist/main.js` never do, because the endpoint writes any data for anyone. So the command listens on
+`127.0.0.1` only, and it pins an empty `LEVEL_EDITOR_IDS`, so a value of the shell never reaches it
+(#239). `http://localhost:<PORT>` still reaches it: `localhost` resolves to `127.0.0.1`, and curl,
+Node `fetch` and the Pact verifier try each address of the name. The `contract` job of hexablock-app
+checks out this repository at `main`, starts the same command with `PORT=3001`, and verifies its
+own pact against `http://localhost:3001` with the same state-change endpoint. That job needs only
+`pnpm install` in that checkout and the `.env.example` of the command: the composition runs on PGlite,
+so the job needs no Postgres.
 
 ```bash
 PORT=3000 node --env-file=.env.example scripts/contract/start-provider.js &   # start the provider composition
@@ -354,7 +361,10 @@ PACT_FILE=test/fixtures/contract/provider-states.json pnpm contract:verify
 The provider states of the client interactions (app #45 to #48, #480 and #485). Each param is optional. A
 request takes a value of the setup through a provider-state expression, such as
 `fromProviderState('Bearer ${accessToken}', …)`. The states of one interaction add up, and the
-teardown after each interaction removes every row.
+teardown after each interaction removes every row. A failed setup gets no teardown, so
+`no account exists` removes every row too, also the rows of a state before it in the same
+interaction: it goes first among the states of its interaction (#239). A state whose sign-in fails
+answers 400 with the status of the sign-in, such as `the sign-in of ada answered 401, not 200.`.
 
 | State                                                  | Params (default)                                                                                                       | Values                                                           | Client     |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------- |
