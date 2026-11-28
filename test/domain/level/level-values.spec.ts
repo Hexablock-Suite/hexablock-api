@@ -8,6 +8,10 @@ import { valueOf } from '../../support/level-format.js';
 // The values of the common part of a level (DS-6) and the cell of a level.
 // Each factory returns a Result: a datum that breaks the rule gives a level
 // problem, never an exception (rule «One failure mechanism»).
+// The other rules of these values enter through LevelValidators.check() and
+// the root LevelDefinition (#255): the delivery of each value, the version
+// rule, the TopologyId that finds a topology, and each rule of a cell. The
+// cases that stay here cannot enter there, and each one says why.
 const NOT_SAFE_INTEGERS = [
   1.5,
   Number.NaN,
@@ -16,6 +20,10 @@ const NOT_SAFE_INTEGERS = [
   '1' as unknown as number,
 ];
 
+// The border builds the values of the common part with these factories
+// (LevelDtoMapper), and check() and the root take them built. So the rule of
+// each factory stays here. No code of src/ compares two orders or two
+// versions, so their equals() cases stay here too.
 describe('LevelOrder', () => {
   it('should_deliver_the_place_when_it_is_a_safe_integer_of_1_or_more', () => {
     expect(deliveredBy(valueOf(LevelOrder.of(1)))).toEqual([1]);
@@ -54,16 +62,6 @@ describe('LevelVersion', () => {
     );
   });
 
-  // DS-11: the copy with the higher version wins. S3-10: the API rejects a
-  // lower version. An equal version is not older.
-  it('should_be_older_when_the_version_is_lower', () => {
-    const two = valueOf(LevelVersion.of(2));
-
-    expect(valueOf(LevelVersion.of(1)).isOlderThan(two)).toBe(true);
-    expect(valueOf(LevelVersion.of(2)).isOlderThan(two)).toBe(false);
-    expect(valueOf(LevelVersion.of(3)).isOlderThan(two)).toBe(false);
-  });
-
   it('should_be_equal_when_two_versions_hold_the_same_number', () => {
     const first = valueOf(LevelVersion.of(2));
 
@@ -87,39 +85,17 @@ describe('TopologyId', () => {
       bad.map(() => ({ ok: false, error: 'invalid-topology' })),
     );
   });
-
-  it('should_be_equal_when_two_ids_hold_the_same_slug', () => {
-    const hex = valueOf(TopologyId.of('hex'));
-
-    expect(hex.equals(valueOf(TopologyId.of('hex')))).toBe(true);
-    expect(hex.equals(valueOf(TopologyId.of('square')))).toBe(false);
-  });
 });
 
+// A cell enters through check() too: its factory, its negative zero, its
+// copy of the raw list, its equals(), its moves and its turns. Two cases
+// stay here. The border JSON copies each list, so a delivery through the
+// root cannot show that a change to a delivered list leaves the cell as it
+// is. A topology checks the length of each cell first, so check() never
+// moves or turns a cell by a cell of another length.
 describe('Coordinate', () => {
   // A cell with values that the test writes.
   const cellOf = (values: number[]) => valueOf(Coordinate.of(values));
-
-  // The topology says how to read the values: [q, r] for hex, three values for a 3D cell.
-  it('should_deliver_the_values_when_they_are_a_list_of_safe_integers', () => {
-    expect(deliveredBy(valueOf(Coordinate.of([0, 0])))).toEqual([[0, 0]]);
-    expect(deliveredBy(valueOf(Coordinate.of([-2, 3])))).toEqual([[-2, 3]]);
-    expect(deliveredBy(valueOf(Coordinate.of([1, 2, 3])))).toEqual([[1, 2, 3]]);
-  });
-
-  it('should_deliver_zero_when_a_value_is_a_negative_zero', () => {
-    const [values] = deliveredBy(valueOf(Coordinate.of([-0, 1])));
-
-    expect(Object.is(values[0], 0)).toBe(true);
-  });
-
-  it('should_return_invalid_coordinate_when_the_raw_value_is_not_a_list_of_safe_integers', () => {
-    const bad: unknown[] = [[], [1.5, 0], ['0', 0], [Number.NaN, 0], [2 ** 53, 0], '0,0', null, {}];
-
-    expect(bad.map((raw) => Coordinate.of(raw))).toEqual(
-      bad.map(() => ({ ok: false, error: 'invalid-coordinate' })),
-    );
-  });
 
   // The coordinate keeps its own copy, so a change to the raw list or to a
   // delivered list does not change it.
@@ -131,36 +107,6 @@ describe('Coordinate', () => {
     (delivered as number[])[1] = 9;
 
     expect(deliveredBy(coordinate)).toEqual([[1, 2]]);
-  });
-
-  it('should_be_equal_when_two_coordinates_hold_the_same_values_in_the_same_order', () => {
-    const cell = valueOf(Coordinate.of([1, 2]));
-
-    expect(cell.equals(valueOf(Coordinate.of([1, 2])))).toBe(true);
-    expect(cell.equals(valueOf(Coordinate.of([2, 1])))).toBe(false);
-    expect(cell.equals(valueOf(Coordinate.of([1, 2, 0])))).toBe(false);
-  });
-
-  it('should_add_each_value_of_the_offset_when_a_cell_moves_by_it', () => {
-    expect(deliveredBy(cellOf([1, 2]).movedBy(cellOf([3, -5])))).toEqual([[4, -3]]);
-    expect(deliveredBy(cellOf([7]).movedBy(cellOf([0])))).toEqual([[7]]);
-  });
-
-  // Each turned unit cell is where the step takes [1, 0] or [0, 1]. The
-  // turned cell adds each turned unit cell times the value of its place.
-  it('should_add_the_turned_unit_cells_times_the_values_when_a_cell_turns_by_them', () => {
-    const turnedUnits = [cellOf([0, 1]), cellOf([-1, 1])];
-
-    expect(deliveredBy(cellOf([2, 3]).turnedBy(turnedUnits))).toEqual([[-3, 5]]);
-    expect(deliveredBy(cellOf([0, 0]).turnedBy(turnedUnits))).toEqual([[0, 0]]);
-  });
-
-  it('should_have_the_same_length_when_two_cells_hold_as_many_values', () => {
-    expect([
-      cellOf([1, 2]).hasSameLengthAs(cellOf([-4, 0])),
-      cellOf([1, 2]).hasSameLengthAs(cellOf([1, 2, 3])),
-      cellOf([1]).hasSameLengthAs(cellOf([1, 2])),
-    ]).toEqual([true, false, false]);
   });
 
   // A topology checks the length of each cell first, so cells of two lengths
