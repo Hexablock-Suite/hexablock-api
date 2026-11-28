@@ -14,6 +14,7 @@ import { Stars } from '../../../src/domain/progress/stars.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
 import { testUserId } from '../../support/user-ids.js';
+import { FakeStopwatch } from '../../support/fake-stopwatch.js';
 import { valueOf } from '../../support/result.js';
 
 const FIT = valueOf(GameId.of('hexa-fit'));
@@ -114,7 +115,7 @@ describe('GetGlobalLeaderboardUseCase (API-FR-03)', () => {
     const inner = new GetGlobalLeaderboardUseCase(
       readerOf({ highScores: [entry(1, valueOf(Score.of(120)))] }),
     );
-    const aspect = new LoggingAspect(inner, 'GetGlobalLeaderboard', logger);
+    const aspect = new LoggingAspect(inner, 'GetGlobalLeaderboard', logger, new FakeStopwatch());
 
     const result = await aspect.execute(LINES);
 
@@ -131,6 +132,7 @@ describe('GetGlobalLeaderboardUseCase (API-FR-03)', () => {
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'GetGlobalLeaderboard',
       outcome: 'success',
+      elapsedMs: 0,
     });
   });
 });

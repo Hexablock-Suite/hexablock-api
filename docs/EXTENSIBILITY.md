@@ -40,18 +40,19 @@ In the frame `DATABASE ENGINE · ADAPTER`, the ports keep `«interface»` `«por
 
 ## A driver
 
-View 1 draws four driver ports. Each one has one adapter in a folder of `src/adapters/` named for the library that it adapts (#212, option C):
+View 1 draws five driver ports. Each one has one adapter in a folder of `src/adapters/` named for the library that it adapts (#212, option C):
 
 | Port                                                            | Adapter                                                                    | Binding           |
 | --------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------- |
 | [`Clock`](../src/application/ports/clock.ts)                    | [`SystemClock`](../src/adapters/clock/system-clock.ts)                     | `CLOCK`           |
 | [`Logger`](../src/application/ports/logger.ts)                  | [`NestLogger`](../src/adapters/logging/nest-logger.ts)                     | `LOGGER`          |
+| [`Stopwatch`](../src/application/ports/stopwatch.ts)            | [`PerformanceStopwatch`](../src/adapters/clock/performance-stopwatch.ts)   | `STOPWATCH`       |
 | [`PasswordHasher`](../src/application/ports/password-hasher.ts) | [`ScryptPasswordHasher`](../src/adapters/crypto/scrypt-password-hasher.ts) | `PASSWORD_HASHER` |
 | [`TokenIssuer`](../src/application/ports/token-issuer.ts)       | [`JwtTokenIssuer`](../src/adapters/jwt/jwt-token-issuer.ts)                | `TOKEN_ISSUER`    |
 
 - **Add:** a class in `src/adapters/<library>/` that implements the port, and a rule in [`.dependency-cruiser.cjs`](../.dependency-cruiser.cjs) for that folder before it imports its library (rule R-other-adapters-no-package of [`AGENTS.md`](../AGENTS.md)).
 - **Register:** change the provider of its binding in [`app.module.ts`](../src/infrastructure/app.module.ts) to the new class.
-- **Test:** a new clock runs `describeClockContract` of [`clock.contract.ts`](../test/support/clock.contract.ts), as [`clock.contract.spec.ts`](../test/support/clock.contract.spec.ts) does for `SystemClock`. The tests of the other adapters are in [`test/unit/adapters/`](../test/unit/adapters/).
+- **Test:** a new clock runs `describeClockContract` of [`clock.contract.ts`](../test/support/clock.contract.ts), as [`clock.contract.spec.ts`](../test/support/clock.contract.spec.ts) does for `SystemClock`, and a new stopwatch runs `describeStopwatchContract` of [`stopwatch.contract.ts`](../test/support/stopwatch.contract.ts), as [`stopwatch.contract.spec.ts`](../test/support/stopwatch.contract.spec.ts) does for `PerformanceStopwatch`. The tests of the other adapters are in [`test/unit/adapters/`](../test/unit/adapters/).
 
 In the frame `DRIVERS · ADAPTER`, the ports keep `«interface»` `«port»`, as in the database engine frame.
 

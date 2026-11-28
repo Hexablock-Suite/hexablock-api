@@ -7,6 +7,7 @@ import {
 import { unavailableLevelEntries } from '../../../src/application/levels/unavailable-level-entries.js';
 import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
+import { FakeStopwatch } from '../../support/fake-stopwatch.js';
 import { levelJson, levelValidators } from '../../support/level-format.js';
 import { brokenRow, storeLevel } from '../../support/level-repository.contract.js';
 
@@ -83,7 +84,13 @@ describe('GetLevelsUseCase (API-FR-04)', () => {
 // Wraps GetLevels in LoggingAspect, as AppModule does.
 function insideLoggingAspect(levels: InMemoryLevelRepository, logger: Logger) {
   const getLevels: GetLevels = new GetLevelsUseCase(levels);
-  return new LoggingAspect(getLevels, 'GetLevels', logger, unavailableLevelEntries);
+  return new LoggingAspect(
+    getLevels,
+    'GetLevels',
+    logger,
+    new FakeStopwatch(),
+    unavailableLevelEntries,
+  );
 }
 
 // #219: LoggingAspect wraps GetLevels, as AppModule wires it. The aspect
@@ -126,7 +133,7 @@ describe('GetLevels inside LoggingAspect (#147, #219)', () => {
         levelId: 'fit-02',
         reason: 'invalid-figure',
       },
-      { useCase: 'GetLevels', outcome: 'success' },
+      { useCase: 'GetLevels', outcome: 'success', elapsedMs: 0 },
     ]);
   });
 
@@ -137,7 +144,7 @@ describe('GetLevels inside LoggingAspect (#147, #219)', () => {
 
     await aspect.execute();
 
-    expect(logger.entries).toEqual([{ useCase: 'GetLevels', outcome: 'success' }]);
+    expect(logger.entries).toEqual([{ useCase: 'GetLevels', outcome: 'success', elapsedMs: 0 }]);
   });
 
   // A log write that fails does not change the read.

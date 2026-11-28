@@ -22,9 +22,9 @@ describe('NestLogger', () => {
   it('should_write_name_and_success_at_log_level_when_entry_is_a_success', () => {
     const nest = recordingNestLogger();
 
-    new NestLogger(nest).log({ useCase: 'Echo', outcome: 'success' });
+    new NestLogger(nest).log({ useCase: 'Echo', outcome: 'success', elapsedMs: 0 });
 
-    expect(nest.log).toHaveBeenCalledExactlyOnceWith('useCase=Echo outcome=success');
+    expect(nest.log).toHaveBeenCalledExactlyOnceWith('useCase=Echo outcome=success elapsedMs=0');
     expect(nest.warn).not.toHaveBeenCalled();
     expect(nest.error).not.toHaveBeenCalled();
   });
@@ -32,10 +32,15 @@ describe('NestLogger', () => {
   it('should_write_name_failure_and_kind_at_warn_level_when_entry_is_a_failure', () => {
     const nest = recordingNestLogger();
 
-    new NestLogger(nest).log({ useCase: 'Echo', outcome: 'failure', kind: 'progress-not-found' });
+    new NestLogger(nest).log({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'progress-not-found',
+      elapsedMs: 0,
+    });
 
     expect(nest.warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=failure kind=progress-not-found',
+      'useCase=Echo outcome=failure kind=progress-not-found elapsedMs=0',
     );
     expect(nest.log).not.toHaveBeenCalled();
     expect(nest.error).not.toHaveBeenCalled();
@@ -72,10 +77,11 @@ describe('NestLogger', () => {
       name: 'DriverError',
       code: 'ECONNREFUSED',
       frames: '    at connect (driver.ts:1:1)',
+      elapsedMs: 0,
     });
 
     expect(nest.error).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=error error=DriverError code=ECONNREFUSED',
+      'useCase=Echo outcome=error error=DriverError code=ECONNREFUSED elapsedMs=0',
       '    at connect (driver.ts:1:1)',
     );
     expect(nest.log).not.toHaveBeenCalled();
@@ -91,10 +97,42 @@ describe('NestLogger', () => {
       name: 'string',
       code: undefined,
       frames: undefined,
+      elapsedMs: 0,
     });
 
     expect(nest.error).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Echo outcome=error error=string',
+      'useCase=Echo outcome=error error=string elapsedMs=0',
+      undefined,
+    );
+  });
+
+  // #181: the line ends with the duration of the call in whole milliseconds.
+  it('should_write_the_duration_in_whole_milliseconds_at_the_end_of_the_line_when_the_entry_carries_a_duration', () => {
+    const nest = recordingNestLogger();
+    const logger = new NestLogger(nest);
+
+    logger.log({ useCase: 'Echo', outcome: 'success', elapsedMs: 41.6 });
+    logger.log({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'progress-not-found',
+      elapsedMs: 12.4,
+    });
+    logger.log({
+      useCase: 'Echo',
+      outcome: 'error',
+      name: 'DriverError',
+      code: 'ECONNREFUSED',
+      frames: undefined,
+      elapsedMs: 7,
+    });
+
+    expect(nest.log).toHaveBeenCalledExactlyOnceWith('useCase=Echo outcome=success elapsedMs=42');
+    expect(nest.warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=Echo outcome=failure kind=progress-not-found elapsedMs=12',
+    );
+    expect(nest.error).toHaveBeenCalledExactlyOnceWith(
+      'useCase=Echo outcome=error error=DriverError code=ECONNREFUSED elapsedMs=7',
       undefined,
     );
   });
@@ -103,9 +141,9 @@ describe('NestLogger', () => {
   it('should_write_through_nest_logger_with_logging_aspect_context_when_no_logger_is_given', () => {
     const log = vi.spyOn(NestBuiltInLogger.prototype, 'log').mockImplementation(() => undefined);
 
-    new NestLogger().log({ useCase: 'Echo', outcome: 'success' });
+    new NestLogger().log({ useCase: 'Echo', outcome: 'success', elapsedMs: 0 });
 
-    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=Echo outcome=success');
+    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=Echo outcome=success elapsedMs=0');
     expect(log.mock.contexts[0]).toMatchObject({ context: 'LoggingAspect' });
   });
 });

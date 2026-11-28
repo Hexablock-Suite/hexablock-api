@@ -187,7 +187,7 @@ describe('auth endpoints (API-FR-01)', () => {
 
     expect(response.status).toBe(401);
     expect(warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=Login outcome=failure kind=invalid-credentials',
+      'useCase=Login outcome=failure kind=invalid-credentials elapsedMs=0',
     );
     expect(warn.mock.contexts[0]).toMatchObject({ context: 'LoggingAspect' });
   });
@@ -208,12 +208,12 @@ describe('auth endpoints (API-FR-01)', () => {
 
     expect(read.status).toBe(404);
     expect(log.mock.calls).toEqual([
-      ['useCase=RegisterUser outcome=success'],
-      ['useCase=Login outcome=success'],
-      ['useCase=AuthenticateToken outcome=success'],
+      ['useCase=RegisterUser outcome=success elapsedMs=0'],
+      ['useCase=Login outcome=success elapsedMs=0'],
+      ['useCase=AuthenticateToken outcome=success elapsedMs=0'],
     ]);
     expect(warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=GetProgress outcome=failure kind=progress-not-found',
+      'useCase=GetProgress outcome=failure kind=progress-not-found elapsedMs=0',
     );
   });
 

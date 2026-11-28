@@ -13,6 +13,7 @@ import { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
+import { FakeStopwatch } from '../../support/fake-stopwatch.js';
 import { levelJson, levelValidators } from '../../support/level-format.js';
 import { storeLevel } from '../../support/level-repository.contract.js';
 import { levelResultOf } from '../../support/level-results.js';
@@ -148,7 +149,12 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
   it('should_log_get_level_leaderboard_success_and_return_the_board_unchanged_when_logging_aspect_wraps_it', async () => {
     const logger = { log: vi.fn<(entry: UseCaseLogEntry) => void>() } satisfies Logger;
     const reader = readerOf([entry(1, levelResult(3, 10, 40_000))]);
-    const aspect = new LoggingAspect(await useCaseOf(reader), 'GetLevelLeaderboard', logger);
+    const aspect = new LoggingAspect(
+      await useCaseOf(reader),
+      'GetLevelLeaderboard',
+      logger,
+      new FakeStopwatch(),
+    );
 
     const result = await aspect.execute(QUERY);
 
@@ -165,13 +171,19 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'GetLevelLeaderboard',
       outcome: 'success',
+      elapsedMs: 0,
     });
   });
 
   // LoggingAspect logs the kind of the failure and returns it unchanged.
   it('should_log_the_unknown_level_failure_when_logging_aspect_wraps_get_level_leaderboard', async () => {
     const logger = { log: vi.fn<(entry: UseCaseLogEntry) => void>() } satisfies Logger;
-    const aspect = new LoggingAspect(await useCaseOf(readerOf()), 'GetLevelLeaderboard', logger);
+    const aspect = new LoggingAspect(
+      await useCaseOf(readerOf()),
+      'GetLevelLeaderboard',
+      logger,
+      new FakeStopwatch(),
+    );
 
     const result = await aspect.execute({ gameId: FIT, levelId: valueOf(LevelId.of('fit-99')) });
 
@@ -180,6 +192,7 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
       useCase: 'GetLevelLeaderboard',
       outcome: 'failure',
       kind: 'unknown-level',
+      elapsedMs: 0,
     });
   });
 });
