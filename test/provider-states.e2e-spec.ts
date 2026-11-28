@@ -8,14 +8,14 @@ import request from 'supertest';
 import { AppModule } from '../src/infrastructure/app.module.js';
 import { configureHttpApp } from '../src/infrastructure/http-app.js';
 import { createProviderApp, type ProviderApp } from './support/contract/provider-app.js';
-import { TEST_PASSWORD } from './support/http/sign-in.js';
+import { signIn, TEST_PASSWORD } from './support/http/sign-in.js';
 import { stubTestEnvironment } from './support/http/test-app.js';
 
 // #151: the pact provider states of the client interactions of app #45 to
-// #48. Only the test composition of the contract job mounts the state-change
-// endpoint. Each setup adds rows through the public routes and the level
-// store; each teardown removes every row, so the next interaction starts on
-// an empty database.
+// #48, and #258: those of app #480 and #485. Only the test composition of
+// the contract job mounts the state-change endpoint. Each setup adds rows
+// through the public routes, the level store or the database; each teardown
+// removes every row, so the next interaction starts on an empty database.
 const ROOT = resolve(import.meta.dirname, '..');
 const STATES = '/v1/_pact/provider-states';
 const LOCAL_PACT = 'test/fixtures/contract/provider-states.json';
@@ -174,6 +174,50 @@ describe('pact provider states (#151)', () => {
       ]);
     });
 
+    // #258: the global board of app #480. Each account syncs one score and
+    // no level result, so the board has high-score rows and no standing.
+    it('should_rank_three_high_scores_when_several_accounts_have_high_scores_in_a_game_is_set_up', async () => {
+      const setup = await setUp('several accounts have high scores in a game', {
+        gameId: 'hexa-merge',
+      });
+      const board = await withToken('/v1/leaderboard/hexa-merge', setup.body.accessToken);
+
+      expect(setup.status).toBe(200);
+      expect(setup.body).toEqual({ accessToken: expect.any(String), gameId: 'hexa-merge' });
+      expect(board.status).toBe(200);
+      expect(
+        board.body.highScores.map((row: { rank: number; username: string; highScore: number }) => [
+          row.rank,
+          row.username,
+          row.highScore,
+        ]),
+      ).toEqual([
+        [1, 'ada', 300],
+        [2, 'grace', 200],
+        [3, 'linus', 100],
+      ]);
+      expect(board.body.standings).toEqual([]);
+    });
+
+    // #258: the unavailable list of app #485. The broken row hides no
+    // other level, so the list of valid levels stays empty.
+    it('should_name_the_level_in_unavailable_when_a_broken_level_is_stored_is_set_up', async () => {
+      const setup = await setUp('a broken level is stored', { levelId: 'fit-03' });
+      const levels = await request(server()).get('/v1/levels');
+
+      expect(setup.status).toBe(200);
+      expect(setup.body).toEqual({
+        gameId: 'hexa-fit',
+        levelId: 'fit-03',
+        reason: 'invalid-figure',
+      });
+      expect(levels.status).toBe(200);
+      expect(levels.body).toEqual({
+        levels: [],
+        unavailable: [{ gameId: 'hexa-fit', levelId: 'fit-03', reason: 'invalid-figure' }],
+      });
+    });
+
     // Two states of one interaction add up: the account syncs a result on
     // the level of the other state.
     it('should_keep_the_rows_of_each_state_when_one_interaction_sets_up_two_states', async () => {
@@ -203,12 +247,29 @@ describe('pact provider states (#151)', () => {
       expect(levels.body).toEqual({ levels: [] });
     });
 
+    // #258: the teardown removes the broken row and the high scores too.
+    it('should_remove_the_broken_row_and_the_high_scores_when_the_states_of_258_are_torn_down', async () => {
+      await setUp('a broken level is stored');
+      await setUp('several accounts have high scores in a game');
+
+      const teardown = await tearDown('several accounts have high scores in a game');
+      const signInAda = await login('ada');
+      const levels = await request(server()).get('/v1/levels');
+      const { token } = await signIn(server(), 'eve');
+      const board = await withToken('/v1/leaderboard/hexa-lines', token);
+
+      expect(teardown.status).toBe(200);
+      expect(signInAda.status).toBe(401);
+      expect(levels.body).toEqual({ levels: [] });
+      expect(board.body.highScores).toEqual([]);
+    });
+
     it('should_answer_400_and_name_the_known_states_when_the_state_is_unknown', async () => {
       const setup = await setUp('a dragon exists');
 
       expect(setup.status).toBe(400);
       expect(setup.body.message).toBe(
-        'Unknown provider state "a dragon exists". Known states: no account exists, an account exists, a signed-in account exists, a level is stored, the signed-in account has progress on a stored level, several accounts have results on a stored level.',
+        'Unknown provider state "a dragon exists". Known states: no account exists, an account exists, a signed-in account exists, a level is stored, the signed-in account has progress on a stored level, several accounts have results on a stored level, several accounts have high scores in a game, a broken level is stored.',
       );
     });
 
