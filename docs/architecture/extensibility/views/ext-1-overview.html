@@ -76,15 +76,16 @@
           layer 1. Each driver and each Drizzle adapter has its own line for each port that it
           implements, and DrizzleLeaderboardReader implements GlobalBoardReader and LevelBoardReader
           (#218). PerformanceStopwatch implements the Stopwatch port, which LoggingAspect reads for
-          the duration of each call (#181). No line starts or ends on a dashed frame. UseCase
-          carries only the interface stereotype. UpdateLevelsUseCase holds LevelRepository through a
-          use arrow levels 1, and LevelValidators holds LevelValidator through a use arrow entries
-          0..*. A dashed frame labelled Aggregate encloses the LevelDefinition root alone. The
-          footnote says that every input port binds UseCase, that LevelDefinition keeps its fields
-          private, that FitSection and SortSection are value objects, that LeaderboardEntry is a
-          response type of layer 2 and that Standing is a value object of layer 1, that a new
-          variant with level files adds a section DTO and leaves the core unchanged, and it names
-          the DTO mappers and the operations of LevelRepository that other views draw.
+          the duration of each call (#181). The aspects frame holds UseCaseAspect, LoggingAspect and
+          AuthorizationAspect (#180). No line starts or ends on a dashed frame. UseCase carries only
+          the interface stereotype. UpdateLevelsUseCase holds LevelRepository through a use arrow
+          levels 1, and LevelValidators holds LevelValidator through a use arrow entries 0..*. A
+          dashed frame labelled Aggregate encloses the LevelDefinition root alone. The footnote says
+          that every input port binds UseCase, that LevelDefinition keeps its fields private, that
+          FitSection and SortSection are value objects, that LeaderboardEntry is a response type of
+          layer 2 and that Standing is a value object of layer 1, that a new variant with level
+          files adds a section DTO and leaves the core unchanged, and it names the DTO mappers and
+          the operations of LevelRepository that other views draw.
         </desc>
         <defs>
           <marker
@@ -679,9 +680,9 @@
         </text>
         <!-- UseCaseAspect -->
         <rect
-          x="692"
+          x="688"
           y="808"
-          width="144"
+          width="96"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -689,7 +690,7 @@
           stroke-width="1"
         />
         <text
-          x="764"
+          x="736"
           y="826"
           fill="#5b6873"
           font-size="8"
@@ -700,7 +701,7 @@
           «abstract»
         </text>
         <text
-          x="764"
+          x="736"
           y="842"
           fill="#17212a"
           font-size="11"
@@ -713,9 +714,9 @@
         </text>
         <!-- LoggingAspect -->
         <rect
-          x="852"
+          x="790"
           y="808"
-          width="144"
+          width="92"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -723,7 +724,7 @@
           stroke-width="1"
         />
         <text
-          x="924"
+          x="836"
           y="836"
           fill="#17212a"
           font-size="11"
@@ -732,6 +733,30 @@
           text-anchor="middle"
         >
           LoggingAspect
+        </text>
+        <!-- AuthorizationAspect (#180) -->
+        <rect
+          x="888"
+          y="808"
+          width="108"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          textLength="100"
+          lengthAdjust="spacingAndGlyphs"
+          x="942"
+          y="836"
+          fill="#17212a"
+          font-size="11"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AuthorizationAspect
         </text>
         <!-- HTTP controllers: every listed class holds 1 or 2 input ports -->
         <rect
