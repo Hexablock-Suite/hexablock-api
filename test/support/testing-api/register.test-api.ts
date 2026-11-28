@@ -1,10 +1,12 @@
 import { receiveValueOf } from '../../../src/adapters/received.js';
+import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
 import type { RegisterUserRequest } from '../../../src/application/auth/credentials.js';
 import {
   type RegisterProblem,
   type RegisterUser,
   RegisterUseCase,
 } from '../../../src/application/auth/register.use-case.js';
+import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import { Password } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
@@ -15,11 +17,13 @@ import {
   SequenceUserIdGenerator,
 } from '../auth/fakes.js';
 import { registerRequest } from '../auth/requests.js';
+import { FakeStopwatch } from '../fake-stopwatch.js';
 import { UserMother } from '../object-mother/user-mother.js';
 import { userPartsOf } from '../recording-receiver.js';
 import { valueOf } from '../result.js';
 import { testUserId } from '../user-ids.js';
 import { Arrangements } from './arrangements.js';
+import { RecordingLogger } from './recording-logger.js';
 import { WhenOutcome } from './when-outcome.js';
 
 // One stored account as a then step names it: the number n of
@@ -33,8 +37,9 @@ export interface StoredAccount {
 // Testing API of RegisterUseCase (API-FR-01). It builds the use case and its
 // test doubles, and the doubles stay private: a test names no double. The
 // given steps sign up the accounts that a scenario needs, the when step
-// signs up, and the then steps check the answer, the stored accounts and the
-// calls of the ports. A then step fails when no when step ran.
+// signs up, alone or inside LoggingAspect as AppModule wires it, and the then
+// steps check the answer, the stored accounts, the calls of the ports and the
+// log entries. A then step fails when no when step ran.
 export class RegisterTestApi {
   private readonly users = new InMemoryUserRepository();
   private readonly hasher = new PrefixPasswordHasher();
@@ -46,6 +51,7 @@ export class RegisterTestApi {
     this.hasher,
     new SequenceUserIdGenerator(),
   );
+  private readonly logger = new RecordingLogger();
   private readonly arrangements = new Arrangements();
   private readonly outcome = new WhenOutcome<Result<UserId, RegisterProblem>>();
   private request: RegisterUserRequest | undefined;
@@ -63,18 +69,19 @@ export class RegisterTestApi {
   }
 
   // Signs up with the username and the password, as AuthDtoMapper builds
-  // them. The calls of the ports start again after the given steps.
+  // them.
   async whenRegistering(username: string, password: string): Promise<this> {
-    await this.arrangements.run();
-    this.hash.mockClear();
-    this.taken.mockClear();
-    const request = registerRequest(username, password);
-    this.request = request;
-    await this.outcome.record(() => this.register.execute(request));
-    this.madeHashes = await Promise.allSettled(
-      this.hash.mock.results.map((result) => result.value as Promise<PasswordHash>),
+    return this.when(this.register, username, password);
+  }
+
+  // RegisterUser binds UseCase, so LoggingAspect wraps it under its own name
+  // (decisions 7 and 10).
+  async whenRegisteringThroughTheLoggingAspect(username: string, password: string): Promise<this> {
+    return this.when(
+      new LoggingAspect(this.register, 'RegisterUser', this.logger, new FakeStopwatch()),
+      username,
+      password,
     );
-    return this;
   }
 
   thenTheRegistrationGivesTheIdOfUser(n: number): void {
@@ -143,5 +150,30 @@ export class RegisterTestApi {
   thenNoPasswordWasHashed(): void {
     this.outcome.ran();
     expect(this.hash).not.toHaveBeenCalled();
+  }
+
+  thenTheLogEntriesAre(entries: readonly UseCaseLogEntry[]): void {
+    this.outcome.ran();
+    expect(this.logger.entries).toEqual(entries);
+  }
+
+  thenNoLogEntryHolds(text: string): void {
+    this.outcome.ran();
+    expect(JSON.stringify(this.logger.entries)).not.toContain(text);
+  }
+
+  // Runs the given steps, then signs up. The calls of the ports start again
+  // after the given steps.
+  private async when(register: RegisterUser, username: string, password: string): Promise<this> {
+    await this.arrangements.run();
+    this.hash.mockClear();
+    this.taken.mockClear();
+    const request = registerRequest(username, password);
+    this.request = request;
+    await this.outcome.record(() => register.execute(request));
+    this.madeHashes = await Promise.allSettled(
+      this.hash.mock.results.map((result) => result.value as Promise<PasswordHash>),
+    );
+    return this;
   }
 }

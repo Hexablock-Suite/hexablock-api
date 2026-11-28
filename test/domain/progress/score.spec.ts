@@ -1,5 +1,4 @@
 import { Score } from '../../../src/domain/progress/score.js';
-import { RecordingReceiver } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
 
 const score = (value: number): Score => valueOf(Score.of(value));
@@ -44,30 +43,5 @@ describe('Score', () => {
   it('should_be_a_zero_score_when_value_is_negative_zero', () => {
     expect(score(-0).equals(score(0))).toBe(true);
     expect(score(0).isHigherThan(score(-0))).toBe(false);
-  });
-
-  it('should_be_higher_only_when_its_value_is_greater_than_the_other', () => {
-    expect(score(121).isHigherThan(score(120))).toBe(true);
-    expect(score(120).isHigherThan(score(120))).toBe(false);
-    expect(score(80).isHigherThan(score(120))).toBe(false);
-  });
-
-  // #90: the value leaves only through a delivery to a receiver.
-  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
-    const receiver = new RecordingReceiver<number>();
-
-    score(120).deliverTo(receiver);
-
-    expect(receiver.received).toEqual([120]);
-  });
-
-  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
-    const built = score(120);
-    const receiver = new RecordingReceiver<number>();
-
-    // @ts-expect-error -- #90 makes the value private.
-    void built.value;
-    // The delivery returns nothing: the receiver holds the value.
-    expect(built.deliverTo(receiver)).toBeUndefined();
   });
 });

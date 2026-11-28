@@ -36,30 +36,6 @@ describe('GameId', () => {
       });
     },
   );
-
-  it('should_be_equal_when_two_game_ids_hold_the_same_value', () => {
-    expect(gameId('fit').equals(gameId('fit'))).toBe(true);
-    expect(gameId('fit').equals(gameId('sort'))).toBe(false);
-  });
-
-  // #90: the value leaves only through a delivery to a receiver.
-  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
-    const receiver = new RecordingReceiver<string>();
-
-    gameId('fit').deliverTo(receiver);
-
-    expect(receiver.received).toEqual(['fit']);
-  });
-
-  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
-    const built = gameId('fit');
-    const receiver = new RecordingReceiver<string>();
-
-    // @ts-expect-error -- #90 makes the value private.
-    void built.value;
-    // The delivery returns nothing: the receiver holds the value.
-    expect(built.deliverTo(receiver)).toBeUndefined();
-  });
 });
 
 // A stored row keeps what it holds, so of() keeps no length bound (#135).

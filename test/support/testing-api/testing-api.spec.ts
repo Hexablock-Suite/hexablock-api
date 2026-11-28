@@ -1,11 +1,15 @@
 import { AuthenticateTokenTestApi } from './authenticate-token.test-api.js';
+import { AuthorizationAspectTestApi } from './authorization-aspect.test-api.js';
 import { GetGlobalLeaderboardTestApi } from './get-global-leaderboard.test-api.js';
 import { GetLevelLeaderboardTestApi } from './get-level-leaderboard.test-api.js';
 import { GetLevelsTestApi } from './get-levels.test-api.js';
 import { GetProgressTestApi } from './get-progress.test-api.js';
+import { LevelValidatorsTestApi } from './level-validators.test-api.js';
+import { LoggingAspectTestApi } from './logging-aspect.test-api.js';
 import { LoginTestApi } from './login.test-api.js';
 import { RegisterTestApi } from './register.test-api.js';
 import { SyncProgressTestApi } from './sync-progress.test-api.js';
+import { UpdateLevelsTestApi } from './update-levels.test-api.js';
 import { WhenOutcome } from './when-outcome.js';
 
 // A then step reads the outcome of a when step. A then step that runs
@@ -13,13 +17,17 @@ import { WhenOutcome } from './when-outcome.js';
 // step at all, cannot pass a test that reads an old state (#254).
 const TESTING_APIS: [string, () => object][] = [
   ['AuthenticateTokenTestApi', () => new AuthenticateTokenTestApi()],
+  ['AuthorizationAspectTestApi', () => new AuthorizationAspectTestApi()],
   ['GetGlobalLeaderboardTestApi', () => new GetGlobalLeaderboardTestApi()],
   ['GetLevelLeaderboardTestApi', () => new GetLevelLeaderboardTestApi()],
   ['GetLevelsTestApi', () => new GetLevelsTestApi()],
   ['GetProgressTestApi', () => new GetProgressTestApi()],
+  ['LevelValidatorsTestApi', () => new LevelValidatorsTestApi()],
+  ['LoggingAspectTestApi', () => new LoggingAspectTestApi()],
   ['LoginTestApi', () => new LoginTestApi()],
   ['RegisterTestApi', () => new RegisterTestApi()],
   ['SyncProgressTestApi', () => new SyncProgressTestApi()],
+  ['UpdateLevelsTestApi', () => new UpdateLevelsTestApi()],
 ];
 
 // The names of the then steps of a Testing API.
