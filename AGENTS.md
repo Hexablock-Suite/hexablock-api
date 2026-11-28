@@ -5,7 +5,9 @@ Rules for every contributor, human or agent, in this repository. Each rule names
 ## Commands
 
 - `pnpm verify`: lint, format:check, typecheck, test, arch, openapi:check, in that order.
-- `pnpm test`: unit and gate tests, then e2e tests.
+- `pnpm test`: unit, integration and gate tests, then e2e tests. It runs both suites, the behavior suite and the gate suite.
+- `pnpm test:behavior`: the behavior suite, the tests that run the code: unit, integration and e2e tests. It holds 1,257 tests on 2026-11-28.
+- `pnpm test:gates`: the gate suite, the tests that read the code, the documents or the configuration to hold a rule. It holds 101 tests on 2026-11-28. `vitest.gates.config.ts` lists the gate files.
 - `pnpm arch`: dependency-cruiser layer rules.
 - `pnpm contract:verify`: verify the client pact against the API at `BACKEND_URL`. `PACT_FILE` picks a local pact. The API must be the provider composition: `node --env-file=.env.example scripts/contract/start-provider.js` starts it with the state-change endpoint of the pact provider states (#151).
 - `pnpm db:generate`: write a migration into `drizzle/` from the schema. `pnpm db:migrate` applies them to `DATABASE_URL`.
@@ -17,6 +19,7 @@ Rules for every contributor, human or agent, in this repository. Each rule names
 - Write every artifact, comment and commit message in English. Gate: no gate. <!-- rule: R-english -->
 - Write commit messages as Conventional Commits. Gate: `commitlint.config.cjs`, `.vite-hooks/commit-msg`, `test/gates/commit-message.gate.spec.ts`. <!-- rule: R-conventional-commits -->
 - Name each test `should_<expected_result>_when_<condition>`. Gate: `vite.config.ts`, `test/gates/test-name.gate.spec.ts`. <!-- rule: R-test-names -->
+- Put each gate test in `test/gates/`. A gate test reads the code, the documents or the configuration to hold a rule; a behavior test runs the code. A gate that lives with behavior tests stays in its folder and goes into `GATE_FILES` of `vitest.gates.config.ts`, as `test/integration/in-memory-database.spec.ts`, `test/domain/level/level-problem.spec.ts` and the OpenAPI drift test of `test/health.e2e-spec.ts` do (#253). Each test file of `pnpm test` belongs to one suite; only `test/health.e2e-spec.ts` has a test in each. Gate: `vitest.gates.config.ts`, `test/gates/test-suites.gate.spec.ts`. <!-- rule: R-test-suites -->
 - Keep `src/domain` free of imports from outside `src/domain`. Gate: `.dependency-cruiser.cjs`, `test/gates/architecture.gate.spec.ts`. <!-- rule: R-domain-pure -->
 - Keep `src/domain` free of import cycles: no file of `src/domain` reaches itself through its imports, and a type-only import counts. A file directly in a folder of `src/domain`, such as `src/domain/level/`, never imports a subfolder of that folder, such as `level/fit/`: a type that the shared part and a variant both use lives in the shared folder, as `Rotation` lives in `src/domain/level/` next to `Coordinate` (#221). Two types that need each other share one file, as `StoredLevel` and `LevelDefinition` do. Gate: `.dependency-cruiser.cjs`, `test/gates/architecture.gate.spec.ts`. <!-- rule: R-domain-no-cycles -->
 - Let `src/application` import only `src/domain`; build aspects as custom decorators, not Nest interceptors. Gate: `.dependency-cruiser.cjs`, `test/gates/architecture.gate.spec.ts`. <!-- rule: R-application-pure -->

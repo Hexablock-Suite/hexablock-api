@@ -15,6 +15,13 @@ describe('CI contract', () => {
     );
   });
 
+  // #253: `pnpm test` runs the behavior tests and the gate tests, so the
+  // `verify` job runs every gate. test/gates/test-suites.gate.spec.ts shows
+  // that these two configs select every file of both suites.
+  it('should_run_every_test_file_when_verify_runs_pnpm_test', () => {
+    expect(scripts.test).toBe('vitest run && vitest run --config ./vitest.config.e2e.ts');
+  });
+
   it('should_keep_required_job_names_when_workflow_changes', () => {
     expect(workflow).toMatch(/^ {2}verify:\n {4}name: verify$/m);
     expect(workflow).toMatch(/^ {6}- run: pnpm verify$/m);
