@@ -73,16 +73,17 @@
           Class diagram of layer 2 showing the generic UseCase interface, the contract that every
           input port binds, the SyncProgress input port that binds it, the use case that implements
           it, and the UseCaseAspect decorator with LoggingAspect and AuthorizationAspect, which view
-          3 details (#180). Each solid aspect box carries the stereotype «aspect», and UseCaseAspect
-          carries «abstract» «aspect» (#182). UseCaseAspect joins the UseCase that it wraps with a
-          hollow diamond on its own side, labelled decorate and 1 (class of 2026-11-23). Since Q12
-          the aspects live in layer 2, and LoggingAspect writes to the Logger port and reads the
-          Stopwatch port before and after each call, so the one entry of the call carries its
-          duration (#181); an optional function gives it extra entries from a success, such as the
-          broken level rows of GetLevels (#219). Its TError type parameter extends { readonly kind:
-          string }, and every problem type of an input port has a kind. A footnote names
-          LevelsController, LeaderboardController, LevelDtoMapper and LeaderboardDtoMapper of layer
-          3, which call and translate the level and leaderboard input ports.
+          3 details (#180). Each aspect box carries the stereotype «aspect», the dashed reference
+          box of AuthorizationAspect too, and UseCaseAspect carries «abstract» «aspect» (#182).
+          UseCaseAspect joins the UseCase that it wraps with a hollow diamond on its own side,
+          labelled decorate and 1 (class of 2026-11-23). Since Q12 the aspects live in layer 2, and
+          LoggingAspect writes to the Logger port and reads the Stopwatch port before and after each
+          call, so the one entry of the call carries its duration (#181); an optional function gives
+          it extra entries from a success, such as the broken level rows of GetLevels (#219). Its
+          TError type parameter extends { readonly kind: string }, and every problem type of an
+          input port has a kind. A footnote names LevelsController, LeaderboardController,
+          LevelDtoMapper and LeaderboardDtoMapper of layer 3, which call and translate the level and
+          leaderboard input ports.
         </desc>
         <defs>
           <marker
@@ -523,12 +524,12 @@
           Promise&lt;Result&lt;PlayerProgress, ProgressProblem&gt;&gt;
         </text>
 
-        <!-- Class: AuthorizationAspect (PART 2 · VIEW 3, #180) -->
+        <!-- Class: AuthorizationAspect («aspect»; PART 2 · VIEW 3, #180, #182) -->
         <rect
           x="376"
           y="320"
           width="160"
-          height="48"
+          height="64"
           rx="6"
           fill="#ffffff"
           stroke="#5b6873"
@@ -548,7 +549,18 @@
         </text>
         <text
           x="456"
-          y="356"
+          y="354"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «aspect»
+        </text>
+        <text
+          x="456"
+          y="372"
           fill="#17212a"
           font-size="12"
           font-weight="600"
