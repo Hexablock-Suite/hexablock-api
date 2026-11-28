@@ -1,6 +1,9 @@
 import type { LevelResultValues } from '../../../src/adapters/received.js';
+import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
+import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.js';
 import type { Clock } from '../../../src/application/ports/clock.js';
 import type { LevelFinder } from '../../../src/application/ports/level-repository.js';
+import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { ProgressRepository } from '../../../src/application/ports/progress-repository.js';
 import type { ProgressProblem } from '../../../src/application/progress/progress-problem.js';
 import {
@@ -14,6 +17,7 @@ import { Stars } from '../../../src/domain/progress/stars.js';
 import type { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import type { MockInstance } from 'vitest';
+import { FakeStopwatch } from '../fake-stopwatch.js';
 import { FixedClock } from '../fixed-clock.js';
 import { type HeldGame, heldLevels } from '../held-levels.js';
 import { InMemoryLevelRepository } from '../in-memory-level-repository.js';
@@ -24,6 +28,7 @@ import { UserMother } from '../object-mother/user-mother.js';
 import { progressPartsOf } from '../recording-receiver.js';
 import { valueOf } from '../result.js';
 import { Arrangements } from './arrangements.js';
+import { RecordingLogger } from './recording-logger.js';
 import { WhenOutcome } from './when-outcome.js';
 
 // One sync as a test names it: the gameId, the score and the level results,
@@ -65,6 +70,8 @@ export class SyncProgressTestApi {
   // The levels that the tests sync: each one has 3 star thresholds (DS-6).
   private levels: LevelFinder = heldLevels([['hexa-fit', ['fit-01', 'fit-02']]]);
   private findFor: MockInstance<LevelFinder['findFor']> | undefined;
+  private readonly logger = new RecordingLogger();
+  private loggingAspect: SyncProgress | undefined;
   private readonly arrangements = new Arrangements();
   private readonly outcome = new WhenOutcome<readonly SyncAnswer[]>();
   private readonly gameIds = new Set<string>();
@@ -119,6 +126,19 @@ export class SyncProgressTestApi {
 
   async whenSyncing(values: SyncValues = {}): Promise<this> {
     return this.when(() => this.useCase().execute(this.requestOf(values)), values);
+  }
+
+  // SyncProgress binds UseCase, so LoggingAspect wraps it under its own name
+  // (decisions 7 and 10).
+  async whenSyncingThroughTheLoggingAspect(values: SyncValues = {}): Promise<this> {
+    const aspect = new LoggingAspect(
+      this.useCase(),
+      'SyncProgress',
+      this.logger,
+      new FakeStopwatch(),
+    );
+    this.loggingAspect = aspect;
+    return this.when(() => aspect.execute(this.requestOf(values)), values);
   }
 
   // The request types forbid this value. The mapper of the border builds
@@ -266,6 +286,17 @@ export class SyncProgressTestApi {
       ProgressMother.gameId(gameId),
       results.map((values) => ProgressMother.levelResult(values)),
     );
+  }
+
+  thenTheLogEntriesAre(entries: readonly UseCaseLogEntry[]): void {
+    this.outcome.ran();
+    expect(this.logger.entries).toEqual(entries);
+  }
+
+  // LoggingAspect is a UseCaseAspect, as every aspect is (decision 7).
+  thenTheLoggingAspectIsAUseCaseAspect(): void {
+    this.outcome.ran();
+    expect(this.loggingAspect).toBeInstanceOf(UseCaseAspect);
   }
 
   private async when(sync: () => Promise<SyncAnswer>, values: SyncValues): Promise<this> {

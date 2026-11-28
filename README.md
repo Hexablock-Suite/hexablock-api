@@ -366,7 +366,7 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,416 tests in `pnpm test`: 1,298 behavior tests and
+On 2026-11-28 the Vitest JSON reporter counts 1,420 tests in `pnpm test`: 1,302 behavior tests and
 118 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
@@ -407,8 +407,10 @@ Below it, the Object Mothers of `test/support/object-mother/`, such as `UserMoth
 domain data with the public factories and know no double. Each `then…` step fails when no
 `when…` step ran. `pnpm lint` fails on a test that asserts neither with `expect` nor through a
 `then…` step (`vitest/expect-expect`), and on a `when…` step without `await`
-(`typescript/no-floating-promises`). `update-levels.use-case.spec.ts` and
-`logging-aspect.spec.ts` still build their doubles in the test; a later change of #254 moves them.
+(`typescript/no-floating-promises`). Every test file of `test/unit/application/` has this shape, the
+tests of `LoggingAspect` and `AuthorizationAspect` included, and so has the test of the domain
+service `LevelValidators` in `test/domain/level/`: its `when…` steps are `async` too, although
+`check()` is synchronous.
 
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.
