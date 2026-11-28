@@ -33,6 +33,7 @@ import {
   PrefixTokenIssuer,
   SequenceUserIdGenerator,
 } from '../../support/auth/fakes.js';
+import { FakeStopwatch } from '../../support/fake-stopwatch.js';
 import { loginRequest, registerRequest } from '../../support/auth/requests.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 import { heldLevels } from '../../support/held-levels.js';
@@ -85,13 +86,133 @@ describe('LoggingAspect', () => {
     const result: EchoResult = ok('done');
     const { inner, execute } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     const returned = await aspect.execute('ping');
 
     expect(returned).toBe(result);
     expect(execute).toHaveBeenCalledExactlyOnceWith('ping');
-    expect(logger.log).toHaveBeenCalledExactlyOnceWith({ useCase: 'Echo', outcome: 'success' });
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'success',
+      elapsedMs: 0,
+    });
+  });
+
+  // #181: the aspect reads the Stopwatch port before and after the inner
+  // call. The entry of the call carries the time between the two readings.
+  it('should_log_the_measured_duration_in_the_success_entry_when_the_inner_use_case_succeeds', async () => {
+    const stopwatch = new FakeStopwatch();
+    const { inner } = echo(() => {
+      stopwatch.advanceBy(37.5);
+      return Promise.resolve(ok('done'));
+    });
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger, stopwatch);
+
+    await aspect.execute('ping');
+
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'success',
+      elapsedMs: 37.5,
+    });
+  });
+
+  it('should_log_the_measured_duration_in_the_failure_entry_when_the_inner_use_case_fails', async () => {
+    const stopwatch = new FakeStopwatch();
+    const { inner } = echo(() => {
+      stopwatch.advanceBy(37.5);
+      return Promise.resolve(err({ kind: 'progress-not-found' }));
+    });
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger, stopwatch);
+
+    await aspect.execute('ping');
+
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'failure',
+      kind: 'progress-not-found',
+      elapsedMs: 37.5,
+    });
+  });
+
+  it('should_log_the_measured_duration_in_the_error_entry_when_the_inner_use_case_throws', async () => {
+    const failure = new Error('database is down');
+    const stopwatch = new FakeStopwatch();
+    const { inner } = echo(() => {
+      stopwatch.advanceBy(37.5);
+      return Promise.reject(failure);
+    });
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger, stopwatch);
+
+    await expect(aspect.execute('ping')).rejects.toBe(failure);
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'error',
+      name: 'Error',
+      code: undefined,
+      frames: framesOf(failure),
+      elapsedMs: 37.5,
+    });
+  });
+
+  // The duration is a datum of the one entry of the call. No second entry
+  // holds it, so each call still writes one entry.
+  it('should_write_one_entry_with_its_own_duration_per_call_when_the_aspect_runs_two_calls', async () => {
+    const stopwatch = new FakeStopwatch();
+    const durations = [30, 12];
+    const { inner } = echo(() => {
+      stopwatch.advanceBy(durations.shift() ?? 0);
+      return Promise.resolve(ok('done'));
+    });
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger, stopwatch);
+
+    await aspect.execute('ping');
+    await aspect.execute('pong');
+
+    expect(logger.log.mock.calls).toEqual([
+      [{ useCase: 'Echo', outcome: 'success', elapsedMs: 30 }],
+      [{ useCase: 'Echo', outcome: 'success', elapsedMs: 12 }],
+    ]);
+  });
+
+  // An extra entry, such as a broken level row, is not a call. Only the
+  // success entry of the call carries the duration.
+  it('should_log_the_duration_only_in_the_success_entry_when_extra_entries_are_given', async () => {
+    const stopwatch = new FakeStopwatch();
+    const { inner } = echo(() => {
+      stopwatch.advanceBy(25);
+      return Promise.resolve(ok('fit-01'));
+    });
+    const logger = recordingLogger();
+    const aspect = new LoggingAspect(inner, 'Echo', logger, stopwatch, (value: string) => [
+      {
+        outcome: 'unavailable-level',
+        gameId: 'hexa-fit',
+        levelId: value,
+        reason: 'invalid-figure',
+      },
+    ]);
+
+    await aspect.execute('ping');
+
+    expect(logger.log.mock.calls).toEqual([
+      [
+        {
+          useCase: 'Echo',
+          outcome: 'unavailable-level',
+          gameId: 'hexa-fit',
+          levelId: 'fit-01',
+          reason: 'invalid-figure',
+        },
+      ],
+      [{ useCase: 'Echo', outcome: 'success', elapsedMs: 25 }],
+    ]);
+    expect(logger.log.mock.calls[0]?.[0]).not.toHaveProperty('elapsedMs');
   });
 
   // #219: a function of the composition root gives extra entries from the
@@ -101,7 +222,7 @@ describe('LoggingAspect', () => {
     const result: EchoResult = ok('fit-01,fit-02');
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger, (value: string) =>
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch(), (value: string) =>
       value.split(',').map((levelId) => ({
         outcome: 'unavailable-level' as const,
         gameId: 'hexa-fit',
@@ -132,7 +253,7 @@ describe('LoggingAspect', () => {
           reason: 'invalid-figure',
         },
       ],
-      [{ useCase: 'Echo', outcome: 'success' }],
+      [{ useCase: 'Echo', outcome: 'success', elapsedMs: 0 }],
     ]);
   });
 
@@ -142,7 +263,7 @@ describe('LoggingAspect', () => {
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
     const extraEntries = vi.fn<(value: string) => readonly ExtraLogEntry[]>(() => []);
-    const aspect = new LoggingAspect(inner, 'Echo', logger, extraEntries);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch(), extraEntries);
 
     const returned = await aspect.execute('ping');
 
@@ -152,6 +273,7 @@ describe('LoggingAspect', () => {
       useCase: 'Echo',
       outcome: 'failure',
       kind: 'progress-not-found',
+      elapsedMs: 0,
     });
   });
 
@@ -164,7 +286,7 @@ describe('LoggingAspect', () => {
     logger.log.mockImplementationOnce(() => {
       throw new Error('the log is full');
     });
-    const aspect = new LoggingAspect(inner, 'Echo', logger, (value: string) =>
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch(), (value: string) =>
       value.split(',').map((levelId) => ({
         outcome: 'unavailable-level' as const,
         gameId: 'hexa-fit',
@@ -186,7 +308,7 @@ describe('LoggingAspect', () => {
           reason: 'invalid-figure',
         },
       ],
-      [{ useCase: 'Echo', outcome: 'success' }],
+      [{ useCase: 'Echo', outcome: 'success', elapsedMs: 0 }],
     ]);
   });
 
@@ -196,21 +318,25 @@ describe('LoggingAspect', () => {
     const result: EchoResult = ok('done');
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger, () => {
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch(), () => {
       throw new Error('no entries');
     });
 
     const returned = await aspect.execute('ping');
 
     expect(returned).toBe(result);
-    expect(logger.log).toHaveBeenCalledExactlyOnceWith({ useCase: 'Echo', outcome: 'success' });
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'Echo',
+      outcome: 'success',
+      elapsedMs: 0,
+    });
   });
 
   it('should_log_name_failure_and_kind_and_return_inner_result_unchanged_when_inner_use_case_fails', async () => {
     const result: EchoResult = err({ kind: 'progress-not-found' });
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     const returned = await aspect.execute('ping');
 
@@ -219,6 +345,7 @@ describe('LoggingAspect', () => {
       useCase: 'Echo',
       outcome: 'failure',
       kind: 'progress-not-found',
+      elapsedMs: 0,
     });
   });
 
@@ -231,13 +358,14 @@ describe('LoggingAspect', () => {
     });
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).resolves.toBe(result);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'Echo',
       outcome: 'failure',
       kind: 'invalid-progress',
+      elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('Hexa Lines');
   });
@@ -248,13 +376,14 @@ describe('LoggingAspect', () => {
     const result = err({ kind: 'big', sizes: [1n, { inner: 2n }], count: 3 });
     const { inner } = echo(() => Promise.resolve(result));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).resolves.toBe(result);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'Echo',
       outcome: 'failure',
       kind: 'big',
+      elapsedMs: 0,
     });
   });
 
@@ -262,7 +391,7 @@ describe('LoggingAspect', () => {
     const failure = new Error('database is down');
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -271,6 +400,7 @@ describe('LoggingAspect', () => {
       name: 'Error',
       code: undefined,
       frames: framesOf(failure),
+      elapsedMs: 0,
     });
   });
 
@@ -280,7 +410,7 @@ describe('LoggingAspect', () => {
     const failure = new Error('gameId "Hexa Lines" is invalid');
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledOnce();
@@ -293,7 +423,7 @@ describe('LoggingAspect', () => {
     const failure = new RangeError('gameId "Hexa Lines" is invalid\nscore "Hexa Sort" is invalid');
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -302,6 +432,7 @@ describe('LoggingAspect', () => {
       name: 'RangeError',
       code: undefined,
       frames: expect.stringMatching(/^ {4}at /),
+      elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('Hexa');
   });
@@ -313,7 +444,7 @@ describe('LoggingAspect', () => {
     });
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -322,6 +453,7 @@ describe('LoggingAspect', () => {
       name: 'DriverError',
       code: 'ECONNREFUSED',
       frames: framesOf(failure),
+      elapsedMs: 0,
     });
     expect(framesOf(failure)).toMatch(/^ {4}at /);
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('Hexa Lines');
@@ -331,7 +463,7 @@ describe('LoggingAspect', () => {
     const failure = Object.assign(new Error('duplicate key "Hexa Lines"'), { code: 23505 });
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -340,6 +472,7 @@ describe('LoggingAspect', () => {
       name: 'Error',
       code: undefined,
       frames: framesOf(failure),
+      elapsedMs: 0,
     });
   });
 
@@ -350,7 +483,7 @@ describe('LoggingAspect', () => {
     failure.stack = 'Wrapped: gameId "Hexa\nLines" is invalid\n    at somewhere (file.ts:1:1)';
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -359,6 +492,7 @@ describe('LoggingAspect', () => {
       name: 'Error',
       code: undefined,
       frames: undefined,
+      elapsedMs: 0,
     });
   });
 
@@ -373,7 +507,7 @@ describe('LoggingAspect', () => {
     });
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).not.toHaveBeenCalled();
@@ -386,7 +520,7 @@ describe('LoggingAspect', () => {
     const failure = new Error('x\n    at SECRETVAL (file:1:1)');
     const { inner } = echo(() => Promise.reject(failure));
     const nest = recordingNestLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', new NestLogger(nest));
+    const aspect = new LoggingAspect(inner, 'Echo', new NestLogger(nest), new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(nest.error).toHaveBeenCalledOnce();
@@ -405,7 +539,7 @@ describe('LoggingAspect', () => {
     failure.message = 'changed SECRETVAL';
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -414,6 +548,7 @@ describe('LoggingAspect', () => {
       name: 'Error',
       code: undefined,
       frames: undefined,
+      elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('SECRETVAL');
   });
@@ -427,7 +562,7 @@ describe('LoggingAspect', () => {
       logger.log.mockImplementation(() => {
         throw new Error('log sink is full');
       });
-      const aspect = new LoggingAspect(inner, 'Echo', logger);
+      const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
       await expect(aspect.execute('ping')).resolves.toBe(result);
       expect(logger.log).toHaveBeenCalledOnce();
@@ -441,7 +576,7 @@ describe('LoggingAspect', () => {
     logger.log.mockImplementation(() => {
       throw new Error('log sink is full');
     });
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledOnce();
@@ -454,7 +589,7 @@ describe('LoggingAspect', () => {
     logger.log.mockImplementation(() => {
       throw new Error('log sink is full');
     });
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -463,6 +598,7 @@ describe('LoggingAspect', () => {
       name: 'object',
       code: undefined,
       frames: undefined,
+      elapsedMs: 0,
     });
   });
 
@@ -472,7 +608,7 @@ describe('LoggingAspect', () => {
   it('should_log_only_the_type_and_rethrow_it_when_inner_use_case_throws_a_non_error', async () => {
     const { inner } = echo(() => Promise.reject('gameId "Hexa Lines" is invalid'));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe('gameId "Hexa Lines" is invalid');
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -481,6 +617,7 @@ describe('LoggingAspect', () => {
       name: 'string',
       code: undefined,
       frames: undefined,
+      elapsedMs: 0,
     });
   });
 
@@ -491,7 +628,7 @@ describe('LoggingAspect', () => {
     const failure: unknown = Object.create(null);
     const { inner } = echo(() => Promise.reject(failure));
     const logger = recordingLogger();
-    const aspect = new LoggingAspect(inner, 'Echo', logger);
+    const aspect = new LoggingAspect(inner, 'Echo', logger, new FakeStopwatch());
 
     await expect(aspect.execute('ping')).rejects.toBe(failure);
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
@@ -500,6 +637,7 @@ describe('LoggingAspect', () => {
       name: 'object',
       code: undefined,
       frames: undefined,
+      elapsedMs: 0,
     });
   });
 
@@ -511,7 +649,7 @@ describe('LoggingAspect', () => {
       heldLevels([]),
       new FixedClock(syncInstantOf(new Date('2026-11-06T10:00:00.000Z'))),
     );
-    const aspect = new LoggingAspect(sync, 'SyncProgress', logger);
+    const aspect = new LoggingAspect(sync, 'SyncProgress', logger, new FakeStopwatch());
 
     const result = await aspect.execute({
       userId: valueOf(UserId.from(testUserId(1))),
@@ -525,6 +663,7 @@ describe('LoggingAspect', () => {
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'SyncProgress',
       outcome: 'success',
+      elapsedMs: 0,
     });
   });
 
@@ -537,6 +676,7 @@ describe('LoggingAspect', () => {
       new UpdateLevelsUseCase(levels, levelValidators()),
       'UpdateLevels',
       logger,
+      new FakeStopwatch(),
     );
 
     const result = await aspect.execute({
@@ -548,6 +688,7 @@ describe('LoggingAspect', () => {
       useCase: 'UpdateLevels',
       outcome: 'failure',
       kind: 'invalid-levels',
+      elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('fit-secret-07');
   });
@@ -559,7 +700,13 @@ describe('LoggingAspect', () => {
     const getLevels: GetLevels = new GetLevelsUseCase(
       new InMemoryLevelRepository(levelValidators()),
     );
-    const aspect = new LoggingAspect(getLevels, 'GetLevels', logger, unavailableLevelEntries);
+    const aspect = new LoggingAspect(
+      getLevels,
+      'GetLevels',
+      logger,
+      new FakeStopwatch(),
+      unavailableLevelEntries,
+    );
 
     const result = await aspect.execute();
 
@@ -567,6 +714,7 @@ describe('LoggingAspect', () => {
     expect(logger.log).toHaveBeenCalledExactlyOnceWith({
       useCase: 'GetLevels',
       outcome: 'success',
+      elapsedMs: 0,
     });
   });
 
@@ -582,7 +730,7 @@ describe('LoggingAspect', () => {
       new SequenceUserIdGenerator(),
     );
     await register.execute(registerRequest('ada', 'correct horse'));
-    const aspect = new LoggingAspect(register, 'RegisterUser', logger);
+    const aspect = new LoggingAspect(register, 'RegisterUser', logger, new FakeStopwatch());
 
     const result = await aspect.execute(registerRequest('ada', 'typed-secret-07'));
 
@@ -591,6 +739,7 @@ describe('LoggingAspect', () => {
       useCase: 'RegisterUser',
       outcome: 'failure',
       kind: 'username-taken',
+      elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('typed-secret-07');
   });
@@ -603,7 +752,7 @@ describe('LoggingAspect', () => {
       registerRequest('ada', 'correct horse'),
     );
     const login: Login = new LoginUseCase(users, hasher, new PrefixTokenIssuer());
-    const aspect = new LoggingAspect(login, 'Login', logger);
+    const aspect = new LoggingAspect(login, 'Login', logger, new FakeStopwatch());
 
     const result = await aspect.execute(loginRequest('ada', 'typed-secret-07'));
 
@@ -612,6 +761,7 @@ describe('LoggingAspect', () => {
       useCase: 'Login',
       outcome: 'failure',
       kind: 'invalid-credentials',
+      elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('typed-secret-07');
   });
@@ -622,7 +772,12 @@ describe('LoggingAspect', () => {
       new PrefixTokenIssuer(),
       new InMemoryUserRepository(),
     );
-    const aspect = new LoggingAspect(authenticate, 'AuthenticateToken', logger);
+    const aspect = new LoggingAspect(
+      authenticate,
+      'AuthenticateToken',
+      logger,
+      new FakeStopwatch(),
+    );
 
     const result = await aspect.execute('forged-token-secret-07');
 
@@ -631,6 +786,7 @@ describe('LoggingAspect', () => {
       useCase: 'AuthenticateToken',
       outcome: 'failure',
       kind: 'invalid-token',
+      elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('forged-token-secret-07');
   });

@@ -8,6 +8,7 @@ import { DrizzleUserRepository } from '../../../src/adapters/persistence/drizzle
 import { CLOCK, type Clock } from '../../../src/application/ports/clock.js';
 import { LEVEL_REPOSITORY } from '../../../src/application/ports/level-repository.js';
 import { PROGRESS_REPOSITORY } from '../../../src/application/ports/progress-repository.js';
+import { STOPWATCH, type Stopwatch } from '../../../src/application/ports/stopwatch.js';
 import {
   USER_ID_GENERATOR,
   type UserIdGenerator,
@@ -17,6 +18,7 @@ import type { LevelValidators } from '../../../src/domain/level/level-validators
 import { AppModule, LEVEL_VALIDATORS } from '../../../src/infrastructure/app.module.js';
 import { configureHttpApp } from '../../../src/infrastructure/http-app.js';
 import { TEST_JWT_SECRET } from '../auth/test-jwt-secret.js';
+import { FakeStopwatch } from '../fake-stopwatch.js';
 import { createTestDatabase, type TestDatabase } from '../test-database.js';
 
 export { TEST_JWT_SECRET };
@@ -28,11 +30,14 @@ const UNUSED_DATABASE_URL = 'postgres://test:test@127.0.0.1:1/unused';
 
 // Sets the configuration that AppModule reads. Call vi.unstubAllEnvs() after the test.
 // The list of level editors is empty, so no account may update the levels
-// (#145). A LEVEL_EDITOR_IDS of the shell never reaches a test.
+// (#145). A LEVEL_EDITOR_IDS of the shell never reaches a test. The rate
+// limit of sign-up and sign-in is off, because the tests sign in many times
+// from one client (#170). An AUTH_RATE_LIMIT of the shell never reaches a test.
 export function stubTestEnvironment(): void {
   vi.stubEnv('JWT_SECRET', TEST_JWT_SECRET);
   vi.stubEnv('DATABASE_URL', UNUSED_DATABASE_URL);
   vi.stubEnv('LEVEL_EDITOR_IDS', '');
+  vi.stubEnv('AUTH_RATE_LIMIT', 'off');
 }
 
 export interface TestApp {
@@ -50,11 +55,17 @@ export interface TestModuleOptions {
   // Replaces the random user ids, so a test knows the id of each account
   // before it signs up.
   readonly userIds?: UserIdGenerator;
+  // Replaces the monotonic clock of the aspects, so a test knows each
+  // duration that a log line holds (#181).
+  readonly stopwatch?: Stopwatch;
 }
 
 export interface TestAppOptions extends Pick<TestModuleOptions, 'clock' | 'userIds'> {
   // The user ids that may update the levels (#145). Without it, no account may.
   readonly levelEditorIds?: readonly string[];
+  // The AUTH_RATE_LIMIT of the app (#170). Without it, the limit is off.
+  // null leaves the variable unset, so the default limit applies.
+  readonly authRateLimit?: string | null;
 }
 
 // Builds the module of AppModule on the given database. The user, progress
@@ -88,12 +99,16 @@ export function testModuleOf(
   if (options.userIds !== undefined) {
     builder = builder.overrideProvider(USER_ID_GENERATOR).useValue(options.userIds);
   }
+  if (options.stopwatch !== undefined) {
+    builder = builder.overrideProvider(STOPWATCH).useValue(options.stopwatch);
+  }
   return builder;
 }
 
 // Starts AppModule with the test configuration. The user, progress and level
 // repositories and the leaderboard reader run on the in-memory PGlite
-// database, so a test can read the stored rows.
+// database, so a test can read the stored rows. A stopwatch that never moves
+// replaces the monotonic clock, so each log line ends with elapsedMs=0 (#181).
 export async function createTestApp(
   controllers: Type<unknown>[] = [],
   options: TestAppOptions = {},
@@ -102,11 +117,15 @@ export async function createTestApp(
   if (options.levelEditorIds !== undefined) {
     vi.stubEnv('LEVEL_EDITOR_IDS', options.levelEditorIds.join(','));
   }
+  if (options.authRateLimit !== undefined) {
+    vi.stubEnv('AUTH_RATE_LIMIT', options.authRateLimit ?? undefined);
+  }
   const database = await createTestDatabase();
   const moduleRef = await testModuleOf(database, {
     controllers,
     clock: options.clock,
     userIds: options.userIds,
+    stopwatch: new FakeStopwatch(),
   }).compile();
   const app = moduleRef.createNestApplication<INestApplication<App>>({ logger: false });
   configureHttpApp(app);

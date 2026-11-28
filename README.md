@@ -172,9 +172,8 @@ Each principle has one example from the progress slice. Each link opens the sour
 
 ## AOP
 
-The cross-cutting aspects are logging and timing (§3.5, API-NFR-07). They wrap use cases as
-decorators: `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and `LoggingAspect` extends it. [View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)
-also draws a `TimingAspect`, which is not built yet.
+The cross-cutting aspect is logging (§3.5, API-NFR-07): each entry of a call holds the use case, the outcome and the duration. It wraps use cases as
+a decorator: `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and `LoggingAspect` extends it ([View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)).
 They are custom decorators or proxies, never Nest interceptors, because `src/application`
 imports no package (rule R-application-pure).
 
@@ -185,23 +184,39 @@ belong there, built as decorators with one interface common to the use cases, wi
 `LoggingAspect` writes a typed entry to the `Logger` port
 ([src/application/ports/logger.ts](src/application/ports/logger.ts)), and `NestLogger` in
 [src/adapters/logging](src/adapters/logging) implements it and writes the text.
-`AppModule` wraps `SyncProgressUseCase`, `GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and
-`GetLevelLeaderboardUseCase` in `LoggingAspect`, each under the name of its input port. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
+`AppModule` wraps `RegisterUseCase`, `LoginUseCase`, `AuthenticateTokenUseCase`, `SyncProgressUseCase`, `GetProgressUseCase`,
+`GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and `GetLevelLeaderboardUseCase` in `LoggingAspect`,
+each under the name of its input port, so a failed sign-in leaves a log entry (#170). `AuthorizeLevelEditorUseCase` has no aspect. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
 value that the client sent never reaches the log. For `GetLevels`, the aspect also writes one entry per stored level
 row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section, from `unavailableLevelEntries()`.
 No use case imports the `Logger` port (rule `only-aspects-import-logger-port`, #219). A request value that breaks its rule stops in its
 DTO mapper, such as `ProgressDtoMapper`, before the use case, so the aspect writes no entry for that
-request. `TimingAspect` is not built yet.
+request. `LoggingAspect` reads the `Stopwatch` port before and after each call, and the one entry of the call carries
+`elapsedMs`, the duration in milliseconds; `PerformanceStopwatch` in [src/adapters/clock](src/adapters/clock) reads the
+monotonic clock of `performance`. No second aspect writes a timing entry (#181).
 
 ## Getting Started
 
-You need Node 26 (through [fnm](https://github.com/Schniz/fnm)), pnpm and, for database work,
-Docker.
+You need Node 26.13.1 (through [fnm](https://github.com/Schniz/fnm)), pnpm and, for database
+work, Docker.
 
 ```bash
-fnm use            # reads .node-version (Node 26)
+fnm use            # reads .node-version (Node 26.13.1)
 pnpm install       # also installs the git hooks
 pnpm start:dev     # http://localhost:3000/v1/health, docs at /docs, JSON at /docs-json
+```
+
+`.node-version` names the exact Node of the three CI jobs. `engines.node` of `package.json` accepts
+`>=26.13.1 <27`, so a newer Node 26 also works. `engineStrict: true` in `pnpm-workspace.yaml` makes
+`pnpm install` and every `pnpm` script stop on an older or another major version (#250):
+
+```text
+[ERR_PNPM_UNSUPPORTED_ENGINE] Unsupported environment (bad pnpm and/or Node.js version)
+
+Your Node version is incompatible with "<repository path>".
+
+Expected version: >=26.13.1 <27
+Got: v26.7.0
 ```
 
 The API reads `PORT` (default `3000`), `DATABASE_URL` and `JWT_SECRET` from the environment, and does not
@@ -235,6 +250,17 @@ pnpm start:dev
 An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` gets
 403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
 does. The account that a deploy uses to send the levels must be in the list (see [Deploy](#deploy)).
+
+Sign-up and sign-in have a rate limit for each client
+([#170](https://github.com/Hexablock-Suite/hexablock-api/issues/170)). `AUTH_RATE_LIMIT` is the
+number of requests that one IP address may send to `POST /v1/auth/register`, and the same number to
+`POST /v1/auth/login`, in one minute. Unset or empty, it is `10`, the default decided on 2026-11-28.
+`off` turns the limit off, as the tests and the provider composition of the contract job do; with
+`NODE_ENV=production`, `off` stops the start, as the example `JWT_SECRET` does. Any other value that
+is not a whole number of 1 or more stops the start. Each answer under the limit carries
+`X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`. A request over the limit
+answers 429 with the `ErrorDto` body and a `Retry-After` header. The API counts by the IP address of the connection, so behind a proxy every
+client shares the address of the proxy.
 
 For database work, start the local Postgres from `compose.yaml` and point `DATABASE_URL` at it:
 
@@ -339,8 +365,8 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,372 tests in `pnpm test`: 1,271 behavior tests and
-101 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+On 2026-11-28 the Vitest JSON reporter counts 1,414 tests in `pnpm test`: 1,312 behavior tests and
+102 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
 Name each test `should_<expected_result>_when_<condition>`. The gate

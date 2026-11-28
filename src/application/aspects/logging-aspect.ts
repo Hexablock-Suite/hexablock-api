@@ -1,5 +1,6 @@
 import type { Result } from '../../domain/shared/result.js';
 import type { Logger, UseCaseLogEntry } from '../ports/logger.js';
+import type { Stopwatch } from '../ports/stopwatch.js';
 import { describeThrown } from '../thrown-value.js';
 import type { UseCase } from '../use-case.js';
 import { UseCaseAspect } from './use-case-aspect.js';
@@ -15,16 +16,18 @@ export type ExtraLogEntry = WithoutUseCase<UseCaseLogEntry>;
 // The composition root gives one to the aspect (#219).
 export type ExtraLogEntries<TValue> = (value: TValue) => readonly ExtraLogEntry[];
 
-// Logs each call of the inner use case: its name and the outcome. It writes
-// a typed entry to the Logger port, and the adapter writes the text
-// (decision 10 of docs/architecture/classes.md, Q12). A failed Result logs
+// Logs each call of the inner use case: its name, the outcome and the
+// duration. It reads the Stopwatch port before and after the inner call, and
+// the one entry of the call carries the time between the two readings in
+// milliseconds (#181). It writes a typed entry to the Logger port, and the
+// adapter writes the text (decision 10 of docs/architecture/classes.md, Q12). A failed Result logs
 // only its kind, so a value that the client sent never reaches the log. A
 // thrown error logs its name, its string code and its stack frames, never
 // its message, and the aspect throws it again. A logger that throws does not
 // change the outcome of the use case. An optional function gives extra
 // entries from the value of a success, such as one entry for each broken
 // level row of GetLevels (#219). The aspect writes them before the success
-// entry, with its own name.
+// entry, with its own name and no duration: an extra entry is not a call.
 export class LoggingAspect<
   TRequest,
   TValue,
@@ -34,30 +37,44 @@ export class LoggingAspect<
     inner: UseCase<TRequest, Result<TValue, TError>>,
     private readonly name: string,
     private readonly logger: Logger,
+    private readonly stopwatch: Stopwatch,
     private readonly extraEntries: ExtraLogEntries<TValue> = () => [],
   ) {
     super(inner);
   }
 
   override async execute(request: TRequest): Promise<Result<TValue, TError>> {
+    const startMs = this.stopwatch.readMs();
     let result: Result<TValue, TError>;
     try {
       result = await super.execute(request);
     } catch (error) {
+      const elapsedMs = this.stopwatch.readMs() - startMs;
       // A getter of the thrown value can throw while the aspect reads it.
       // So the aspect builds the entry inside safely(), and the caller still
       // gets the thrown value.
       this.safely(() =>
-        this.logger.log({ useCase: this.name, outcome: 'error', ...describeThrown(error) }),
+        this.logger.log({
+          useCase: this.name,
+          outcome: 'error',
+          ...describeThrown(error),
+          elapsedMs,
+        }),
       );
       throw error;
     }
+    const elapsedMs = this.stopwatch.readMs() - startMs;
     if (result.ok) {
       this.logExtraEntries(result.value);
-      this.safely(() => this.logger.log({ useCase: this.name, outcome: 'success' }));
+      this.safely(() => this.logger.log({ useCase: this.name, outcome: 'success', elapsedMs }));
     } else {
       this.safely(() =>
-        this.logger.log({ useCase: this.name, outcome: 'failure', kind: result.error.kind }),
+        this.logger.log({
+          useCase: this.name,
+          outcome: 'failure',
+          kind: result.error.kind,
+          elapsedMs,
+        }),
       );
     }
     return result;
