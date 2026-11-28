@@ -7,8 +7,8 @@ import type { SessionToken } from './session-token.js';
 
 // One problem for a malformed, expired or forged token, and for a valid
 // token whose user is not stored, so the answer does not tell which check
-// failed. It carries a kind, so LoggingAspect logs it
-// and no token.
+// failed. It carries a kind. AppModule wraps this use case in LoggingAspect,
+// so the aspect logs that kind and no token (#170).
 export type TokenProblem = { readonly kind: 'invalid-token' };
 
 // Input port of the token check (API-FR-01). JwtAuthGuard calls it and never

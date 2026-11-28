@@ -1,5 +1,5 @@
 // Port. The aspects write one entry per use case call here. The entry holds
-// data, not text: the adapter in src/infrastructure writes the text
+// data, not text: the adapter in src/adapters/logging writes the text
 // (decision 10 of docs/architecture/classes.md). A failure gives only its
 // kind, because the rest of a failure can hold values that the client sent.
 // A thrown error gives its name, its code when the code is a string, and the
@@ -7,16 +7,25 @@
 // and it can quote a value that the client sent. The frames exclude the
 // first line of the stack, because that line repeats the message. An
 // unavailable level is a stored level row that breaks a rule (#147). It
-// gives the key of the row and the code of the rule, and no section.
+// gives the key of the row and the code of the rule, and no section. The
+// entry of a call (success, failure or error) gives the duration of the call
+// in milliseconds, from the Stopwatch port (#181). An unavailable level is
+// not a call, so it gives no duration.
 export type UseCaseLogEntry =
-  | { readonly useCase: string; readonly outcome: 'success' }
-  | { readonly useCase: string; readonly outcome: 'failure'; readonly kind: string }
+  | { readonly useCase: string; readonly outcome: 'success'; readonly elapsedMs: number }
+  | {
+      readonly useCase: string;
+      readonly outcome: 'failure';
+      readonly kind: string;
+      readonly elapsedMs: number;
+    }
   | {
       readonly useCase: string;
       readonly outcome: 'error';
       readonly name: string;
       readonly code: string | undefined;
       readonly frames: string | undefined;
+      readonly elapsedMs: number;
     }
   | {
       readonly useCase: string;

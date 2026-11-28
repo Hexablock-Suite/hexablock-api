@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { PerformanceStopwatch } from '../adapters/clock/performance-stopwatch.js';
 import { SystemClock } from '../adapters/clock/system-clock.js';
 import { RandomUserIdGenerator } from '../adapters/crypto/random-user-id-generator.js';
 import { ScryptPasswordHasher } from '../adapters/crypto/scrypt-password-hasher.js';
@@ -58,6 +60,7 @@ import {
   type LevelUpdater,
 } from '../application/ports/level-repository.js';
 import { LOGGER, type Logger } from '../application/ports/logger.js';
+import { STOPWATCH, type Stopwatch } from '../application/ports/stopwatch.js';
 import { PASSWORD_HASHER, type PasswordHasher } from '../application/ports/password-hasher.js';
 import {
   PROGRESS_REPOSITORY,
@@ -80,7 +83,12 @@ import { Topologies } from '../domain/level/topologies.js';
 import { TopologyId } from '../domain/level/topology-id.js';
 import { TriangleTopology } from '../domain/level/triangle-topology.js';
 import { GameId } from '../domain/progress/game-id.js';
-import { createJwtService, readJwtSecret, readLevelEditors } from './auth/auth-config.js';
+import {
+  createJwtService,
+  readAuthThrottle,
+  readJwtSecret,
+  readLevelEditors,
+} from './auth/auth-config.js';
 import type { Database } from './database/connection.js';
 import { DATABASE, DatabaseModule } from './database/database.module.js';
 
@@ -122,7 +130,9 @@ function levelValidators(): LevelValidators {
 
 // The composition root: it binds each port to its adapter.
 @Module({
-  imports: [DatabaseModule],
+  // ThrottlerModule holds the rate limit of sign-up and sign-in, which
+  // AUTH_RATE_LIMIT sets (#170). The factory reads it when the module starts.
+  imports: [DatabaseModule, ThrottlerModule.forRootAsync({ useFactory: () => readAuthThrottle() })],
   controllers: [
     HealthController,
     AuthController,
@@ -133,6 +143,8 @@ function levelValidators(): LevelValidators {
   providers: [
     { provide: CLOCK, useClass: SystemClock },
     { provide: LOGGER, useFactory: (): Logger => new NestLogger() },
+    // Each LoggingAspect reads the duration of a call from this port (#181).
+    { provide: STOPWATCH, useClass: PerformanceStopwatch },
     { provide: PASSWORD_HASHER, useClass: ScryptPasswordHasher },
     { provide: USER_ID_GENERATOR, useClass: RandomUserIdGenerator },
     {
@@ -144,23 +156,52 @@ function levelValidators(): LevelValidators {
       inject: [DATABASE],
       useFactory: (database: Database): UserRepository => new DrizzleUserRepository(database),
     },
+    // LoggingAspect wraps each use case under the name of its input port, so
+    // the use case holds no logging code. AuthorizeLevelEditorUseCase is the
+    // one use case without it (#170).
     {
       provide: REGISTER_USER,
-      inject: [USER_REPOSITORY, PASSWORD_HASHER, USER_ID_GENERATOR],
-      useFactory: (users: UserRepository, hasher: PasswordHasher, ids: UserIdGenerator) =>
-        new RegisterUseCase(users, hasher, ids),
+      inject: [USER_REPOSITORY, PASSWORD_HASHER, USER_ID_GENERATOR, LOGGER, STOPWATCH],
+      useFactory: (
+        users: UserRepository,
+        hasher: PasswordHasher,
+        ids: UserIdGenerator,
+        logger: Logger,
+        stopwatch: Stopwatch,
+      ) =>
+        new LoggingAspect(
+          new RegisterUseCase(users, hasher, ids),
+          'RegisterUser',
+          logger,
+          stopwatch,
+        ),
     },
     {
       provide: LOGIN,
-      inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_ISSUER],
-      useFactory: (users: UserRepository, hasher: PasswordHasher, tokens: TokenIssuer) =>
-        new LoginUseCase(users, hasher, tokens),
+      inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_ISSUER, LOGGER, STOPWATCH],
+      useFactory: (
+        users: UserRepository,
+        hasher: PasswordHasher,
+        tokens: TokenIssuer,
+        logger: Logger,
+        stopwatch: Stopwatch,
+      ) => new LoggingAspect(new LoginUseCase(users, hasher, tokens), 'Login', logger, stopwatch),
     },
     {
       provide: AUTHENTICATE_TOKEN,
-      inject: [TOKEN_ISSUER, USER_REPOSITORY],
-      useFactory: (tokens: TokenIssuer, users: UserRepository) =>
-        new AuthenticateTokenUseCase(tokens, users),
+      inject: [TOKEN_ISSUER, USER_REPOSITORY, LOGGER, STOPWATCH],
+      useFactory: (
+        tokens: TokenIssuer,
+        users: UserRepository,
+        logger: Logger,
+        stopwatch: Stopwatch,
+      ) =>
+        new LoggingAspect(
+          new AuthenticateTokenUseCase(tokens, users),
+          'AuthenticateToken',
+          logger,
+          stopwatch,
+        ),
     },
     {
       provide: PROGRESS_REPOSITORY,
@@ -168,22 +209,28 @@ function levelValidators(): LevelValidators {
       useFactory: (database: Database): ProgressRepository =>
         new DrizzleProgressRepository(database),
     },
-    // LoggingAspect wraps the use case, so the use case holds no logging code.
     {
       provide: SYNC_PROGRESS,
-      inject: [PROGRESS_REPOSITORY, LEVEL_REPOSITORY, CLOCK, LOGGER],
+      inject: [PROGRESS_REPOSITORY, LEVEL_REPOSITORY, CLOCK, LOGGER, STOPWATCH],
       useFactory: (
         progress: ProgressRepository,
         levels: LevelFinder,
         clock: Clock,
         logger: Logger,
+        stopwatch: Stopwatch,
       ) =>
-        new LoggingAspect(new SyncProgressUseCase(progress, levels, clock), 'SyncProgress', logger),
+        new LoggingAspect(
+          new SyncProgressUseCase(progress, levels, clock),
+          'SyncProgress',
+          logger,
+          stopwatch,
+        ),
     },
     {
       provide: GET_PROGRESS,
-      inject: [PROGRESS_REPOSITORY],
-      useFactory: (progress: ProgressRepository) => new GetProgressUseCase(progress),
+      inject: [PROGRESS_REPOSITORY, LOGGER, STOPWATCH],
+      useFactory: (progress: ProgressRepository, logger: Logger, stopwatch: Stopwatch) =>
+        new LoggingAspect(new GetProgressUseCase(progress), 'GetProgress', logger, stopwatch),
     },
     { provide: LEVEL_VALIDATORS, useFactory: (): LevelValidators => levelValidators() },
     // One DrizzleLevelRepository plays the four roles of the LevelRepository
@@ -197,21 +244,32 @@ function levelValidators(): LevelValidators {
     },
     {
       provide: GET_LEVELS,
-      inject: [LEVEL_REPOSITORY, LOGGER],
+      inject: [LEVEL_REPOSITORY, LOGGER, STOPWATCH],
       // The aspect also writes one entry per broken level row (#219).
-      useFactory: (levels: LevelLister, logger: Logger) =>
+      useFactory: (levels: LevelLister, logger: Logger, stopwatch: Stopwatch) =>
         new LoggingAspect(
           new GetLevelsUseCase(levels),
           'GetLevels',
           logger,
+          stopwatch,
           unavailableLevelEntries,
         ),
     },
     {
       provide: UPDATE_LEVELS,
-      inject: [LEVEL_REPOSITORY, LEVEL_VALIDATORS, LOGGER],
-      useFactory: (levels: LevelUpdater, validators: LevelValidators, logger: Logger) =>
-        new LoggingAspect(new UpdateLevelsUseCase(levels, validators), 'UpdateLevels', logger),
+      inject: [LEVEL_REPOSITORY, LEVEL_VALIDATORS, LOGGER, STOPWATCH],
+      useFactory: (
+        levels: LevelUpdater,
+        validators: LevelValidators,
+        logger: Logger,
+        stopwatch: Stopwatch,
+      ) =>
+        new LoggingAspect(
+          new UpdateLevelsUseCase(levels, validators),
+          'UpdateLevels',
+          logger,
+          stopwatch,
+        ),
     },
     // The list of level editors comes from LEVEL_EDITOR_IDS (#145).
     {
@@ -230,18 +288,29 @@ function levelValidators(): LevelValidators {
     { provide: LEVEL_BOARD_READER, useExisting: DrizzleLeaderboardReader },
     {
       provide: GET_GLOBAL_LEADERBOARD,
-      inject: [GLOBAL_BOARD_READER, LOGGER],
-      useFactory: (boards: GlobalBoardReader, logger: Logger) =>
-        new LoggingAspect(new GetGlobalLeaderboardUseCase(boards), 'GetGlobalLeaderboard', logger),
+      inject: [GLOBAL_BOARD_READER, LOGGER, STOPWATCH],
+      useFactory: (boards: GlobalBoardReader, logger: Logger, stopwatch: Stopwatch) =>
+        new LoggingAspect(
+          new GetGlobalLeaderboardUseCase(boards),
+          'GetGlobalLeaderboard',
+          logger,
+          stopwatch,
+        ),
     },
     {
       provide: GET_LEVEL_LEADERBOARD,
-      inject: [LEVEL_BOARD_READER, LEVEL_REPOSITORY, LOGGER],
-      useFactory: (boards: LevelBoardReader, levels: LevelHolder, logger: Logger) =>
+      inject: [LEVEL_BOARD_READER, LEVEL_REPOSITORY, LOGGER, STOPWATCH],
+      useFactory: (
+        boards: LevelBoardReader,
+        levels: LevelHolder,
+        logger: Logger,
+        stopwatch: Stopwatch,
+      ) =>
         new LoggingAspect(
           new GetLevelLeaderboardUseCase(boards, levels),
           'GetLevelLeaderboard',
           logger,
+          stopwatch,
         ),
     },
     // Every route, also the routes of later modules, answers errors with ErrorDto.

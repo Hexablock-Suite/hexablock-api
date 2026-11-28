@@ -4,7 +4,7 @@ import type { Moves } from './moves.js';
 import type { Stars } from './stars.js';
 
 // The receiver of the four values of a LevelResult. LevelResult.deliverTo()
-// calls it once. Only the border implements it, for example a row mapper.
+// calls it once. Only the border implements it, for example a repository.
 export interface LevelResultReceiver {
   receive(levelId: LevelId, stars: Stars, moves: Moves, elapsedTime: ElapsedTime): void;
 }

@@ -22,10 +22,11 @@ import { GLOBAL_BOARD_READER } from '../../src/application/ports/global-board-re
 import { LEVEL_BOARD_READER } from '../../src/application/ports/level-board-reader.js';
 import { LEVEL_REPOSITORY } from '../../src/application/ports/level-repository.js';
 import { LOGGER } from '../../src/application/ports/logger.js';
+import { STOPWATCH } from '../../src/application/ports/stopwatch.js';
 import { PROGRESS_REPOSITORY } from '../../src/application/ports/progress-repository.js';
 import {
   GET_PROGRESS,
-  GetProgressUseCase,
+  type GetProgress,
 } from '../../src/application/progress/get-progress.use-case.js';
 import {
   SYNC_PROGRESS,
@@ -34,8 +35,12 @@ import {
 import { GameId } from '../../src/domain/progress/game-id.js';
 import { LevelId } from '../../src/domain/progress/level-id.js';
 import { UserId } from '../../src/domain/user/user-id.js';
-import { LOGIN, LoginUseCase } from '../../src/application/auth/login.use-case.js';
-import { REGISTER_USER, RegisterUseCase } from '../../src/application/auth/register.use-case.js';
+import {
+  AUTHENTICATE_TOKEN,
+  type AuthenticateToken,
+} from '../../src/application/auth/authenticate-token.use-case.js';
+import { LOGIN, type Login } from '../../src/application/auth/login.use-case.js';
+import { REGISTER_USER, type RegisterUser } from '../../src/application/auth/register.use-case.js';
 import { PASSWORD_HASHER } from '../../src/application/ports/password-hasher.js';
 import { TOKEN_ISSUER } from '../../src/application/ports/token-issuer.js';
 import { USER_ID_GENERATOR } from '../../src/application/ports/user-id-generator.js';
@@ -45,6 +50,10 @@ import { JwtTokenIssuer } from '../../src/adapters/jwt/jwt-token-issuer.js';
 import { RandomUserIdGenerator } from '../../src/adapters/crypto/random-user-id-generator.js';
 import { ScryptPasswordHasher } from '../../src/adapters/crypto/scrypt-password-hasher.js';
 import { NestLogger } from '../../src/adapters/logging/nest-logger.js';
+import { PerformanceStopwatch } from '../../src/adapters/clock/performance-stopwatch.js';
+import { InMemoryUserRepository, PrefixPasswordHasher } from '../support/auth/fakes.js';
+import { loginRequest, registerRequest } from '../support/auth/requests.js';
+import { FakeStopwatch } from '../support/fake-stopwatch.js';
 import { stubTestEnvironment } from '../support/http/test-app.js';
 import { InMemoryLevelRepository } from '../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../support/in-memory-progress-repository.js';
@@ -62,7 +71,9 @@ describe('AppModule account wiring', () => {
     vi.restoreAllMocks();
   });
 
-  it('should_bind_account_ports_to_their_adapters_when_app_module_compiles', async () => {
+  // #170: LoggingAspect wraps the three account use cases, so a failed
+  // sign-in leaves a log entry.
+  it('should_bind_account_ports_to_their_adapters_and_wrap_the_account_use_cases_in_logging_aspect_when_app_module_compiles', async () => {
     stubTestEnvironment();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
@@ -70,19 +81,76 @@ describe('AppModule account wiring', () => {
     expect(moduleRef.get(TOKEN_ISSUER)).toBeInstanceOf(JwtTokenIssuer);
     expect(moduleRef.get(USER_ID_GENERATOR)).toBeInstanceOf(RandomUserIdGenerator);
     expect(moduleRef.get(USER_REPOSITORY)).toBeInstanceOf(DrizzleUserRepository);
-    expect(moduleRef.get(REGISTER_USER)).toBeInstanceOf(RegisterUseCase);
-    expect(moduleRef.get(LOGIN)).toBeInstanceOf(LoginUseCase);
+    expect(moduleRef.get(REGISTER_USER)).toBeInstanceOf(LoggingAspect);
+    expect(moduleRef.get(LOGIN)).toBeInstanceOf(LoggingAspect);
+    expect(moduleRef.get(AUTHENTICATE_TOKEN)).toBeInstanceOf(LoggingAspect);
     await moduleRef.close();
   });
 
-  it('should_bind_progress_ports_to_their_adapters_when_app_module_compiles', async () => {
+  it('should_bind_progress_ports_and_wrap_both_progress_use_cases_in_logging_aspect_when_app_module_compiles', async () => {
     stubTestEnvironment();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
     expect(moduleRef.get(PROGRESS_REPOSITORY)).toBeInstanceOf(DrizzleProgressRepository);
     expect(moduleRef.get(LOGGER)).toBeInstanceOf(NestLogger);
     expect(moduleRef.get(SYNC_PROGRESS)).toBeInstanceOf(LoggingAspect);
-    expect(moduleRef.get(GET_PROGRESS)).toBeInstanceOf(GetProgressUseCase);
+    expect(moduleRef.get(GET_PROGRESS)).toBeInstanceOf(LoggingAspect);
+    await moduleRef.close();
+  });
+
+  // #181: AppModule binds the Stopwatch port to the monotonic clock of the
+  // global performance object.
+  it('should_bind_the_stopwatch_port_to_performance_stopwatch_when_app_module_compiles', async () => {
+    stubTestEnvironment();
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+
+    expect(moduleRef.get(STOPWATCH)).toBeInstanceOf(PerformanceStopwatch);
+    await moduleRef.close();
+  });
+
+  // #181: the composition root gives the Stopwatch port to each LoggingAspect.
+  // The fake stopwatch moves 25 ms per reading, so each line of the five
+  // ports that the other tests do not call ends with elapsedMs=25.
+  it('should_end_each_line_with_the_duration_of_the_stopwatch_port_when_the_account_progress_and_update_ports_are_called', async () => {
+    stubTestEnvironment();
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(USER_REPOSITORY)
+      .useValue(new InMemoryUserRepository())
+      .overrideProvider(PASSWORD_HASHER)
+      .useValue(new PrefixPasswordHasher())
+      .overrideProvider(PROGRESS_REPOSITORY)
+      .useValue(new InMemoryProgressRepository())
+      .overrideProvider(LEVEL_REPOSITORY)
+      .useValue(new InMemoryLevelRepository(levelValidators()))
+      .overrideProvider(STOPWATCH)
+      .useValue(new FakeStopwatch(25))
+      .compile();
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+
+    await moduleRef
+      .get<RegisterUser>(REGISTER_USER)
+      .execute(registerRequest('ada', 'correct horse'));
+    const token = valueOf(
+      await moduleRef.get<Login>(LOGIN).execute(loginRequest('ada', 'correct horse')),
+    );
+    const userId = valueOf(
+      await moduleRef.get<AuthenticateToken>(AUTHENTICATE_TOKEN).execute(token),
+    );
+    await moduleRef
+      .get<GetProgress>(GET_PROGRESS)
+      .execute({ userId, gameId: valueOf(GameId.of('hexa-lines')) });
+    await moduleRef.get<UpdateLevels>(UPDATE_LEVELS).execute({ levels: [] });
+
+    const lines = [...log.mock.calls, ...warn.mock.calls].map(([line]) => String(line));
+    expect(lines.map((line) => line.split(' ')[0]).sort()).toEqual([
+      'useCase=AuthenticateToken',
+      'useCase=GetProgress',
+      'useCase=Login',
+      'useCase=RegisterUser',
+      'useCase=UpdateLevels',
+    ]);
+    expect(lines.every((line) => line.endsWith(' elapsedMs=25'))).toBe(true);
     await moduleRef.close();
   });
 
@@ -94,6 +162,8 @@ describe('AppModule account wiring', () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(PROGRESS_REPOSITORY)
       .useValue(new InMemoryProgressRepository())
+      .overrideProvider(STOPWATCH)
+      .useValue(new FakeStopwatch(25))
       .compile();
     const sync = moduleRef.get<SyncProgress>(SYNC_PROGRESS);
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
@@ -105,7 +175,9 @@ describe('AppModule account wiring', () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=SyncProgress outcome=success');
+    expect(log).toHaveBeenCalledExactlyOnceWith(
+      'useCase=SyncProgress outcome=success elapsedMs=25',
+    );
     await moduleRef.close();
   });
 
@@ -179,6 +251,8 @@ describe('AppModule account wiring', () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(LEVEL_REPOSITORY)
       .useValue(levels)
+      .overrideProvider(STOPWATCH)
+      .useValue(new FakeStopwatch(25))
       .compile();
     const getLevels = moduleRef.get<GetLevels>(GET_LEVELS);
     const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
@@ -190,7 +264,7 @@ describe('AppModule account wiring', () => {
     expect(warn).toHaveBeenCalledExactlyOnceWith(
       'useCase=GetLevels outcome=unavailable-level gameId="hexa-fit" levelId="fit-01" reason=invalid-figure',
     );
-    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetLevels outcome=success');
+    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetLevels outcome=success elapsedMs=25');
     expect(warn.mock.invocationCallOrder[0]).toBeLessThan(log.mock.invocationCallOrder[0] ?? 0);
     expect(warn.mock.contexts[0]).toMatchObject({ context: 'LoggingAspect' });
     await moduleRef.close();
@@ -220,6 +294,8 @@ describe('AppModule account wiring', () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(DrizzleLeaderboardReader)
       .useValue({ levelResults: empty, highScores: empty, standings: empty })
+      .overrideProvider(STOPWATCH)
+      .useValue(new FakeStopwatch(25))
       .compile();
     const getGlobalLeaderboard = moduleRef.get<GetGlobalLeaderboard>(GET_GLOBAL_LEADERBOARD);
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
@@ -227,7 +303,9 @@ describe('AppModule account wiring', () => {
     const result = await getGlobalLeaderboard.execute(valueOf(GameId.of('hexa-fit')));
 
     expect(result.ok).toBe(true);
-    expect(log).toHaveBeenCalledExactlyOnceWith('useCase=GetGlobalLeaderboard outcome=success');
+    expect(log).toHaveBeenCalledExactlyOnceWith(
+      'useCase=GetGlobalLeaderboard outcome=success elapsedMs=25',
+    );
     await moduleRef.close();
   });
 
@@ -241,6 +319,8 @@ describe('AppModule account wiring', () => {
       .useValue({ levelResults: empty, highScores: empty, standings: empty })
       .overrideProvider(LEVEL_REPOSITORY)
       .useValue(new InMemoryLevelRepository(levelValidators()))
+      .overrideProvider(STOPWATCH)
+      .useValue(new FakeStopwatch(25))
       .compile();
     const getLevelLeaderboard = moduleRef.get<GetLevelLeaderboard>(GET_LEVEL_LEADERBOARD);
     const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
@@ -252,7 +332,7 @@ describe('AppModule account wiring', () => {
 
     expect(result).toEqual({ ok: false, error: { kind: 'unknown-level' } });
     expect(warn).toHaveBeenCalledExactlyOnceWith(
-      'useCase=GetLevelLeaderboard outcome=failure kind=unknown-level',
+      'useCase=GetLevelLeaderboard outcome=failure kind=unknown-level elapsedMs=25',
     );
     await moduleRef.close();
   });
@@ -274,6 +354,16 @@ describe('AppModule account wiring', () => {
 
     await expect(Test.createTestingModule({ imports: [AppModule] }).compile()).rejects.toThrow(
       'LEVEL_EDITOR_IDS holds "ada", which is not a user id.',
+    );
+  });
+
+  // #170: a wrong rate limit of sign-up and sign-in stops the start.
+  it('should_refuse_to_start_when_auth_rate_limit_is_not_a_whole_number_of_1_or_more_or_off', async () => {
+    stubTestEnvironment();
+    vi.stubEnv('AUTH_RATE_LIMIT', 'ten');
+
+    await expect(Test.createTestingModule({ imports: [AppModule] }).compile()).rejects.toThrow(
+      'AUTH_RATE_LIMIT holds "ten", which is not a whole number of 1 or more or "off".',
     );
   });
 });

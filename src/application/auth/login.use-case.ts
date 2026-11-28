@@ -11,9 +11,10 @@ import type { LoginRequest } from './credentials.js';
 import type { SessionToken } from './session-token.js';
 
 // One problem for an unknown username and for a wrong password, so the
-// answer does not tell which usernames exist. It carries a kind, so
-// LoggingAspect logs it and no typed text. AuthDtoMapper gives the same
-// problem for a username that breaks its rule (#105).
+// answer does not tell which usernames exist. It carries a kind. AppModule
+// wraps this use case in LoggingAspect, so the aspect logs that kind and no
+// typed text (#170). AuthDtoMapper gives the same problem for a username that
+// breaks its rule (#105).
 export type LoginProblem = { readonly kind: 'invalid-credentials' };
 
 // Input port of sign-in (API-FR-01). It binds UseCase, so one aspect can

@@ -5,7 +5,7 @@ import type { UserId } from './user-id.js';
 import type { Username } from './username.js';
 
 // The receiver of the parts of a User. User.deliverTo() calls it once. Only
-// the border implements it, for example the row mapper or the token issuer.
+// the border implements it, for example the repository or the token issuer.
 export interface UserReceiver {
   receive(id: UserId, username: Username, passwordHash: PasswordHash): void;
 }

@@ -2,7 +2,9 @@
 // an in-memory PGlite database, plus the state-change endpoint at
 // /v1/_pact/provider-states. Only this command mounts that endpoint. The
 // production start (dist/main.js) never does, and the build leaves test/
-// out of dist/.
+// out of dist/. The composition turns the rate limit of sign-up and sign-in
+// off, whatever AUTH_RATE_LIMIT holds, because the contract job signs in for
+// each provider state (#170).
 // Run it with the example configuration:
 //   node --env-file=.env.example scripts/contract/start-provider.js
 // PORT names the port; the default is 3000. The state-change endpoint writes
