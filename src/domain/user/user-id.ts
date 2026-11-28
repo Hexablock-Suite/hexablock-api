@@ -9,7 +9,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 export type UserIdProblem = 'invalid-user-id';
 
 // Identity of a User. The application gets a new one from its generator port.
-// The value is a UUID, as the uuid columns users.id and progress.user_id ask.
+// The value is a UUID (#64).
 export class UserId {
   private constructor(private readonly value: string) {}
 
@@ -18,8 +18,8 @@ export class UserId {
     if (typeof value !== 'string' || !UUID_PATTERN.test(value)) {
       return err('invalid-user-id');
     }
-    // Postgres returns a uuid in lower case. The same form keeps equals()
-    // true for an id that the database reads back.
+    // The hexadecimal digits of a UUID name the same id in either letter
+    // case. The lower case form keeps equals() true for two texts of one id.
     return ok(new UserId(value.toLowerCase()));
   }
 

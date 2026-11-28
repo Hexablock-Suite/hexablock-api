@@ -2,8 +2,8 @@ import { GameId } from './game-id.js';
 import { UserId } from '../user/user-id.js';
 
 // The receiver of the two parts of a ProgressKey. ProgressKey.deliverTo()
-// calls it once. Only the border implements it, for example the helper that
-// gives the lock key and the SQL filters.
+// calls it once. Only the border implements it, for example the repository
+// that finds and changes one progress by its key.
 export interface ProgressKeyReceiver {
   receive(userId: UserId, gameId: GameId): void;
 }

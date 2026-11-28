@@ -9,8 +9,10 @@ export type LevelIdProblem = 'invalid-level-id';
 export class LevelId {
   private constructor(private readonly value: string) {}
 
-  // Builds a levelId that the API already holds: a stored row. A stored row
-  // keeps what it holds, so this factory has no length or character bound.
+  // Builds a levelId that the API already holds: a stored levelId. A stored
+  // value keeps what it holds, so this factory has no length or character
+  // bound. The bounds of a levelId that a client sends live at the border
+  // (#135, #179).
   static of(value: string): Result<LevelId, LevelIdProblem> {
     return typeof value === 'string' && value.trim() !== ''
       ? ok(new LevelId(value))

@@ -22,8 +22,8 @@ export class PasswordHash {
     return value.length > 0 ? ok(new PasswordHash(value)) : err('invalid-password-hash');
   }
 
-  // Delivers the text to a receiver of the border: the users row or the
-  // adapter of the PasswordHasher port. No operation returns it.
+  // Delivers the text to a receiver of the border: the repository of the
+  // users or the adapter of the PasswordHasher port. No operation returns it.
   deliverTo(receiver: ValueReceiver<string>): void {
     receiver.receive(this.#value);
   }
