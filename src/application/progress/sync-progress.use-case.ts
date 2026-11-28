@@ -7,7 +7,7 @@ import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
 import type { UseCase } from '../use-case.js';
 import type { Clock } from '../ports/clock.js';
-import type { LevelRepository } from '../ports/level-repository.js';
+import type { LevelFinder } from '../ports/level-repository.js';
 import type { ProgressRepository } from '../ports/progress-repository.js';
 import type { ProgressProblem } from './progress-problem.js';
 
@@ -41,7 +41,8 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // the userId, the sync fails with unknown-user and saves nothing (#137).
 // Before the lock, the use case checks each result against its level
 // (DS-6, #135): it reads the levels of all results in one call of
-// LevelRepository.findFor() (#217). Then it pairs each result with its
+// LevelRepository.findFor() (#217). It holds only the LevelFinder role of
+// that port (decision 23, #193). Then it pairs each result with its
 // level through LevelDefinition.isLevelOf(), in the order of the request,
 // so the API must hold a valid level of the result, and the result carries
 // no more stars than the level has star thresholds. A broken rule returns its
@@ -50,7 +51,7 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 export class SyncProgressUseCase implements SyncProgress {
   constructor(
     private readonly progress: ProgressRepository,
-    private readonly levels: LevelRepository,
+    private readonly levels: LevelFinder,
     private readonly clock: Clock,
   ) {}
 

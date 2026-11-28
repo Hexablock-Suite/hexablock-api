@@ -366,6 +366,98 @@
           }
         }
       }
+    },
+    {
+      "description": "the high scores of the global board of a game",
+      "providerStates": [
+        {
+          "name": "several accounts have high scores in a game",
+          "params": {
+            "gameId": "hexa-lines"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/leaderboard/hexa-lines",
+        "headers": {
+          "Authorization": "Bearer a-token"
+        },
+        "generators": {
+          "header": {
+            "Authorization": {
+              "type": "ProviderState",
+              "expression": "Bearer ${accessToken}",
+              "dataType": "STRING"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "gameId": "hexa-lines",
+          "highScores": [
+            {
+              "rank": 1,
+              "username": "ada",
+              "highScore": 300
+            }
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.highScores": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "the stored levels with a broken level",
+      "providerStates": [
+        {
+          "name": "a broken level is stored",
+          "params": {
+            "gameId": "hexa-fit",
+            "levelId": "fit-01"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/levels"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "unavailable": [
+            {
+              "gameId": "hexa-fit",
+              "levelId": "fit-01",
+              "reason": "invalid-figure"
+            }
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.unavailable": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        }
+      }
     }
   ],
   "metadata": {

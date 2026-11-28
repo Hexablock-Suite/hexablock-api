@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 2 of 5</p>
       <h1>Level and user store: Drizzle adapters and their row mappers</h1>
       <svg
-        viewBox="0 0 1040 1102"
+        viewBox="0 0 1040 1118"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad2levelstore-title ad2levelstore-desc"
@@ -76,12 +76,14 @@
           LevelValidators and uses LevelRowMapper, and DrizzleUserRepository with UserRowMapper,
           implementing the LevelRepository and UserRepository ports. LevelRepository and
           DrizzleLevelRepository both show the four operations list(), holds(gameId, levelId),
-          findFor(gameId, results) and update(gameId, levelId, change). LevelRowMapper restores each
-          stored row through the strategy that LevelValidators finds for its gameId, so each
-          LevelDefinition is valid; a row that no strategy accepts is a broken row with its reason
-          and its stored version: list() gives it apart, findFor() gives no level for it, and
-          update() passes it to the change as the broken state (#147), whose change asks
-          decideReplace() of the incoming level (#174).
+          findFor(gameId, results) and update(gameId, levelId, change). LevelRepository declares
+          none of them itself: it extends four role interfaces, LevelLister, LevelHolder,
+          LevelFinder and LevelUpdater, one per use case, which view 2.3 draws (#193).
+          LevelRowMapper restores each stored row through the strategy that LevelValidators finds
+          for its gameId, so each LevelDefinition is valid; a row that no strategy accepts is a
+          broken row with its reason and its stored version: list() gives it apart, findFor() gives
+          no level for it, and update() passes it to the change as the broken state (#147), whose
+          change asks decideReplace() of the incoming level (#174).
         </desc>
         <defs>
           <marker
@@ -671,7 +673,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          PART 2 · VIEW 3
+          PART 2 · VIEW 3 · the operations of its four roles · #193
         </text>
         <line x1="352" y1="632" x2="744" y2="632" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="368" y="648" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -870,180 +872,192 @@
           update() locks each level in one transaction, as the progress store does, and its change
           asks decideReplace() of the incoming level (#174).
         </text>
-        <!-- Legend -->
-        <line
-          x1="24"
-          y1="1020"
-          x2="1016"
-          y2="1020"
-          stroke="rgba(23,33,42,0.10)"
-          stroke-width="0.8"
-        />
         <text
           x="24"
-          y="1038"
+          y="1012"
           fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          letter-spacing="0.18em"
-        >
-          LEGEND
-        </text>
-        <line
-          x1="24"
-          y1="1056"
-          x2="52"
-          y2="1056"
-          stroke="#17212a"
-          stroke-width="1"
-          stroke-dasharray="5,4"
-          marker-end="url(#ad2levelstore-triangle)"
-        />
-        <text
-          x="60"
-          y="1060"
-          fill="#5b6873"
-          font-size="8.5"
+          font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Realization
+          LevelRepository takes its four operations from its roles LevelLister, LevelHolder,
+          LevelFinder and LevelUpdater, one per use case (Part 2, view 3; decision 23, #193).
         </text>
-        <line
-          x1="128"
-          y1="1056"
-          x2="156"
-          y2="1056"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#ad2levelstore-open)"
-        />
-        <text
-          x="164"
-          y="1060"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Use · attribute across layers, parameter, return, local or new
-        </text>
-        <rect
-          x="480"
-          y="1050"
-          width="28"
-          height="12"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="0.8"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="516"
-          y="1060"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Corner box · type parameters
-        </text>
-        <rect
-          x="24"
-          y="1076"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#e2ebf8"
-          stroke="rgba(29,78,216,0.40)"
-          stroke-width="1"
-        />
-        <rect
-          x="48"
-          y="1076"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#efe7f8"
-          stroke="rgba(126,34,206,0.40)"
-          stroke-width="1"
-        />
-        <rect
-          x="72"
-          y="1076"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#f9f4dc"
-          stroke="rgba(180,83,9,0.45)"
-          stroke-width="1"
-        />
-        <text
-          x="104"
-          y="1085"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Zones · Clean layers, outer on top
-        </text>
-        <rect
-          x="288"
-          y="1076"
-          width="28"
-          height="12"
-          rx="2"
-          fill="none"
-          stroke="rgba(91,104,115,0.55)"
-          stroke-width="1"
-          stroke-dasharray="4,4"
-        />
-        <text
-          x="324"
-          y="1085"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Dashed frame · pattern or group
-        </text>
-        <rect
-          x="494"
-          y="1076"
-          width="28"
-          height="12"
-          rx="2"
-          fill="rgba(15,111,116,0.10)"
-          stroke="#0f6f74"
-          stroke-width="1"
-        />
-        <text
-          x="530"
-          y="1085"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Teal · focal class
-        </text>
-        <rect
-          x="640"
-          y="1076"
-          width="28"
-          height="12"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="1"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="676"
-          y="1085"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Dashed class · detailed in another view
-        </text>
+        <!-- Legend: moved down 16 for the footnote line of #193 -->
+        <g transform="translate(0,16)">
+          <line
+            x1="24"
+            y1="1020"
+            x2="1016"
+            y2="1020"
+            stroke="rgba(23,33,42,0.10)"
+            stroke-width="0.8"
+          />
+          <text
+            x="24"
+            y="1038"
+            fill="#5b6873"
+            font-size="8"
+            font-family="'IBM Plex Mono', monospace"
+            letter-spacing="0.18em"
+          >
+            LEGEND
+          </text>
+          <line
+            x1="24"
+            y1="1056"
+            x2="52"
+            y2="1056"
+            stroke="#17212a"
+            stroke-width="1"
+            stroke-dasharray="5,4"
+            marker-end="url(#ad2levelstore-triangle)"
+          />
+          <text
+            x="60"
+            y="1060"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Realization
+          </text>
+          <line
+            x1="128"
+            y1="1056"
+            x2="156"
+            y2="1056"
+            stroke="#5b6873"
+            stroke-width="1"
+            marker-end="url(#ad2levelstore-open)"
+          />
+          <text
+            x="164"
+            y="1060"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Use · attribute across layers, parameter, return, local or new
+          </text>
+          <rect
+            x="480"
+            y="1050"
+            width="28"
+            height="12"
+            rx="2"
+            fill="#ffffff"
+            stroke="#5b6873"
+            stroke-width="0.8"
+            stroke-dasharray="4,3"
+          />
+          <text
+            x="516"
+            y="1060"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Corner box · type parameters
+          </text>
+          <rect
+            x="24"
+            y="1076"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#e2ebf8"
+            stroke="rgba(29,78,216,0.40)"
+            stroke-width="1"
+          />
+          <rect
+            x="48"
+            y="1076"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#efe7f8"
+            stroke="rgba(126,34,206,0.40)"
+            stroke-width="1"
+          />
+          <rect
+            x="72"
+            y="1076"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#f9f4dc"
+            stroke="rgba(180,83,9,0.45)"
+            stroke-width="1"
+          />
+          <text
+            x="104"
+            y="1085"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Zones · Clean layers, outer on top
+          </text>
+          <rect
+            x="288"
+            y="1076"
+            width="28"
+            height="12"
+            rx="2"
+            fill="none"
+            stroke="rgba(91,104,115,0.55)"
+            stroke-width="1"
+            stroke-dasharray="4,4"
+          />
+          <text
+            x="324"
+            y="1085"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Dashed frame · pattern or group
+          </text>
+          <rect
+            x="494"
+            y="1076"
+            width="28"
+            height="12"
+            rx="2"
+            fill="rgba(15,111,116,0.10)"
+            stroke="#0f6f74"
+            stroke-width="1"
+          />
+          <text
+            x="530"
+            y="1085"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Teal · focal class
+          </text>
+          <rect
+            x="640"
+            y="1076"
+            width="28"
+            height="12"
+            rx="2"
+            fill="#ffffff"
+            stroke="#5b6873"
+            stroke-width="1"
+            stroke-dasharray="4,3"
+          />
+          <text
+            x="676"
+            y="1085"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Dashed class · detailed in another view
+          </text>
+        </g>
       </svg>
     </div>
   </body>
