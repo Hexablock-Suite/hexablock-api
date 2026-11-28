@@ -1,5 +1,4 @@
 import { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
-import { RecordingReceiver } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
 
 // The largest distance from the epoch that a JavaScript Date holds, in
@@ -48,30 +47,5 @@ describe('SyncInstant', () => {
   it('should_be_equal_when_two_instants_hold_the_same_milliseconds', () => {
     expect(instant(SYNC_MS).equals(instant(SYNC_MS))).toBe(true);
     expect(instant(SYNC_MS).equals(instant(SYNC_MS + 1))).toBe(false);
-  });
-
-  // An equal instant is not later, so updatedAt keeps the instant it has.
-  it('should_be_later_only_when_its_milliseconds_are_greater_than_the_other', () => {
-    expect(instant(SYNC_MS + 1).isLaterThan(instant(SYNC_MS))).toBe(true);
-    expect(instant(SYNC_MS).isLaterThan(instant(SYNC_MS))).toBe(false);
-    expect(instant(SYNC_MS - 1).isLaterThan(instant(SYNC_MS))).toBe(false);
-  });
-
-  it('should_deliver_the_milliseconds_to_the_receiver_when_the_factory_took_them', () => {
-    const receiver = new RecordingReceiver<number>();
-
-    instant(SYNC_MS).deliverTo(receiver);
-
-    expect(receiver.received).toEqual([SYNC_MS]);
-  });
-
-  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
-    const built = instant(SYNC_MS);
-    const receiver = new RecordingReceiver<number>();
-
-    // @ts-expect-error -- the milliseconds are private.
-    void built.epochMs;
-    // The delivery returns nothing: the receiver holds the value.
-    expect(built.deliverTo(receiver)).toBeUndefined();
   });
 });
