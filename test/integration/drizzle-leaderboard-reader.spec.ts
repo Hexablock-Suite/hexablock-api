@@ -6,14 +6,14 @@ import {
   progress as progressRows,
   users,
 } from '../../src/adapters/persistence/schema.js';
-import { ElapsedTime } from '../../src/domain/progress/elapsed-time.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelId } from '../../src/domain/progress/level-id.js';
+import { ElapsedTime } from '../../src/domain/shared/elapsed-time.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
+import { LevelId } from '../../src/domain/shared/level-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { LevelsCompleted } from '../../src/domain/progress/levels-completed.js';
-import { Moves } from '../../src/domain/progress/moves.js';
+import { Moves } from '../../src/domain/shared/moves.js';
 import { Standing } from '../../src/domain/progress/standing.js';
-import { Stars } from '../../src/domain/progress/stars.js';
+import { Stars } from '../../src/domain/shared/stars.js';
 import type { Result } from '../../src/domain/shared/result.js';
 import { describeGlobalBoardReaderContract } from '../support/global-board-reader.contract.js';
 import { describeLevelBoardReaderContract } from '../support/level-board-reader.contract.js';

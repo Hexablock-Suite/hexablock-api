@@ -1,8 +1,8 @@
-import { ElapsedTime } from '../../../src/domain/progress/elapsed-time.js';
+import { ElapsedTime } from '../../../src/domain/shared/elapsed-time.js';
 import { LevelsCompleted } from '../../../src/domain/progress/levels-completed.js';
-import { Moves } from '../../../src/domain/progress/moves.js';
+import { Moves } from '../../../src/domain/shared/moves.js';
 import { Standing } from '../../../src/domain/progress/standing.js';
-import { Stars } from '../../../src/domain/progress/stars.js';
+import { Stars } from '../../../src/domain/shared/stars.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import { valueOf } from '../../support/result.js';
 

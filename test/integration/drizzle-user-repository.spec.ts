@@ -6,8 +6,8 @@ import { UserRowMapper } from '../../src/adapters/persistence/user-row.mapper.js
 import { RegisterUseCase } from '../../src/application/auth/register.use-case.js';
 import { PasswordHash } from '../../src/domain/user/password-hash.js';
 import { User } from '../../src/domain/user/user.js';
-import { UserId } from '../../src/domain/user/user-id.js';
-import { Username } from '../../src/domain/user/username.js';
+import { UserId } from '../../src/domain/shared/user-id.js';
+import { Username } from '../../src/domain/shared/username.js';
 import { PrefixPasswordHasher } from '../support/auth/fakes.js';
 import { registerRequest } from '../support/auth/requests.js';
 import { createTestDatabase, type TestDatabase } from '../support/test-database.js';

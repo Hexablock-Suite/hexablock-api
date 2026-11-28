@@ -1,7 +1,9 @@
-import type { ElapsedTime } from './elapsed-time.js';
-import type { LevelId } from './level-id.js';
-import type { Moves } from './moves.js';
-import type { Stars } from './stars.js';
+import type { ElapsedTime } from '../shared/elapsed-time.js';
+import type { GameId } from '../shared/game-id.js';
+import type { LevelId } from '../shared/level-id.js';
+import type { Moves } from '../shared/moves.js';
+import type { Stars } from '../shared/stars.js';
+import type { PlayedLevel } from './played-level.js';
 
 // The receiver of the four values of a LevelResult. LevelResult.deliverTo()
 // calls it once. Only the border implements it, for example a repository.
@@ -44,14 +46,17 @@ export class LevelResult {
     return this.levelId.equals(other.levelId);
   }
 
-  // Tells if this result is a play of the level with this levelId (#135).
-  isFor(levelId: LevelId): boolean {
-    return this.levelId.equals(levelId);
+  // Tells if this result is a play of the level: the level has the gameId
+  // of the sync and the levelId of this result (#135). The result asks the
+  // level, so the level reads no LevelResult (#290).
+  isPlayOf(gameId: GameId, level: PlayedLevel): boolean {
+    return level.isIdentifiedBy(gameId, this.levelId);
   }
 
-  // Tells if this result carries more stars than a level allows (DS-6, #135).
-  hasMoreStarsThan(most: Stars): boolean {
-    return this.stars.isMoreThan(most);
+  // Tells if this result carries no more stars than its level allows (DS-6,
+  // #135). The caller pairs the result with its level through isPlayOf().
+  isWithinStarsOf(level: PlayedLevel): boolean {
+    return !this.stars.isMoreThan(level.mostStars());
   }
 
   // The order of DS-4: more stars wins, then fewer moves, then less time. A

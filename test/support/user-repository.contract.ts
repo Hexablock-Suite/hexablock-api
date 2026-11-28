@@ -3,8 +3,8 @@ import type { UserRepository } from '../../src/application/ports/user-repository
 import { err, ok } from '../../src/domain/shared/result.js';
 import { PasswordHash } from '../../src/domain/user/password-hash.js';
 import { User } from '../../src/domain/user/user.js';
-import { UserId } from '../../src/domain/user/user-id.js';
-import { Username } from '../../src/domain/user/username.js';
+import { UserId } from '../../src/domain/shared/user-id.js';
+import { Username } from '../../src/domain/shared/username.js';
 import { valueOf } from './result.js';
 
 // UUIDs, because the users.id column of the Drizzle adapter is a uuid (#64).

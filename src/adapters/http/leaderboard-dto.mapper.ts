@@ -4,7 +4,7 @@ import type {
   LevelLeaderboard,
   UnknownLevel,
 } from '../../application/leaderboard/get-level-leaderboard.use-case.js';
-import type { GameId } from '../../domain/progress/game-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { RankedBoard } from '../../domain/progress/ranked-board.js';
 import type { Score } from '../../domain/progress/score.js';

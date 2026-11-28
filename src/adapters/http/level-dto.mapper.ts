@@ -9,7 +9,7 @@ import { LevelOrder } from '../../domain/level/level-order.js';
 import { LevelVersion } from '../../domain/level/level-version.js';
 import { TopologyId } from '../../domain/level/topology-id.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import { receiveJsonOf, receiveValueOf } from '../received.js';
 import type { LevelDto, LevelsDto } from './level.dto.js';
 import { gameIdFrom, levelIdFrom } from './progress-values.js';

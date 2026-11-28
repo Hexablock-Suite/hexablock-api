@@ -31,6 +31,14 @@ module.exports = {
       to: { path: '^src/domain/$1/[^/]+/' },
     },
     {
+      name: 'domain-aggregates-import-only-shared',
+      comment:
+        'A folder of src/domain, such as the aggregate folders level/, progress/ and user/, imports only itself and src/domain/shared/, and shared/ imports only itself. The class of 2026-11-13 designs each aggregate as if it ran on its own server, so one aggregate never sees the classes of another. A value that two aggregates use lives in shared/, and a contract that one aggregate needs from another is an interface of the folder that needs it, as PlayedLevel of progress/ is (#290).',
+      severity: 'error',
+      from: { path: '^src/domain/([^/]+)/' },
+      to: { path: '^src/domain/', pathNot: ['^src/domain/$1/', '^src/domain/shared/'] },
+    },
+    {
       name: 'application-imports-only-domain',
       comment:
         'The application imports only src/domain and itself: no adapter, no infrastructure and no package such as @nestjs/*. Aspects are custom decorators, not Nest interceptors.',

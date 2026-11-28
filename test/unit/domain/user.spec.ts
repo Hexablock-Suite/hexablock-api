@@ -2,8 +2,8 @@ import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import type { PasswordVerifier } from '../../../src/domain/user/password-verifier.js';
 import { User } from '../../../src/domain/user/user.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { Username } from '../../../src/domain/user/username.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
+import { Username } from '../../../src/domain/shared/username.js';
 import {
   deliveredBy,
   keyDeliveredBy,

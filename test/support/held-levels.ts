@@ -3,8 +3,8 @@ import { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../src/domain/level/level-order.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';
 import { TopologyId } from '../../src/domain/level/topology-id.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelId } from '../../src/domain/progress/level-id.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
+import { LevelId } from '../../src/domain/shared/level-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { ok } from '../../src/domain/shared/result.js';
 import { testSection } from './level-format.js';
@@ -20,7 +20,7 @@ export type HeldGame = readonly [gameId: string, levelIds: readonly string[]];
 // double holds a level of each named gameId and levelId, with `stars` star
 // thresholds, also for a game with no strategy, such as the slug fit of the
 // concurrency suite. It holds no broken row, so findFor() gives each held
-// level that one result names, through isLevelOf(). It has no other
+// level that one result names, through LevelResult.isPlayOf(). It has no other
 // operation of the port, because a sync calls none.
 export function heldLevels(games: readonly HeldGame[], stars = 3): LevelFinder {
   const levels = games.flatMap(([gameId, levelIds]) =>
@@ -40,7 +40,7 @@ export function heldLevels(games: readonly HeldGame[], stars = 3): LevelFinder {
   return {
     findFor: (gameId: GameId, results: readonly LevelResult[]) =>
       Promise.resolve(
-        levels.filter((held) => results.some((result) => held.isLevelOf(gameId, result))),
+        levels.filter((held) => results.some((result) => result.isPlayOf(gameId, held))),
       ),
   };
 }

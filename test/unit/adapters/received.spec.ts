@@ -9,7 +9,7 @@ import {
   receiveUserOf,
   receiveValueOf,
 } from '../../../src/adapters/received.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
 import type { LevelResultReceiver } from '../../../src/domain/progress/level-result.js';
 import {
   PlayerProgress,
@@ -22,12 +22,12 @@ import {
 import { Score } from '../../../src/domain/progress/score.js';
 import { Range } from '../../../src/domain/shared/range.js';
 import type { ValueReceiver } from '../../../src/domain/shared/value-receiver.js';
-import { CharacterCount } from '../../../src/domain/user/character-count.js';
+import { CharacterCount } from '../../../src/domain/shared/character-count.js';
 import { PASSWORD_LENGTH } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { User, type UserReceiver } from '../../../src/domain/user/user.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { USERNAME_LENGTH, Username } from '../../../src/domain/user/username.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
+import { USERNAME_LENGTH, Username } from '../../../src/domain/shared/username.js';
 import { checkedLevel, levelExample } from '../../support/level-format.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { valueOf } from '../../support/result.js';

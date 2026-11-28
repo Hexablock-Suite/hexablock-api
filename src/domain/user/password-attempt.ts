@@ -1,5 +1,5 @@
 import type { ValueReceiver } from '../shared/value-receiver.js';
-import { CharacterCount } from './character-count.js';
+import { CharacterCount } from '../shared/character-count.js';
 import { PASSWORD_LENGTH } from './password.js';
 
 // The text that a player types as the password at sign-in. It is not a

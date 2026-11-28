@@ -1,4 +1,4 @@
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 
 // Port. The source of new user ids. The use cases take randomness only from
 // an injected source (rule R-deterministic-core).

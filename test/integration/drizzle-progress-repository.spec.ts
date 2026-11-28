@@ -4,12 +4,12 @@ import { ProgressRowMapper } from '../../src/adapters/persistence/progress-row.m
 import { users } from '../../src/adapters/persistence/schema.js';
 import { err } from '../../src/domain/shared/result.js';
 import { SyncProgressUseCase } from '../../src/application/progress/sync-progress.use-case.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../src/domain/progress/player-progress.js';
 import { ProgressKey } from '../../src/domain/progress/progress-key.js';
 import { Score } from '../../src/domain/progress/score.js';
-import { UserId } from '../../src/domain/user/user-id.js';
+import { UserId } from '../../src/domain/shared/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
 import { heldLevels } from '../support/held-levels.js';
 import { levelResultOf } from '../support/level-results.js';

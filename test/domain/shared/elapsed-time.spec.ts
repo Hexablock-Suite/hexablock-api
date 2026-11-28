@@ -1,4 +1,4 @@
-import { ElapsedTime } from '../../../src/domain/progress/elapsed-time.js';
+import { ElapsedTime } from '../../../src/domain/shared/elapsed-time.js';
 import { valueOf } from '../../support/result.js';
 
 const elapsedTime = (value: number): ElapsedTime => valueOf(ElapsedTime.ofMs(value));

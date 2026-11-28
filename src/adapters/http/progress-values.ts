@@ -1,10 +1,10 @@
-import { ElapsedTime } from '../../domain/progress/elapsed-time.js';
-import { GameId, type GameIdProblem } from '../../domain/progress/game-id.js';
-import { LevelId } from '../../domain/progress/level-id.js';
+import { ElapsedTime } from '../../domain/shared/elapsed-time.js';
+import { GameId, type GameIdProblem } from '../../domain/shared/game-id.js';
+import { LevelId } from '../../domain/shared/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
-import { Moves } from '../../domain/progress/moves.js';
+import { Moves } from '../../domain/shared/moves.js';
 import { Score, type ScoreProblem } from '../../domain/progress/score.js';
-import { Stars } from '../../domain/progress/stars.js';
+import { Stars } from '../../domain/shared/stars.js';
 import { err, type Result } from '../../domain/shared/result.js';
 import { buildLevelResult, type LevelResultProblem } from '../built.js';
 import { type Bounds, type LevelResultValues } from '../received.js';

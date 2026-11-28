@@ -1,6 +1,6 @@
-import { GameId } from '../../../src/domain/progress/game-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
 import { ProgressKey } from '../../../src/domain/progress/progress-key.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 

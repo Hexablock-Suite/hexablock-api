@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { USERNAME_PATTERN } from '../../src/adapters/http/credentials.dto.js';
 import { receiveBoundValuesOf } from '../../src/adapters/received.js';
-import { USERNAME_LENGTH } from '../../src/domain/user/username.js';
+import { USERNAME_LENGTH } from '../../src/domain/shared/username.js';
 
 const DOCUMENT = resolve(import.meta.dirname, '../../openapi/openapi.json');
 

@@ -1,7 +1,7 @@
 import { Range } from '../shared/range.js';
 import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
-import { CharacterCount } from './character-count.js';
+import { CharacterCount } from '../shared/character-count.js';
 
 // The length of a password in characters: 8 to 128 code points. The upper
 // limit keeps the hash work of one request bounded. Both limits are a

@@ -1,6 +1,6 @@
 import { LeaderboardDtoMapper } from '../../../src/adapters/http/leaderboard-dto.mapper.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelId } from '../../../src/domain/progress/level-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
+import { LevelId } from '../../../src/domain/shared/level-id.js';
 import { valueOf } from '../../support/result.js';
 
 // The mapper writes the text of the one failed Result of the board of a

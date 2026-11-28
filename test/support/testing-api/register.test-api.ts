@@ -10,7 +10,7 @@ import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import { Password } from '../../../src/domain/user/password.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
-import type { UserId } from '../../../src/domain/user/user-id.js';
+import type { UserId } from '../../../src/domain/shared/user-id.js';
 import {
   InMemoryUserRepository,
   PrefixPasswordHasher,

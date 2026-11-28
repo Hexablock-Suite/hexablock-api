@@ -1,5 +1,5 @@
 import type { LevelResult } from '../../domain/progress/level-result.js';
-import type { Stars } from '../../domain/progress/stars.js';
+import type { Stars } from '../../domain/shared/stars.js';
 
 // The expected failures of the progress use cases. A controller turns each
 // one into the ErrorDto body (decision 11). A value that breaks its rule

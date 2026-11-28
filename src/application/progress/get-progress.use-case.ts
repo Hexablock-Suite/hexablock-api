@@ -1,8 +1,8 @@
-import type { GameId } from '../../domain/progress/game-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { ProgressKey } from '../../domain/progress/progress-key.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import type { UseCase } from '../use-case.js';
 import type { ProgressRepository } from '../ports/progress-repository.js';
 import type { ProgressProblem } from './progress-problem.js';

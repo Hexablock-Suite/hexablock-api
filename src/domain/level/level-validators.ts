@@ -1,5 +1,5 @@
-import type { GameId } from '../progress/game-id.js';
-import type { LevelId } from '../progress/level-id.js';
+import type { GameId } from '../shared/game-id.js';
+import type { LevelId } from '../shared/level-id.js';
 import { err, type Result } from '../shared/result.js';
 import { LevelDefinition } from './level-definition.js';
 import type { LevelOrder } from './level-order.js';

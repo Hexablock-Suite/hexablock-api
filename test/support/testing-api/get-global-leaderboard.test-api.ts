@@ -7,7 +7,7 @@ import {
 } from '../../../src/application/leaderboard/get-global-leaderboard.use-case.js';
 import type { GlobalBoardReader } from '../../../src/application/ports/global-board-reader.js';
 import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
-import type { GameId } from '../../../src/domain/progress/game-id.js';
+import type { GameId } from '../../../src/domain/shared/game-id.js';
 import type { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
 import type { Standing } from '../../../src/domain/progress/standing.js';
 import type { Result } from '../../../src/domain/shared/result.js';

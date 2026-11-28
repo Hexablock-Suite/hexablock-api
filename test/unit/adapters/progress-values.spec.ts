@@ -9,11 +9,11 @@ import {
   MOST_STARS,
   starsFrom,
 } from '../../../src/adapters/http/progress-values.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
-import { ElapsedTime } from '../../../src/domain/progress/elapsed-time.js';
-import { LevelId } from '../../../src/domain/progress/level-id.js';
-import { Moves } from '../../../src/domain/progress/moves.js';
-import { Stars } from '../../../src/domain/progress/stars.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
+import { ElapsedTime } from '../../../src/domain/shared/elapsed-time.js';
+import { LevelId } from '../../../src/domain/shared/level-id.js';
+import { Moves } from '../../../src/domain/shared/moves.js';
+import { Stars } from '../../../src/domain/shared/stars.js';
 import { valueOf } from '../../support/result.js';
 
 // #179: the bounds of a value that a client sends live at the HTTP border,

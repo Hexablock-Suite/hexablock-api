@@ -1,4 +1,4 @@
-import { Stars } from '../progress/stars.js';
+import { Stars } from '../shared/stars.js';
 
 // The part that every section of a level holds, whatever its game: the star
 // thresholds (DS-6). The stars are cumulative, so a play gets one star for

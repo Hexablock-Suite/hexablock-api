@@ -1,8 +1,8 @@
 import { err, ok, type Result } from '../shared/result.js';
-import type { ElapsedTime } from './elapsed-time.js';
+import type { ElapsedTime } from '../shared/elapsed-time.js';
 import type { LevelsCompleted } from './levels-completed.js';
-import type { Moves } from './moves.js';
-import type { Stars } from './stars.js';
+import type { Moves } from '../shared/moves.js';
+import type { Stars } from '../shared/stars.js';
 
 // The code of the broken rule. The border writes the message.
 export type StandingProblem = 'no-level-completed';

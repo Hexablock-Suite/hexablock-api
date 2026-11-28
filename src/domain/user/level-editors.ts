@@ -1,4 +1,4 @@
-import type { UserId } from './user-id.js';
+import type { UserId } from '../shared/user-id.js';
 
 // The accounts that may update the level definitions, by their user ids
 // (#145). A user id names one account, and a name could be signed up first

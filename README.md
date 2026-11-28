@@ -114,8 +114,8 @@ definitions that the engine plays, with generic types (decision D6):
 - **`Result<T, E>`** carries an expected failure as a value, never as an exception.
 - **[`Range<T>`](src/domain/shared/range.ts)** is a closed interval over a value that orders itself
   (`T extends Ordered<T>`), with `contains(value: T): boolean`. The username (3 to 32) and password
-  (8 to 128) length limits are the `Range<CharacterCount>` values `USERNAME_LENGTH` and
-  `PASSWORD_LENGTH` in `src/domain/user`. `CharacterCount` counts code points, so an emoji is one
+  (8 to 128) length limits are the `Range<CharacterCount>` values `USERNAME_LENGTH` in
+  `src/domain/shared` and `PASSWORD_LENGTH` in `src/domain/user`. `CharacterCount` counts code points, so an emoji is one
   character. The value objects ask the ranges, and the ranges deliver their bounds to the HTTP error messages and `CredentialsDto`. The professor modeled the limits
   of the statement as a generic range with a contains method in the session of 2026-11-06.
 
@@ -366,11 +366,11 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,330 tests in `pnpm test`: 1,211 behavior tests and
-119 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+On 2026-11-28 the Vitest JSON reporter counts 1,326 tests in `pnpm test`: 1,205 behavior tests and
+121 gate tests (#290). The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
-`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 760 tests of
+`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 754 tests of
 `test/unit/` and `test/domain/`, which start no database and no HTTP application. One gate is among
 them: `test/domain/level/level-problem.spec.ts`. The command skips the integration tests of
 `test/integration/`, the e2e tests and the other gates. `pnpm test`, `pnpm verify` and the CI

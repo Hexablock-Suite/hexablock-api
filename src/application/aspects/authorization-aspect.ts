@@ -1,6 +1,6 @@
 import { err, type Result } from '../../domain/shared/result.js';
 import type { LevelEditors } from '../../domain/user/level-editors.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import type { NotALevelEditor } from '../levels/not-a-level-editor.js';
 import type { UseCase } from '../use-case.js';
 import { UseCaseAspect } from './use-case-aspect.js';

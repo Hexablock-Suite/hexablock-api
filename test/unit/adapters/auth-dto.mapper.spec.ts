@@ -1,8 +1,8 @@
 import { AuthDtoMapper } from '../../../src/adapters/http/auth-dto.mapper.js';
 import { receiveValueOf } from '../../../src/adapters/received.js';
 import { Password } from '../../../src/domain/user/password.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { Username } from '../../../src/domain/user/username.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
+import { Username } from '../../../src/domain/shared/username.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 

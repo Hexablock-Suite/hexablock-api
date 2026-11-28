@@ -1,6 +1,6 @@
 import type { LevelBoardReader } from '../../src/application/ports/level-board-reader.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelId } from '../../src/domain/progress/level-id.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
+import { LevelId } from '../../src/domain/shared/level-id.js';
 import { levelResultOf } from './level-results.js';
 import { byPlayer, namesOf, type PlayedProgress } from './played-progress.js';
 import { testUserId } from './user-ids.js';

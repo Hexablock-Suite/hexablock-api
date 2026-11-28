@@ -7,8 +7,8 @@ import type { BoundsReceiver } from '../../src/domain/shared/bounds-receiver.js'
 import type { ValueReceiver } from '../../src/domain/shared/value-receiver.js';
 import type { PasswordHash } from '../../src/domain/user/password-hash.js';
 import type { User } from '../../src/domain/user/user.js';
-import type { UserId } from '../../src/domain/user/user-id.js';
-import type { Username } from '../../src/domain/user/username.js';
+import type { UserId } from '../../src/domain/shared/user-id.js';
+import type { Username } from '../../src/domain/shared/username.js';
 
 // Test double for a ValueReceiver. It keeps every value that it receives,
 // in order, so a test sees the value and the number of deliveries.

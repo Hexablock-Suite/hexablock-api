@@ -1,10 +1,10 @@
-import type { GameId } from '../../domain/progress/game-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { ProgressKey } from '../../domain/progress/progress-key.js';
 import type { Score } from '../../domain/progress/score.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import type { UseCase } from '../use-case.js';
 import type { Clock } from '../ports/clock.js';
 import type { LevelFinder } from '../ports/level-repository.js';
@@ -43,9 +43,10 @@ export const SYNC_PROGRESS = Symbol('SyncProgress');
 // (DS-6, #135): it reads the levels of all results in one call of
 // LevelRepository.findFor() (#217). It holds only the LevelFinder role of
 // that port (decision 23, #193). Then it pairs each result with its
-// level through LevelDefinition.isLevelOf(), in the order of the request,
-// so the API must hold a valid level of the result, and the result carries
-// no more stars than the level has star thresholds. A broken rule returns its
+// level through LevelResult.isPlayOf(), in the order of the request, so the
+// API must hold a valid level of the result, and LevelResult.isWithinStarsOf()
+// checks that the result carries no more stars than the level has star
+// thresholds (#290). A broken rule returns its
 // problem and saves nothing. The levels are other aggregates, so the use
 // case reads them and changes none.
 export class SyncProgressUseCase implements SyncProgress {
@@ -86,12 +87,13 @@ export class SyncProgressUseCase implements SyncProgress {
     return ok(saved.value);
   }
 
-  // The first result, in the order of the request, that no valid level
-  // admits, or undefined. A sync with no result reads no level, so Lines
-  // and Merge need none. findFor() gives the valid levels of the gameId
-  // that the results name, in one read, and no level for an absent row or
-  // a broken row (#147, #171, #217). The domain gives no levelId of a
-  // result, so isLevelOf() pairs each result with its level.
+  // The first result, in the order of the request, that has no valid level
+  // or carries more stars than its level allows, or undefined. A sync with
+  // no result reads no level, so Lines and Merge need none. findFor() gives
+  // the valid levels of the gameId that the results name, in one read, and
+  // no level for an absent row or a broken row (#147, #171, #217). The
+  // domain gives no levelId of a result, so the result pairs itself with its
+  // level through isPlayOf() (#290).
   private async levelProblemOf(
     gameId: GameId,
     results: readonly LevelResult[],
@@ -101,11 +103,11 @@ export class SyncProgressUseCase implements SyncProgress {
     }
     const held = await this.levels.findFor(gameId, results);
     for (const result of results) {
-      const level = held.find((candidate) => candidate.isLevelOf(gameId, result));
+      const level = held.find((candidate) => result.isPlayOf(gameId, candidate));
       if (level === undefined) {
         return { kind: 'unknown-level', result };
       }
-      if (!level.admits(result)) {
+      if (!result.isWithinStarsOf(level)) {
         return { kind: 'too-many-stars', result, most: level.mostStars() };
       }
     }

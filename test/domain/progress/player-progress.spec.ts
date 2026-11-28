@@ -1,11 +1,11 @@
 import { receiveProgressOf } from '../../../src/adapters/received.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
 import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { ProgressKey } from '../../../src/domain/progress/progress-key.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { ProgressMother } from '../../support/object-mother/progress-mother.js';
 import { type ProgressParts, progressPartsOf } from '../../support/recording-receiver.js';

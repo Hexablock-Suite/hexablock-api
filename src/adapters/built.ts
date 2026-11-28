@@ -1,8 +1,8 @@
-import { ElapsedTime, type ElapsedTimeProblem } from '../domain/progress/elapsed-time.js';
-import { LevelId, type LevelIdProblem } from '../domain/progress/level-id.js';
+import { ElapsedTime, type ElapsedTimeProblem } from '../domain/shared/elapsed-time.js';
+import { LevelId, type LevelIdProblem } from '../domain/shared/level-id.js';
 import { LevelResult } from '../domain/progress/level-result.js';
-import { Moves, type MovesProblem } from '../domain/progress/moves.js';
-import { Stars, type StarsProblem } from '../domain/progress/stars.js';
+import { Moves, type MovesProblem } from '../domain/shared/moves.js';
+import { Stars, type StarsProblem } from '../domain/shared/stars.js';
 import { ok, type Result } from '../domain/shared/result.js';
 import type { LevelResultValues } from './received.js';
 

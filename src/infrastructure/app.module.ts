@@ -79,7 +79,7 @@ import { SquareTopology } from '../domain/level/square-topology.js';
 import { Topologies } from '../domain/level/topologies.js';
 import { TopologyId } from '../domain/level/topology-id.js';
 import { TriangleTopology } from '../domain/level/triangle-topology.js';
-import { GameId } from '../domain/progress/game-id.js';
+import { GameId } from '../domain/shared/game-id.js';
 import {
   createJwtService,
   readAuthThrottle,

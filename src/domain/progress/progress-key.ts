@@ -1,5 +1,5 @@
-import { GameId } from './game-id.js';
-import { UserId } from '../user/user-id.js';
+import { GameId } from '../shared/game-id.js';
+import { UserId } from '../shared/user-id.js';
 
 // The receiver of the two parts of a ProgressKey. ProgressKey.deliverTo()
 // calls it once. Only the border implements it, for example the repository

@@ -1,4 +1,4 @@
-import { LevelId } from '../../../src/domain/progress/level-id.js';
+import { LevelId } from '../../../src/domain/shared/level-id.js';
 
 // The id of one level of a game, such as fit-01.
 describe('LevelId', () => {

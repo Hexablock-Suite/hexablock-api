@@ -1,5 +1,5 @@
 import { LevelEditors } from '../../../src/domain/user/level-editors.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
 import { valueOf } from '../../support/result.js';
 import { testUserId } from '../../support/user-ids.js';
 

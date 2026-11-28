@@ -1,5 +1,5 @@
 import type { ValueReceiver } from '../../../src/domain/shared/value-receiver.js';
-import type { UserId } from '../../../src/domain/user/user-id.js';
+import type { UserId } from '../../../src/domain/shared/user-id.js';
 
 // Wrong example: three static methods that look like the factory of a value
 // object. An aggregate declares no delivery operation, so its factory is not

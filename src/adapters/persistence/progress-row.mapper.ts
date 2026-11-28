@@ -1,9 +1,9 @@
-import { GameId } from '../../domain/progress/game-id.js';
+import { GameId } from '../../domain/shared/game-id.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { ProgressKey } from '../../domain/progress/progress-key.js';
 import { Score } from '../../domain/progress/score.js';
 import { SyncInstant } from '../../domain/progress/sync-instant.js';
-import { UserId } from '../../domain/user/user-id.js';
+import { UserId } from '../../domain/shared/user-id.js';
 import { buildLevelResult } from '../built.js';
 import { receiveProgressOf } from '../received.js';
 import type { levelResults, progress } from './schema.js';

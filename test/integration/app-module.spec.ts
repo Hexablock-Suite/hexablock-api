@@ -32,9 +32,9 @@ import {
   SYNC_PROGRESS,
   type SyncProgress,
 } from '../../src/application/progress/sync-progress.use-case.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelId } from '../../src/domain/progress/level-id.js';
-import { UserId } from '../../src/domain/user/user-id.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
+import { LevelId } from '../../src/domain/shared/level-id.js';
+import { UserId } from '../../src/domain/shared/user-id.js';
 import {
   AUTHENTICATE_TOKEN,
   type AuthenticateToken,

@@ -2,7 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { TOO_MANY_REQUESTS_MESSAGE } from '../../adapters/http/too-many-requests.response.js';
 import { LevelEditors } from '../../domain/user/level-editors.js';
-import { UserId } from '../../domain/user/user-id.js';
+import { UserId } from '../../domain/shared/user-id.js';
 
 // HS256 with a key of at least 256 bits, so the secret needs 32 characters.
 const MIN_SECRET_LENGTH = 32;

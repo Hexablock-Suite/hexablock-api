@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { UserIdGenerator } from '../../application/ports/user-id-generator.js';
-import { UserId } from '../../domain/user/user-id.js';
+import { UserId } from '../../domain/shared/user-id.js';
 
 // Production adapter of the UserIdGenerator port: a random UUID v4.
 // randomUUID() always gives a UUID, so a failed UserId is a defect of the
