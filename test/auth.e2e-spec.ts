@@ -249,7 +249,23 @@ describe('auth endpoints (API-FR-01)', () => {
   });
 
   // Login answers 401, never 400, so its schema publishes no length rule (#60).
-  it('should_publish_login_body_without_length_rules_when_openapi_document_is_requested', async () => {
+  // Each field of the login body is one case (#184).
+  it.each(['username', 'password'])(
+    'should_publish_login_body_without_length_rules_when_openapi_document_is_requested',
+    async (field) => {
+      const response = await request(testApp.app.getHttpServer()).get('/docs-json');
+
+      const property = response.body.components.schemas.LoginDto.properties[field];
+      expect(property).toMatchObject({ type: 'string' });
+      expect(property).not.toHaveProperty('minLength');
+      expect(property).not.toHaveProperty('maxLength');
+      expect(property).not.toHaveProperty('pattern');
+    },
+  );
+
+  // Sign-up keeps the length rules in its own schema. The login schema has
+  // only the two fields of the cases above.
+  it('should_publish_length_rules_only_in_the_register_body_when_openapi_document_is_requested', async () => {
     const response = await request(testApp.app.getHttpServer()).get('/docs-json');
 
     const { paths, components } = response.body;
@@ -260,12 +276,7 @@ describe('auth endpoints (API-FR-01)', () => {
     });
     const login = components.schemas.LoginDto;
     expect(login.required).toEqual(['username', 'password']);
-    for (const property of Object.values<object>(login.properties)) {
-      expect(property).toMatchObject({ type: 'string' });
-      expect(property).not.toHaveProperty('minLength');
-      expect(property).not.toHaveProperty('maxLength');
-      expect(property).not.toHaveProperty('pattern');
-    }
+    expect(Object.keys(login.properties)).toEqual(['username', 'password']);
     expect(components.schemas.CredentialsDto.properties).toMatchObject({
       username: { minLength: 3, maxLength: 32, pattern: '^[A-Za-z0-9._-]{3,32}$' },
       password: { minLength: 8, maxLength: 128 },
@@ -412,25 +423,29 @@ describe('auth endpoints (API-FR-01)', () => {
     },
   );
 
-  it.each(['/v1/auth/register', '/v1/auth/login'])(
+  // A JSON array and a plain text are no JSON object. Each body on each route
+  // is one case (#184).
+  const sendArray = (path: string) => request(testApp.app.getHttpServer()).post(path).send([]);
+  const sendText = (path: string) =>
+    request(testApp.app.getHttpServer()).post(path).set('Content-Type', 'text/plain').send('ada');
+  it.each([
+    { path: '/v1/auth/register', body: 'a json array', send: sendArray },
+    { path: '/v1/auth/register', body: 'a plain text', send: sendText },
+    { path: '/v1/auth/login', body: 'a json array', send: sendArray },
+    { path: '/v1/auth/login', body: 'a plain text', send: sendText },
+  ])(
     'should_return_validation_error_body_when_body_is_not_a_json_object',
-    async (path) => {
-      const server = testApp.app.getHttpServer();
-      const responses = [
-        await request(server).post(path).send([]),
-        await request(server).post(path).set('Content-Type', 'text/plain').send('ada'),
-      ];
+    async ({ path, send }) => {
+      const response = await send(path);
 
-      for (const response of responses) {
-        expect(response.status).toBe(400);
-        expect(response.body).toEqual({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: 'Request validation failed',
-          details: MISSING_FIELDS,
-          path,
-        });
-      }
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Request validation failed',
+        details: MISSING_FIELDS,
+        path,
+      });
       expect(await testApp.database.db.select().from(users)).toHaveLength(0);
     },
   );

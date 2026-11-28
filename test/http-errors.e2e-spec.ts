@@ -74,21 +74,22 @@ describe('HTTP error body (API-FR-06)', () => {
 
   // The message names the method, and a query can start with a second «?» or
   // hold encoded characters. The body holds no part of the query in each case.
-  it('should_return_no_query_in_the_error_body_when_the_unknown_route_uses_any_method_or_a_double_question_mark', async () => {
-    const server = app.getHttpServer();
-    const responses = await Promise.all([
-      request(server).post('/v1/no-such-resource?token=secret-value'),
-      request(server).delete('/v1/no-such-resource?token=secret-value'),
-      request(server).get('/v1/no-such-resource??token=secret-value'),
-      request(server).get('/v1/no-such-resource?a=%E2%9C%93&b=%20secret-value'),
-    ]);
+  // Each request is one case (#184).
+  it.each([
+    { method: 'post', url: '/v1/no-such-resource?token=secret-value' },
+    { method: 'delete', url: '/v1/no-such-resource?token=secret-value' },
+    { method: 'get', url: '/v1/no-such-resource??token=secret-value' },
+    { method: 'get', url: '/v1/no-such-resource?a=%E2%9C%93&b=%20secret-value' },
+  ] as const)(
+    'should_return_no_query_in_the_error_body_when_the_unknown_route_uses_any_method_or_a_double_question_mark',
+    async ({ method, url }) => {
+      const response = await request(app.getHttpServer())[method](url);
 
-    for (const response of responses) {
       expect(response.status).toBe(404);
       expect(response.body.path).toBe('/v1/no-such-resource');
       expect(JSON.stringify(response.body)).not.toContain('secret-value');
-    }
-  });
+    },
+  );
 
   // The filter removes only the query. A message or a detail that does not
   // quote the query keeps its exact text.
@@ -213,18 +214,17 @@ describe('HTTP error body (API-FR-06)', () => {
     });
   });
 
-  it('should_use_same_body_keys_when_errors_differ', async () => {
-    const server = app.getHttpServer();
-    const responses = await Promise.all([
-      request(server).get('/v1/no-such-resource'),
-      request(server).get('/v1/error-probe/items/abc'),
-      request(server).get('/v1/error-probe/protected'),
-      request(server).get('/v1/error-probe/crash'),
-    ]);
+  // A missing route, a failed validation, a missing token and a crash give
+  // four different errors. Each error is one case (#184).
+  it.each([
+    '/v1/no-such-resource',
+    '/v1/error-probe/items/abc',
+    '/v1/error-probe/protected',
+    '/v1/error-probe/crash',
+  ])('should_use_same_body_keys_when_errors_differ', async (url) => {
+    const response = await request(app.getHttpServer()).get(url);
 
-    for (const response of responses) {
-      expect(Object.keys(response.body).sort()).toEqual(ERROR_BODY_KEYS);
-    }
+    expect(Object.keys(response.body).sort()).toEqual(ERROR_BODY_KEYS);
   });
 
   it('should_keep_success_body_when_request_succeeds', async () => {
