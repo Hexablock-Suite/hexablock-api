@@ -162,7 +162,9 @@ Each principle has one example from the progress slice. Each link opens the sour
 - **Interface segregation:** the [SyncProgress](src/application/progress/sync-progress.use-case.ts)
   input port has one `execute` method, and
   [ProgressController](src/adapters/http/progress.controller.ts) depends only on `SyncProgress`
-  and `GetProgress`, the two ports it calls.
+  and `GetProgress`, the two ports it calls. `SyncProgressUseCase` holds only
+  [LevelFinder](src/application/ports/level-repository.ts), the one role of `LevelRepository`
+  that a sync calls (#193).
 - **Dependency inversion:** the application owns the
   [ProgressRepository](src/application/ports/progress-repository.ts) port,
   [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) implements
