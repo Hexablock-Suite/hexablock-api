@@ -172,9 +172,8 @@ Each principle has one example from the progress slice. Each link opens the sour
 
 ## AOP
 
-The cross-cutting aspects are logging and timing (§3.5, API-NFR-07). They wrap use cases as
-decorators: `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and `LoggingAspect` extends it. [View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)
-also draws a `TimingAspect`, which is not built yet.
+The cross-cutting aspect is logging (§3.5, API-NFR-07): each entry of a call holds the use case, the outcome and the duration. It wraps use cases as
+a decorator: `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and `LoggingAspect` extends it ([View 2.1](docs/architecture/classes.md#view-21-the-use-case-contract-and-its-aspects)).
 They are custom decorators or proxies, never Nest interceptors, because `src/application`
 imports no package (rule R-application-pure).
 
@@ -192,7 +191,9 @@ value that the client sent never reaches the log. For `GetLevels`, the aspect al
 row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section, from `unavailableLevelEntries()`.
 No use case imports the `Logger` port (rule `only-aspects-import-logger-port`, #219). A request value that breaks its rule stops in its
 DTO mapper, such as `ProgressDtoMapper`, before the use case, so the aspect writes no entry for that
-request. `TimingAspect` is not built yet.
+request. `LoggingAspect` reads the `Stopwatch` port before and after each call, and the one entry of the call carries
+`elapsedMs`, the duration in milliseconds; `PerformanceStopwatch` in [src/adapters/clock](src/adapters/clock) reads the
+monotonic clock of `performance`. No second aspect writes a timing entry (#181).
 
 ## Getting Started
 
@@ -364,7 +365,7 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,398 tests in `pnpm test`: 1,296 behavior tests and
+On 2026-11-28 the Vitest JSON reporter counts 1,414 tests in `pnpm test`: 1,312 behavior tests and
 102 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 

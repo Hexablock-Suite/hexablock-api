@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 1 of 4</p>
       <h1>The use case contract and the aspects that wrap it</h1>
       <svg
-        viewBox="0 0 1040 1052"
+        viewBox="0 0 1040 1068"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc1contract-title uc1contract-desc"
@@ -72,10 +72,11 @@
         <desc id="uc1contract-desc">
           Class diagram of layer 2 showing the generic UseCase interface, the contract that every
           input port binds, the SyncProgress input port that binds it, the use case that implements
-          it, and the UseCaseAspect decorator with LoggingAspect and TimingAspect. UseCaseAspect
-          joins the UseCase that it wraps with a hollow diamond on its own side, labelled decorate
-          and 1 (class of 2026-11-23). Since Q12 the aspects live in layer 2, and LoggingAspect
-          writes to the Logger port; an optional function gives it extra entries from a success,
+          it, and the UseCaseAspect decorator with LoggingAspect. UseCaseAspect joins the UseCase
+          that it wraps with a hollow diamond on its own side, labelled decorate and 1 (class of
+          2026-11-23). Since Q12 the aspects live in layer 2, and LoggingAspect writes to the Logger
+          port and reads the Stopwatch port before and after each call, so the one entry of the call
+          carries its duration (#181); an optional function gives it extra entries from a success,
           such as the broken level rows of GetLevels (#219). Its TError type parameter extends {
           readonly kind: string }, and every problem type of an input port has a kind. A footnote
           names LevelsController, LeaderboardController, LevelDtoMapper and LeaderboardDtoMapper of
@@ -176,14 +177,6 @@
           stroke-width="1"
           marker-end="url(#uc1contract-triangle)"
         />
-        <!-- TimingAspect extends UseCaseAspect: inheritance -->
-        <path
-          d="M408 336 L472 336 Q480 336 480 328 L480 240 Q480 232 488 232 L544 232"
-          fill="none"
-          stroke="#17212a"
-          stroke-width="1"
-          marker-end="url(#uc1contract-triangle)"
-        />
         <!-- UseCaseAspect implements UseCase: realization -->
         <line
           x1="568"
@@ -228,13 +221,33 @@
         />
         <!-- LoggingAspect holds Logger: use -->
         <path
-          d="M88 248 L88 504"
+          d="M88 264 L88 504"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#uc1contract-open)"
+        />
+        <!-- LoggingAspect holds Stopwatch: use (#181) -->
+        <path
+          d="M336 264 L336 504"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc1contract-open)"
         />
         <!-- Arrow labels and multiplicities -->
+        <rect x="342" y="464" width="72" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="378"
+          y="473"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.06em"
+        >
+          stopwatch 1
+        </text>
         <rect x="662" y="470" width="60" height="12" rx="2" fill="#efe7f8" />
         <text
           x="692"
@@ -299,7 +312,7 @@
           x="64"
           y="88"
           width="296"
-          height="160"
+          height="176"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -324,57 +337,22 @@
           - logger: Logger
         </text>
         <text x="80" y="184" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - stopwatch: Stopwatch
+        </text>
+        <text x="80" y="200" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - extraEntries: ExtraLogEntries&lt;TValue&gt;
         </text>
-        <line x1="64" y1="192" x2="360" y2="192" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="208" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="208" x2="360" y2="208" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="80" y="224" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + execute(request: TRequest):
         </text>
-        <text x="102" y="224" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="102" y="240" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;Result&lt;TValue, TError&gt;&gt;
         </text>
-        <text x="80" y="240" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="80" y="256" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - safely(write: () =&gt; void): void
         </text>
 
-        <!-- Class: TimingAspect (no role label) -->
-        <rect
-          x="112"
-          y="280"
-          width="296"
-          height="96"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="260"
-          y="308"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          TimingAspect
-        </text>
-        <line x1="112" y1="328" x2="408" y2="328" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="128" y="344" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - clock: Clock
-        </text>
-        <line x1="112" y1="352" x2="408" y2="352" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text
-          textLength="274"
-          lengthAdjust="spacingAndGlyphs"
-          x="128"
-          y="368"
-          fill="#17212a"
-          font-size="9"
-          font-family="'IBM Plex Mono', monospace"
-        >
-          + execute(request: TRequest): Promise&lt;TResponse&gt;
-        </text>
         <!-- Class: UseCaseAspect («abstract»; no role label) -->
         <rect
           x="544"
@@ -562,7 +540,7 @@
         <rect
           x="64"
           y="504"
-          width="240"
+          width="216"
           height="72"
           rx="6"
           fill="#ffffff"
@@ -570,7 +548,7 @@
           stroke-width="1"
         />
         <text
-          x="184"
+          x="172"
           y="522"
           fill="#5b6873"
           font-size="8"
@@ -581,7 +559,7 @@
           «interface» «port»
         </text>
         <text
-          x="184"
+          x="172"
           y="540"
           fill="#17212a"
           font-size="12"
@@ -591,9 +569,54 @@
         >
           Logger
         </text>
-        <line x1="64" y1="552" x2="304" y2="552" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="80" y="568" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="64" y1="552" x2="280" y2="552" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          textLength="190"
+          lengthAdjust="spacingAndGlyphs"
+          x="80"
+          y="568"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
           + log(entry: UseCaseLogEntry): void
+        </text>
+        <!-- Class: Stopwatch («interface» «port», #181) -->
+        <rect
+          x="296"
+          y="504"
+          width="200"
+          height="72"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="396"
+          y="522"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="396"
+          y="540"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Stopwatch
+        </text>
+        <line x1="296" y1="552" x2="496" y2="552" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="312" y="568" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + readMs(): number
         </text>
         <!-- UML template boxes: type parameters on the top-right corner -->
         <rect
@@ -616,27 +639,6 @@
           text-anchor="middle"
         >
           TRequest, TValue, TError extends { readonly kind: string }
-        </text>
-        <rect
-          x="304"
-          y="270"
-          width="112"
-          height="18"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="0.8"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="360"
-          y="282"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-        >
-          TRequest, TResponse
         </text>
         <rect
           x="736"
@@ -719,12 +721,22 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
+          LoggingAspect reads the Stopwatch port before and after each call, and the one entry of
+          the call carries elapsedMs, its duration (#181).
+        </text>
+        <text
+          x="24"
+          y="844"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
           SyncProgress returns a Result with the PlayerProgress, and ProgressDtoMapper in layer 3
           turns it into the response DTO (Part 3, view 5).
         </text>
         <text
           x="24"
-          y="844"
+          y="860"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -734,7 +746,7 @@
         </text>
         <text
           x="24"
-          y="860"
+          y="876"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -744,7 +756,7 @@
         </text>
         <text
           x="24"
-          y="876"
+          y="892"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -754,7 +766,7 @@
         </text>
         <text
           x="24"
-          y="892"
+          y="908"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -764,7 +776,7 @@
         </text>
         <text
           x="24"
-          y="908"
+          y="924"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -774,7 +786,7 @@
         </text>
         <text
           x="24"
-          y="924"
+          y="940"
           fill="#5b6873"
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
@@ -783,10 +795,10 @@
           wrap it.
         </text>
         <!-- Legend -->
-        <line x1="24" y1="948" x2="1016" y2="948" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <line x1="24" y1="964" x2="1016" y2="964" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="966"
+          y="982"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -796,16 +808,16 @@
         </text>
         <line
           x1="24"
-          y1="984"
+          y1="1000"
           x2="52"
-          y2="984"
+          y2="1000"
           stroke="#17212a"
           stroke-width="1"
           marker-end="url(#uc1contract-triangle)"
         />
         <text
           x="60"
-          y="988"
+          y="1004"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -814,9 +826,9 @@
         </text>
         <line
           x1="128"
-          y1="984"
+          y1="1000"
           x2="156"
-          y2="984"
+          y2="1000"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -824,7 +836,7 @@
         />
         <text
           x="164"
-          y="988"
+          y="1004"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -833,16 +845,16 @@
         </text>
         <line
           x1="232"
-          y1="984"
+          y1="1000"
           x2="260"
-          y2="984"
+          y2="1000"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc1contract-open)"
         />
         <text
           x="268"
-          y="988"
+          y="1004"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -851,16 +863,16 @@
         </text>
         <line
           x1="536"
-          y1="984"
+          y1="1000"
           x2="564"
-          y2="984"
+          y2="1000"
           stroke="#17212a"
           stroke-width="1"
           marker-start="url(#uc1contract-diamond-hollow)"
         />
         <text
           x="572"
-          y="988"
+          y="1004"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -869,7 +881,7 @@
         </text>
         <rect
           x="24"
-          y="1004"
+          y="1020"
           width="20"
           height="12"
           rx="2"
@@ -879,7 +891,7 @@
         />
         <text
           x="56"
-          y="1013"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -888,7 +900,7 @@
         </text>
         <rect
           x="264"
-          y="1004"
+          y="1020"
           width="28"
           height="12"
           rx="2"
@@ -899,7 +911,7 @@
         />
         <text
           x="300"
-          y="1013"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -908,7 +920,7 @@
         </text>
         <rect
           x="470"
-          y="1004"
+          y="1020"
           width="28"
           height="12"
           rx="2"
@@ -918,7 +930,7 @@
         />
         <text
           x="506"
-          y="1013"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -927,7 +939,7 @@
         </text>
         <rect
           x="616"
-          y="1004"
+          y="1020"
           width="28"
           height="12"
           rx="2"
@@ -938,7 +950,7 @@
         />
         <text
           x="652"
-          y="1013"
+          y="1029"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -947,7 +959,7 @@
         </text>
         <rect
           x="24"
-          y="1026"
+          y="1042"
           width="28"
           height="12"
           rx="2"
@@ -958,7 +970,7 @@
         />
         <text
           x="60"
-          y="1035"
+          y="1051"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
