@@ -162,7 +162,9 @@ Each principle has one example from the progress slice. Each link opens the sour
 - **Interface segregation:** the [SyncProgress](src/application/progress/sync-progress.use-case.ts)
   input port has one `execute` method, and
   [ProgressController](src/adapters/http/progress.controller.ts) depends only on `SyncProgress`
-  and `GetProgress`, the two ports it calls.
+  and `GetProgress`, the two ports it calls. `SyncProgressUseCase` holds only
+  [LevelFinder](src/application/ports/level-repository.ts), the one role of `LevelRepository`
+  that a sync calls (#193).
 - **Dependency inversion:** the application owns the
   [ProgressRepository](src/application/ports/progress-repository.ts) port,
   [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) implements
@@ -357,7 +359,14 @@ composition of [start-provider.js](scripts/contract/start-provider.js): `AppModu
 in-memory PGlite database, plus the state-change endpoint `POST /v1/_pact/provider-states`.
 Before and after each interaction, the verifier posts the provider state of the interaction to
 that endpoint (#151). Only this composition mounts the endpoint: the production `AppModule` and
-`dist/main.js` never do, because the endpoint writes any data for anyone.
+`dist/main.js` never do, because the endpoint writes any data for anyone. So the command listens on
+`127.0.0.1` only, and it pins an empty `LEVEL_EDITOR_IDS`, so a value of the shell never reaches it
+(#239). `http://localhost:<PORT>` still reaches it: `localhost` resolves to `127.0.0.1`, and curl,
+Node `fetch` and the Pact verifier try each address of the name. The `contract` job of hexablock-app
+checks out this repository at `main`, starts the same command with `PORT=3001`, and verifies its
+own pact against `http://localhost:3001` with the same state-change endpoint. That job needs only
+`pnpm install` in that checkout and the `.env.example` of the command: the composition runs on PGlite,
+so the job needs no Postgres.
 
 ```bash
 PORT=3000 node --env-file=.env.example scripts/contract/start-provider.js &   # start the provider composition
@@ -367,19 +376,24 @@ PACT_FILE=test/fixtures/contract/provider-states.json pnpm contract:verify
 
 `BACKEND_URL` defaults to `http://localhost:3000`. A missing pact fails the run.
 
-The provider states of the client interactions (app #45 to #48). Each param is optional. A
+The provider states of the client interactions (app #45 to #48, #480 and #485). Each param is optional. A
 request takes a value of the setup through a provider-state expression, such as
 `fromProviderState('Bearer ${accessToken}', …)`. The states of one interaction add up, and the
-teardown after each interaction removes every row.
+teardown after each interaction removes every row. A failed setup gets no teardown, so
+`no account exists` removes every row too, also the rows of a state before it in the same
+interaction: it goes first among the states of its interaction (#239). A state whose sign-in fails
+answers 400 with the status of the sign-in, such as `the sign-in of ada answered 401, not 200.`.
 
-| State                                                  | Params (default)                                                         | Values                                                   | Client     |
-| ------------------------------------------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------- | ---------- |
-| `no account exists`                                    | none                                                                     | none                                                     | #45        |
-| `an account exists`                                    | `username` (`ada`), `password` (`correct horse battery`)                 | `username`                                               | #45        |
-| `a signed-in account exists`                           | `username`, `password`                                                   | `accessToken`, `userId`, `username`                      | #45 to #47 |
-| `a level is stored`                                    | `gameId` (`hexa-fit` or `hexa-sort`; `hexa-fit`), `levelId` (`fit-01`)   | `gameId`, `levelId`                                      | #46, #48   |
-| `the signed-in account has progress on a stored level` | the params of the two states above; the result has 3 stars and 12 moves  | `accessToken`, `userId`, `username`, `gameId`, `levelId` | #46        |
-| `several accounts have results on a stored level`      | `gameId`, `levelId`; `ada`, `grace` and `linus` sync 10, 12 and 14 moves | `accessToken` of `ada`, `gameId`, `levelId`              | #47        |
+| State                                                  | Params (default)                                                                                                       | Values                                                           | Client     |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------- |
+| `no account exists`                                    | none                                                                                                                   | none                                                             | #45        |
+| `an account exists`                                    | `username` (`ada`), `password` (`correct horse battery`)                                                               | `username`                                                       | #45        |
+| `a signed-in account exists`                           | `username`, `password`                                                                                                 | `accessToken`, `userId`, `username`                              | #45 to #47 |
+| `a level is stored`                                    | `gameId` (`hexa-fit` or `hexa-sort`; `hexa-fit`), `levelId` (`fit-01`)                                                 | `gameId`, `levelId`                                              | #46, #48   |
+| `the signed-in account has progress on a stored level` | the params of the two states above; the result has 3 stars and 12 moves                                                | `accessToken`, `userId`, `username`, `gameId`, `levelId`         | #46        |
+| `several accounts have results on a stored level`      | `gameId`, `levelId`; `ada`, `grace` and `linus` sync 10, 12 and 14 moves                                               | `accessToken` of `ada`, `gameId`, `levelId`                      | #47        |
+| `several accounts have high scores in a game`          | `gameId` (`hexa-lines`); `ada`, `grace` and `linus` sync the scores 300, 200 and 100 and no level result               | `accessToken` of `ada`, `gameId`                                 | #480       |
+| `a broken level is stored`                             | `gameId` (`hexa-fit` or `hexa-sort`; `hexa-fit`), `levelId` (`fit-01`); the row has a Fit section that breaks its rule | `gameId`, `levelId`, `reason` (`invalid-figure` for a Fit level) | #485       |
 
 ## AI Usage Documentation
 

@@ -78,13 +78,15 @@
           SystemClock implements Clock. In layer 2, SyncProgressUseCase implements SyncProgress,
           takes a SyncProgressRequest, which holds its LevelResult values through a use arrow
           results 0..*, and holds the ProgressRepository and Clock ports, and the Clock gives a
-          SyncInstant. In layer 1, the use case creates the ProgressKey of the userId and the gameId
-          of the request, and updates the PlayerProgress aggregate of that key at that instant. The
-          aggregate keeps its LevelResult values and the SyncInstant of its last sync. LevelResult
-          keeps its four value objects private, takes them built in of(), and delivers all four to a
-          LevelResultReceiver with deliverTo(). ProgressDtoMapper builds the GameId, the Score and
-          each value of a LevelResult through factories that return a Result. A dashed frame
-          labelled Aggregate encloses PlayerProgress and the value objects that it holds.
+          SyncInstant. Its member levels has the type LevelFinder, the role of the LevelRepository
+          port that a sync calls (#193). In layer 1, the use case creates the ProgressKey of the
+          userId and the gameId of the request, and updates the PlayerProgress aggregate of that key
+          at that instant. The aggregate keeps its LevelResult values and the SyncInstant of its
+          last sync. LevelResult keeps its four value objects private, takes them built in of(), and
+          delivers all four to a LevelResultReceiver with deliverTo(). ProgressDtoMapper builds the
+          GameId, the Score and each value of a LevelResult through factories that return a Result.
+          A dashed frame labelled Aggregate encloses PlayerProgress and the value objects that it
+          holds.
         </desc>
         <defs>
           <marker
@@ -991,7 +993,7 @@
           - clock: Clock
         </text>
         <text x="532" y="940" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - levels: LevelRepository
+          - levels: LevelFinder
         </text>
 
         <line x1="516" y1="948" x2="936" y2="948" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
@@ -1700,9 +1702,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          SyncProgressUseCase also reads the levels of all results in one LevelRepository.findFor()
-          call and checks the stars of each result against its level (DS-6, #135, #171, #217); view
-          2.2 draws that port.
+          SyncProgressUseCase also reads the levels of all results in one LevelFinder.findFor() call
+          and checks the stars of each result against its level (DS-6, #135, #171, #217); view 2.2
+          draws LevelFinder, a role of LevelRepository (#193).
         </text>
         <!-- Legend -->
         <line

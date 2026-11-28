@@ -1,5 +1,4 @@
-import type { ListedLevels } from '../../src/application/levels/listed-levels.js';
-import type { LevelRepository } from '../../src/application/ports/level-repository.js';
+import type { LevelFinder } from '../../src/application/ports/level-repository.js';
 import { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../src/domain/level/level-order.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';
@@ -15,14 +14,15 @@ import { valueOf } from './result.js';
 // the count of star thresholds of each level.
 export type HeldGame = readonly [gameId: string, levelIds: readonly string[]];
 
-// Test double for the LevelRepository port of a sync. A sync reads the
-// levels of all its results through one findFor() (#135, #171, #217). The
+// Test double for the LevelFinder role of the LevelRepository port, the one
+// role that a sync depends on (#193). A sync reads the levels of all its
+// results through one findFor() (#135, #171, #217). The
 // double holds a level of each named gameId and levelId, with `stars` star
 // thresholds, also for a game with no strategy, such as the slug fit of the
 // concurrency suite. It holds no broken row, so findFor() gives each held
-// level that one result names, through isLevelOf(). A sync never updates a
-// level, so holds() and update() throw.
-export function heldLevels(games: readonly HeldGame[], stars = 3): LevelRepository {
+// level that one result names, through isLevelOf(). It has no other
+// operation of the port, because a sync calls none.
+export function heldLevels(games: readonly HeldGame[], stars = 3): LevelFinder {
   const levels = games.flatMap(([gameId, levelIds]) =>
     levelIds.map((levelId) =>
       valueOf(
@@ -37,14 +37,10 @@ export function heldLevels(games: readonly HeldGame[], stars = 3): LevelReposito
       ),
     ),
   );
-  const listed: ListedLevels = { levels, unavailable: [] };
   return {
-    list: () => Promise.resolve(listed),
     findFor: (gameId: GameId, results: readonly LevelResult[]) =>
       Promise.resolve(
         levels.filter((held) => results.some((result) => held.isLevelOf(gameId, result))),
       ),
-    holds: () => Promise.reject(new Error('A sync asks no holds().')),
-    update: () => Promise.reject(new Error('A sync updates no level.')),
   };
 }

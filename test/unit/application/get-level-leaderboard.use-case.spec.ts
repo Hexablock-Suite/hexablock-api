@@ -5,6 +5,7 @@ import {
 } from '../../../src/application/leaderboard/get-level-leaderboard.use-case.js';
 import type { LeaderboardEntry } from '../../../src/application/ports/leaderboard-entry.js';
 import type { LevelBoardReader } from '../../../src/application/ports/level-board-reader.js';
+import type { LevelHolder } from '../../../src/application/ports/level-repository.js';
 import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
@@ -141,6 +142,23 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
       ok: true,
       value: { gameId: FIT, levelId: LEVEL, entries: RankedBoard.of([]) },
     });
+  });
+
+  // #193: the use case depends only on the LevelHolder role of the level
+  // repository. A double of holds() alone serves it. The use case asks it
+  // once, with the gameId and the levelId of the query.
+  it('should_ask_holds_once_with_the_level_of_the_query_when_the_level_store_plays_only_the_level_holder_role', async () => {
+    const holder = {
+      holds: vi.fn<LevelHolder['holds']>(() => Promise.resolve(true)),
+    } satisfies LevelHolder;
+
+    const result = await new GetLevelLeaderboardUseCase(readerOf(), holder).execute(QUERY);
+
+    expect(result).toEqual({
+      ok: true,
+      value: { gameId: FIT, levelId: LEVEL, entries: RankedBoard.of([]) },
+    });
+    expect(holder.holds).toHaveBeenCalledExactlyOnceWith(FIT, LEVEL);
   });
 
   // GetLevelLeaderboard binds UseCase, so LoggingAspect wraps it under its

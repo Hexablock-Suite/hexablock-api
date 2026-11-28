@@ -1,6 +1,7 @@
 import { type ChildProcess, execFile, spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createServer, type AddressInfo } from 'node:net';
+import { networkInterfaces } from 'node:os';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { Test } from '@nestjs/testing';
@@ -8,14 +9,14 @@ import request from 'supertest';
 import { AppModule } from '../src/infrastructure/app.module.js';
 import { configureHttpApp } from '../src/infrastructure/http-app.js';
 import { createProviderApp, type ProviderApp } from './support/contract/provider-app.js';
-import { TEST_PASSWORD } from './support/http/sign-in.js';
+import { signIn, TEST_PASSWORD } from './support/http/sign-in.js';
 import { stubTestEnvironment } from './support/http/test-app.js';
 
 // #151: the pact provider states of the client interactions of app #45 to
-// #48. Only the test composition of the contract job mounts the state-change
-// endpoint. Each setup adds rows through the public routes and the level
-// store; each teardown removes every row, so the next interaction starts on
-// an empty database.
+// #48, and #258: those of app #480 and #485. Only the test composition of
+// the contract job mounts the state-change endpoint. Each setup adds rows
+// through the public routes, the level store or the database; each teardown
+// removes every row, so the next interaction starts on an empty database.
 const ROOT = resolve(import.meta.dirname, '..');
 const STATES = '/v1/_pact/provider-states';
 const LOCAL_PACT = 'test/fixtures/contract/provider-states.json';
@@ -174,6 +175,50 @@ describe('pact provider states (#151)', () => {
       ]);
     });
 
+    // #258: the global board of app #480. Each account syncs one score and
+    // no level result, so the board has high-score rows and no standing.
+    it('should_rank_three_high_scores_when_several_accounts_have_high_scores_in_a_game_is_set_up', async () => {
+      const setup = await setUp('several accounts have high scores in a game', {
+        gameId: 'hexa-merge',
+      });
+      const board = await withToken('/v1/leaderboard/hexa-merge', setup.body.accessToken);
+
+      expect(setup.status).toBe(200);
+      expect(setup.body).toEqual({ accessToken: expect.any(String), gameId: 'hexa-merge' });
+      expect(board.status).toBe(200);
+      expect(
+        board.body.highScores.map((row: { rank: number; username: string; highScore: number }) => [
+          row.rank,
+          row.username,
+          row.highScore,
+        ]),
+      ).toEqual([
+        [1, 'ada', 300],
+        [2, 'grace', 200],
+        [3, 'linus', 100],
+      ]);
+      expect(board.body.standings).toEqual([]);
+    });
+
+    // #258: the unavailable list of app #485. The broken row hides no
+    // other level, so the list of valid levels stays empty.
+    it('should_name_the_level_in_unavailable_when_a_broken_level_is_stored_is_set_up', async () => {
+      const setup = await setUp('a broken level is stored', { levelId: 'fit-03' });
+      const levels = await request(server()).get('/v1/levels');
+
+      expect(setup.status).toBe(200);
+      expect(setup.body).toEqual({
+        gameId: 'hexa-fit',
+        levelId: 'fit-03',
+        reason: 'invalid-figure',
+      });
+      expect(levels.status).toBe(200);
+      expect(levels.body).toEqual({
+        levels: [],
+        unavailable: [{ gameId: 'hexa-fit', levelId: 'fit-03', reason: 'invalid-figure' }],
+      });
+    });
+
     // Two states of one interaction add up: the account syncs a result on
     // the level of the other state.
     it('should_keep_the_rows_of_each_state_when_one_interaction_sets_up_two_states', async () => {
@@ -203,12 +248,84 @@ describe('pact provider states (#151)', () => {
       expect(levels.body).toEqual({ levels: [] });
     });
 
+    // #258: the teardown removes the broken row and the high scores too.
+    it('should_remove_the_broken_row_and_the_high_scores_when_the_states_of_258_are_torn_down', async () => {
+      await setUp('a broken level is stored');
+      await setUp('several accounts have high scores in a game');
+
+      const teardown = await tearDown('several accounts have high scores in a game');
+      const signInAda = await login('ada');
+      const levels = await request(server()).get('/v1/levels');
+      const { token } = await signIn(server(), 'eve');
+      const board = await withToken('/v1/leaderboard/hexa-lines', token);
+
+      expect(teardown.status).toBe(200);
+      expect(signInAda.status).toBe(401);
+      expect(levels.body).toEqual({ levels: [] });
+      expect(board.body.highScores).toEqual([]);
+    });
+
+    // #239: a failed setup gets no teardown, so its rows stay. The next
+    // interaction with no account exists still signs up the username, and
+    // the interaction after it still finds its account.
+    it('should_sign_up_and_sign_in_in_the_next_two_interactions_when_a_setup_failed_and_left_rows', async () => {
+      await setUp('an account exists');
+      const failed = await setUp('an account exists');
+      const first = await setUp('no account exists');
+      const signUp = await request(server())
+        .post('/v1/auth/register')
+        .send({ username: 'ada', password: TEST_PASSWORD });
+      await tearDown('no account exists');
+      const second = await setUp('an account exists', { password: 'pa55word-long' });
+      const signIn = await login('ada', 'pa55word-long');
+
+      expect(failed.status).toBe(400);
+      expect(failed.body.message).toBe('an account exists answered 409, not 201.');
+      expect(first.status).toBe(200);
+      expect(first.body).toEqual({});
+      expect(signUp.status).toBe(201);
+      expect(second.status).toBe(200);
+      expect(signIn.status).toBe(200);
+    });
+
+    // #239: no account exists removes every row, also the rows of a state
+    // before it in the same interaction. So the order of the states matters:
+    // no account exists goes first.
+    it('should_keep_only_the_rows_of_the_later_states_when_no_account_exists_is_set_up_in_an_interaction', async () => {
+      await setUp('a signed-in account exists');
+      await setUp('no account exists');
+      await setUp('a broken level is stored', { levelId: 'fit-03' });
+      const cleanFirst = await request(server()).get('/v1/levels');
+      const signInAfterClean = await login('ada');
+      await tearDown('a broken level is stored');
+      await setUp('a broken level is stored', { levelId: 'fit-04' });
+      await setUp('no account exists');
+      const cleanLast = await request(server()).get('/v1/levels');
+
+      expect(cleanFirst.body).toEqual({
+        levels: [],
+        unavailable: [{ gameId: 'hexa-fit', levelId: 'fit-03', reason: 'invalid-figure' }],
+      });
+      expect(signInAfterClean.status).toBe(401);
+      expect(cleanLast.body).toEqual({ levels: [] });
+    });
+
+    // #239: two states of one interaction sign in one username with two
+    // passwords. The state names the cause instead of a 500.
+    it('should_answer_400_with_the_status_of_the_sign_in_when_the_sign_in_of_a_state_fails', async () => {
+      await setUp('an account exists', { username: 'grace', password: 'pa55word-long' });
+      const setup = await setUp('a signed-in account exists', { username: 'grace' });
+
+      expect(setup.status).toBe(400);
+      expect(setup.body.message).toBe('the sign-in of grace answered 401, not 200.');
+    });
+
     it('should_answer_400_and_name_the_known_states_when_the_state_is_unknown', async () => {
       const setup = await setUp('a dragon exists');
 
       expect(setup.status).toBe(400);
       expect(setup.body.message).toBe(
-        'Unknown provider state "a dragon exists". Known states: no account exists, an account exists, a signed-in account exists, a level is stored, the signed-in account has progress on a stored level, several accounts have results on a stored level.',
+        'Unknown provider state "a dragon exists". Known states: no account exists, an account exists, a signed-in account exists, a level is stored, the signed-in account has progress on a stored level, several accounts have results on a stored level, several accounts have high scores in a game, a broken level is stored.',
       );
     });
 
@@ -246,21 +363,8 @@ describe('pact provider states (#151)', () => {
   // start the API with this command. It runs the test composition from the
   // sources with the example configuration.
   it('should_serve_the_provider_states_when_start_provider_starts_the_test_composition', async () => {
-    const port = await freePort();
-    const child = spawn(
-      process.execPath,
-      ['--env-file=.env.example', 'scripts/contract/start-provider.js'],
-      { cwd: ROOT, env: { PATH: process.env.PATH ?? '', PORT: String(port) }, stdio: 'ignore' },
-    );
-    try {
-      const base = `http://127.0.0.1:${port}`;
-      await waitForHealth(base, child);
-
-      const setup = await fetch(`${base}${STATES}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state: 'a signed-in account exists', action: 'setup' }),
-      });
+    await withStartedProvider({}, async (base) => {
+      const setup = await setUpOver(base, 'a signed-in account exists');
       const values = (await setup.json()) as { accessToken: string };
       const me = await fetch(`${base}/v1/auth/me`, {
         headers: { Authorization: `Bearer ${values.accessToken}` },
@@ -268,15 +372,92 @@ describe('pact provider states (#151)', () => {
 
       expect(setup.status).toBe(200);
       expect(me.status).toBe(200);
-    } finally {
-      if (child.exitCode === null && child.signalCode === null) {
-        const exit = once(child, 'exit');
-        child.kill('SIGTERM');
-        await exit;
-      }
-    }
+    });
+  }, 60_000);
+
+  // #239: the state-change endpoint writes any data for anyone, so the
+  // command listens on the loopback address 127.0.0.1 only.
+  it('should_refuse_a_request_to_an_outside_address_when_start_provider_starts_the_test_composition', async () => {
+    const outside = outsideAddress();
+    await withStartedProvider({}, async (base, port) => {
+      const local = await fetch(`${base}/v1/health`);
+      const remote = fetch(`http://${outside}:${port}/v1/health`);
+
+      expect(local.status).toBe(200);
+      await expect(remote).rejects.toThrow();
+    });
+  }, 60_000);
+
+  // #239: the command pins an empty list of level editors, as
+  // stubTestEnvironment() does. A LEVEL_EDITOR_IDS of the shell, even one
+  // that is not a user id, never reaches the composition.
+  it('should_refuse_a_level_update_when_start_provider_starts_with_level_editor_ids_in_the_shell', async () => {
+    await withStartedProvider({ LEVEL_EDITOR_IDS: 'ada' }, async (base) => {
+      const setup = await setUpOver(base, 'a signed-in account exists');
+      const values = (await setup.json()) as { accessToken: string };
+      const update = await fetch(`${base}/v1/levels`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${values.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ levels: [] }),
+      });
+
+      expect(setup.status).toBe(200);
+      expect(update.status).toBe(403);
+    });
   }, 60_000);
 });
+
+// Starts scripts/contract/start-provider.js on a free port with the example
+// configuration and the given environment, runs the check against
+// http://127.0.0.1:<port>, and stops the process.
+async function withStartedProvider(
+  env: Readonly<Record<string, string>>,
+  check: (base: string, port: number) => Promise<void>,
+): Promise<void> {
+  const port = await freePort();
+  const child = spawn(
+    process.execPath,
+    ['--env-file=.env.example', 'scripts/contract/start-provider.js'],
+    {
+      cwd: ROOT,
+      env: { PATH: process.env.PATH ?? '', PORT: String(port), ...env },
+      stdio: 'ignore',
+    },
+  );
+  try {
+    const base = `http://127.0.0.1:${port}`;
+    await waitForHealth(base, child);
+    await check(base, port);
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) {
+      const exit = once(child, 'exit');
+      child.kill('SIGTERM');
+      await exit;
+    }
+  }
+}
+
+function setUpOver(base: string, state: string): Promise<Response> {
+  return fetch(`${base}${STATES}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ state, action: 'setup' }),
+  });
+}
+
+// The first IPv4 address of this machine that is not a loopback address.
+function outsideAddress(): string {
+  const address = Object.values(networkInterfaces())
+    .flat()
+    .find((entry) => entry !== undefined && entry.family === 'IPv4' && !entry.internal);
+  if (address === undefined) {
+    throw new Error('This machine has no IPv4 address outside the loopback interface.');
+  }
+  return address.address;
+}
 
 async function freePort(): Promise<number> {
   const probe = createServer();

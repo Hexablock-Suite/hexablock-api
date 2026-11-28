@@ -8,13 +8,17 @@ import {
   Post,
 } from '@nestjs/common';
 import { HttpAdapterHost, ModuleRef } from '@nestjs/core';
-import { levelResults, levels, progress, users } from '../../../src/adapters/persistence/schema.js';
 import {
   LEVEL_REPOSITORY,
   type LevelRepository,
 } from '../../../src/application/ports/level-repository.js';
 import type { TestDatabase } from '../test-database.js';
-import { PROVIDER_STATES, type StateParams, type StateValues } from './provider-states.js';
+import {
+  PROVIDER_STATES,
+  removeEveryRow,
+  type StateParams,
+  type StateValues,
+} from './provider-states.js';
 
 // The token of the database of the provider composition.
 export const PROVIDER_DATABASE = Symbol('ProviderDatabase');
@@ -43,7 +47,7 @@ export class ProviderStatesController {
   @HttpCode(HttpStatus.OK)
   async change(@Body() body: StateChangeBody): Promise<StateValues> {
     if (body.action === 'teardown') {
-      await this.removeEveryRow();
+      await removeEveryRow(this.database);
       return {};
     }
     const state = typeof body.state === 'string' ? body.state : '';
@@ -60,19 +64,10 @@ export class ProviderStatesController {
       {
         server: this.adapterHost.httpAdapter.getHttpServer(),
         levels: this.moduleRef.get<LevelRepository>(LEVEL_REPOSITORY, { strict: false }),
+        database: this.database,
       },
       paramsOf(body.params),
     );
-  }
-
-  // The level results go first, because each one belongs to a progress row,
-  // and each progress row belongs to a user.
-  private async removeEveryRow(): Promise<void> {
-    const { db } = this.database;
-    await db.delete(levelResults);
-    await db.delete(progress);
-    await db.delete(users);
-    await db.delete(levels);
   }
 }
 
