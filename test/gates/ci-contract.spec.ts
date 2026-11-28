@@ -46,9 +46,26 @@ describe('CI contract', () => {
     expect(job).not.toContain('dist/main.js');
   });
 
+  // #250: `.node-version` names the exact Node of CI, and `engines.node`
+  // starts at it. A newer 26.x still installs, so the contract job of
+  // hexablock-app, which takes the newest 26.x, installs this repository.
   it('should_use_pinned_node_when_ci_sets_up_node', () => {
-    expect(read('.node-version').trim()).toBe('26');
-    expect(workflow).toContain('node-version-file: .node-version');
+    const pinned = read('.node-version').trim();
+    const engines = (JSON.parse(read('package.json')) as { engines: { node: string } }).engines;
+
+    expect(pinned).toMatch(/^26\.\d+\.\d+$/);
+    expect(engines.node).toBe(`>=${pinned} <27`);
+    expect(workflow.match(/^ {6}- uses: actions\/setup-node@/gm)?.length).toBeGreaterThan(0);
+    expect(workflow.match(/^ {10}node-version-file: \.node-version$/gm)?.length).toBe(
+      workflow.match(/^ {6}- uses: actions\/setup-node@/gm)?.length,
+    );
+  });
+
+  // #250: without `engineStrict`, pnpm 11 only warns when the Node version
+  // breaks `engines.node`. pnpm 11 reads the setting from
+  // pnpm-workspace.yaml and ignores `engine-strict` in .npmrc.
+  it('should_reject_another_node_when_pnpm_reads_the_engines', () => {
+    expect(read('pnpm-workspace.yaml')).toMatch(/^engineStrict: true$/m);
   });
 
   it('should_repeat_every_hook_check_when_ci_runs', () => {
