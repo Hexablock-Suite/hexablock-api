@@ -347,6 +347,7 @@ pnpm test           # both suites: unit, integration and gate tests, then e2e te
 pnpm test:behavior  # behavior suite: unit, integration and e2e tests, without the gates
 pnpm test:gates     # gate suite only
 pnpm test:unit      # unit, integration and gate tests only
+pnpm test:fast      # fast feedback: the unit and domain tests only, in seconds
 pnpm test:e2e       # HTTP end-to-end tests only
 pnpm verify         # lint, format:check, typecheck, test, arch, openapi:check (the CI gate)
 pnpm openapi:check  # fails when openapi/openapi.json differs from the built app
@@ -365,9 +366,33 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,414 tests in `pnpm test`: 1,312 behavior tests and
-102 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+On 2026-11-28 the Vitest JSON reporter counts 1,420 tests in `pnpm test`: 1,312 behavior tests and
+108 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
+
+`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 881 tests of
+`test/unit/` and `test/domain/`, which start no database and no HTTP application. One gate is among
+them: `test/domain/level/level-problem.spec.ts`. The command skips the integration tests of
+`test/integration/`, the e2e tests and the other gates. `pnpm test`, `pnpm verify` and the CI
+`verify` job still run every test, so run `pnpm verify` before you push. `pnpm test:unit` is not
+the fast command: it also runs the integration tests and the gates.
+
+The times below are from the Vitest JSON reporter and the wall clock of two runs of each command, one
+run at a time. They were measured on 2026-11-28, Node v26.13.1, with the 1-minute load before each run:
+
+| Command                                                | Tests              | Run 1              | Run 2              |
+| ------------------------------------------------------ | ------------------ | ------------------ | ------------------ |
+| `pnpm test:fast`                                       | 881                | 6.3 s (load 16.0)  | 5.6 s (load 16.1)  |
+| `pnpm test:gates`                                      | 102 + 2 skipped    | 8.3 s (load 14.9)  | 8.4 s (load 14.5)  |
+| `pnpm test:unit`                                       | 1,149 + 16 skipped | 31.4 s (load 12.7) | 33.2 s (load 13.3) |
+| `pnpm exec vitest run --config ./vitest.config.e2e.ts` | 208                | 84.3 s (load 13.5) | 107.5 s (load 9.1) |
+
+The gate suite alone takes longer than the unit and domain tests, so `pnpm test:fast` leaves it out.
+In 13 of the 14 e2e files, `beforeEach` starts a new Nest application on a new PGlite database for
+each test. Each such test takes at least 1.2 s, and a sign-in test of `test/auth-sign-in.e2e-spec.ts`,
+which starts one application for its file, takes about 40 ms. In `pnpm test:fast`,
+`test/unit/infrastructure/database-pool-shutdown.child.spec.ts` takes 4.8 s of the run alone, because it
+builds the app with `pnpm build` and starts `dist/main.js` in a child process.
 
 Name each test `should_<expected_result>_when_<condition>`. The gate
 `test/gates/test-name.gate.spec.ts` fails on any other name.
