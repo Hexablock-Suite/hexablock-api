@@ -76,10 +76,11 @@
           of app.module.ts: the drivers and the adapters on the left, among them the Drizzle
           adapters over DATABASE and LevelValidators, with the two board reader tokens that alias
           one DrizzleLeaderboardReader (#218), and the input ports and the filter on the right.
-          LoggingAspect wraps SyncProgress, GetLevels, UpdateLevels, GetGlobalLeaderboard and
-          GetLevelLeaderboard; for GetLevels it also logs each broken level row (#219). The
-          AuthorizeLevelEditor input port binds to AuthorizeLevelEditorUseCase with the LevelEditors
-          of LEVEL_EDITOR_IDS (#145); the Nest container creates each adapter once.
+          LoggingAspect wraps RegisterUser, Login, AuthenticateToken, SyncProgress, GetProgress,
+          GetLevels, UpdateLevels, GetGlobalLeaderboard and GetLevelLeaderboard (#170); for
+          GetLevels it also logs each broken level row (#219). The AuthorizeLevelEditor input port
+          binds to AuthorizeLevelEditorUseCase with the LevelEditors of LEVEL_EDITOR_IDS (#145); the
+          Nest container creates each adapter once.
         </desc>
         <defs>
           <marker
@@ -340,19 +341,19 @@
           LEVEL_BOARD_READER → DrizzleLeaderboardReader
         </text>
         <text x="536" y="148" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          REGISTER_USER → RegisterUseCase
+          REGISTER_USER → LoggingAspect(RegisterUseCase)
         </text>
         <text x="536" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          LOGIN → LoginUseCase
+          LOGIN → LoggingAspect(LoginUseCase)
         </text>
         <text x="536" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          AUTHENTICATE_TOKEN → AuthenticateTokenUseCase
+          AUTHENTICATE_TOKEN → LoggingAspect(AuthenticateTokenUseCase)
         </text>
         <text x="536" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           SYNC_PROGRESS → LoggingAspect(SyncProgressUseCase)
         </text>
         <text x="536" y="212" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          GET_PROGRESS → GetProgressUseCase
+          GET_PROGRESS → LoggingAspect(GetProgressUseCase)
         </text>
         <text x="536" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           GET_LEVELS → LoggingAspect(GetLevelsUseCase)
@@ -660,8 +661,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LoggingAspect wraps SyncProgress, GetLevels, UpdateLevels and both boards (#218, #219).
-          Each chain reads from the outside in. Both board reader tokens alias one
+          LoggingAspect wraps every use case except AuthorizeLevelEditor (#170, #218, #219). Each
+          chain reads from the outside in. Both board reader tokens alias one
           DrizzleLeaderboardReader.
         </text>
         <text

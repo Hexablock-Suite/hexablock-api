@@ -28,11 +28,14 @@ const UNUSED_DATABASE_URL = 'postgres://test:test@127.0.0.1:1/unused';
 
 // Sets the configuration that AppModule reads. Call vi.unstubAllEnvs() after the test.
 // The list of level editors is empty, so no account may update the levels
-// (#145). A LEVEL_EDITOR_IDS of the shell never reaches a test.
+// (#145). A LEVEL_EDITOR_IDS of the shell never reaches a test. The rate
+// limit of sign-up and sign-in is off, because the tests sign in many times
+// from one client (#170). An AUTH_RATE_LIMIT of the shell never reaches a test.
 export function stubTestEnvironment(): void {
   vi.stubEnv('JWT_SECRET', TEST_JWT_SECRET);
   vi.stubEnv('DATABASE_URL', UNUSED_DATABASE_URL);
   vi.stubEnv('LEVEL_EDITOR_IDS', '');
+  vi.stubEnv('AUTH_RATE_LIMIT', 'off');
 }
 
 export interface TestApp {
@@ -55,6 +58,9 @@ export interface TestModuleOptions {
 export interface TestAppOptions extends Pick<TestModuleOptions, 'clock' | 'userIds'> {
   // The user ids that may update the levels (#145). Without it, no account may.
   readonly levelEditorIds?: readonly string[];
+  // The AUTH_RATE_LIMIT of the app (#170). Without it, the limit is off.
+  // null leaves the variable unset, so the default limit applies.
+  readonly authRateLimit?: string | null;
 }
 
 // Builds the module of AppModule on the given database. The user, progress
@@ -101,6 +107,9 @@ export async function createTestApp(
   stubTestEnvironment();
   if (options.levelEditorIds !== undefined) {
     vi.stubEnv('LEVEL_EDITOR_IDS', options.levelEditorIds.join(','));
+  }
+  if (options.authRateLimit !== undefined) {
+    vi.stubEnv('AUTH_RATE_LIMIT', options.authRateLimit ?? undefined);
   }
   const database = await createTestDatabase();
   const moduleRef = await testModuleOf(database, {
