@@ -16,7 +16,7 @@ import {
   PrefixPasswordHasher,
   SequenceUserIdGenerator,
 } from '../auth/fakes.js';
-import { registerRequest } from '../auth/requests.js';
+import { type CredentialProblem, registerRequest, registerRequestOf } from '../auth/requests.js';
 import { FakeStopwatch } from '../fake-stopwatch.js';
 import { UserMother } from '../object-mother/user-mother.js';
 import { userPartsOf } from '../recording-receiver.js';
@@ -39,7 +39,8 @@ export interface StoredAccount {
 // given steps sign up the accounts that a scenario needs, the when step
 // signs up, alone or inside LoggingAspect as AppModule wires it, and the then
 // steps check the answer, the stored accounts, the calls of the ports and the
-// log entries. A then step fails when no when step ran.
+// log entries. A credential that breaks its rule stops before the use case,
+// as at the border. A then step fails when no when step ran.
 export class RegisterTestApi {
   private readonly users = new InMemoryUserRepository();
   private readonly hasher = new PrefixPasswordHasher();
@@ -53,7 +54,7 @@ export class RegisterTestApi {
   );
   private readonly logger = new RecordingLogger();
   private readonly arrangements = new Arrangements();
-  private readonly outcome = new WhenOutcome<Result<UserId, RegisterProblem>>();
+  private readonly outcome = new WhenOutcome<Result<UserId, RegisterProblem | CredentialProblem>>();
   private request: RegisterUserRequest | undefined;
   private madeHashes: PromiseSettledResult<PasswordHash>[] = [];
 
@@ -69,7 +70,7 @@ export class RegisterTestApi {
   }
 
   // Signs up with the username and the password, as AuthDtoMapper builds
-  // them.
+  // them. A value that breaks its rule never reaches the use case.
   async whenRegistering(username: string, password: string): Promise<this> {
     return this.when(this.register, username, password);
   }
@@ -90,6 +91,12 @@ export class RegisterTestApi {
 
   thenTheRegistrationFailsWithUsernameTaken(): void {
     expect(this.outcome.value()).toEqual({ ok: false, error: { kind: 'username-taken' } });
+  }
+
+  // The value of the request broke the rule of this code, so the use case
+  // did not run.
+  thenTheRegistrationIsRefusedWith(problem: CredentialProblem): void {
+    expect(this.outcome.value()).toEqual({ ok: false, error: problem });
   }
 
   // An unexpected failure is not a RegisterProblem. HttpErrorFilter turns it into a 500.
@@ -168,9 +175,11 @@ export class RegisterTestApi {
     await this.arrangements.run();
     this.hash.mockClear();
     this.taken.mockClear();
-    const request = registerRequest(username, password);
-    this.request = request;
-    await this.outcome.record(() => register.execute(request));
+    const built = registerRequestOf(username, password);
+    this.request = built.ok ? built.value : undefined;
+    await this.outcome.record(() =>
+      built.ok ? register.execute(built.value) : Promise.resolve(built),
+    );
     this.madeHashes = await Promise.allSettled(
       this.hash.mock.results.map((result) => result.value as Promise<PasswordHash>),
     );

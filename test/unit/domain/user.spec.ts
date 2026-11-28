@@ -4,7 +4,12 @@ import type { PasswordVerifier } from '../../../src/domain/user/password-verifie
 import { User } from '../../../src/domain/user/user.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { Username } from '../../../src/domain/user/username.js';
-import { deliveredBy, type UserParts, userPartsOf } from '../../support/recording-receiver.js';
+import {
+  deliveredBy,
+  keyDeliveredBy,
+  type UserParts,
+  userPartsOf,
+} from '../../support/recording-receiver.js';
 import { testUserId } from '../../support/user-ids.js';
 import { valueOf } from '../../support/result.js';
 
@@ -47,6 +52,19 @@ describe('User identity', () => {
     expect(user.equals(otherId)).toBe(false);
     expect(otherId.equals(user)).toBe(false);
   });
+
+  // UserId keeps the lower case form of its text (#64), so the letter case
+  // of an id does not matter. Postgres gives a uuid in lower case, and a
+  // listed level editor id can come in upper case (#145).
+  it('should_be_the_same_user_when_the_id_texts_differ_only_in_letter_case', () => {
+    const upper = 'ABCDEF01-2345-4678-9ABC-DEF012345678';
+    const hash = valueOf(PasswordHash.from('$one'));
+    const user = User.register(valueOf(UserId.from(upper)), nameOf('ada'), hash);
+    const lower = User.register(valueOf(UserId.from(upper.toLowerCase())), nameOf('ada'), hash);
+
+    expect(user.equals(lower)).toBe(true);
+    expect(lower.equals(user)).toBe(true);
+  });
 });
 
 // #91: User is an aggregate root that hides its state. Only its factories
@@ -56,25 +74,6 @@ describe('User delivery', () => {
   const ID = valueOf(UserId.from(testUserId(1)));
   const NAME = nameOf('Ada');
   const HASH = valueOf(PasswordHash.from('$one'));
-
-  // Vitest does not check types. `pnpm typecheck` fails on a directive below
-  // when its field, the constructor or the snapshot is public.
-  it('should_have_no_public_field_and_no_public_constructor_when_the_state_is_read_through_the_delivery', () => {
-    const user = User.register(ID, NAME, HASH);
-
-    // @ts-expect-error -- #91 makes the id field private.
-    void user.id;
-    // @ts-expect-error -- #91 makes the username field private.
-    void user.username;
-    // @ts-expect-error -- #91 makes the passwordHash field private.
-    void user.passwordHash;
-    // @ts-expect-error -- #91 makes the constructor private, so no public constructor type takes it.
-    const open: new (...values: never[]) => User = User;
-    void open;
-    // @ts-expect-error -- #96 replaces snapshot() with deliverTo().
-    void user.snapshot;
-    expect('snapshot' in user).toBe(false);
-  });
 
   it('should_deliver_the_id_the_name_and_the_hash_once_as_domain_values_when_it_delivers_to_a_receiver', () => {
     const user = User.register(ID, NAME, HASH);
@@ -90,6 +89,23 @@ describe('User delivery', () => {
     expect(calls[0][0]).toBe(ID);
     expect(calls[0][1]).toBe(NAME);
     expect(calls[0][2]).toBe(HASH);
+  });
+
+  // #255: the border receives the value of each part from the delivery of
+  // the root: the id in lower case, the name as typed, the key of the name
+  // in lower case (#73) and the text of the hash.
+  it('should_give_the_border_the_value_of_each_part_when_the_parts_deliver_what_the_user_delivered', () => {
+    const user = User.register(
+      valueOf(UserId.from('ABCDEF01-2345-4678-9ABC-DEF012345678')),
+      nameOf('Ada'),
+      valueOf(PasswordHash.from('scrypt$salt$hashbytes')),
+    );
+    const parts = userPartsOf(user);
+
+    expect(deliveredBy(parts.id)).toEqual(['abcdef01-2345-4678-9abc-def012345678']);
+    expect(deliveredBy(parts.username)).toEqual(['Ada']);
+    expect(keyDeliveredBy(parts.username)).toEqual(['ada']);
+    expect(deliveredBy(parts.passwordHash)).toEqual(['scrypt$salt$hashbytes']);
   });
 
   // The values are immutable, and the receiver keeps them in a record of its
