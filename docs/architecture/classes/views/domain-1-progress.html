@@ -79,18 +79,20 @@
           restore() from those parts and keeps its LevelResult values, each one with the
           isBetterThan order of DS-4. The Standing value object holds the totals of a player in one
           game, a Stars, a LevelsCompleted, a Moves and an ElapsedTime, and the isBetterThan order
-          of S3-03. In layer 2, the LeaderboardEntry response type names the player by UserId, names
-          the account by Username (#230), and holds the value that ranks the player: a LevelResult,
-          a Score or a Standing. ProgressKey takes the UserId and the GameId built in of(), which
-          returns the key itself, compares them in equals() and delivers both to a
-          ProgressKeyReceiver with deliverTo(). GameId, Score, SyncInstant and UserId keep their
-          value private and deliver it to a receiver with deliverTo(). Each of their factories
-          returns a Result with the code of a broken rule. LevelResult keeps its four value objects
-          private, takes them built in of(), and delivers all four to a LevelResultReceiver with
-          deliverTo(). A dashed frame labelled Aggregate encloses PlayerProgress and the value
-          objects that it holds: ProgressKey, UserId, GameId, LevelResult, Score and SyncInstant. A
-          footnote gives the port signatures find(key: ProgressKey) and update(key: ProgressKey,
-          change: ProgressChange) of ProgressRepository.
+          of S3-03. In layer 2, the LeaderboardEntry response type is an alias of BoardEntry of the
+          domain with its TResult (#213). BoardEntry names the player by UserId, names the account
+          by Username (#230), and holds the value that ranks the player: a LevelResult, a Score or a
+          Standing. The view draws no line from the alias, because the alias holds no field of its
+          own (#224). ProgressKey takes the UserId and the GameId built in of(), which returns the
+          key itself, compares them in equals() and delivers both to a ProgressKeyReceiver with
+          deliverTo(). GameId, Score, SyncInstant and UserId keep their value private and deliver it
+          to a receiver with deliverTo(). Each of their factories returns a Result with the code of
+          a broken rule. LevelResult keeps its four value objects private, takes them built in of(),
+          and delivers all four to a LevelResultReceiver with deliverTo(). A dashed frame labelled
+          Aggregate encloses PlayerProgress and the value objects that it holds: ProgressKey,
+          UserId, GameId, LevelResult, Score and SyncInstant. A footnote gives the port signatures
+          find(key: ProgressKey) and update(key: ProgressKey, change: ProgressChange) of
+          ProgressRepository.
         </desc>
         <defs>
           <marker
@@ -214,40 +216,6 @@
           stroke-width="1"
           marker-end="url(#domain1progress-open)"
         />
-        <!-- LeaderboardEntry holds userId: UserId across layers: use with role and multiplicity -->
-        <path
-          d="M400 140 L176 140 L176 272"
-          fill="none"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#domain1progress-open)"
-        />
-        <!-- LeaderboardEntry<LevelResult> holds result on the board of a level: use with role and multiplicity -->
-        <line
-          x1="540"
-          y1="180"
-          x2="540"
-          y2="288"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#domain1progress-open)"
-        />
-        <!-- LeaderboardEntry<Standing> holds result on the global board of Fit and Sort: use with role and multiplicity -->
-        <path
-          d="M680 100 L868 100 L868 272"
-          fill="none"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#domain1progress-open)"
-        />
-        <!-- LeaderboardEntry<Score> holds result on the global board of Lines and Merge: use with role and multiplicity -->
-        <path
-          d="M680 132 L728 132 L728 644 L744 644"
-          fill="none"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#domain1progress-open)"
-        />
         <!-- Arrow labels and multiplicities -->
         <rect x="546" y="552" width="72" height="12" rx="2" fill="#f9f4dc" />
         <text
@@ -333,54 +301,6 @@
         >
           0..1
         </text>
-        <rect x="240" y="122" width="56" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="268"
-          y="131"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          userId 1
-        </text>
-        <rect x="546" y="210" width="52" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="572"
-          y="219"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          result 1
-        </text>
-        <rect x="764" y="82" width="52" height="12" rx="2" fill="#efe7f8" />
-        <text
-          x="790"
-          y="91"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          result 1
-        </text>
-        <rect x="730" y="598" width="52" height="12" rx="2" fill="#f9f4dc" />
-        <text
-          x="756"
-          y="607"
-          fill="#7d8a94"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.06em"
-        >
-          result 1
-        </text>
         <rect x="686" y="898" width="52" height="12" rx="2" fill="#f9f4dc" />
         <text
           x="712"
@@ -430,12 +350,12 @@
         >
           LAYER 1 · ENTITIES · src/domain/
         </text>
-        <!-- Class: LeaderboardEntry (response type of layer 2, no tactical stereotype) -->
+        <!-- Class: LeaderboardEntry (type alias of layer 2: BoardEntry of the domain with its TResult, #213; an alias carries no kind word and no tactical stereotype) -->
         <rect
           x="400"
           y="64"
           width="280"
-          height="116"
+          height="84"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -443,18 +363,7 @@
         />
         <text
           x="540"
-          y="82"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «interface»
-        </text>
-        <text
-          x="540"
-          y="100"
+          y="88"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -465,7 +374,7 @@
         </text>
         <text
           x="540"
-          y="114"
+          y="102"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -474,15 +383,9 @@
         >
           API-FR-03 · response type
         </text>
-        <line x1="400" y1="124" x2="680" y2="124" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="416" y="140" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + userId: UserId {readOnly}
-        </text>
-        <text x="416" y="156" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + username: Username {readOnly}
-        </text>
-        <text x="416" y="172" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + result: TResult {readOnly}
+        <line x1="400" y1="112" x2="680" y2="112" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="416" y="132" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          = BoardEntry&lt;TResult&gt;
         </text>
         <!-- Class: UserId («value object») -->
         <rect
@@ -1408,8 +1311,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LeaderboardEntry also names the account of the player by its Username, which view 1.3
-          draws (#230).
+          It is an alias of BoardEntry&lt;TResult&gt; of the domain (#213), which holds the UserId,
+          the Username (#230) and the result, so no line starts at the alias (#224).
         </text>
         <text
           x="24"
