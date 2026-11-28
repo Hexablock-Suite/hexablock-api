@@ -1,3 +1,4 @@
+import { receiveLevelResultOf, receiveValueOf } from '../../../src/adapters/received.js';
 import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
 import {
   type GetLevelLeaderboard,
@@ -11,15 +12,16 @@ import type { LevelHolder } from '../../../src/application/ports/level-repositor
 import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
-import { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
+import type { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import type { Mock } from 'vitest';
 import { FakeStopwatch } from '../fake-stopwatch.js';
 import { InMemoryLevelRepository } from '../in-memory-level-repository.js';
 import { levelJson, levelValidators } from '../level-format.js';
 import { storeLevel } from '../level-repository.contract.js';
-import { BoardMother, type LevelRow } from '../object-mother/board-mother.js';
+import { BoardMother, type LevelRow, type Ranked } from '../object-mother/board-mother.js';
 import { valueOf } from '../result.js';
+import { testUserId } from '../user-ids.js';
 import { RecordingLogger } from './recording-logger.js';
 import { WhenOutcome } from './when-outcome.js';
 
@@ -81,16 +83,27 @@ export class GetLevelLeaderboardTestApi {
     );
   }
 
-  // The board of the level of the query holds these rows, ranked by the domain.
-  thenTheBoardIs(rows: readonly LevelRow[]): void {
+  // The board of the level of the query holds these rows, in this order and
+  // with these ranks. The test states each row, so a wrong order fails.
+  thenTheBoardIs(rows: readonly Ranked<LevelRow>[]): void {
     const answer = this.outcome.value();
-    expect(answer).toEqual({
-      ok: true,
-      value: {
-        gameId: this.query?.gameId,
-        levelId: this.query?.levelId,
-        entries: RankedBoard.of(rows.map((row) => BoardMother.levelEntry(row))),
-      },
+    expect(
+      answer.ok
+        ? {
+            gameId: answer.value.gameId,
+            levelId: answer.value.levelId,
+            entries: rowsOf(answer.value.entries, (result) => receiveLevelResultOf(result)),
+          }
+        : answer,
+    ).toEqual({
+      gameId: this.query?.gameId,
+      levelId: this.query?.levelId,
+      entries: rows.map(({ rank, player, ...values }) => ({
+        rank,
+        ...playerOf(player),
+        levelId: BoardMother.LEVEL_ID,
+        ...values,
+      })),
     });
   }
 
@@ -143,4 +156,32 @@ async function storedLevels(): Promise<InMemoryLevelRepository> {
   const levels = new InMemoryLevelRepository(levelValidators());
   await storeLevel(levels, levelJson('hexa-fit', 'fit-01'));
   return levels;
+}
+
+// Runs one delivery of a ranked board and gives each row as plain values, in
+// the order of the delivery. The rank, the userId and the username leave
+// through their own deliveries, as the border reads them, and valuesOf gives
+// the values of the result. A then step compares these rows with the rows
+// that the test states, so the expected board never comes from RankedBoard.
+function rowsOf<TResult extends { isBetterThan(other: TResult): boolean }, TValues>(
+  board: RankedBoard<TResult>,
+  valuesOf: (result: TResult) => TValues,
+): ({ rank: number; userId: string; username: string } & TValues)[] {
+  const rows: ({ rank: number; userId: string; username: string } & TValues)[] = [];
+  board.deliverTo({
+    receive(rank, userId, username, result) {
+      rows.push({
+        rank: receiveValueOf(rank),
+        userId: receiveValueOf(userId),
+        username: receiveValueOf(username),
+        ...valuesOf(result),
+      });
+    },
+  });
+  return rows;
+}
+
+// The userId and the username of player n, as the board delivers them.
+function playerOf(n: number): { userId: string; username: string } {
+  return { userId: testUserId(n), username: BoardMother.usernameText(n) };
 }
