@@ -60,6 +60,7 @@ export class ProviderStatesController {
       {
         server: this.adapterHost.httpAdapter.getHttpServer(),
         levels: this.moduleRef.get<LevelRepository>(LEVEL_REPOSITORY, { strict: false }),
+        database: this.database,
       },
       paramsOf(body.params),
     );
