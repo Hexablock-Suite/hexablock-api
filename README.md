@@ -378,7 +378,8 @@ them: `test/domain/level/level-problem.spec.ts`. The command skips the integrati
 the fast command: it also runs the integration tests and the gates.
 
 The times below are from the Vitest JSON reporter and the wall clock of two runs of each command, one
-run at a time. They were measured on 2026-11-28, Node v26.13.1, with the 1-minute load before each run:
+run at a time. They were measured on 2026-11-28, Node v26.13.1, with the 1-minute load before each run, before #255
+removed isolated tests, so their test counts are older than the counts above:
 
 | Command                                                | Tests              | Run 1              | Run 2              |
 | ------------------------------------------------------ | ------------------ | ------------------ | ------------------ |
@@ -414,8 +415,8 @@ service `LevelValidators` in `test/domain/level/`: its `when…` steps are `asyn
 
 The review demo (#257) shows that the tests hold the behavior, not the shape of the code. Run it on a
 scratch branch and never push that branch: a push starts CI and leaves a branch that nobody merges.
-First count the two suites with `pnpm test:behavior` and `pnpm test:gates`: the 1,334 behavior
-tests and the 118 gate tests above. Then make two changes, one at a time, undo each one before the
+First count the two suites with `pnpm test:behavior` and `pnpm test:gates`: the behavior and gate
+counts above. Then make two changes, one at a time, undo each one before the
 next, and run `pnpm test` after each:
 
 1. A refactor that keeps the behavior. Add the `Clock` port to the constructor of `LoginUseCase`,
