@@ -2,8 +2,9 @@ import { GetLevelLeaderboardTestApi } from '../../support/testing-api/get-level-
 
 // API-FR-03. The reader only filters. The domain ranks the board: the use
 // case builds RankedBoard.of() with the rows of the reader and orders
-// nothing (decision of #83). The RankedBoard spec pins the order and the
-// shared rank of the board.
+// nothing (decision of #83). These cases pin the order of the board, the
+// rank of each row and the shared rank of a tie through the use case
+// (#255). Each then step states the rows of the board, with their ranks.
 describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
   let board: GetLevelLeaderboardTestApi;
 
@@ -13,21 +14,46 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
 
   // The use case asks the reader for the board of the level of the query,
   // and the board that it answers holds the rows that the reader gave,
-  // ranked by the domain. Two entries with different stars pin that the
-  // board is ranked, not raw.
+  // ranked by the domain (DS-4). The PlayerProgress spec pins each step of
+  // the order of a level result through the root, so these rows differ only
+  // in stars. The userId order differs from the board order, so the order
+  // of a tie cannot make the test pass.
   it('should_rank_the_level_board_through_the_domain_when_the_reader_gives_entries_in_no_order', async () => {
     board.givenTheReaderGives([
       { player: 4, stars: 2, moves: 10, elapsedMs: 40_000 },
+      { player: 3, stars: 0, moves: 10, elapsedMs: 40_000 },
+      { player: 1, stars: 1, moves: 10, elapsedMs: 40_000 },
       { player: 2, stars: 3, moves: 10, elapsedMs: 40_000 },
     ]);
 
     await board.whenReadingTheBoardOf('hexa-fit', 'fit-01');
 
     board.thenTheBoardIs([
-      { player: 2, stars: 3, moves: 10, elapsedMs: 40_000 },
-      { player: 4, stars: 2, moves: 10, elapsedMs: 40_000 },
+      { rank: 1, player: 2, stars: 3, moves: 10, elapsedMs: 40_000 },
+      { rank: 2, player: 4, stars: 2, moves: 10, elapsedMs: 40_000 },
+      { rank: 3, player: 1, stars: 1, moves: 10, elapsedMs: 40_000 },
+      { rank: 4, player: 3, stars: 0, moves: 10, elapsedMs: 40_000 },
     ]);
     board.thenTheReaderWasAskedOnceForTheLevelOfTheQuery();
+  });
+
+  // A full tie ranks neither player first: the tied rows share a rank, and
+  // the next rank skips: 1, 1, 3 (decision of #83, #195). Tied rows come out
+  // by userId ascending. The reader gives them by userId descending.
+  it('should_share_a_rank_skip_the_next_rank_and_list_by_user_id_when_two_level_results_tie_fully', async () => {
+    board.givenTheReaderGives([
+      { player: 3, stars: 1, moves: 10, elapsedMs: 40_000 },
+      { player: 2, stars: 3, moves: 10, elapsedMs: 40_000 },
+      { player: 1, stars: 3, moves: 10, elapsedMs: 40_000 },
+    ]);
+
+    await board.whenReadingTheBoardOf('hexa-fit', 'fit-01');
+
+    board.thenTheBoardIs([
+      { rank: 1, player: 1, stars: 3, moves: 10, elapsedMs: 40_000 },
+      { rank: 1, player: 2, stars: 3, moves: 10, elapsedMs: 40_000 },
+      { rank: 3, player: 3, stars: 1, moves: 10, elapsedMs: 40_000 },
+    ]);
   });
 
   // A board lists only the players who have a result to rank (decision of
@@ -87,7 +113,7 @@ describe('GetLevelLeaderboardUseCase (API-FR-03)', () => {
 
     await board.whenReadingTheBoardThroughTheLoggingAspect('hexa-fit', 'fit-01');
 
-    board.thenTheBoardIs([{ player: 1, stars: 3, moves: 10, elapsedMs: 40_000 }]);
+    board.thenTheBoardIs([{ rank: 1, player: 1, stars: 3, moves: 10, elapsedMs: 40_000 }]);
     board.thenTheLogEntriesAre([
       { useCase: 'GetLevelLeaderboard', outcome: 'success', elapsedMs: 0 },
     ]);

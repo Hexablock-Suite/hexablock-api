@@ -9,7 +9,11 @@ function created<T>(result: Result<T, string>): T {
 
 const count = (value: number): LevelsCompleted => created(LevelsCompleted.of(value));
 
-// S3-03: the count of levels of one game that a player completed.
+// S3-03: the count of levels of one game that a player completed. The
+// GetGlobalLeaderboard spec pins the order of two counts through the use
+// case (#255), and the Standing spec pins a count of zero through the
+// factory of Standing. A use case takes each count built, so the rules of
+// the factory stay here.
 describe('LevelsCompleted', () => {
   it('should_accept_the_count_when_value_is_a_non_negative_safe_integer', () => {
     expect(deliveredBy(count(0))).toEqual([0]);
@@ -38,21 +42,5 @@ describe('LevelsCompleted', () => {
       ok: false,
       error: 'invalid-levels-completed',
     });
-  });
-
-  it('should_be_more_only_when_its_count_is_greater_than_the_other', () => {
-    expect(count(3).isMoreThan(count(2))).toBe(true);
-    expect(count(2).isMoreThan(count(2))).toBe(false);
-    expect(count(1).isMoreThan(count(2))).toBe(false);
-  });
-
-  it('should_tell_that_no_level_is_completed_only_when_the_count_is_zero', () => {
-    expect(count(0).isNone()).toBe(true);
-    expect(count(1).isNone()).toBe(false);
-  });
-
-  it('should_be_equal_when_two_counts_hold_the_same_value', () => {
-    expect(count(2).equals(count(2))).toBe(true);
-    expect(count(2).equals(count(3))).toBe(false);
   });
 });

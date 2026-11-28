@@ -7,7 +7,6 @@ import { UserId } from '../../../src/domain/user/user-id.js';
 import { USERNAME_CHARACTERS, Username } from '../../../src/domain/user/username.js';
 import { deliveredBy } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
-import { testUserId } from '../../support/user-ids.js';
 
 const ADA_ID = '6f1c1d0e-2b7a-4c55-9a51-0d6c7a1e8f01';
 
@@ -66,24 +65,6 @@ describe('UserId', () => {
     const nil = '00000000-0000-0000-0000-000000000000';
 
     expect(deliveredBy(userId(nil))).toEqual([nil]);
-  });
-
-  // A leaderboard lists full ties in one fixed order: the ids in ascending
-  // order of their lower case text (decision of #83). Only the leaderboard
-  // files of test/domain/progress reach this order. The use case tests of
-  // the leaderboards do not, so the case stays until they do (#255).
-  it('should_come_before_another_id_when_its_lower_case_value_sorts_first', () => {
-    const first = userId(testUserId(1));
-    const second = userId(testUserId(2));
-    // The raw text «F…» sorts before «a…», but the lower case text «f…» sorts after it.
-    const upperF = userId('F0000000-0000-4000-8000-000000000000');
-    const lowerA = userId('a0000000-0000-4000-8000-000000000000');
-
-    expect(first.comesBefore(second)).toBe(true);
-    expect(second.comesBefore(first)).toBe(false);
-    expect(first.comesBefore(userId(testUserId(1)))).toBe(false);
-    expect(lowerA.comesBefore(upperF)).toBe(true);
-    expect(upperF.comesBefore(lowerA)).toBe(false);
   });
 });
 

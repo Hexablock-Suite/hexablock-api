@@ -1,3 +1,4 @@
+import { receiveValueOf } from '../../../src/adapters/received.js';
 import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
 import {
   type GetGlobalLeaderboard,
@@ -7,11 +8,19 @@ import {
 import type { GlobalBoardReader } from '../../../src/application/ports/global-board-reader.js';
 import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { GameId } from '../../../src/domain/progress/game-id.js';
-import { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
+import type { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
+import type { Standing } from '../../../src/domain/progress/standing.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import { FakeStopwatch } from '../fake-stopwatch.js';
-import { BoardMother, type ScoreRow, type StandingRow } from '../object-mother/board-mother.js';
+import {
+  BoardMother,
+  type Ranked,
+  type ScoreRow,
+  type StandingRow,
+  type StandingTotals,
+} from '../object-mother/board-mother.js';
 import { ProgressMother } from '../object-mother/progress-mother.js';
+import { testUserId } from '../user-ids.js';
 import { RecordingLogger } from './recording-logger.js';
 import { WhenOutcome } from './when-outcome.js';
 
@@ -19,6 +28,13 @@ import { WhenOutcome } from './when-outcome.js';
 export interface GlobalRows {
   readonly highScores?: readonly ScoreRow[];
   readonly standings?: readonly StandingRow[];
+}
+
+// The rows of the two ranked global boards of a game as a test states them,
+// each with the rank that the test expects, in board order.
+export interface RankedGlobalRows {
+  readonly highScores?: readonly Ranked<ScoreRow>[];
+  readonly standings?: readonly Ranked<StandingRow>[];
 }
 
 // Testing API of GetGlobalLeaderboardUseCase (API-FR-03), alone or inside
@@ -59,19 +75,32 @@ export class GetGlobalLeaderboardTestApi {
     );
   }
 
-  // Both boards of the game of the query hold these rows, ranked by the domain.
-  thenTheBoardsAre(rows: GlobalRows): void {
-    expect(this.outcome.value()).toEqual({
-      ok: true,
-      value: {
-        gameId: this.gameId,
-        highScores: RankedBoard.of(
-          (rows.highScores ?? []).map((row) => BoardMother.scoreEntry(row)),
-        ),
-        standings: RankedBoard.of(
-          (rows.standings ?? []).map((row) => BoardMother.standingEntry(row)),
-        ),
-      },
+  // Both boards of the game of the query hold these rows, in this order and
+  // with these ranks. The test states each row, so a wrong order fails.
+  thenTheBoardsAre(rows: RankedGlobalRows): void {
+    const answer = this.outcome.value();
+    expect(
+      answer.ok
+        ? {
+            gameId: answer.value.gameId,
+            highScores: rowsOf(answer.value.highScores, (score) => ({
+              score: receiveValueOf(score),
+            })),
+            standings: rowsOf(answer.value.standings, standingTotalsOf),
+          }
+        : answer,
+    ).toEqual({
+      gameId: this.gameId,
+      highScores: (rows.highScores ?? []).map(({ rank, player, score }) => ({
+        rank,
+        ...playerOf(player),
+        score,
+      })),
+      standings: (rows.standings ?? []).map((row) => ({
+        rank: row.rank,
+        ...playerOf(row.player),
+        ...BoardMother.standingTotals(row),
+      })),
     });
   }
 
@@ -92,4 +121,49 @@ export class GetGlobalLeaderboardTestApi {
     await this.outcome.record(() => useCase.execute(game));
     return this;
   }
+}
+
+// Runs one delivery of a ranked board and gives each row as plain values, in
+// the order of the delivery. The rank, the userId and the username leave
+// through their own deliveries, as the border reads them, and valuesOf gives
+// the values of the result. A then step compares these rows with the rows
+// that the test states, so the expected board never comes from RankedBoard.
+function rowsOf<TResult extends { isBetterThan(other: TResult): boolean }, TValues>(
+  board: RankedBoard<TResult>,
+  valuesOf: (result: TResult) => TValues,
+): ({ rank: number; userId: string; username: string } & TValues)[] {
+  const rows: ({ rank: number; userId: string; username: string } & TValues)[] = [];
+  board.deliverTo({
+    receive(rank, userId, username, result) {
+      rows.push({
+        rank: receiveValueOf(rank),
+        userId: receiveValueOf(userId),
+        username: receiveValueOf(username),
+        ...valuesOf(result),
+      });
+    },
+  });
+  return rows;
+}
+
+// The userId and the username of player n, as the board delivers them.
+function playerOf(n: number): { userId: string; username: string } {
+  return { userId: testUserId(n), username: BoardMother.usernameText(n) };
+}
+
+// The four totals that one delivery of a standing gives.
+function standingTotalsOf(standing: Standing): StandingTotals {
+  const received: StandingTotals[] = [];
+  standing.deliverTo({
+    receive(stars, levels, moves, elapsedTime) {
+      received.push({
+        stars: receiveValueOf(stars),
+        levels: receiveValueOf(levels),
+        moves: receiveValueOf(moves),
+        elapsedMs: receiveValueOf(elapsedTime),
+      });
+    },
+  });
+  if (received.length !== 1) throw new Error(`The standing delivered ${received.length} times.`);
+  return received[0];
 }

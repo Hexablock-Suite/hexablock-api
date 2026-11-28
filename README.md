@@ -366,11 +366,11 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,345 tests in `pnpm test`: 1,226 behavior tests and
+On 2026-11-28 the Vitest JSON reporter counts 1,330 tests in `pnpm test`: 1,211 behavior tests and
 119 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
-`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 881 tests of
+`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 760 tests of
 `test/unit/` and `test/domain/`, which start no database and no HTTP application. One gate is among
 them: `test/domain/level/level-problem.spec.ts`. The command skips the integration tests of
 `test/integration/`, the e2e tests and the other gates. `pnpm test`, `pnpm verify` and the CI
@@ -424,12 +424,11 @@ next, and run `pnpm test` after each:
    `src/infrastructure/app.module.ts` and `test/support/testing-api/login.test-api.ts` only. No test
    case changes, because only the Testing API builds the use case.
 2. A change of behavior. In `Standing.isBetterThan()` (`src/domain/progress/standing.ts`), compare
-   the time before the moves. `pnpm test` fails on two named tests:
-   `should_rank_fewer_total_moves_first_when_stars_and_levels_completed_are_equal` of
-   `test/domain/progress/standing.spec.ts` and
-   `should_rank_the_board_by_the_standing_comparison_when_the_entries_come_in_no_order` of
-   `test/domain/progress/ranked-board.spec.ts`. Each failure shows the expected and the received
-   value.
+   the time before the moves. `pnpm test` fails on one named test, in the row of its table where
+   fewer moves win over more time:
+   `should_rank_more_stars_then_more_levels_then_fewer_moves_then_less_time_first_when_the_reader_gives_two_standings`
+   of `test/unit/application/get-global-leaderboard.use-case.spec.ts`. The failure shows the expected
+   and the received board.
 
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.
