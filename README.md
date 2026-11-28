@@ -180,13 +180,13 @@ imports no package (rule R-application-pure).
 The aspects live in the application layer: **Q12** in [layers.md](docs/architecture/layers.md#resolved-questions).
 In the session of 2026-11-06 the professor answered that the aspects talk to the use case, so they
 belong there, built as decorators with one interface common to the use cases, without libraries.
-`UseCaseAspect` and `LoggingAspect` live in [src/application/aspects](src/application/aspects).
+`UseCaseAspect`, `LoggingAspect` and `AuthorizationAspect` live in [src/application/aspects](src/application/aspects).
 `LoggingAspect` writes a typed entry to the `Logger` port
 ([src/application/ports/logger.ts](src/application/ports/logger.ts)), and `NestLogger` in
 [src/adapters/logging](src/adapters/logging) implements it and writes the text.
 `AppModule` wraps `RegisterUseCase`, `LoginUseCase`, `AuthenticateTokenUseCase`, `SyncProgressUseCase`, `GetProgressUseCase`,
 `GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and `GetLevelLeaderboardUseCase` in `LoggingAspect`,
-each under the name of its input port, so a failed sign-in leaves a log entry (#170). `AuthorizeLevelEditorUseCase` has no aspect. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
+each under the name of its input port, so a failed sign-in leaves a log entry (#170). For `UpdateLevelsUseCase`, `AuthorizationAspect` sits inside `LoggingAspect`, so a rejected level update leaves a log entry too (#180). It logs the use case name, the outcome and, for a failure, only its `kind`, so a
 value that the client sent never reaches the log. For `GetLevels`, the aspect also writes one entry per stored level
 row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section, from `unavailableLevelEntries()`.
 No use case imports the `Logger` port (rule `only-aspects-import-logger-port`, #219). A request value that breaks its rule stops in its
@@ -247,8 +247,8 @@ export LEVEL_EDITOR_IDS=0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b,6f1c1d0e-2b7a-4c55-
 pnpm start:dev
 ```
 
-An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` gets
-403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
+An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` whose
+body passes the shape check gets 403 with the `ErrorDto` body; a malformed body gets 400 first (#180). An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
 does. The account that a deploy uses to send the levels must be in the list (see [Deploy](#deploy)).
 
 Sign-up and sign-in have a rate limit for each client
@@ -347,6 +347,7 @@ pnpm test           # both suites: unit, integration and gate tests, then e2e te
 pnpm test:behavior  # behavior suite: unit, integration and e2e tests, without the gates
 pnpm test:gates     # gate suite only
 pnpm test:unit      # unit, integration and gate tests only
+pnpm test:fast      # fast feedback: the unit and domain tests only, in seconds
 pnpm test:e2e       # HTTP end-to-end tests only
 pnpm verify         # lint, format:check, typecheck, test, arch, openapi:check (the CI gate)
 pnpm openapi:check  # fails when openapi/openapi.json differs from the built app
@@ -365,9 +366,33 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,427 tests in `pnpm test`: 1,325 behavior tests and
-102 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+On 2026-11-28 the Vitest JSON reporter counts 1,420 tests in `pnpm test`: 1,302 behavior tests and
+118 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
+
+`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 881 tests of
+`test/unit/` and `test/domain/`, which start no database and no HTTP application. One gate is among
+them: `test/domain/level/level-problem.spec.ts`. The command skips the integration tests of
+`test/integration/`, the e2e tests and the other gates. `pnpm test`, `pnpm verify` and the CI
+`verify` job still run every test, so run `pnpm verify` before you push. `pnpm test:unit` is not
+the fast command: it also runs the integration tests and the gates.
+
+The times below are from the Vitest JSON reporter and the wall clock of two runs of each command, one
+run at a time. They were measured on 2026-11-28, Node v26.13.1, with the 1-minute load before each run:
+
+| Command                                                | Tests              | Run 1              | Run 2              |
+| ------------------------------------------------------ | ------------------ | ------------------ | ------------------ |
+| `pnpm test:fast`                                       | 881                | 6.3 s (load 16.0)  | 5.6 s (load 16.1)  |
+| `pnpm test:gates`                                      | 102 + 2 skipped    | 8.3 s (load 14.9)  | 8.4 s (load 14.5)  |
+| `pnpm test:unit`                                       | 1,149 + 16 skipped | 31.4 s (load 12.7) | 33.2 s (load 13.3) |
+| `pnpm exec vitest run --config ./vitest.config.e2e.ts` | 208                | 84.3 s (load 13.5) | 107.5 s (load 9.1) |
+
+The gate suite alone takes longer than the unit and domain tests, so `pnpm test:fast` leaves it out.
+In 13 of the 14 e2e files, `beforeEach` starts a new Nest application on a new PGlite database for
+each test. Each such test takes at least 1.2 s, and a sign-in test of `test/auth-sign-in.e2e-spec.ts`,
+which starts one application for its file, takes about 40 ms. In `pnpm test:fast`,
+`test/unit/infrastructure/database-pool-shutdown.child.spec.ts` takes 4.8 s of the run alone, because it
+builds the app with `pnpm build` and starts `dist/main.js` in a child process.
 
 Name each test `should_<expected_result>_when_<condition>`. The gate
 `test/gates/test-name.gate.spec.ts` fails on any other name.
@@ -382,8 +407,10 @@ Below it, the Object Mothers of `test/support/object-mother/`, such as `UserMoth
 domain data with the public factories and know no double. Each `then…` step fails when no
 `when…` step ran. `pnpm lint` fails on a test that asserts neither with `expect` nor through a
 `then…` step (`vitest/expect-expect`), and on a `when…` step without `await`
-(`typescript/no-floating-promises`). `update-levels.use-case.spec.ts` and
-`logging-aspect.spec.ts` still build their doubles in the test; a later change of #254 moves them.
+(`typescript/no-floating-promises`). Every test file of `test/unit/application/` has this shape, the
+tests of `LoggingAspect` and `AuthorizationAspect` included, and so has the test of the domain
+service `LevelValidators` in `test/domain/level/`: its `when…` steps are `async` too, although
+`check()` is synchronous.
 
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.

@@ -42,7 +42,7 @@ flowchart TB
     REPOPORTS(["Output ports: UserRepository, ProgressRepository,<br/>GlobalBoardReader, LevelBoardReader, LevelRepository<br/>with its roles LevelLister, LevelHolder,<br/>LevelFinder and LevelUpdater"])
     SECPORTS(["PasswordHasher, TokenIssuer and<br/>UserIdGenerator ports"])
     CLOCK(["Clock port and CLOCK token<br/>ports/clock.ts"])
-    ASPECTS["aspects/: UseCaseAspect, LoggingAspect"]
+    ASPECTS["aspects/: UseCaseAspect, LoggingAspect,<br/>AuthorizationAspect"]
     STOPPORT(["Stopwatch port and STOPWATCH token<br/>ports/stopwatch.ts"])
     LOGPORT(["Logger port and LOGGER token<br/>ports/logger.ts"])
   end
@@ -62,8 +62,8 @@ flowchart TB
   APPMOD -->|binds CLOCK to| SYSCLOCK
   PERFSW -.->|implements| STOPPORT
   NESTLOGGER -.->|implements| LOGPORT
-  ASPECTS -->|uses| LOGPORT
-  ASPECTS -->|uses| STOPPORT
+  ASPECTS -->|LoggingAspect uses| LOGPORT
+  ASPECTS -->|LoggingAspect uses| STOPPORT
   CONTROLLERS -->|calls| INPORTS
   GUARD -->|calls| INPORTS
   UC -.->|implements| INPORTS
@@ -173,7 +173,7 @@ The folders `http` and `persistence` of layer 3 never import each other. A contr
 - **Drizzle repositories and row mappers:** `src/adapters/persistence`. The mappers turn rows into entities and back.
 - **JWT guard:** `src/adapters/http`. It calls the `AuthenticateToken` input port, as a controller calls its input ports, and never calls `TokenIssuer`. `AuthenticateTokenUseCase` verifies the token through the `TokenIssuer` port, asks the `UserRepository` port if its user is still stored ([#137](https://github.com/Hexablock-Suite/hexablock-api/issues/137)), and returns the `UserId` or a failed `Result`. The docs named two options, a separate `TokenVerifier` port or an `AuthenticateToken` input port. This draft takes the input port, as an assumption for team review: decision 14 of [classes.md](classes.md).
 - **Adapters of the system services:** layer 3, one folder per library (#212, option C). `JwtTokenIssuer` is in `src/adapters/jwt`, `ScryptPasswordHasher` and `RandomUserIdGenerator` are in `src/adapters/crypto`, `SystemClock` and `PerformanceStopwatch` are in `src/adapters/clock` and `NestLogger` is in `src/adapters/logging`. `auth-config.ts` stays in `src/infrastructure/auth`: it reads the environment and builds the `JwtService` of `JwtTokenIssuer`.
-- **AOP aspects over use cases:** `src/application/aspects`, as custom decorators, never Nest interceptors (rule `application-imports-only-domain`). `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and each aspect extends it. See Q12.
+- **AOP aspects over use cases:** `src/application/aspects`, as custom decorators, never Nest interceptors (rule `application-imports-only-domain`). `UseCaseAspect` implements `UseCase`, the generic interface that each input port binds, and each aspect extends it. `LoggingAspect` writes each call to the `Logger` port, and `AuthorizationAspect` lets only a level editor reach `UpdateLevels` ([#180](https://github.com/Hexablock-Suite/hexablock-api/issues/180)); `AppModule` puts `AuthorizationAspect` inside `LoggingAspect`, so the log sees each rejected attempt. See Q12.
 - **Logging:** the `Logger` port lives in `src/application/ports/logger.ts`. It takes a typed entry (use case name, outcome, and the `kind` of a failure, or the name, string `code` and stack frames of a thrown error, never its message, or the `gameId`, `levelId` and reason code of a stored level row that breaks a rule). `NestLogger` in `src/adapters/logging` implements it and writes the text (decision 10 of [classes.md](classes.md)). A failure logs only its `kind`, so a value that the client sent never reaches the log. Only the aspects write to the port: rule `only-aspects-import-logger-port` lets only `src/application/aspects` import `ports/logger.ts`. Each entry of a call also gives `elapsedMs`, the duration of the call, which `LoggingAspect` reads from the `Stopwatch` port in `src/application/ports/stopwatch.ts` before and after the call; `PerformanceStopwatch` in `src/adapters/clock` implements it (#181). `LoggingAspect` also writes the entry of each stored level row that breaks a rule: `AppModule` wraps `GetLevels` in it and gives it `unavailableLevelEntries()`, and `GetLevelsUseCase` holds no logger (#219).
 - **Swagger and OpenAPI:** `@nestjs/swagger` decorators on controllers and DTOs in `src/adapters/http`. `src/infrastructure/http-app.ts` builds the document. `openapi/openapi.json` is its committed export.
 - **NestJS modules:** `src/infrastructure`. Nest stays out of `src/domain`, `src/application` and `src/adapters/persistence`. A Nest injection token next to a port is a plain `Symbol`, such as `CLOCK`.

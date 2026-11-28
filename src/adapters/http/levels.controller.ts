@@ -2,11 +2,13 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
   Inject,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -22,24 +24,27 @@ import { GET_LEVELS, type GetLevels } from '../../application/levels/get-levels.
 import {
   UPDATE_LEVELS,
   type UpdateLevels,
+  type UpdateLevelsError,
 } from '../../application/levels/update-levels.use-case.js';
 import { ErrorDto } from './error.dto.js';
-import { JwtAuthGuard } from './jwt-auth.guard.js';
-import { LevelEditorGuard } from './level-editor.guard.js';
+import { type AuthenticatedRequest, JwtAuthGuard } from './jwt-auth.guard.js';
 import { LevelDtoMapper } from './level-dto.mapper.js';
 import { LevelsDto } from './level.dto.js';
 import { UNAUTHORIZED } from './unauthorized.response.js';
 
 // The level definitions of Fit and Sort (API-FR-04). The read has no guard,
 // and one call gives every level. A stored level that breaks a rule hides no
-// other level: the read names it in unavailable (#147). The update is behind JwtAuthGuard and
-// LevelEditorGuard: only an account in the list of level editors of the
-// configuration may update, with no roles (Q4, #145). It is an idempotent
-// batch, so a retry of the same batch is safe (S3-10). LevelDtoMapper builds
-// the request and the answer. A request that the mapper rejects and a failed
-// Result become a 400, and HttpErrorFilter answers it with ErrorDto
-// (API-FR-06). Each detail of that body names one level by its gameId and
-// its levelId.
+// other level: the read names it in unavailable (#147). The update is behind
+// JwtAuthGuard. Only an account in the list of level editors of the
+// configuration may update, with no roles (Q4, #145): AuthorizationAspect
+// checks the UserId of the request inside the UpdateLevels port (#180). It
+// is an idempotent batch, so a retry of the same batch is safe (S3-10).
+// LevelDtoMapper builds the request and the answer. A request that the
+// mapper rejects becomes a 400 for any account, because the mapper runs
+// before the aspect (option A of 2026-11-28). A failed Result of kind
+// not-a-level-editor becomes a 403, and one of kind invalid-levels a 400.
+// HttpErrorFilter answers each one with ErrorDto (API-FR-06). Each detail of
+// a 400 of invalid-levels names one level by its gameId and its levelId.
 @ApiTags('levels')
 @Controller('levels')
 export class LevelsController {
@@ -65,7 +70,7 @@ export class LevelsController {
 
   @Put()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard, LevelEditorGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiNoContentResponse({
     description:
@@ -82,14 +87,25 @@ export class LevelsController {
     description:
       'The account of the token is not in the list of level editors of the configuration. An empty or unset list lets no account update. No level is saved.',
   })
-  async update(@Body() body: LevelsDto): Promise<void> {
-    const request = LevelDtoMapper.toRequest(body);
-    if (!request.ok) {
-      throw new BadRequestException(request.error);
+  async update(@Body() body: LevelsDto, @Req() request: AuthenticatedRequest): Promise<void> {
+    const updateRequest = LevelDtoMapper.toRequest(body, request.userId);
+    if (!updateRequest.ok) {
+      throw new BadRequestException(updateRequest.error);
     }
-    const result = await this.updateLevels.execute(request.value);
+    const result = await this.updateLevels.execute(updateRequest.value);
     if (!result.ok) {
-      throw new BadRequestException(LevelDtoMapper.toDetails(result.error.problems));
+      throw updateErrorOf(result.error);
     }
+  }
+}
+
+// Each expected failure of the update has its own status. The 403 keeps the
+// message of #145, so a client sees the same answer as before #180.
+function updateErrorOf(problem: UpdateLevelsError): Error {
+  switch (problem.kind) {
+    case 'not-a-level-editor':
+      return new ForbiddenException('This account may not update levels');
+    case 'invalid-levels':
+      return new BadRequestException(LevelDtoMapper.toDetails(problem.problems));
   }
 }

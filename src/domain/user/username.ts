@@ -41,8 +41,8 @@ export type UsernameProblem = 'invalid-username';
 // The key is the name in lower case. Two names collide when their keys are
 // equal, and no two users have names that collide, so `Ada` cannot register
 // after `ada` (#62). collidesWith() is the business name of that rule (#100).
-// The persistence adapter stores the key and compares it in SQL, and the
-// database only keeps it unique (#73).
+// The repository of the users finds and keeps a user by the key, so a
+// lookup and a sign-up compare names as collidesWith() does (#73).
 export class Username {
   private readonly key: string;
 
@@ -64,8 +64,8 @@ export class Username {
     receiver.receive(this.value);
   }
 
-  // Delivers the key to a receiver of the border. The persistence adapter
-  // stores it and compares it.
+  // Delivers the key to a receiver of the border. The repository of the
+  // users keeps it and compares it.
   deliverKeyTo(receiver: ValueReceiver<string>): void {
     receiver.receive(this.key);
   }
@@ -78,7 +78,7 @@ export class Username {
 
   // Tells if two names collide: they differ at most in letter case. `Ada`
   // and `ada` collide, `Ada` and `Adb` do not, and a name collides with itself.
-  // The UserRepository contract checks that the SQL of the adapter agrees.
+  // The UserRepository contract checks that each repository agrees.
   collidesWith(other: Username): boolean {
     return this.key === other.key;
   }

@@ -1,4 +1,5 @@
 import { receiveValueOf } from '../../../src/adapters/received.js';
+import { LoggingAspect } from '../../../src/application/aspects/logging-aspect.js';
 import type { LoginRequest } from '../../../src/application/auth/credentials.js';
 import {
   type Login,
@@ -7,6 +8,7 @@ import {
 } from '../../../src/application/auth/login.use-case.js';
 import { RegisterUseCase } from '../../../src/application/auth/register.use-case.js';
 import type { SessionToken } from '../../../src/application/auth/session-token.js';
+import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { PasswordHasher } from '../../../src/application/ports/password-hasher.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import { Password } from '../../../src/domain/user/password.js';
@@ -19,8 +21,10 @@ import {
   SequenceUserIdGenerator,
 } from '../auth/fakes.js';
 import { loginRequest, registerRequest } from '../auth/requests.js';
+import { FakeStopwatch } from '../fake-stopwatch.js';
 import { testUserId } from '../user-ids.js';
 import { Arrangements } from './arrangements.js';
+import { RecordingLogger } from './recording-logger.js';
 import { WhenOutcome } from './when-outcome.js';
 
 // The text of the dummy password of LoginUseCase, as PrefixPasswordHasher hashes it.
@@ -37,8 +41,9 @@ interface Built {
 // Testing API of LoginUseCase (API-FR-01). It builds the use case and its
 // test doubles, and the doubles stay private: a test names no double. The
 // given steps prepare the accounts and the hasher, the when steps build the
-// use case or sign in, and the then steps check the answer and the calls of
-// the ports. The ports are the boundary of the hexagon, so a then step
+// use case or sign in, alone or inside LoggingAspect as AppModule wires it,
+// and the then steps check the answer, the calls of the ports and the log
+// entries. The ports are the boundary of the hexagon, so a then step
 // counts their calls. A then step fails when no when step ran.
 export class LoginTestApi {
   private readonly users = new InMemoryUserRepository();
@@ -51,6 +56,7 @@ export class LoginTestApi {
   private readonly issue = vi.spyOn(this.tokens, 'issue');
   private readonly hasherFailure = new Error('the hasher is down');
   private hasher: PasswordHasher = this.prefixHasher;
+  private readonly logger = new RecordingLogger();
   private readonly arrangements = new Arrangements();
   private readonly build = new WhenOutcome<Built>();
   private readonly signIn = new WhenOutcome<Result<SessionToken, LoginProblem>>();
@@ -106,10 +112,15 @@ export class LoginTestApi {
   // them. The use case is built once, before the first sign-in.
   async whenSigningIn(username: string, typed: string): Promise<this> {
     const { login } = await this.built();
-    const request = loginRequest(username, typed);
-    this.request = request;
-    await this.signIn.record(() => login.execute(request));
-    return this;
+    return this.signInWith(login, username, typed);
+  }
+
+  // Login binds UseCase, so LoggingAspect wraps it under its own name
+  // (decisions 7 and 10).
+  async whenSigningInThroughTheLoggingAspect(username: string, typed: string): Promise<this> {
+    const { login } = await this.built();
+    const aspect = new LoggingAspect(login, 'Login', this.logger, new FakeStopwatch());
+    return this.signInWith(aspect, username, typed);
   }
 
   thenTheSignInGivesTheTokenOfUser(n: number): void {
@@ -211,6 +222,16 @@ export class LoginTestApi {
     expect(this.verify.mock.calls[0][0]).toBe(this.request?.attempt);
   }
 
+  thenTheLogEntriesAre(entries: readonly UseCaseLogEntry[]): void {
+    this.signIn.ran();
+    expect(this.logger.entries).toEqual(entries);
+  }
+
+  thenNoLogEntryHolds(text: string): void {
+    this.signIn.ran();
+    expect(JSON.stringify(this.logger.entries)).not.toContain(text);
+  }
+
   thenNoPortWasCalled(): void {
     this.signIn.ran();
     expect(this.find).not.toHaveBeenCalled();
@@ -232,6 +253,13 @@ export class LoginTestApi {
       this.builtOnce = { login, hashed, startedDummyHash: await started };
     }
     return this.builtOnce;
+  }
+
+  private async signInWith(login: Login, username: string, typed: string): Promise<this> {
+    const request = loginRequest(username, typed);
+    this.request = request;
+    await this.signIn.record(() => login.execute(request));
+    return this;
   }
 
   private clearCalls(): void {

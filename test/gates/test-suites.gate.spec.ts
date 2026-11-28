@@ -3,6 +3,7 @@ import { matchesGlob, resolve } from 'node:path';
 import e2eConfig from '../../vitest.config.e2e.js';
 import unitConfig from '../../vitest.config.js';
 import behaviorConfig from '../../vitest.behavior.config.js';
+import fastConfig from '../../vitest.fast.config.js';
 import gatesConfig, { OPENAPI_DRIFT_FILE } from '../../vitest.gates.config.js';
 
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -79,5 +80,20 @@ describe('test suites', () => {
 
     expect(scripts['test:gates']).toBe('vitest run --config ./vitest.gates.config.ts');
     expect(scripts['test:behavior']).toBe('vitest run --config ./vitest.behavior.config.ts');
+  });
+
+  // #256: the fast command runs the unit and domain tests only. They need no
+  // database and no HTTP application, so they give feedback in seconds.
+  // `pnpm test` still runs every one of them.
+  it('should_run_only_the_unit_and_domain_files_when_the_fast_command_runs', () => {
+    const scripts = (JSON.parse(read('package.json')) as { scripts: Record<string, string> })
+      .scripts;
+    const unitAndDomain = filesOf(unitConfig).filter(
+      (file) => file.startsWith('test/unit/') || file.startsWith('test/domain/'),
+    );
+
+    expect(scripts['test:fast']).toBe('vitest run --config ./vitest.fast.config.ts');
+    expect(unitAndDomain.length).toBeGreaterThan(0);
+    expect(filesOf(fastConfig)).toEqual(unitAndDomain);
   });
 });
