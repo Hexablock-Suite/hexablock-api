@@ -39,7 +39,7 @@ flowchart TB
   subgraph APP["2. Application (use cases): src/application"]
     INPORTS(["Input ports, one interface per use case:<br/>RegisterUser, Login, AuthenticateToken, SyncProgress,<br/>GetProgress, GetGlobalLeaderboard, GetLevelLeaderboard,<br/>GetLevels, UpdateLevels"])
     UC["RegisterUseCase, LoginUseCase, AuthenticateTokenUseCase,<br/>SyncProgressUseCase, GetProgressUseCase, GetGlobalLeaderboardUseCase,<br/>GetLevelLeaderboardUseCase, GetLevelsUseCase, UpdateLevelsUseCase"]
-    REPOPORTS(["Output ports: UserRepository, ProgressRepository,<br/>GlobalBoardReader, LevelBoardReader, LevelRepository"])
+    REPOPORTS(["Output ports: UserRepository, ProgressRepository,<br/>GlobalBoardReader, LevelBoardReader, LevelRepository<br/>with its roles LevelLister, LevelHolder,<br/>LevelFinder and LevelUpdater"])
     SECPORTS(["PasswordHasher, TokenIssuer and<br/>UserIdGenerator ports"])
     CLOCK(["Clock port and CLOCK token<br/>ports/clock.ts"])
     ASPECTS["aspects/: UseCaseAspect, LoggingAspect"]

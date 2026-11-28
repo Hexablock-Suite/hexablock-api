@@ -4,7 +4,7 @@ import type { LevelResult } from '../../domain/progress/level-result.js';
 import { RankedBoard } from '../../domain/progress/ranked-board.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { LevelBoardReader } from '../ports/level-board-reader.js';
-import type { LevelRepository } from '../ports/level-repository.js';
+import type { LevelHolder } from '../ports/level-repository.js';
 import type { UseCase } from '../use-case.js';
 
 // The input of GetLevelLeaderboard: one level of a game. The mapper of the
@@ -39,12 +39,13 @@ export const GET_LEVEL_LEADERBOARD = Symbol('GetLevelLeaderboard');
 // filters. The domain ranks the board: the use case builds RankedBoard.of()
 // with the rows that the reader gives and orders nothing (classes.md
 // decision 2). Before it reads the board, it asks the LevelRepository port
-// whether the definitions hold that level (#146). It reads no Clock and
+// whether the definitions hold that level (#146). It holds only the
+// LevelHolder role of that port (decision 23, #193). It reads no Clock and
 // saves nothing.
 export class GetLevelLeaderboardUseCase implements GetLevelLeaderboard {
   constructor(
     private readonly boards: LevelBoardReader,
-    private readonly levels: LevelRepository,
+    private readonly levels: LevelHolder,
   ) {}
 
   async execute(query: LevelBoardQuery): Promise<Result<LevelLeaderboard, UnknownLevel>> {

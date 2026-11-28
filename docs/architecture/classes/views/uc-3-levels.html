@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 3 of 4</p>
       <h1>Levels: read them, and check every level before an update</h1>
       <svg
-        viewBox="0 0 1040 1044"
+        viewBox="0 0 1040 1076"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc3levels-title uc3levels-desc"
@@ -71,19 +71,22 @@
         <title id="uc3levels-title">HexaBlock API level use cases · UML class diagram</title>
         <desc id="uc3levels-desc">
           Class diagram of layers 2 and 1 showing GetLevelsUseCase and UpdateLevelsUseCase over the
-          LevelRepository port, which lists the levels and updates one level per call under a lock
-          of its gameId and levelId; its change asks the incoming level, whose decideReplace()
-          decides the version rule of S3-10 over the stored state (#174); UpdateLevelsUseCase also
-          holds the LevelValidators domain service and returns a Result whose InvalidLevels failure
-          holds one problem per broken level with its gameId and levelId, so a level that fails its
-          check is never saved and no exception reaches the HTTP layer. GetLevelsUseCase takes no
-          request and has no expected failure; it gives the valid levels and the broken rows apart,
-          and holds no logger: LoggingAspect wraps it and logs each broken row (#147, #219).
-          AuthorizeLevelEditorUseCase holds the LevelEditors value object of layer 1, the user ids
-          of the configuration, and fails with not-a-level-editor for any other id, so an empty list
-          lets no account update (#145). A footnote names LevelDtoMapper, which builds the
-          UpdateLevelsRequest, and LevelRowMapper, which restores each stored row through
-          LevelValidators.
+          LevelRepository port, the one repository of the LevelDefinition aggregate, which extends
+          four role interfaces, one per use case (#193): GetLevelsUseCase holds LevelLister, whose
+          list() lists the levels, and UpdateLevelsUseCase holds LevelUpdater, whose update()
+          updates one level per call under a lock of its gameId and levelId; LevelHolder and
+          LevelFinder are the roles of the two use cases of view 2.2; its change asks the incoming
+          level, whose decideReplace() decides the version rule of S3-10 over the stored state
+          (#174); UpdateLevelsUseCase also holds the LevelValidators domain service and returns a
+          Result whose InvalidLevels failure holds one problem per broken level with its gameId and
+          levelId, so a level that fails its check is never saved and no exception reaches the HTTP
+          layer. GetLevelsUseCase takes no request and has no expected failure; it gives the valid
+          levels and the broken rows apart, and holds no logger: LoggingAspect wraps it and logs
+          each broken row (#147, #219). AuthorizeLevelEditorUseCase holds the LevelEditors value
+          object of layer 1, the user ids of the configuration, and fails with not-a-level-editor
+          for any other id, so an empty list lets no account update (#145). A footnote names
+          LevelDtoMapper, which builds the UpdateLevelsRequest, and LevelRowMapper, which restores
+          each stored row through LevelValidators.
         </desc>
         <defs>
           <marker
@@ -160,10 +163,10 @@
         />
         <!-- Pattern and group frames -->
         <rect
-          x="530"
-          y="136"
-          width="398"
-          height="168"
+          x="572"
+          y="96"
+          width="436"
+          height="372"
           rx="8"
           fill="none"
           stroke="rgba(91,104,115,0.55)"
@@ -171,8 +174,8 @@
           stroke-dasharray="4,4"
         />
         <text
-          x="542"
-          y="152"
+          x="584"
+          y="112"
           fill="#5b6873"
           font-size="8"
           font-weight="500"
@@ -182,19 +185,19 @@
           OUTPUT PORTS · §3.4 · Q10
         </text>
         <!-- Relationships (drawn before boxes) -->
-        <!-- GetLevelsUseCase holds LevelRepository: use -->
+        <!-- GetLevelsUseCase holds LevelLister: use (#193) -->
         <line
           x1="440"
-          y1="200"
-          x2="536"
-          y2="200"
+          y1="172"
+          x2="584"
+          y2="172"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
-        <!-- UpdateLevelsUseCase holds LevelRepository: use -->
+        <!-- UpdateLevelsUseCase holds LevelUpdater: use (#193) -->
         <path
-          d="M528 328 L528 332 L688 332 L688 328"
+          d="M512 304 L512 272 L584 272"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -202,10 +205,10 @@
         />
         <!-- UpdateLevelsUseCase returns Result&lt;void, InvalidLevels&gt;: use -->
         <line
-          x1="528"
-          y1="400"
-          x2="592"
-          y2="400"
+          x1="416"
+          y1="428"
+          x2="416"
+          y2="464"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
@@ -222,11 +225,51 @@
         />
         <!-- LevelRepository returns LevelDefinition values: use -->
         <path
-          d="M912 212 Q920 212 920 220 L920 688"
+          d="M984 352 L1000 352 L1000 712 L976 712"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
+        />
+        <!-- LevelRepository extends LevelUpdater: generalization (#193) -->
+        <line
+          x1="764"
+          y1="320"
+          x2="764"
+          y2="296"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#uc3levels-triangle)"
+        />
+        <!-- LevelRepository extends LevelLister: generalization (#193) -->
+        <line
+          x1="964"
+          y1="320"
+          x2="964"
+          y2="188"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#uc3levels-triangle)"
+        />
+        <!-- LevelRepository extends LevelHolder: generalization (#193) -->
+        <line
+          x1="680"
+          y1="380"
+          x2="680"
+          y2="408"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#uc3levels-triangle)"
+        />
+        <!-- LevelRepository extends LevelFinder: generalization (#193) -->
+        <line
+          x1="888"
+          y1="380"
+          x2="888"
+          y2="408"
+          stroke="#17212a"
+          stroke-width="1"
+          marker-end="url(#uc3levels-triangle)"
         />
         <!-- AuthorizeLevelEditorUseCase holds LevelEditors: use (#145) -->
         <line
@@ -273,10 +316,10 @@
           ids 0..*
         </text>
         <!-- Arrow labels and multiplicities -->
-        <rect x="536" y="382" width="48" height="12" rx="2" fill="#efe7f8" />
+        <rect x="422" y="440" width="48" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="560"
-          y="391"
+          x="446"
+          y="449"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -285,10 +328,10 @@
         >
           RETURNS
         </text>
-        <rect x="926" y="314" width="48" height="12" rx="2" fill="#efe7f8" />
+        <rect x="944" y="600" width="48" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="950"
-          y="323"
+          x="968"
+          y="609"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -297,10 +340,10 @@
         >
           RETURNS
         </text>
-        <rect x="458" y="182" width="56" height="12" rx="2" fill="#efe7f8" />
+        <rect x="484" y="154" width="56" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="486"
-          y="191"
+          x="512"
+          y="163"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -309,10 +352,10 @@
         >
           levels 1
         </text>
-        <rect x="686" y="314" width="56" height="12" rx="2" fill="#efe7f8" />
+        <rect x="520" y="254" width="56" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="714"
-          y="323"
+          x="548"
+          y="263"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -404,7 +447,7 @@
         </text>
         <line x1="64" y1="180" x2="440" y2="180" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="196" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - levels: LevelRepository
+          - levels: LevelLister
         </text>
         <line x1="64" y1="204" x2="440" y2="204" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -458,7 +501,7 @@
         </text>
         <line x1="64" y1="364" x2="528" y2="364" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="80" y="380" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - levels: LevelRepository
+          - levels: LevelUpdater
         </text>
         <text x="80" y="396" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - rules: LevelValidators
@@ -475,20 +518,105 @@
         >
           + execute(request: UpdateLevelsRequest): Promise&lt;Result&lt;void, InvalidLevels&gt;&gt;
         </text>
-        <!-- Class: LevelRepository («interface» «port» «repository») -->
+        <!-- Class: LevelLister («interface» «port»): the role that GetLevelsUseCase holds (#193) -->
         <rect
-          x="536"
-          y="160"
-          width="376"
-          height="168"
+          x="584"
+          y="120"
+          width="400"
+          height="68"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
           stroke-width="1"
         />
         <text
-          x="724"
-          y="178"
+          x="784"
+          y="138"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="784"
+          y="156"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelLister
+        </text>
+        <line x1="584" y1="164" x2="984" y2="164" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="600" y="180" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + list(): Promise&lt;ListedLevels&gt;
+        </text>
+        <!-- Class: LevelUpdater («interface» «port»): the role that UpdateLevelsUseCase holds (#193) -->
+        <rect
+          x="584"
+          y="212"
+          width="360"
+          height="84"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="764"
+          y="230"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="764"
+          y="248"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelUpdater
+        </text>
+        <line x1="584" y1="256" x2="944" y2="256" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text
+          textLength="336"
+          lengthAdjust="spacingAndGlyphs"
+          x="600"
+          y="272"
+          fill="#17212a"
+          font-size="9"
+          font-family="'IBM Plex Mono', monospace"
+        >
+          + update(gameId: GameId, levelId: LevelId, change: LevelChange):
+        </text>
+        <text x="622" y="288" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;LevelDefinition, LevelProblem&gt;&gt;
+        </text>
+        <!-- Class: LevelRepository («interface» «port» «repository»): the composition of the four roles (decision 23, #193) -->
+        <rect
+          x="584"
+          y="320"
+          width="400"
+          height="60"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="784"
+          y="338"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -498,8 +626,8 @@
           «interface» «port» «repository»
         </text>
         <text
-          x="724"
-          y="196"
+          x="784"
+          y="356"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -508,32 +636,88 @@
         >
           LevelRepository
         </text>
-        <line x1="536" y1="208" x2="912" y2="208" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="552" y="224" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(): Promise&lt;ListedLevels&gt;
+        <text
+          x="784"
+          y="370"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-04 · DS-6 · one per aggregate · four roles · #193
         </text>
-        <text x="552" y="240" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
+        <!-- Class: LevelHolder and LevelFinder (PART 2 · VIEW 2): the roles of the other two use cases -->
+        <rect
+          x="584"
+          y="408"
+          width="192"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="680"
+          y="426"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 2
         </text>
-        <text x="552" y="256" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + findFor(gameId: GameId, results: readonly LevelResult[]):
+        <text
+          x="680"
+          y="444"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelHolder
         </text>
-        <text x="574" y="272" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;readonly LevelDefinition[]&gt;
+        <rect
+          x="792"
+          y="408"
+          width="192"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#5b6873"
+          stroke-width="1"
+          stroke-dasharray="4,3"
+        />
+        <text
+          x="888"
+          y="426"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.14em"
+        >
+          PART 2 · VIEW 2
         </text>
-        <text x="552" y="288" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + update(gameId: GameId, levelId: LevelId,
-        </text>
-        <text x="574" y="304" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          change: LevelChange):
-        </text>
-        <text x="574" y="320" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;Result&lt;LevelDefinition, LevelProblem&gt;&gt;
+        <text
+          x="888"
+          y="444"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelFinder
         </text>
         <!-- Class: Result -->
         <rect
-          x="592"
-          y="340"
+          x="300"
+          y="464"
           width="224"
           height="116"
           rx="6"
@@ -542,8 +726,8 @@
           stroke-width="1"
         />
         <text
-          x="704"
-          y="370"
+          x="412"
+          y="494"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -553,8 +737,8 @@
           Result
         </text>
         <text
-          x="704"
-          y="384"
+          x="412"
+          y="508"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -563,19 +747,19 @@
         >
           API-FR-04 · API-FR-06
         </text>
-        <line x1="592" y1="400" x2="816" y2="400" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="608" y="416" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="300" y1="524" x2="524" y2="524" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="316" y="540" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + ok: boolean
         </text>
-        <text x="608" y="432" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="316" y="556" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + value?: T
         </text>
-        <text x="608" y="448" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="316" y="572" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + error?: E
         </text>
         <rect
-          x="780"
-          y="330"
+          x="488"
+          y="454"
           width="44"
           height="18"
           rx="2"
@@ -585,8 +769,8 @@
           stroke-dasharray="4,3"
         />
         <text
-          x="802"
-          y="342"
+          x="510"
+          y="466"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Mono', monospace"
@@ -895,9 +1079,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelRepository.update() saves one level per transaction, under a lock of its gameId and
-          levelId. Its LevelChange gets the stored level, absent, valid or broken (#147), and the
-          incoming level runs decideReplace(), the version rule of S3-10 (#174).
+          LevelUpdater.update() saves one level per transaction, under a lock of its gameId and
+          levelId.
         </text>
         <text
           x="24"
@@ -906,158 +1089,206 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
+          Its LevelChange gets the stored level, absent, valid or broken (#147), and the incoming
+          level runs decideReplace(), the version rule of S3-10 (#174).
+        </text>
+        <text
+          x="24"
+          y="932"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
           In layer 3, LevelDtoMapper builds the UpdateLevelsRequest (Part 3, view 5), and
           LevelRowMapper restores each stored row through LevelValidators (Part 3, view 2).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="940" x2="1016" y2="940" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="958"
+          y="948"
           fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          letter-spacing="0.18em"
-        >
-          LEGEND
-        </text>
-        <line
-          x1="24"
-          y1="976"
-          x2="52"
-          y2="976"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#uc3levels-open)"
-        />
-        <text
-          x="60"
-          y="980"
-          fill="#5b6873"
-          font-size="8.5"
+          font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Use · attribute across layers, parameter, return, local or new
+          LevelRepository is the one repository of the LevelDefinition aggregate. It extends one
+          role per use case, so no use case sees an operation it does not call (decision 23, #193).
         </text>
-        <rect
-          x="24"
-          y="996"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#efe7f8"
-          stroke="rgba(126,34,206,0.40)"
-          stroke-width="1"
-        />
-        <rect
-          x="48"
-          y="996"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#f9f4dc"
-          stroke="rgba(180,83,9,0.45)"
-          stroke-width="1"
-        />
-        <text
-          x="80"
-          y="1005"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Zones · Clean layers, outer on top
-        </text>
-        <rect
-          x="264"
-          y="996"
-          width="28"
-          height="12"
-          rx="2"
-          fill="none"
-          stroke="rgba(91,104,115,0.55)"
-          stroke-width="1"
-          stroke-dasharray="4,4"
-        />
-        <text
-          x="300"
-          y="1005"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Dashed frame · pattern or group
-        </text>
-        <rect
-          x="470"
-          y="996"
-          width="28"
-          height="12"
-          rx="2"
-          fill="rgba(15,111,116,0.10)"
-          stroke="#0f6f74"
-          stroke-width="1"
-        />
-        <text
-          x="506"
-          y="1005"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Teal · focal class
-        </text>
-        <rect
-          x="616"
-          y="996"
-          width="28"
-          height="12"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="0.8"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="652"
-          y="1005"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Corner box · type parameters
-        </text>
-        <line x1="808" y1="1002" x2="824" y2="1002" stroke="#17212a" stroke-width="1" />
-        <circle cx="829" cy="1002" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
-        <text
-          x="844"
-          y="1005"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Lollipop · input port
-        </text>
-        <rect
-          x="24"
-          y="1018"
-          width="28"
-          height="12"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="1"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="60"
-          y="1027"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Dashed class · detailed in another view
-        </text>
+        <!-- Legend: moved down 32 for the footnote lines of #193 -->
+        <g transform="translate(0,32)">
+          <line
+            x1="24"
+            y1="940"
+            x2="1016"
+            y2="940"
+            stroke="rgba(23,33,42,0.10)"
+            stroke-width="0.8"
+          />
+          <text
+            x="24"
+            y="958"
+            fill="#5b6873"
+            font-size="8"
+            font-family="'IBM Plex Mono', monospace"
+            letter-spacing="0.18em"
+          >
+            LEGEND
+          </text>
+          <line
+            x1="24"
+            y1="976"
+            x2="52"
+            y2="976"
+            stroke="#5b6873"
+            stroke-width="1"
+            marker-end="url(#uc3levels-open)"
+          />
+          <text
+            x="60"
+            y="980"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Use · attribute across layers, parameter, return, local or new
+          </text>
+          <rect
+            x="24"
+            y="996"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#efe7f8"
+            stroke="rgba(126,34,206,0.40)"
+            stroke-width="1"
+          />
+          <rect
+            x="48"
+            y="996"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#f9f4dc"
+            stroke="rgba(180,83,9,0.45)"
+            stroke-width="1"
+          />
+          <text
+            x="80"
+            y="1005"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Zones · Clean layers, outer on top
+          </text>
+          <rect
+            x="264"
+            y="996"
+            width="28"
+            height="12"
+            rx="2"
+            fill="none"
+            stroke="rgba(91,104,115,0.55)"
+            stroke-width="1"
+            stroke-dasharray="4,4"
+          />
+          <text
+            x="300"
+            y="1005"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Dashed frame · pattern or group
+          </text>
+          <rect
+            x="470"
+            y="996"
+            width="28"
+            height="12"
+            rx="2"
+            fill="rgba(15,111,116,0.10)"
+            stroke="#0f6f74"
+            stroke-width="1"
+          />
+          <text
+            x="506"
+            y="1005"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Teal · focal class
+          </text>
+          <rect
+            x="616"
+            y="996"
+            width="28"
+            height="12"
+            rx="2"
+            fill="#ffffff"
+            stroke="#5b6873"
+            stroke-width="0.8"
+            stroke-dasharray="4,3"
+          />
+          <text
+            x="652"
+            y="1005"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Corner box · type parameters
+          </text>
+          <line x1="808" y1="1002" x2="824" y2="1002" stroke="#17212a" stroke-width="1" />
+          <circle cx="829" cy="1002" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          <text
+            x="844"
+            y="1005"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Lollipop · input port
+          </text>
+          <rect
+            x="24"
+            y="1018"
+            width="28"
+            height="12"
+            rx="2"
+            fill="#ffffff"
+            stroke="#5b6873"
+            stroke-width="1"
+            stroke-dasharray="4,3"
+          />
+          <text
+            x="60"
+            y="1027"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Dashed class · detailed in another view
+          </text>
+          <!-- Legend: generalization (#193) -->
+          <line
+            x1="232"
+            y1="1024"
+            x2="264"
+            y2="1024"
+            stroke="#17212a"
+            stroke-width="1"
+            marker-end="url(#uc3levels-triangle)"
+          />
+          <text
+            x="272"
+            y="1027"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Hollow triangle · generalization, a port extends a role
+          </text>
+        </g>
       </svg>
     </div>
   </body>
