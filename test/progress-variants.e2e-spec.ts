@@ -130,25 +130,42 @@ describe('progress save and load per variant (API-NFR-03)', () => {
 
   // A later sync of the same variant keeps the stored levels, stores a better
   // result of a levelId it sends again (DS-4), and adds a new levelId. The
-  // test compares the results without order: the port contract fixes no order.
-  it('should_load_better_and_new_level_results_when_sort_is_saved_again', async () => {
-    const { token } = await signIn(server(), 'ada');
-    const retry = { levelId: 'sort-01', stars: 3, moves: 18, elapsedMs: 60000 };
-    const next = { levelId: 'sort-02', stars: 1, moves: 40, elapsedMs: 120000 };
-    await save(token, SORT.save);
+  // tests compare the results without order: the port contract fixes no order.
+  // The answer of the second save and the later load are one case each (#184).
+  const retry = { levelId: 'sort-01', stars: 3, moves: 18, elapsedMs: 60000 };
+  const next = { levelId: 'sort-02', stars: 1, moves: 40, elapsedMs: 120000 };
 
+  // Signs in, saves sort once, then saves the better sort-01 and the new
+  // sort-02. Returns the token and the answer of the second save.
+  async function saveSortAgain(): Promise<{ token: string; savedAgain: request.Response }> {
+    const { token } = await signIn(server(), 'ada');
+    await save(token, SORT.save);
     const savedAgain = await save(token, { gameId: 'hexa-sort', results: [retry, next] });
+    return { token, savedAgain };
+  }
+
+  function expectBetterAndNewLevelResults(response: request.Response): void {
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      gameId: 'hexa-sort',
+      highScore: null,
+      updatedAt: AT.toISOString(),
+      results: expect.arrayContaining([retry, next]),
+    });
+    expect(response.body.results).toHaveLength(2);
+  }
+
+  it('should_answer_better_and_new_level_results_when_sort_is_saved_again', async () => {
+    const { savedAgain } = await saveSortAgain();
+
+    expectBetterAndNewLevelResults(savedAgain);
+  });
+
+  it('should_load_better_and_new_level_results_when_sort_is_saved_again', async () => {
+    const { token } = await saveSortAgain();
+
     const loaded = await load(token, 'hexa-sort');
 
-    for (const response of [savedAgain, loaded]) {
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        gameId: 'hexa-sort',
-        highScore: null,
-        updatedAt: AT.toISOString(),
-        results: expect.arrayContaining([retry, next]),
-      });
-      expect(response.body.results).toHaveLength(2);
-    }
+    expectBetterAndNewLevelResults(loaded);
   });
 });
