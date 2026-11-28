@@ -7,7 +7,7 @@ import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import type { UserId } from '../../domain/user/user-id.js';
-import type { LevelRepository } from '../ports/level-repository.js';
+import type { LevelUpdater } from '../ports/level-repository.js';
 import type { UseCase } from '../use-case.js';
 import type { InvalidLevels, LevelProblemReport } from './invalid-levels.js';
 import type { NotALevelEditor } from './not-a-level-editor.js';
@@ -57,7 +57,8 @@ interface CheckedLevel {
 // any level. A broken level gives one problem, and no level is saved. Then
 // it saves level by level, each in its own transaction, through
 // LevelRepository.update(). Each level is the root of its own aggregate, so
-// one transaction changes one level (section «Domain design rules»).
+// one transaction changes one level (section «Domain design rules»). It
+// holds only the LevelUpdater role of that port (decision 23, #193).
 // The change of each update asks the incoming level: decideReplace() runs
 // the version rule of S3-10 in LevelDefinition, under the lock of the level.
 // A lower version saves nothing for that level, and the use
@@ -72,7 +73,7 @@ interface CheckedLevel {
 // saved before it stay saved, and the error reaches the caller.
 export class UpdateLevelsUseCase implements UpdateLevels {
   constructor(
-    private readonly levels: LevelRepository,
+    private readonly levels: LevelUpdater,
     private readonly rules: LevelValidators,
   ) {}
 

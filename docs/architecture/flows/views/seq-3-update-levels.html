@@ -81,20 +81,20 @@
           For each level, the LevelValidators domain service finds the LevelValidator strategy of
           its gameId with GameId.equals(); the strategy picks the section type, the section checks
           its own shape and rules, and LevelValidators builds the level. With no problem, the use
-          case saves each level with LevelRepository.update(gameId, levelId, change):
-          DrizzleLevelRepository opens one transaction, locks the gameId and the levelId, and the
-          change asks the incoming level: level.decideReplace(stored) decides the version rule of
-          S3-10 over the stored state, absent, valid or broken (#174). Otherwise the use case
-          returns a failed Result, and the controller answers a 400 whose details LevelDtoMapper
-          writes. A note on the strategy gives the Fit path: FitLevelValidator finds the Topology of
-          the level in Topologies, and FitSection checks A5 on it; a topology with no entry gives
-          unknown-topology. The same note gives the Sort path: SortLevelValidator asks
-          SortSection.of(raw) to check the radius, the goals, the source and the stars. The footnote
-          names the LevelOrder, LevelVersion and Coordinate values that the request carries, and
-          GetLevels, which only calls LevelRepository.list(). The footnote also says that
-          LevelDefinition is an entity and the aggregate root of one level with private fields, that
-          FitSection and SortSection are value objects, and that LevelValidator and its validators
-          form the Strategy pattern.
+          case saves each level with LevelUpdater.update(gameId, levelId, change), the role of the
+          LevelRepository port that it holds (#193): DrizzleLevelRepository opens one transaction,
+          locks the gameId and the levelId, and the change asks the incoming level:
+          level.decideReplace(stored) decides the version rule of S3-10 over the stored state,
+          absent, valid or broken (#174). Otherwise the use case returns a failed Result, and the
+          controller answers a 400 whose details LevelDtoMapper writes. A note on the strategy gives
+          the Fit path: FitLevelValidator finds the Topology of the level in Topologies, and
+          FitSection checks A5 on it; a topology with no entry gives unknown-topology. The same note
+          gives the Sort path: SortLevelValidator asks SortSection.of(raw) to check the radius, the
+          goals, the source and the stars. The footnote names the LevelOrder, LevelVersion and
+          Coordinate values that the request carries, and GetLevels, which only calls
+          LevelLister.list(). The footnote also says that LevelDefinition is an entity and the
+          aggregate root of one level with private fields, that FitSection and SortSection are value
+          objects, and that LevelValidator and its validators form the Strategy pattern.
         </desc>
         <defs>
           <marker
@@ -1391,7 +1391,7 @@
         >
           Result&lt;LevelDefinition, …&gt;
         </text>
-        <!-- Message: LevelRepository.update(gameId, levelId, change) -->
+        <!-- Message: LevelUpdater.update(gameId, levelId, change): the role of LevelRepository that the use case holds (#193) -->
         <line
           x1="723"
           y1="890"
@@ -1401,7 +1401,7 @@
           stroke-width="1"
           marker-end="url(#seq3updatelevels-filled)"
         />
-        <rect x="809.5" y="875" width="235" height="12" rx="2" fill="#f3f5f6" />
+        <rect x="817" y="875" width="220" height="12" rx="2" fill="#f3f5f6" />
         <text
           x="927"
           y="884"
@@ -1410,7 +1410,7 @@
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
         >
-          LevelRepository.update(gameId, levelId, change)
+          LevelUpdater.update(gameId, levelId, change)
         </text>
         <!-- Note: one transaction per level under a lock of its key, anchored to its activation -->
         <line
@@ -1685,8 +1685,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelRepository.update(): UpdateLevelsUseCase holds only the port, and AppModule binds it
-          to DrizzleLevelRepository. The LevelValidator lifeline is
+          LevelUpdater.update(): UpdateLevelsUseCase holds only LevelUpdater, its role of the
+          LevelRepository port (#193), and AppModule binds that port to DrizzleLevelRepository. The
+          LevelValidator lifeline is
         </text>
         <text
           x="24"
@@ -1745,7 +1746,7 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          GetLevels has no sequence of its own: GetLevelsUseCase only calls LevelRepository.list()
+          GetLevels has no sequence of its own: GetLevelsUseCase only calls LevelLister.list()
           («Other use cases» in flows.md).
         </text>
         <text

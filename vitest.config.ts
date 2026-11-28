@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
-// Unit and gate tests. Vitest fails when this selection finds no file.
+// Unit, integration and gate tests. Vitest fails when this selection finds no
+// file. vitest.gates.config.ts and vitest.behavior.config.ts split them (#253).
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {

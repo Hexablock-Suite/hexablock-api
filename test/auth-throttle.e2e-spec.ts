@@ -19,6 +19,11 @@ const tooManyRequests = (path: string) => ({
   path,
 });
 
+// Each test hashes several passwords with the scrypt cost of production and
+// starts a new app, so one test can pass the default 5 s on a busy CI runner.
+// The setting holds for this file only: Vitest isolates each test file.
+vi.setConfig({ testTimeout: 20_000 });
+
 describe('rate limit of sign-up and sign-in (API-FR-01)', () => {
   let testApp: TestApp;
 

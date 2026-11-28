@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1722"
+        viewBox="0 0 1240 1738"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow3updatelevels-title flow3updatelevels-desc"
@@ -75,15 +75,17 @@
           Cross-layer class diagram of the update levels use case. In layer 3, JwtAuthGuard holds
           the AuthenticateToken input port, LevelsController holds the UpdateLevels input port and
           uses LevelDtoMapper, and DrizzleLevelRepository implements LevelRepository and holds
-          LevelValidators through a use arrow validators 1. The port and the adapter both show
-          list(), holds(gameId, levelId), findFor(gameId, results) and update(gameId, levelId,
-          change). In layer 2, UpdateLevelsUseCase implements UpdateLevels and holds the
-          LevelRepository port and LevelValidators, and AuthorizationAspect holds LevelEditors and
-          wraps the UpdateLevels port; UseCaseAspect declares the wrapped port, so view 2.1 draws
-          that line (#180). In layer 1, the LevelValidators domain service holds one LevelValidator
-          strategy per gameId in a list of entries and creates each LevelDefinition aggregate root;
-          FitLevelValidator and SortLevelValidator implement LevelValidator and pick their section
-          type. FitLevelValidator holds Topologies and gives FitSection the Topology of the level. A
+          LevelValidators through a use arrow validators 1. The adapter shows list(), holds(gameId,
+          levelId), findFor(gameId, results) and update(gameId, levelId, change). In layer 2,
+          LevelRepository extends LevelUpdater, the role whose update(gameId, levelId, change)
+          UpdateLevelsUseCase calls, and three more roles that view 2.3 draws (#193).
+          UpdateLevelsUseCase implements UpdateLevels and holds the LevelUpdater role and
+          LevelValidators, and AuthorizationAspect holds LevelEditors and wraps the UpdateLevels
+          port; UseCaseAspect declares the wrapped port, so view 2.1 draws that line (#180). In
+          layer 1, the LevelValidators domain service holds one LevelValidator strategy per gameId
+          in a list of entries and creates each LevelDefinition aggregate root; FitLevelValidator
+          and SortLevelValidator implement LevelValidator and pick their section type.
+          FitLevelValidator holds Topologies and gives FitSection the Topology of the level. A
           dashed frame labelled Aggregate marks the boundary of LevelDefinition; views 2 and 5 of
           Part 1 draw its members. The footnote says that a level that fails its check leaves the
           stored levels unchanged, that each save asks decideReplace() of the incoming level (S3-10,
@@ -208,7 +210,7 @@
           stroke-dasharray="5,4"
           marker-end="url(#flow3updatelevels-triangle)"
         />
-        <!-- UpdateLevelsUseCase holds LevelRepository: use -->
+        <!-- UpdateLevelsUseCase holds LevelUpdater: use (#193) -->
         <path
           d="M580 736 L580 764"
           fill="none"
@@ -225,14 +227,22 @@
           marker-end="url(#flow3updatelevels-open)"
         />
         <!-- DrizzleLevelRepository implements LevelRepository: realization -->
-        <line
-          x1="492"
-          y1="436"
-          x2="492"
-          y2="764"
+        <path
+          d="M492 436 L492 752 L148 752 L148 780"
+          fill="none"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
+          marker-end="url(#flow3updatelevels-triangle)"
+        />
+        <!-- LevelRepository extends LevelUpdater: generalization (#193) -->
+        <line
+          x1="256"
+          y1="806"
+          x2="300"
+          y2="806"
+          stroke="#17212a"
+          stroke-width="1"
           marker-end="url(#flow3updatelevels-triangle)"
         />
         <!-- DrizzleLevelRepository holds validators: LevelValidators: use with role and multiplicity, as Part 3, view 2 draws it (decision 13) -->
@@ -856,7 +866,7 @@
         </text>
         <line x1="516" y1="672" x2="996" y2="672" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
         <text x="532" y="688" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - levels: LevelRepository
+          - levels: LevelUpdater
         </text>
         <text x="532" y="704" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - rules: LevelValidators
@@ -865,12 +875,12 @@
         <text x="532" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + execute(request: UpdateLevelsRequest): Promise&lt;Result&lt;void, InvalidLevels&gt;&gt;
         </text>
-        <!-- Class: LevelRepository («interface» «port» «repository») -->
+        <!-- Class: LevelUpdater («interface» «port»): the role of LevelRepository that UpdateLevelsUseCase holds (#193) -->
         <rect
           x="300"
           y="764"
           width="440"
-          height="152"
+          height="84"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -885,7 +895,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «port» «repository»
+          «interface» «port»
         </text>
         <text
           x="520"
@@ -896,26 +906,58 @@
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          LevelRepository
+          LevelUpdater
         </text>
-        <line x1="300" y1="812" x2="740" y2="812" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="316" y="828" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(): Promise&lt;ListedLevels&gt;
-        </text>
-        <text x="316" y="844" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
-        </text>
-        <text x="316" y="860" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + findFor(gameId: GameId, results: readonly LevelResult[]):
-        </text>
-        <text x="338" y="876" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;readonly LevelDefinition[]&gt;
-        </text>
-        <text x="316" y="892" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="300" y1="808" x2="740" y2="808" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="316" y="824" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + update(gameId: GameId, levelId: LevelId, change: LevelChange):
         </text>
-        <text x="338" y="908" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="338" y="840" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;Result&lt;LevelDefinition, LevelProblem&gt;&gt;
+        </text>
+        <!-- Class: LevelRepository («interface» «port» «repository»): the composition of the four roles (decision 23, #193) -->
+        <rect
+          x="40"
+          y="780"
+          width="216"
+          height="60"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="148"
+          y="798"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port» «repository»
+        </text>
+        <text
+          x="148"
+          y="816"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelRepository
+        </text>
+        <text
+          x="148"
+          y="830"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          API-FR-04 · four roles · #193
         </text>
         <!-- Class: LevelValidators («domain service») -->
         <rect
@@ -1490,160 +1532,192 @@
           An account outside LevelEditors gets not-a-level-editor before the use case runs, and
           LevelsController answers 403; a malformed body gets the 400 of LevelDtoMapper first.
         </text>
-        <!-- Legend -->
-        <line
-          x1="24"
-          y1="1640"
-          x2="1216"
-          y2="1640"
-          stroke="rgba(23,33,42,0.10)"
-          stroke-width="0.8"
-        />
         <text
           x="24"
-          y="1658"
+          y="1628"
           fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          letter-spacing="0.18em"
-        >
-          LEGEND
-        </text>
-        <line
-          x1="24"
-          y1="1676"
-          x2="52"
-          y2="1676"
-          stroke="#17212a"
-          stroke-width="1"
-          stroke-dasharray="5,4"
-          marker-end="url(#flow3updatelevels-triangle)"
-        />
-        <text
-          x="60"
-          y="1680"
-          fill="#5b6873"
-          font-size="8.5"
+          font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Realization
+          DrizzleLevelRepository implements LevelRepository, which extends one role per use case;
+          UpdateLevelsUseCase holds only LevelUpdater, and view 2.3 draws all four (decision 23,
+          #193).
         </text>
-        <line
-          x1="128"
-          y1="1676"
-          x2="156"
-          y2="1676"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#flow3updatelevels-open)"
-        />
-        <text
-          x="164"
-          y="1680"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Use · attribute, parameter, return, local or new
-        </text>
-        <rect
-          x="24"
-          y="1696"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#e2ebf8"
-          stroke="rgba(29,78,216,0.40)"
-          stroke-width="1"
-        />
-        <rect
-          x="48"
-          y="1696"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#efe7f8"
-          stroke="rgba(126,34,206,0.40)"
-          stroke-width="1"
-        />
-        <rect
-          x="72"
-          y="1696"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#f9f4dc"
-          stroke="rgba(180,83,9,0.45)"
-          stroke-width="1"
-        />
-        <text
-          x="104"
-          y="1705"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Zones · Clean layers 3, 2 and 1, outer on top
-        </text>
-        <rect
-          x="352"
-          y="1696"
-          width="28"
-          height="12"
-          rx="2"
-          fill="rgba(15,111,116,0.10)"
-          stroke="#0f6f74"
-          stroke-width="1"
-        />
-        <text
-          x="388"
-          y="1705"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Teal · focal class
-        </text>
-        <rect
-          x="512"
-          y="1696"
-          width="28"
-          height="12"
-          rx="2"
-          fill="#ffffff"
-          stroke="#5b6873"
-          stroke-width="0.8"
-          stroke-dasharray="4,3"
-        />
-        <text
-          x="548"
-          y="1705"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Corner box · type parameters
-        </text>
-        <rect
-          x="700"
-          y="1696"
-          width="28"
-          height="12"
-          rx="2"
-          fill="none"
-          stroke="rgba(23,33,42,0.65)"
-          stroke-width="1.25"
-          stroke-dasharray="9,4"
-        />
-        <text
-          x="736"
-          y="1705"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Aggregate frame · root and its members
-        </text>
+        <!-- Legend: moved down 32 for the footnote lines of #193 and #180 -->
+        <g transform="translate(0,32)">
+          <line
+            x1="24"
+            y1="1624"
+            x2="1216"
+            y2="1624"
+            stroke="rgba(23,33,42,0.10)"
+            stroke-width="0.8"
+          />
+          <text
+            x="24"
+            y="1642"
+            fill="#5b6873"
+            font-size="8"
+            font-family="'IBM Plex Mono', monospace"
+            letter-spacing="0.18em"
+          >
+            LEGEND
+          </text>
+          <line
+            x1="24"
+            y1="1660"
+            x2="52"
+            y2="1660"
+            stroke="#17212a"
+            stroke-width="1"
+            stroke-dasharray="5,4"
+            marker-end="url(#flow3updatelevels-triangle)"
+          />
+          <text
+            x="60"
+            y="1664"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Realization
+          </text>
+          <line
+            x1="128"
+            y1="1660"
+            x2="156"
+            y2="1660"
+            stroke="#5b6873"
+            stroke-width="1"
+            marker-end="url(#flow3updatelevels-open)"
+          />
+          <text
+            x="164"
+            y="1664"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Use · attribute, parameter, return, local or new
+          </text>
+          <rect
+            x="24"
+            y="1680"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#e2ebf8"
+            stroke="rgba(29,78,216,0.40)"
+            stroke-width="1"
+          />
+          <rect
+            x="48"
+            y="1680"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#efe7f8"
+            stroke="rgba(126,34,206,0.40)"
+            stroke-width="1"
+          />
+          <rect
+            x="72"
+            y="1680"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#f9f4dc"
+            stroke="rgba(180,83,9,0.45)"
+            stroke-width="1"
+          />
+          <text
+            x="104"
+            y="1689"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Zones · Clean layers 3, 2 and 1, outer on top
+          </text>
+          <rect
+            x="352"
+            y="1680"
+            width="28"
+            height="12"
+            rx="2"
+            fill="rgba(15,111,116,0.10)"
+            stroke="#0f6f74"
+            stroke-width="1"
+          />
+          <text
+            x="388"
+            y="1689"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Teal · focal class
+          </text>
+          <rect
+            x="512"
+            y="1680"
+            width="28"
+            height="12"
+            rx="2"
+            fill="#ffffff"
+            stroke="#5b6873"
+            stroke-width="0.8"
+            stroke-dasharray="4,3"
+          />
+          <text
+            x="548"
+            y="1689"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Corner box · type parameters
+          </text>
+          <rect
+            x="700"
+            y="1680"
+            width="28"
+            height="12"
+            rx="2"
+            fill="none"
+            stroke="rgba(23,33,42,0.65)"
+            stroke-width="1.25"
+            stroke-dasharray="9,4"
+          />
+          <text
+            x="736"
+            y="1689"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Aggregate frame · root and its members
+          </text>
+          <!-- Legend: generalization (#193) -->
+          <line
+            x1="400"
+            y1="1660"
+            x2="432"
+            y2="1660"
+            stroke="#17212a"
+            stroke-width="1"
+            marker-end="url(#flow3updatelevels-triangle)"
+          />
+          <text
+            x="440"
+            y="1663"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Generalization · a port extends a role
+          </text>
+        </g>
       </svg>
     </div>
   </body>

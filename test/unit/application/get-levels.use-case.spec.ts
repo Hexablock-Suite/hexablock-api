@@ -4,7 +4,9 @@ import {
   type GetLevels,
   GetLevelsUseCase,
 } from '../../../src/application/levels/get-levels.use-case.js';
+import type { ListedLevels } from '../../../src/application/levels/listed-levels.js';
 import { unavailableLevelEntries } from '../../../src/application/levels/unavailable-level-entries.js';
+import type { LevelLister } from '../../../src/application/ports/level-repository.js';
 import type { Logger, UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { FakeStopwatch } from '../../support/fake-stopwatch.js';
@@ -78,6 +80,24 @@ describe('GetLevelsUseCase (API-FR-04)', () => {
     expect(result.value.unavailable).toEqual([
       { gameId: 'hexa-fit', levelId: 'fit-01', reason: 'invalid-figure' },
     ]);
+  });
+
+  // #193: the use case depends only on the LevelLister role of the level
+  // repository. A double of list() alone serves it, and the read gives what
+  // list() gives, unchanged.
+  it('should_give_what_list_gives_when_the_level_store_plays_only_the_level_lister_role', async () => {
+    const listed: ListedLevels = {
+      levels: [],
+      unavailable: [{ gameId: 'hexa-fit', levelId: 'fit-01', reason: 'invalid-figure' }],
+    };
+    const lister = {
+      list: vi.fn<LevelLister['list']>(() => Promise.resolve(listed)),
+    } satisfies LevelLister;
+
+    const result = await new GetLevelsUseCase(lister).execute();
+
+    expect(result).toEqual({ ok: true, value: listed });
+    expect(lister.list).toHaveBeenCalledExactlyOnceWith();
   });
 });
 
