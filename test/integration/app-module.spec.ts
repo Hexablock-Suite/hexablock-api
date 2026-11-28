@@ -225,4 +225,14 @@ describe('AppModule account wiring', () => {
       'LEVEL_EDITOR_IDS holds "ada", which is not a user id.',
     );
   });
+
+  // #170: a wrong rate limit of sign-up and sign-in stops the start.
+  it('should_refuse_to_start_when_auth_rate_limit_is_not_a_whole_number_of_1_or_more_or_off', async () => {
+    stubTestEnvironment();
+    vi.stubEnv('AUTH_RATE_LIMIT', 'ten');
+
+    await expect(Test.createTestingModule({ imports: [AppModule] }).compile()).rejects.toThrow(
+      'AUTH_RATE_LIMIT holds "ten", which is not a whole number of 1 or more or "off".',
+    );
+  });
 });

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { SystemClock } from '../adapters/clock/system-clock.js';
 import { RandomUserIdGenerator } from '../adapters/crypto/random-user-id-generator.js';
 import { ScryptPasswordHasher } from '../adapters/crypto/scrypt-password-hasher.js';
@@ -73,7 +74,12 @@ import { Topologies } from '../domain/level/topologies.js';
 import { TopologyId } from '../domain/level/topology-id.js';
 import { TriangleTopology } from '../domain/level/triangle-topology.js';
 import { GameId } from '../domain/progress/game-id.js';
-import { createJwtService, readJwtSecret, readLevelEditors } from './auth/auth-config.js';
+import {
+  createJwtService,
+  readAuthThrottle,
+  readJwtSecret,
+  readLevelEditors,
+} from './auth/auth-config.js';
 import type { Database } from './database/connection.js';
 import { DATABASE, DatabaseModule } from './database/database.module.js';
 
@@ -115,7 +121,9 @@ function levelValidators(): LevelValidators {
 
 // The composition root: it binds each port to its adapter.
 @Module({
-  imports: [DatabaseModule],
+  // ThrottlerModule holds the rate limit of sign-up and sign-in, which
+  // AUTH_RATE_LIMIT sets (#170). The factory reads it when the module starts.
+  imports: [DatabaseModule, ThrottlerModule.forRootAsync({ useFactory: () => readAuthThrottle() })],
   controllers: [
     HealthController,
     AuthController,

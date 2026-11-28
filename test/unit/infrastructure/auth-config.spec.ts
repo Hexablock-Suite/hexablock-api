@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { UserId } from '../../../src/domain/user/user-id.js';
-import { readJwtSecret, readLevelEditors } from '../../../src/infrastructure/auth/auth-config.js';
+import {
+  readAuthThrottle,
+  readJwtSecret,
+  readLevelEditors,
+} from '../../../src/infrastructure/auth/auth-config.js';
 import { valueOf } from '../../support/result.js';
 import { testUserId } from '../../support/user-ids.js';
 
@@ -74,4 +78,45 @@ describe('readLevelEditors', () => {
       'LEVEL_EDITOR_IDS holds "ada", which is not a user id. Each entry must be a UUID.',
     );
   });
+});
+
+// #170: AUTH_RATE_LIMIT sets the rate limit of sign-up and sign-in. A value
+// that is not a whole number of 1 or more, or "off", stops the start, as a
+// wrong LEVEL_EDITOR_IDS does.
+describe('readAuthThrottle', () => {
+  it.each(['0', '-3', '2.5', 'ten', '1e3', 'OFF'])(
+    'should_throw_when_auth_rate_limit_is_not_a_whole_number_of_1_or_more_or_off',
+    (value) => {
+      expect(() => readAuthThrottle({ AUTH_RATE_LIMIT: value })).toThrow(
+        `AUTH_RATE_LIMIT holds "${value}", which is not a whole number of 1 or more or "off".`,
+      );
+    },
+  );
+
+  it.each([undefined, '', ' 7 ', 'off', ' off '])(
+    'should_return_options_when_auth_rate_limit_is_unset_a_whole_number_or_off',
+    (value) => {
+      expect(() => readAuthThrottle({ AUTH_RATE_LIMIT: value })).not.toThrow();
+    },
+  );
+
+  // Production refuses a limit that is off, as it refuses the example
+  // JWT secret.
+  it.each(['off', ' off '])(
+    'should_throw_when_auth_rate_limit_is_off_and_node_env_is_production',
+    (value) => {
+      expect(() => readAuthThrottle({ NODE_ENV: 'production', AUTH_RATE_LIMIT: value })).toThrow(
+        'AUTH_RATE_LIMIT is off, which production refuses. Set a whole number of 1 or more, or leave it unset for 10.',
+      );
+    },
+  );
+
+  it.each([undefined, '5'])(
+    'should_return_options_when_auth_rate_limit_is_unset_or_a_whole_number_and_node_env_is_production',
+    (value) => {
+      expect(() =>
+        readAuthThrottle({ NODE_ENV: 'production', AUTH_RATE_LIMIT: value }),
+      ).not.toThrow();
+    },
+  );
 });
