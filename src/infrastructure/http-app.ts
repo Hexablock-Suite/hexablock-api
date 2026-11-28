@@ -1,6 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, type OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { ErrorDto } from '../adapters/http/error.dto.js';
+import { RATE_LIMIT_HEADER_DEFINITIONS } from '../adapters/http/rate-limit.headers.js';
 
 // The UI lives at /docs. The JSON document lives at /docs-json.
 const DOCS_PATH = 'docs';
@@ -16,7 +17,14 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
     .build();
   // ErrorDto is in the document even before an endpoint names it, so the
   // client can generate the error type (API-FR-06).
-  return SwaggerModule.createDocument(app, config, { extraModels: [ErrorDto] });
+  const document = SwaggerModule.createDocument(app, config, { extraModels: [ErrorDto] });
+  // The answers of sign-up and sign-in name the headers of the rate limit
+  // with a $ref, so the document holds each definition once (#170).
+  document.components = {
+    ...document.components,
+    headers: { ...document.components?.headers, ...RATE_LIMIT_HEADER_DEFINITIONS },
+  };
+  return document;
 }
 
 export function configureHttpApp(app: INestApplication): void {

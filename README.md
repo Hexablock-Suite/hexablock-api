@@ -235,6 +235,17 @@ An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `P
 403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
 does. The account that a deploy uses to send the levels must be in the list (see [Deploy](#deploy)).
 
+Sign-up and sign-in have a rate limit for each client
+([#170](https://github.com/Hexablock-Suite/hexablock-api/issues/170)). `AUTH_RATE_LIMIT` is the
+number of requests that one IP address may send to `POST /v1/auth/register`, and the same number to
+`POST /v1/auth/login`, in one minute. Unset or empty, it is `10`, the default decided on 2026-11-28.
+`off` turns the limit off, as the tests and the provider composition of the contract job do; with
+`NODE_ENV=production`, `off` stops the start, as the example `JWT_SECRET` does. Any other value that
+is not a whole number of 1 or more stops the start. Each answer under the limit carries
+`X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`. A request over the limit
+answers 429 with the `ErrorDto` body and a `Retry-After` header. The API counts by the IP address of the connection, so behind a proxy every
+client shares the address of the proxy.
+
 For database work, start the local Postgres from `compose.yaml` and point `DATABASE_URL` at it:
 
 ```bash
