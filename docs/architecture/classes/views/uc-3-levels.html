@@ -75,7 +75,9 @@
           four role interfaces, one per use case (#193): GetLevelsUseCase holds LevelLister, whose
           list() lists the levels, and UpdateLevelsUseCase holds LevelUpdater, whose update()
           updates one level per call under a lock of its gameId and levelId; LevelHolder and
-          LevelFinder are the roles of the two use cases of view 2.2; its change asks the incoming
+          LevelFinder are the roles of the two use cases of view 2.2; LevelFinder, through
+          findFor(), and LevelUpdater, through update(), return LevelDefinition values, and
+          LevelRepository declares no operation of its own; the change of update() asks the incoming
           level, whose decideReplace() decides the version rule of S3-10 over the stored state
           (#174); UpdateLevelsUseCase also holds the LevelValidators domain service and returns a
           Result whose InvalidLevels failure holds one problem per broken level with its gameId and
@@ -224,9 +226,17 @@
           stroke-width="1"
           marker-end="url(#uc3levels-open)"
         />
-        <!-- LevelRepository returns LevelDefinition values: use -->
+        <!-- LevelFinder returns LevelDefinition values: use (#193) -->
         <path
-          d="M984 352 L1000 352 L1000 712 L976 712"
+          d="M952 456 L952 664 L872 664 L872 688"
+          fill="none"
+          stroke="#5b6873"
+          stroke-width="1"
+          marker-end="url(#uc3levels-open)"
+        />
+        <!-- LevelUpdater returns LevelDefinition values: use (#193) -->
+        <path
+          d="M944 280 L1000 280 L1000 712 L976 712"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -329,14 +339,26 @@
         >
           RETURNS
         </text>
-        <rect x="944" y="600" width="48" height="12" rx="2" fill="#efe7f8" />
+        <rect x="906" y="511" width="44" height="12" rx="2" fill="#efe7f8" />
         <text
-          x="968"
-          y="609"
+          x="948"
+          y="520"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
+          text-anchor="end"
+          letter-spacing="0.06em"
+        >
+          RETURNS
+        </text>
+        <rect x="956" y="591" width="42" height="12" rx="2" fill="#efe7f8" />
+        <text
+          x="996"
+          y="600"
+          fill="#7d8a94"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="end"
           letter-spacing="0.06em"
         >
           RETURNS
@@ -648,7 +670,7 @@
         >
           API-FR-04 · DS-6 · one per aggregate · four roles · #193
         </text>
-        <!-- Class: LevelHolder and LevelFinder (PART 2 · VIEW 2): the roles of the other two use cases -->
+        <!-- Class: LevelHolder (PART 2 · VIEW 2): the role of a use case of view 2.2 -->
         <rect
           x="584"
           y="408"
@@ -682,6 +704,7 @@
         >
           LevelHolder
         </text>
+        <!-- Class: LevelFinder (PART 2 · VIEW 2): the role of a use case of view 2.2 -->
         <rect
           x="792"
           y="408"
