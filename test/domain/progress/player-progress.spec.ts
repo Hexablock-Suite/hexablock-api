@@ -1,3 +1,4 @@
+import { receiveProgressOf } from '../../../src/adapters/received.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
@@ -6,6 +7,7 @@ import { Score } from '../../../src/domain/progress/score.js';
 import { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
+import { ProgressMother } from '../../support/object-mother/progress-mother.js';
 import { type ProgressParts, progressPartsOf } from '../../support/recording-receiver.js';
 import { syncInstantOf } from '../../support/sync-instants.js';
 import { testUserId } from '../../support/user-ids.js';
@@ -213,6 +215,22 @@ describe('PlayerProgress', () => {
     progress.recordLevel(retry, LATER);
 
     expect(progressPartsOf(progress).results).toEqual([retry, second]);
+  });
+
+  // A LevelId keeps its text as it arrives: letter case and spaces count.
+  // So two ids that differ only there name two levels, and the progress
+  // keeps a result for each one.
+  it('should_keep_a_result_per_level_when_two_level_ids_differ_only_in_letter_case_or_a_space', () => {
+    const progress = ProgressMother.startedBy(1, 'fit');
+    const lower = level('fit-01', 1);
+    const upper = level('FIT-01', 2);
+    const spaced = level(' fit-01', 3);
+
+    progress.recordLevel(lower, START);
+    progress.recordLevel(upper, START);
+    progress.recordLevel(spaced, START);
+
+    expect(progressPartsOf(progress).results).toEqual([lower, upper, spaced]);
   });
 
   // DS-4 orders the results of one level: more stars, then fewer moves, then
@@ -441,24 +459,26 @@ describe('PlayerProgress delivery', () => {
     expect(progressPartsOf(restored)).toEqual(progressPartsOf(progress));
   });
 
-  // The delivery is the one read of the state, so the aggregate keeps no
-  // getter, no snapshot and no public field of its key.
-  it('should_have_no_getter_and_no_public_field_when_the_state_is_read_through_the_delivery', () => {
-    const progress = PlayerProgress.start(KEY, START);
+  // The border reads each value object inside the aggregate only through
+  // this delivery: the key gives its user and its game, the score and the
+  // instant give their numbers, and each level result gives its four values
+  // (#90, #95, #96, #107). Each value differs from the others, so a value
+  // in the wrong place fails the test.
+  it('should_give_the_border_the_value_of_each_part_when_the_border_receives_the_delivery', () => {
+    const progress = ProgressMother.startedBy(1, 'fit');
+    progress.recordScore(valueOf(Score.of(120)), ProgressMother.FIVE_MINUTES_LATER);
+    progress.recordLevel(
+      ProgressMother.levelResult({ levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45_000 }),
+      ProgressMother.FIVE_MINUTES_LATER,
+    );
 
-    for (const name of ['highScore', 'updatedAt', 'results', 'snapshot']) {
-      expect(name in progress).toBe(false);
-    }
-    // @ts-expect-error -- R16 removes the getter of highScore.
-    void progress.highScore;
-    // @ts-expect-error -- R16 removes the getter of updatedAt.
-    void progress.updatedAt;
-    // @ts-expect-error -- R16 removes the getter of results.
-    void progress.results;
-    // @ts-expect-error -- #107 makes the key field private.
-    void progress.key;
-    // @ts-expect-error -- #96 replaces snapshot() with deliverTo().
-    void progress.snapshot;
+    expect(receiveProgressOf(progress)).toEqual({
+      userId: testUserId(1),
+      gameId: 'fit',
+      highScore: 120,
+      updatedAt: new Date('2026-11-06T10:05:00.000Z'),
+      results: [{ levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45_000 }],
+    });
   });
 });
 

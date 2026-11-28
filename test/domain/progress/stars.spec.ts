@@ -1,11 +1,11 @@
 import { Stars } from '../../../src/domain/progress/stars.js';
-import { RecordingReceiver } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
 
 const stars = (value: number): Stars => valueOf(Stars.of(value));
 
 // The stars that a player earns in one level. More stars is better (DS-4).
-// The LevelResult spec pins that order, so this spec keeps the creation rules.
+// The PlayerProgress spec pins that order through the root, so this spec
+// keeps the rules that the root cannot reach.
 describe('Stars', () => {
   // One failure mechanism (decision 11): a failed Result with the code of
   // the rule, never an exception. The border writes the message.
@@ -39,25 +39,6 @@ describe('Stars', () => {
     expect(value.equals(other)).toBe(false);
     expect(other.equals(value)).toBe(false);
     expect(stars(-0).equals(stars(0))).toBe(true);
-  });
-
-  // #90: the value leaves only through a delivery to a receiver.
-  it('should_deliver_the_value_to_the_receiver_when_the_factory_took_it', () => {
-    const receiver = new RecordingReceiver<number>();
-
-    stars(3).deliverTo(receiver);
-
-    expect(receiver.received).toEqual([3]);
-  });
-
-  it('should_have_no_public_value_field_when_the_value_leaves_through_a_delivery', () => {
-    const built = stars(3);
-    const receiver = new RecordingReceiver<number>();
-
-    // @ts-expect-error -- #90 makes the value private.
-    void built.value;
-    // The delivery returns nothing: the receiver holds the value.
-    expect(built.deliverTo(receiver)).toBeUndefined();
   });
 });
 
