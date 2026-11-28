@@ -6,9 +6,9 @@ Rules for every contributor, human or agent, in this repository. Each rule names
 
 - `pnpm verify`: lint, format:check, typecheck, test, arch, openapi:check, in that order.
 - `pnpm test`: unit, integration and gate tests, then e2e tests. It runs both suites, the behavior suite and the gate suite.
-- `pnpm test:behavior`: the behavior suite, the tests that run the code: unit, integration and e2e tests. It holds 1,212 tests on 2026-11-28.
+- `pnpm test:behavior`: the behavior suite, the tests that run the code: unit, integration and e2e tests. It holds 1,211 tests on 2026-11-28.
 - `pnpm test:gates`: the gate suite, the tests that read the code, the documents or the configuration to hold a rule. It holds 119 tests on 2026-11-28. `vitest.gates.config.ts` lists the gate files.
-- `pnpm test:fast`: the fast feedback command (#256), the 761 tests of `test/unit/` and `test/domain/`. They start no database and no HTTP application. It skips the integration tests, the e2e tests and the gates outside `test/domain/`; `pnpm verify` runs them. It took 6.3 s and 5.6 s, measured on 2026-11-28, Node v26.13.1, load 16.0 and 16.1. `pnpm test:unit` is not the fast command: it took 31.4 s and 33.2 s (load 12.7 and 13.3).
+- `pnpm test:fast`: the fast feedback command (#256), the 760 tests of `test/unit/` and `test/domain/`. They start no database and no HTTP application. It skips the integration tests, the e2e tests and the gates outside `test/domain/`; `pnpm verify` runs them. It took 6.3 s and 5.6 s, measured on 2026-11-28, Node v26.13.1, load 16.0 and 16.1. `pnpm test:unit` is not the fast command: it took 31.4 s and 33.2 s (load 12.7 and 13.3).
 - `pnpm arch`: dependency-cruiser layer rules.
 - `pnpm contract:verify`: verify the client pact against the API at `BACKEND_URL`. `PACT_FILE` picks a local pact. The API must be the provider composition: `node --env-file=.env.example scripts/contract/start-provider.js` starts it with the state-change endpoint of the pact provider states (#151).
 - `pnpm db:generate`: write a migration into `drizzle/` from the schema. `pnpm db:migrate` applies them to `DATABASE_URL`.

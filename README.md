@@ -366,11 +366,11 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,331 tests in `pnpm test`: 1,212 behavior tests and
+On 2026-11-28 the Vitest JSON reporter counts 1,330 tests in `pnpm test`: 1,211 behavior tests and
 119 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
-`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 761 tests of
+`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 760 tests of
 `test/unit/` and `test/domain/`, which start no database and no HTTP application. One gate is among
 them: `test/domain/level/level-problem.spec.ts`. The command skips the integration tests of
 `test/integration/`, the e2e tests and the other gates. `pnpm test`, `pnpm verify` and the CI
