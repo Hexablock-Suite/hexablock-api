@@ -7,7 +7,7 @@ Rules for every contributor, human or agent, in this repository. Each rule names
 - `pnpm verify`: lint, format:check, typecheck, test, arch, openapi:check, in that order.
 - `pnpm test`: unit, integration and gate tests, then e2e tests. It runs both suites, the behavior suite and the gate suite.
 - `pnpm test:behavior`: the behavior suite, the tests that run the code: unit, integration and e2e tests. It holds 1,312 tests on 2026-11-28.
-- `pnpm test:gates`: the gate suite, the tests that read the code, the documents or the configuration to hold a rule. It holds 102 tests on 2026-11-28. `vitest.gates.config.ts` lists the gate files.
+- `pnpm test:gates`: the gate suite, the tests that read the code, the documents or the configuration to hold a rule. It holds 107 tests on 2026-11-28. `vitest.gates.config.ts` lists the gate files.
 - `pnpm arch`: dependency-cruiser layer rules.
 - `pnpm contract:verify`: verify the client pact against the API at `BACKEND_URL`. `PACT_FILE` picks a local pact. The API must be the provider composition: `node --env-file=.env.example scripts/contract/start-provider.js` starts it with the state-change endpoint of the pact provider states (#151).
 - `pnpm db:generate`: write a migration into `drizzle/` from the schema. `pnpm db:migrate` applies them to `DATABASE_URL`.
