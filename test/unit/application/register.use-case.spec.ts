@@ -1,5 +1,8 @@
 import { RegisterTestApi } from '../../support/testing-api/register.test-api.js';
 
+// One code point, two UTF-16 units.
+const EMOJI = '\u{1F600}';
+
 describe('RegisterUseCase', () => {
   let register: RegisterTestApi;
 
@@ -80,6 +83,52 @@ describe('RegisterUseCase', () => {
     register.thenNoPasswordWasHashed();
     register.thenTheStoreHoldsAccounts(1);
   });
+
+  // The credential rules of sign-up (API-FR-01): a username has 3 to 32
+  // letters, digits, dots, hyphens or underscores, and a password has 8 to
+  // 128 characters. A character is one code point, so an emoji counts once
+  // (#60). Each row sits at a limit of a rule.
+  it.each([
+    ['abc', '12345678'],
+    ['a'.repeat(32), 'x'.repeat(128)],
+    ['grace.hopper', EMOJI.repeat(8)],
+    ['Player_01-x', EMOJI.repeat(128)],
+  ])(
+    'should_store_the_account_when_the_username_and_the_password_follow_their_rules',
+    async (username, password) => {
+      await register.whenRegistering(username, password);
+
+      register.thenTheRegistrationGivesTheIdOfUser(1);
+      register.thenTheStoredAccountsAre([{ user: 1, username, password }]);
+    },
+  );
+
+  // A value that breaks its rule stops at the border, so the use case never
+  // runs. #100: the lower case of a letter outside ASCII, such as İ or ẞ, can
+  // differ between JavaScript and a database, so the rule rejects it.
+  it.each(['ab', 'a'.repeat(33), '', 'ada lovelace', 'ada!', `ad${EMOJI}`, 'İlker', 'STRAẞE'])(
+    'should_refuse_the_registration_with_invalid_username_when_the_username_breaks_its_rule',
+    async (username) => {
+      await register.whenRegistering(username, 'correct horse');
+
+      register.thenTheRegistrationIsRefusedWith('invalid-username');
+      register.thenNoPasswordWasHashed();
+      register.thenTheStoreHoldsAccounts(0);
+    },
+  );
+
+  // The length counts code points, not UTF-16 units: four emoji are eight
+  // UTF-16 units and four characters.
+  it.each(['', '1234567', 'x'.repeat(129), EMOJI.repeat(4), EMOJI.repeat(129)])(
+    'should_refuse_the_registration_with_invalid_password_when_the_password_has_fewer_than_8_or_more_than_128_characters',
+    async (password) => {
+      await register.whenRegistering('ada', password);
+
+      register.thenTheRegistrationIsRefusedWith('invalid-password');
+      register.thenNoPasswordWasHashed();
+      register.thenTheStoreHoldsAccounts(0);
+    },
+  );
 
   // An unexpected failure is not a RegisterProblem. HttpErrorFilter turns it into a 500.
   it('should_reject_without_storing_user_when_password_hasher_fails', async () => {

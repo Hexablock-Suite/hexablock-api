@@ -23,6 +23,16 @@ const GET_METHOD = /^get/;
 // these declarations. Rule R-no-delivery-call keeps their calls out of the core.
 const DELIVERY_OPERATIONS = new Set(['deliverTo', 'deliverKeyTo', 'deliverBoundsTo']);
 
+// An aggregate root is built only by its factories (#91, decisions 2, 4 and
+// 16 of docs/architecture/classes.md), so its constructor is private. A new
+// root joins this list. The gate fails when src/domain no longer declares a
+// listed root, so a rename cannot turn the check off.
+export const AGGREGATE_ROOTS: readonly string[] = ['User', 'PlayerProgress', 'LevelDefinition'];
+
+// #96 replaced snapshot() with deliverTo(): a domain type gives its parts only
+// through a delivery to a receiver of the border (decision 15).
+const SNAPSHOT_METHOD = 'snapshot';
+
 type Signature = ts.SignatureDeclaration;
 
 // Gives every .ts file under a folder of the repository, as a path from the
@@ -38,17 +48,31 @@ export function typeScriptFilesIn(directory: string): string[] {
 // the source. A key is "<file> <subject> <kind>", for example
 // "src/domain/user/user.ts User.passwordMatches(typed) parameter".
 export function surfaceSitesOf(files: readonly string[]): string[] {
+  return modulesOf(files).flatMap((module) => module.sites());
+}
+
+// Gives the name of each exported class of the files that AGGREGATE_ROOTS
+// lists, in sorted order.
+export function aggregateRootsIn(files: readonly string[]): string[] {
+  return modulesOf(files)
+    .flatMap((module) => module.classNames())
+    .filter((name) => AGGREGATE_ROOTS.includes(name))
+    .sort();
+}
+
+// One ModuleSurface per file, all of them read by one program.
+function modulesOf(files: readonly string[]): ModuleSurface[] {
   const program = ts.createProgram(
     files.map((file) => resolve(ROOT, file)),
     COMPILER_OPTIONS,
   );
   const checker = program.getTypeChecker();
-  return files.flatMap((file) => {
+  return files.map((file) => {
     const source = program.getSourceFile(resolve(ROOT, file));
     if (source === undefined) {
       throw new Error(`The domain surface gate cannot read ${file}.`);
     }
-    return new ModuleSurface(file, source, checker).sites();
+    return new ModuleSurface(file, source, checker);
   });
 }
 
@@ -86,18 +110,27 @@ class ModuleSurface {
   ) {}
 
   sites(): string[] {
-    const exported = this.exportedDeclarations();
-    for (const statement of this.source.statements) {
-      const declarations = ts.isVariableStatement(statement)
-        ? statement.declarationList.declarations
-        : [statement];
-      for (const declaration of declarations) {
-        if (exported.has(declaration)) {
-          this.checkDeclaration(declaration);
-        }
-      }
+    for (const declaration of this.exportedStatements()) {
+      this.checkDeclaration(declaration);
     }
     return this.found;
+  }
+
+  // The names of the exported classes of the module.
+  classNames(): string[] {
+    return this.exportedStatements()
+      .filter((node) => ts.isClassDeclaration(node))
+      .map((node) => node.name?.text ?? 'default');
+  }
+
+  // The exported declarations, in the order of the source.
+  private exportedStatements(): ts.Node[] {
+    const exported = this.exportedDeclarations();
+    return this.source.statements
+      .flatMap((statement): readonly ts.Node[] =>
+        ts.isVariableStatement(statement) ? statement.declarationList.declarations : [statement],
+      )
+      .filter((declaration) => exported.has(declaration));
   }
 
   // An `export` keyword, an `export { name }` list and a default export all
@@ -138,6 +171,13 @@ class ModuleSurface {
     const valueObject = node.members.some(
       (member) => ts.isMethodDeclaration(member) && DELIVERY_OPERATIONS.has(this.text(member.name)),
     );
+    // A class without a constructor declaration has a public one.
+    if (
+      AGGREGATE_ROOTS.includes(owner) &&
+      !node.members.some((member) => ts.isConstructorDeclaration(member) && isPrivate(member))
+    ) {
+      this.report(`${owner}.constructor`, 'public-constructor');
+    }
     for (const member of node.members) {
       if (ts.isConstructorDeclaration(member)) {
         this.checkConstructor(owner, member);
@@ -176,6 +216,8 @@ class ModuleSurface {
     const name = this.text(node.name);
     if (GET_METHOD.test(name)) {
       this.report(`${owner}.${name}`, 'get-method');
+    } else if (name === SNAPSHOT_METHOD) {
+      this.report(`${owner}.${name}`, 'snapshot-method');
     } else if (DELIVERY_OPERATIONS.has(name)) {
       return;
     } else if (valueObject && this.isRawValueFactory(owner, node)) {
@@ -207,6 +249,8 @@ class ModuleSurface {
         const name = this.text(member.name);
         if (GET_METHOD.test(name)) {
           this.report(`${owner}.${name}`, 'get-method');
+        } else if (name === SNAPSHOT_METHOD) {
+          this.report(`${owner}.${name}`, 'snapshot-method');
         } else if (!DELIVERY_OPERATIONS.has(name)) {
           this.checkSignature(`${owner}.${name}`, member);
         }

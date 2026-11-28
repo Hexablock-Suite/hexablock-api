@@ -366,8 +366,8 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,442 tests in `pnpm test`: 1,324 behavior tests and
-118 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+On 2026-11-28 the Vitest JSON reporter counts 1,380 tests in `pnpm test`: 1,261 behavior tests and
+119 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
 `pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 881 tests of
@@ -411,6 +411,25 @@ domain data with the public factories and know no double. Each `then…` step fa
 tests of `LoggingAspect` and `AuthorizationAspect` included, and so has the test of the domain
 service `LevelValidators` in `test/domain/level/`: its `when…` steps are `async` too, although
 `check()` is synchronous.
+
+The review demo (#257) shows that the tests hold the behavior, not the shape of the code. Run it on a
+scratch branch and never push that branch: a push starts CI and leaves a branch that nobody merges.
+First count the two suites with `pnpm test:behavior` and `pnpm test:gates`: the 1,334 behavior
+tests and the 118 gate tests above. Then make two changes, one at a time, undo each one before the
+next, and run `pnpm test` after each:
+
+1. A refactor that keeps the behavior. Add the `Clock` port to the constructor of `LoginUseCase`,
+   inject `CLOCK` in the `LOGIN` factory of `AppModule`, and give `LoginTestApi` a `FixedClock`.
+   `pnpm test` stays green, and `git diff --stat` names `src/application/auth/login.use-case.ts`,
+   `src/infrastructure/app.module.ts` and `test/support/testing-api/login.test-api.ts` only. No test
+   case changes, because only the Testing API builds the use case.
+2. A change of behavior. In `Standing.isBetterThan()` (`src/domain/progress/standing.ts`), compare
+   the time before the moves. `pnpm test` fails on two named tests:
+   `should_rank_fewer_total_moves_first_when_stars_and_levels_completed_are_equal` of
+   `test/domain/progress/standing.spec.ts` and
+   `should_rank_the_board_by_the_standing_comparison_when_the_entries_come_in_no_order` of
+   `test/domain/progress/ranked-board.spec.ts`. Each failure shows the expected and the received
+   value.
 
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.
@@ -463,7 +482,7 @@ answers 400 with the status of the sign-in, such as `the sign-in of ada answered
 
 ## AI Usage Documentation
 
-TODO: summarize the AI tools used. The full log lives in [AI_USAGE.md](AI_USAGE.md).
+The team used two AI tools. Claude Code, with the models Claude Opus 5.5 and Claude Fable 5.2, wrote most logged tasks: the tests first and then the code, the architecture documents, the class views and the flows, and the requirement and decision records. OpenCode, with the model GLM-5.3-Flash, wrote eight issues between 2026-11-21 and 2026-11-26, tests first. Each row of the log gives what the AI produced and what the team changed. The full log lives in [AI_USAGE.md](AI_USAGE.md).
 
 ## Contributing
 
@@ -483,4 +502,6 @@ At the end of each sprint, the team tags `v0.N.0` and moves the `[Unreleased]` e
 
 ## License
 
-TODO: confirm the copyright holder. The code is under the [MIT License](LICENSE).
+The code is under the [MIT License](LICENSE). `LICENSE` says `Copyright (c) 2026 HexaBlock Suite contributors`.
+
+TODO: confirm the copyright holder.

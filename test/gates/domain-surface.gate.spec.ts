@@ -1,14 +1,22 @@
 import { DOMAIN_SURFACE_BASELINE } from './domain-surface.baseline.js';
-import { baselineDrift, surfaceSitesOf, typeScriptFilesIn } from './domain-surface.js';
+import {
+  AGGREGATE_ROOTS,
+  aggregateRootsIn,
+  baselineDrift,
+  surfaceSitesOf,
+  typeScriptFilesIn,
+} from './domain-surface.js';
 
 // Gate of #102: a domain type keeps its fields private and has no getter. No
 // string, number or Date crosses a public signature of src/domain. Three
 // cases pass: a boolean query, the factory of a value object that takes the
-// raw value, and the delivery operations (decision 15). The baseline lists
-// the sites that break the rule today. The list only shrinks.
+// raw value, and the delivery operations (decision 15). An aggregate root
+// has a private constructor, and no domain type declares snapshot() (#255).
+// The baseline lists the sites that break the rule today. The list only
+// shrinks.
 const FIXTURES = 'test/fixtures/domain-surface';
 const SITE =
-  /^src\/domain\/\S+\.ts \S+ (field|get-accessor|set-accessor|get-method|parameter|return|constant|type)$/;
+  /^src\/domain\/\S+\.ts \S+ (field|get-accessor|set-accessor|get-method|parameter|return|constant|type|public-constructor|snapshot-method)$/;
 
 describe('domain surface gate', () => {
   describe('rule', () => {
@@ -121,6 +129,14 @@ describe('domain surface gate', () => {
   describe('baseline', () => {
     const domainSites = surfaceSitesOf(typeScriptFilesIn('src/domain'));
     const drift = baselineDrift(domainSites, DOMAIN_SURFACE_BASELINE);
+
+    // #255: a root that the list names and src/domain no longer declares
+    // would turn the check of its constructor off without a failure.
+    it('should_find_each_listed_aggregate_root_when_the_gate_reads_each_file_of_src_domain', () => {
+      expect(aggregateRootsIn(typeScriptFilesIn('src/domain'))).toEqual(
+        [...AGGREGATE_ROOTS].sort(),
+      );
+    });
 
     it('should_list_every_site_when_the_gate_reads_each_file_of_src_domain', () => {
       expect(drift.unlisted, 'Fix each new site. Never add it to the baseline.').toEqual([]);
