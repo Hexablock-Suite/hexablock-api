@@ -197,13 +197,26 @@ monotonic clock of `performance`. No second aspect writes a timing entry (#181).
 
 ## Getting Started
 
-You need Node 26 (through [fnm](https://github.com/Schniz/fnm)), pnpm and, for database work,
-Docker.
+You need Node 26.13.1 (through [fnm](https://github.com/Schniz/fnm)), pnpm and, for database
+work, Docker.
 
 ```bash
-fnm use            # reads .node-version (Node 26)
+fnm use            # reads .node-version (Node 26.13.1)
 pnpm install       # also installs the git hooks
 pnpm start:dev     # http://localhost:3000/v1/health, docs at /docs, JSON at /docs-json
+```
+
+`.node-version` names the exact Node of the three CI jobs. `engines.node` of `package.json` accepts
+`>=26.13.1 <27`, so a newer Node 26 also works. `engineStrict: true` in `pnpm-workspace.yaml` makes
+`pnpm install` and every `pnpm` script stop on an older or another major version (#250):
+
+```text
+[ERR_PNPM_UNSUPPORTED_ENGINE] Unsupported environment (bad pnpm and/or Node.js version)
+
+Your Node version is incompatible with "<repository path>".
+
+Expected version: >=26.13.1 <27
+Got: v26.7.0
 ```
 
 The API reads `PORT` (default `3000`), `DATABASE_URL` and `JWT_SECRET` from the environment, and does not
@@ -352,8 +365,8 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,372 tests in `pnpm test`: 1,271 behavior tests and
-101 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+On 2026-11-28 the Vitest JSON reporter counts 1,398 tests in `pnpm test`: 1,296 behavior tests and
+102 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
 Name each test `should_<expected_result>_when_<condition>`. The gate
