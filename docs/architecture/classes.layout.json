@@ -131,7 +131,7 @@
         },
         {
           "group": "usecases|src/application/aspects",
-          "types": ["UseCaseAspect", "LoggingAspect"]
+          "types": ["UseCaseAspect", "LoggingAspect", "AuthorizationAspect"]
         },
         {
           "group": "usecases|src/application/auth",
@@ -158,8 +158,6 @@
             "GetLevels",
             "InvalidLevels",
             "UpdateLevelsRequest",
-            "AuthorizeLevelEditorUseCase",
-            "AuthorizeLevelEditor",
             "IncomingLevel",
             "LevelProblemReport",
             "UpdateLevels",
@@ -181,6 +179,7 @@
             "GlobalBoardReader",
             "LevelBoardReader",
             "Clock",
+            "Stopwatch",
             "Logger",
             "UserRepository",
             "LevelRepository",
@@ -198,10 +197,6 @@
             "GetProgressRequest",
             "ProgressProblem"
           ]
-        },
-        {
-          "group": "usecases|planned",
-          "types": ["TimingAspect"]
         }
       ],
       "3": [
@@ -242,7 +237,6 @@
             "FitPlacementDto",
             "FitSectionDto",
             "LeaderboardDtoMapper",
-            "LevelEditorGuard",
             "JwtAuthGuard",
             "FitStarDto",
             "HealthResponse",
@@ -288,7 +282,7 @@
         },
         {
           "group": "adapters|src/adapters/clock",
-          "types": ["SystemClock"]
+          "types": ["SystemClock", "PerformanceStopwatch"]
         },
         {
           "group": "adapters|src/adapters/logging",
@@ -432,7 +426,7 @@
             "GetGlobalLeaderboardUseCase",
             "GetLevelLeaderboardUseCase",
             "LevelBoardQuery",
-            "AuthorizeLevelEditor",
+            "AuthorizationAspect",
             "UserRepository",
             "LevelChange",
             "LevelRepository",
@@ -441,7 +435,6 @@
             "ProgressRepository",
             "GlobalBoardReader",
             "LevelBoardReader",
-            "AuthorizeLevelEditorUseCase",
             "RegisterUseCase",
             "GetLevels",
             "GetLevelsUseCase",
@@ -484,7 +477,6 @@
             "LeaderboardController",
             "LeaderboardDtoMapper",
             "AuthDtoMapper",
-            "LevelEditorGuard",
             "JwtAuthGuard",
             "LevelsController",
             "ProgressController",
@@ -584,6 +576,7 @@
             "LevelChange",
             "LevelRepository",
             "Clock",
+            "Stopwatch",
             "TokenIssuer",
             "PasswordHasher",
             "UserIdGenerator",
@@ -592,18 +585,16 @@
         },
         {
           "group": "usecases|src/application/aspects",
-          "types": ["UseCaseAspect", "LoggingAspect"]
+          "types": ["UseCaseAspect", "LoggingAspect", "AuthorizationAspect"]
         },
         {
           "group": "usecases|src/application/levels",
           "types": [
             "GetLevelsUseCase",
             "GetLevels",
-            "AuthorizeLevelEditorUseCase",
             "UpdateLevelsUseCase",
             "UpdateLevelsRequest",
             "NotALevelEditor",
-            "AuthorizeLevelEditor",
             "InvalidLevels",
             "LevelProblemReport",
             "IncomingLevel",
@@ -623,10 +614,6 @@
             "GetProgressRequest",
             "GetProgress"
           ]
-        },
-        {
-          "group": "usecases|planned",
-          "types": ["TimingAspect"]
         }
       ],
       "3": [
@@ -647,13 +634,13 @@
             "LeaderboardDtoMapper",
             "LevelDtoMapper",
             "ProgressDtoMapper",
-            "LevelEditorGuard",
             "AuthDtoMapper",
             "JwtAuthGuard",
             "JwtTokenIssuer",
             "ScryptPasswordHasher",
             "RandomUserIdGenerator",
             "SystemClock",
+            "PerformanceStopwatch",
             "NestLogger"
           ]
         }
@@ -723,7 +710,6 @@
             "UserRepository",
             "AuthenticateToken",
             "RegisterUserRequest",
-            "AuthorizeLevelEditor",
             "ProgressChange",
             "UpdateLevels",
             "LoginRequest",
@@ -785,8 +771,7 @@
             "ErrorDto",
             "SyncProgressDto",
             "LevelResultDto",
-            "ScoreEntryDto",
-            "LevelEditorGuard"
+            "ScoreEntryDto"
           ]
         },
         {
@@ -828,7 +813,7 @@
         },
         {
           "group": "adapters|src/adapters/clock",
-          "types": ["SystemClock"]
+          "types": ["SystemClock", "PerformanceStopwatch"]
         },
         {
           "group": "adapters|src/adapters/logging",
