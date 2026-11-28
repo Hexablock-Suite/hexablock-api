@@ -482,7 +482,7 @@ answers 400 with the status of the sign-in, such as `the sign-in of ada answered
 
 ## AI Usage Documentation
 
-TODO: summarize the AI tools used. The full log lives in [AI_USAGE.md](AI_USAGE.md).
+The team used two AI tools. Claude Code, with the models Claude Opus 5.5 and Claude Fable 5.2, wrote most logged tasks: the tests first and then the code, the architecture documents, the class views and the flows, and the requirement and decision records. OpenCode, with the model GLM-5.3-Flash, wrote eight issues between 2026-11-21 and 2026-11-26, tests first. Each row of the log gives what the AI produced and what the team changed. The full log lives in [AI_USAGE.md](AI_USAGE.md).
 
 ## Contributing
 
@@ -502,4 +502,6 @@ At the end of each sprint, the team tags `v0.N.0` and moves the `[Unreleased]` e
 
 ## License
 
-TODO: confirm the copyright holder. The code is under the [MIT License](LICENSE).
+The code is under the [MIT License](LICENSE). `LICENSE` says `Copyright (c) 2026 HexaBlock Suite contributors`.
+
+TODO: confirm the copyright holder.
