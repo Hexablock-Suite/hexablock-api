@@ -12,7 +12,10 @@ export type UserRow = typeof users.$inferSelect;
 // delivers, and writes the key of the Username into username_key. toEntity()
 // restores the user from the row. It reads only the name, and the domain
 // computes the key again. A stored value that breaks its rule is a server
-// fault, so toEntity() throws.
+// fault, so toEntity() throws. The uuid columns users.id and progress.user_id
+// keep the UUID of a UserId. Postgres returns a uuid in lower case, and
+// UserId.from() keeps that form, so equals() stays true for an id that the
+// database reads back.
 export const UserRowMapper = {
   toEntity(row: UserRow): User {
     const username = Username.create(row.username);

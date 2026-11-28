@@ -1,14 +1,10 @@
-import type {
-  LevelChange,
-  LevelRepository,
-} from '../../../src/application/ports/level-repository.js';
+import type { LevelChange, LevelUpdater } from '../../../src/application/ports/level-repository.js';
 import {
   type UpdateLevelsRequest,
   UpdateLevelsUseCase,
 } from '../../../src/application/levels/update-levels.use-case.js';
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { LevelId } from '../../../src/domain/progress/level-id.js';
-import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { levelJson, levelValidators, type LevelJson } from '../../support/level-format.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
@@ -166,14 +162,13 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
 
   // Each level is saved in its own transaction. A save that throws stops
   // the batch and keeps the levels saved before it. A retry of the same
-  // batch saves each level again: an equal version passes.
+  // batch saves each level again: an equal version passes. The use case
+  // depends only on the LevelUpdater role, so the double has only update()
+  // (#193).
   it('should_keep_the_levels_saved_before_a_failed_save_and_save_every_level_when_the_batch_is_retried', async () => {
     const failure = new Error('the connection is lost');
     let calls = 0;
-    const flaky: LevelRepository = {
-      list: () => levels.list(),
-      findFor: (gameId: GameId, results: readonly LevelResult[]) => levels.findFor(gameId, results),
-      holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
+    const flaky: LevelUpdater = {
       update: (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         calls += 1;
         return calls === 2 ? Promise.reject(failure) : levels.update(gameId, levelId, change);
@@ -207,10 +202,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
   it('should_report_older_version_for_the_losing_update_when_a_newer_update_saves_between_its_check_and_its_save', async () => {
     await storeLevel(levels, levelJson('hexa-fit', 'fit-01', 1));
     const newer = new UpdateLevelsUseCase(levels, levelValidators());
-    const racing: LevelRepository = {
-      list: () => levels.list(),
-      findFor: (gameId: GameId, results: readonly LevelResult[]) => levels.findFor(gameId, results),
-      holds: (gameId: GameId, levelId: LevelId) => levels.holds(gameId, levelId),
+    const racing: LevelUpdater = {
       update: async (gameId: GameId, levelId: LevelId, change: LevelChange) => {
         await newer.execute(batchOf(levelJson('hexa-fit', 'fit-01', 3)));
         return levels.update(gameId, levelId, change);

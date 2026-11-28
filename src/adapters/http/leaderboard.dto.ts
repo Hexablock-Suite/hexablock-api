@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { USERNAME_LIMITS } from './credentials.dto.js';
 
 const RANK = {
   example: 1,
@@ -12,10 +13,12 @@ const USER_ID = {
   description: 'The player. A full tie lists its players by userId ascending.',
 };
 
+// The name of the account follows the username rule of sign-up, so the row
+// publishes the same limits.
 const USERNAME = {
   example: 'ada',
-  description:
-    'The username of the account of the player, as the player typed it at sign-up (#230).',
+  ...USERNAME_LIMITS,
+  description: 'The username of the account of the player, as the player typed it at sign-up.',
 };
 
 // One row of the board of a level: the stored result of one player (DS-4,

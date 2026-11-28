@@ -11,9 +11,10 @@ export class Moves {
   private constructor(private readonly value: number) {}
 
   // Builds the moves of a value that the API already holds or reads from a
-  // level: a stored row, a total that sums the stored rows, or a star
-  // threshold. A total can exceed one column, and a stored row keeps what it
-  // holds, so this factory has no upper bound.
+  // level: a stored result, a total that sums the stored results, or a star
+  // threshold. A total can exceed the bound of one play, and a stored value
+  // keeps what it holds, so this factory has no upper bound. The bound of
+  // the moves that a client sends lives at the border (#135, #179).
   static of(value: number): Result<Moves, MovesProblem> {
     return Number.isSafeInteger(value) && value >= 0 ? ok(new Moves(value)) : err('invalid-moves');
   }
