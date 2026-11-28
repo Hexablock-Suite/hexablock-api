@@ -370,7 +370,7 @@ On 2026-11-28 the Vitest JSON reporter counts 1,331 tests in `pnpm test`: 1,212 
 119 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
-`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 859 tests of
+`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 761 tests of
 `test/unit/` and `test/domain/`, which start no database and no HTTP application. One gate is among
 them: `test/domain/level/level-problem.spec.ts`. The command skips the integration tests of
 `test/integration/`, the e2e tests and the other gates. `pnpm test`, `pnpm verify` and the CI
