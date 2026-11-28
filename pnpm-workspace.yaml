@@ -1,3 +1,8 @@
+# Fail `pnpm install` and `pnpm run` on a Node version that breaks `engines.node`
+# of package.json (#250). Without it, pnpm only warns. pnpm 11 ignores
+# `engine-strict` in .npmrc.
+engineStrict: true
+
 # Vite+ asks every package to share its Vite core and its Vitest version.
 # Keep both pins equal to the installed vite-plus release (`vp toolchain`).
 overrides:

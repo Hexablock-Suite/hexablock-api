@@ -1,48 +1,23 @@
-import { GetProgressUseCase } from '../../../src/application/progress/get-progress.use-case.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
-import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
-import { ProgressKey } from '../../../src/domain/progress/progress-key.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
-import { syncInstantOf } from '../../support/sync-instants.js';
-import { testUserId } from '../../support/user-ids.js';
-import { valueOf } from '../../support/result.js';
-
-const ADA = valueOf(UserId.from(testUserId(1)));
-const GRACE = valueOf(UserId.from(testUserId(2)));
-const AT = syncInstantOf(new Date('2026-11-06T10:00:00.000Z'));
+import { ProgressMother } from '../../support/object-mother/progress-mother.js';
+import { GetProgressTestApi } from '../../support/testing-api/get-progress.test-api.js';
 
 describe('GetProgressUseCase (API-FR-02)', () => {
-  let progress: InMemoryProgressRepository;
-  let getProgress: GetProgressUseCase;
-
-  beforeEach(() => {
-    progress = new InMemoryProgressRepository();
-    getProgress = new GetProgressUseCase(progress);
-  });
-
   it('should_return_stored_progress_when_user_has_progress_for_game', async () => {
-    const stored = PlayerProgress.start(ProgressKey.of(ADA, valueOf(GameId.of('hexa-lines'))), AT);
-    await progress.save(stored);
+    const stored = ProgressMother.startedBy(1, 'hexa-lines');
+    const getProgress = new GetProgressTestApi().givenAStoredProgress(stored);
 
-    const result = await getProgress.execute({
-      userId: ADA,
-      gameId: valueOf(GameId.of('hexa-lines')),
-    });
+    await getProgress.whenGettingTheProgressOf(1, 'hexa-lines');
 
-    expect(result).toEqual({ ok: true, value: stored });
+    getProgress.thenTheProgressIs(stored);
   });
 
   it('should_fail_with_progress_not_found_when_only_another_user_has_progress_for_game', async () => {
-    await progress.save(
-      PlayerProgress.start(ProgressKey.of(GRACE, valueOf(GameId.of('hexa-lines'))), AT),
+    const getProgress = new GetProgressTestApi().givenAStoredProgress(
+      ProgressMother.startedBy(2, 'hexa-lines'),
     );
 
-    const result = await getProgress.execute({
-      userId: ADA,
-      gameId: valueOf(GameId.of('hexa-lines')),
-    });
+    await getProgress.whenGettingTheProgressOf(1, 'hexa-lines');
 
-    expect(result).toEqual({ ok: false, error: { kind: 'progress-not-found' } });
+    getProgress.thenNoProgressIsFound();
   });
 });

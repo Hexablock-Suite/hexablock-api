@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 2 · View 2 of 4</p>
       <h1>Progress and leaderboard: use cases over output ports</h1>
       <svg
-        viewBox="0 0 1040 1078"
+        viewBox="0 0 1040 1094"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="uc2progress-title uc2progress-desc"
@@ -72,9 +72,12 @@
         <desc id="uc2progress-desc">
           Class diagram of layer 2 showing SyncProgressUseCase, which holds the ProgressRepository
           port for the whole progress aggregate and the Clock port, and the two leaderboard use
-          cases (#218). GetLevelLeaderboardUseCase holds the LevelBoardReader port and the
-          LevelRepository port: before the board of a level, it asks LevelRepository.holds() whether
-          the definitions hold the level, and fails with UnknownLevel when they do not (#146).
+          cases (#218). SyncProgressUseCase also holds LevelFinder, the role of the LevelRepository
+          port whose findFor() reads the levels of the results of one sync (#217).
+          GetLevelLeaderboardUseCase holds the LevelBoardReader port and LevelHolder, the role of
+          the LevelRepository port whose holds() answers, before the board of a level, whether the
+          definitions hold the level; it fails with UnknownLevel when they do not (#146). Both roles
+          are two of the four roles of LevelRepository, which view 2.3 draws (#193).
           GetGlobalLeaderboardUseCase holds the GlobalBoardReader port and never fails. Each reader
           only filters and sums, and the RankedBoard value object of the domain ranks the entries
           that the reader gives: the use cases build no order. Each progress use case joins the
@@ -189,9 +192,9 @@
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
-        <!-- SyncProgressUseCase holds LevelRepository: use (#135) -->
+        <!-- SyncProgressUseCase holds LevelFinder: use (#135, #193) -->
         <path
-          d="M448 200 L458 200 L458 420 L568 420"
+          d="M448 200 L458 200 L458 452 L568 452"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -213,9 +216,9 @@
           stroke-width="1"
           marker-end="url(#uc2progress-open)"
         />
-        <!-- GetLevelLeaderboardUseCase holds LevelRepository: use -->
+        <!-- GetLevelLeaderboardUseCase holds LevelHolder: use (#193) -->
         <path
-          d="M448 568 L520 568 L520 388 L568 388"
+          d="M448 568 L520 568 L520 372 L568 372"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -223,7 +226,7 @@
         />
         <text
           x="484"
-          y="406"
+          y="562"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -379,7 +382,7 @@
           - clock: Clock
         </text>
         <text x="80" y="228" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - levels: LevelRepository
+          - levels: LevelFinder
         </text>
 
         <line x1="64" y1="236" x2="448" y2="236" stroke="rgba(15,111,116,0.40)" stroke-width="1" />
@@ -436,7 +439,7 @@
         </text>
         <line x1="64" y1="548" x2="448" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="80" y="564" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - levels: LevelRepository
+          - levels: LevelHolder
         </text>
         <text x="80" y="580" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           - boards: LevelBoardReader
@@ -503,12 +506,12 @@
         <text x="102" y="796" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;Result&lt;GlobalLeaderboard, never&gt;&gt;
         </text>
-        <!-- Class: LevelRepository («interface» «port» «repository»): only the operation of this view -->
+        <!-- Class: LevelHolder («interface» «port»): the role of LevelRepository that GetLevelLeaderboardUseCase holds (#193) -->
         <rect
           x="568"
-          y="336"
+          y="320"
           width="416"
-          height="140"
+          height="68"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -516,48 +519,68 @@
         />
         <text
           x="776"
-          y="354"
+          y="338"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «interface» «port» «repository»
+          «interface» «port»
         </text>
         <text
           x="776"
-          y="372"
+          y="356"
           fill="#17212a"
           font-size="12"
           font-weight="600"
           font-family="'IBM Plex Sans', sans-serif"
           text-anchor="middle"
         >
-          LevelRepository
+          LevelHolder
         </text>
+        <line x1="568" y1="364" x2="984" y2="364" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="584" y="380" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
+        </text>
+        <!-- Class: LevelFinder («interface» «port»): the role of LevelRepository that SyncProgressUseCase holds (#193) -->
+        <rect
+          x="568"
+          y="404"
+          width="416"
+          height="84"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
         <text
           x="776"
-          y="386"
+          y="422"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-02 · API-FR-03 · #135 · #146 · view 2.3 draws update()
+          «interface» «port»
         </text>
-        <line x1="568" y1="396" x2="984" y2="396" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="584" y="414" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + holds(gameId: GameId, levelId: LevelId): Promise&lt;boolean&gt;
+        <text
+          x="776"
+          y="440"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          LevelFinder
         </text>
-        <text x="584" y="430" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + list(): Promise&lt;ListedLevels&gt;
-        </text>
-        <text x="584" y="446" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="568" y1="448" x2="984" y2="448" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="584" y="464" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + findFor(gameId: GameId, results: readonly LevelResult[]):
         </text>
-        <text x="606" y="462" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="606" y="480" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           Promise&lt;readonly LevelDefinition[]&gt;
         </text>
 
@@ -911,105 +934,124 @@
           LeaderboardEntry is a response type of layer 2 in src/application/ports/, with no tactical
           stereotype (Part 1, view 1).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="996" x2="1016" y2="996" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="1014"
+          y="988"
           fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          letter-spacing="0.18em"
-        >
-          LEGEND
-        </text>
-        <line
-          x1="24"
-          y1="1032"
-          x2="52"
-          y2="1032"
-          stroke="#5b6873"
-          stroke-width="1"
-          marker-end="url(#uc2progress-open)"
-        />
-        <text
-          x="60"
-          y="1036"
-          fill="#5b6873"
-          font-size="8.5"
+          font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          Use · attribute across layers, parameter, return, local or new
+          LevelFinder and LevelHolder are two of the four roles of LevelRepository, the one
+          repository of the LevelDefinition aggregate, which view 2.3 draws (decision 23, #193).
         </text>
-        <rect
-          x="24"
-          y="1052"
-          width="20"
-          height="12"
-          rx="2"
-          fill="#efe7f8"
-          stroke="rgba(126,34,206,0.40)"
-          stroke-width="1"
-        />
-        <text
-          x="56"
-          y="1061"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Zone · Clean layer
-        </text>
-        <rect
-          x="166"
-          y="1052"
-          width="28"
-          height="12"
-          rx="2"
-          fill="none"
-          stroke="rgba(91,104,115,0.55)"
-          stroke-width="1"
-          stroke-dasharray="4,4"
-        />
-        <text
-          x="202"
-          y="1061"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Dashed frame · pattern or group
-        </text>
-        <rect
-          x="372"
-          y="1052"
-          width="28"
-          height="12"
-          rx="2"
-          fill="rgba(15,111,116,0.10)"
-          stroke="#0f6f74"
-          stroke-width="1"
-        />
-        <text
-          x="408"
-          y="1061"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Teal · focal class
-        </text>
-        <line x1="518" y1="1058" x2="534" y2="1058" stroke="#17212a" stroke-width="1" />
-        <circle cx="539" cy="1058" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
-        <text
-          x="554"
-          y="1061"
-          fill="#5b6873"
-          font-size="8.5"
-          font-family="'IBM Plex Sans', sans-serif"
-        >
-          Lollipop · input port
-        </text>
+        <!-- Legend: moved down 16 for the footnote line of #193 -->
+        <g transform="translate(0,16)">
+          <line
+            x1="24"
+            y1="996"
+            x2="1016"
+            y2="996"
+            stroke="rgba(23,33,42,0.10)"
+            stroke-width="0.8"
+          />
+          <text
+            x="24"
+            y="1014"
+            fill="#5b6873"
+            font-size="8"
+            font-family="'IBM Plex Mono', monospace"
+            letter-spacing="0.18em"
+          >
+            LEGEND
+          </text>
+          <line
+            x1="24"
+            y1="1032"
+            x2="52"
+            y2="1032"
+            stroke="#5b6873"
+            stroke-width="1"
+            marker-end="url(#uc2progress-open)"
+          />
+          <text
+            x="60"
+            y="1036"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Use · attribute across layers, parameter, return, local or new
+          </text>
+          <rect
+            x="24"
+            y="1052"
+            width="20"
+            height="12"
+            rx="2"
+            fill="#efe7f8"
+            stroke="rgba(126,34,206,0.40)"
+            stroke-width="1"
+          />
+          <text
+            x="56"
+            y="1061"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Zone · Clean layer
+          </text>
+          <rect
+            x="166"
+            y="1052"
+            width="28"
+            height="12"
+            rx="2"
+            fill="none"
+            stroke="rgba(91,104,115,0.55)"
+            stroke-width="1"
+            stroke-dasharray="4,4"
+          />
+          <text
+            x="202"
+            y="1061"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Dashed frame · pattern or group
+          </text>
+          <rect
+            x="372"
+            y="1052"
+            width="28"
+            height="12"
+            rx="2"
+            fill="rgba(15,111,116,0.10)"
+            stroke="#0f6f74"
+            stroke-width="1"
+          />
+          <text
+            x="408"
+            y="1061"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Teal · focal class
+          </text>
+          <line x1="518" y1="1058" x2="534" y2="1058" stroke="#17212a" stroke-width="1" />
+          <circle cx="539" cy="1058" r="5" fill="#ffffff" stroke="#17212a" stroke-width="1" />
+          <text
+            x="554"
+            y="1061"
+            fill="#5b6873"
+            font-size="8.5"
+            font-family="'IBM Plex Sans', sans-serif"
+          >
+            Lollipop · input port
+          </text>
+        </g>
       </svg>
     </div>
   </body>

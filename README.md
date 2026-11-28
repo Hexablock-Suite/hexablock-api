@@ -162,7 +162,9 @@ Each principle has one example from the progress slice. Each link opens the sour
 - **Interface segregation:** the [SyncProgress](src/application/progress/sync-progress.use-case.ts)
   input port has one `execute` method, and
   [ProgressController](src/adapters/http/progress.controller.ts) depends only on `SyncProgress`
-  and `GetProgress`, the two ports it calls.
+  and `GetProgress`, the two ports it calls. `SyncProgressUseCase` holds only
+  [LevelFinder](src/application/ports/level-repository.ts), the one role of `LevelRepository`
+  that a sync calls (#193).
 - **Dependency inversion:** the application owns the
   [ProgressRepository](src/application/ports/progress-repository.ts) port,
   [DrizzleProgressRepository](src/adapters/persistence/drizzle-progress-repository.ts) implements
@@ -195,13 +197,26 @@ monotonic clock of `performance`. No second aspect writes a timing entry (#181).
 
 ## Getting Started
 
-You need Node 26 (through [fnm](https://github.com/Schniz/fnm)), pnpm and, for database work,
-Docker.
+You need Node 26.13.1 (through [fnm](https://github.com/Schniz/fnm)), pnpm and, for database
+work, Docker.
 
 ```bash
-fnm use            # reads .node-version (Node 26)
+fnm use            # reads .node-version (Node 26.13.1)
 pnpm install       # also installs the git hooks
 pnpm start:dev     # http://localhost:3000/v1/health, docs at /docs, JSON at /docs-json
+```
+
+`.node-version` names the exact Node of the three CI jobs. `engines.node` of `package.json` accepts
+`>=26.13.1 <27`, so a newer Node 26 also works. `engineStrict: true` in `pnpm-workspace.yaml` makes
+`pnpm install` and every `pnpm` script stop on an older or another major version (#250):
+
+```text
+[ERR_PNPM_UNSUPPORTED_ENGINE] Unsupported environment (bad pnpm and/or Node.js version)
+
+Your Node version is incompatible with "<repository path>".
+
+Expected version: >=26.13.1 <27
+Got: v26.7.0
 ```
 
 The API reads `PORT` (default `3000`), `DATABASE_URL` and `JWT_SECRET` from the environment, and does not
@@ -328,16 +343,72 @@ hexablock-app gives the options of both commands.
 ## Running Tests
 
 ```bash
-pnpm test          # unit, gate and integration tests, then e2e tests
-pnpm test:unit     # unit, gate and integration tests only
-pnpm test:e2e      # HTTP end-to-end tests only
-pnpm verify        # lint, format:check, typecheck, test, arch, openapi:check (the CI gate)
-pnpm openapi:check # fails when openapi/openapi.json differs from the built app
+pnpm test           # both suites: unit, integration and gate tests, then e2e tests
+pnpm test:behavior  # behavior suite: unit, integration and e2e tests, without the gates
+pnpm test:gates     # gate suite only
+pnpm test:unit      # unit, integration and gate tests only
+pnpm test:fast      # fast feedback: the unit and domain tests only, in seconds
+pnpm test:e2e       # HTTP end-to-end tests only
+pnpm verify         # lint, format:check, typecheck, test, arch, openapi:check (the CI gate)
+pnpm openapi:check  # fails when openapi/openapi.json differs from the built app
 pnpm openapi:export # rewrites openapi/openapi.json after an HTTP change
 ```
 
+The tests form two suites. A behavior test runs the code and checks what it does. A gate test reads
+the code, the documents or the configuration to hold a rule of design or of process. The gate suite
+holds the files of `test/gates/` and three gates that live with behavior tests:
+`test/integration/in-memory-database.spec.ts` (rule R-database-harness),
+`test/domain/level/level-problem.spec.ts` (it compares `docs/level-format.md` and
+`openapi/openapi.json` with the code) and the OpenAPI drift test of `test/health.e2e-spec.ts` (rule
+R-openapi-drift). `vitest.gates.config.ts` lists the gates, and `vitest.behavior.config.ts`
+selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm verify` and the CI
+`verify` job run every gate. The gate `test/gates/test-suites.gate.spec.ts` fails when a test file
+of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
+to the other suite as skipped.
+
+On 2026-11-28 the Vitest JSON reporter counts 1,448 tests in `pnpm test`: 1,330 behavior tests and
+118 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+unless `HB_TEST_PG_URL` is set (rule R-database-harness).
+
+`pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 881 tests of
+`test/unit/` and `test/domain/`, which start no database and no HTTP application. One gate is among
+them: `test/domain/level/level-problem.spec.ts`. The command skips the integration tests of
+`test/integration/`, the e2e tests and the other gates. `pnpm test`, `pnpm verify` and the CI
+`verify` job still run every test, so run `pnpm verify` before you push. `pnpm test:unit` is not
+the fast command: it also runs the integration tests and the gates.
+
+The times below are from the Vitest JSON reporter and the wall clock of two runs of each command, one
+run at a time. They were measured on 2026-11-28, Node v26.13.1, with the 1-minute load before each run:
+
+| Command                                                | Tests              | Run 1              | Run 2              |
+| ------------------------------------------------------ | ------------------ | ------------------ | ------------------ |
+| `pnpm test:fast`                                       | 881                | 6.3 s (load 16.0)  | 5.6 s (load 16.1)  |
+| `pnpm test:gates`                                      | 102 + 2 skipped    | 8.3 s (load 14.9)  | 8.4 s (load 14.5)  |
+| `pnpm test:unit`                                       | 1,149 + 16 skipped | 31.4 s (load 12.7) | 33.2 s (load 13.3) |
+| `pnpm exec vitest run --config ./vitest.config.e2e.ts` | 208                | 84.3 s (load 13.5) | 107.5 s (load 9.1) |
+
+The gate suite alone takes longer than the unit and domain tests, so `pnpm test:fast` leaves it out.
+In 13 of the 14 e2e files, `beforeEach` starts a new Nest application on a new PGlite database for
+each test. Each such test takes at least 1.2 s, and a sign-in test of `test/auth-sign-in.e2e-spec.ts`,
+which starts one application for its file, takes about 40 ms. In `pnpm test:fast`,
+`test/unit/infrastructure/database-pool-shutdown.child.spec.ts` takes 4.8 s of the run alone, because it
+builds the app with `pnpm build` and starts `dist/main.js` in a child process.
+
 Name each test `should_<expected_result>_when_<condition>`. The gate
 `test/gates/test-name.gate.spec.ts` fails on any other name.
+
+A use case test of `test/unit/application/` has three layers (API-NFR-01, #254). The test case
+reads Given / When / Then in the words of the domain and names no test double. It calls the
+Testing API of its use case in `test/support/testing-api/`, such as `LoginTestApi`: the `given…`
+steps return the Testing API, the `when…` steps are `async`, call the use case and return
+`Promise<this>`, and the `then…` steps assert. The Testing API builds the use case and holds its
+test doubles as private fields, so a new collaborator of a use case changes only its Testing API.
+Below it, the Object Mothers of `test/support/object-mother/`, such as `UserMother`, build
+domain data with the public factories and know no double. Each `then…` step fails when no
+`when…` step ran. `pnpm lint` fails on a test that asserts neither with `expect` nor through a
+`then…` step (`vitest/expect-expect`), and on a `when…` step without `await`
+(`typescript/no-floating-promises`). `update-levels.use-case.spec.ts` and
+`logging-aspect.spec.ts` still build their doubles in the test; a later change of #254 moves them.
 
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.
@@ -352,7 +423,14 @@ composition of [start-provider.js](scripts/contract/start-provider.js): `AppModu
 in-memory PGlite database, plus the state-change endpoint `POST /v1/_pact/provider-states`.
 Before and after each interaction, the verifier posts the provider state of the interaction to
 that endpoint (#151). Only this composition mounts the endpoint: the production `AppModule` and
-`dist/main.js` never do, because the endpoint writes any data for anyone.
+`dist/main.js` never do, because the endpoint writes any data for anyone. So the command listens on
+`127.0.0.1` only, and it pins an empty `LEVEL_EDITOR_IDS`, so a value of the shell never reaches it
+(#239). `http://localhost:<PORT>` still reaches it: `localhost` resolves to `127.0.0.1`, and curl,
+Node `fetch` and the Pact verifier try each address of the name. The `contract` job of hexablock-app
+checks out this repository at `main`, starts the same command with `PORT=3001`, and verifies its
+own pact against `http://localhost:3001` with the same state-change endpoint. That job needs only
+`pnpm install` in that checkout and the `.env.example` of the command: the composition runs on PGlite,
+so the job needs no Postgres.
 
 ```bash
 PORT=3000 node --env-file=.env.example scripts/contract/start-provider.js &   # start the provider composition
@@ -365,7 +443,10 @@ PACT_FILE=test/fixtures/contract/provider-states.json pnpm contract:verify
 The provider states of the client interactions (app #45 to #48, #480 and #485). Each param is optional. A
 request takes a value of the setup through a provider-state expression, such as
 `fromProviderState('Bearer ${accessToken}', …)`. The states of one interaction add up, and the
-teardown after each interaction removes every row.
+teardown after each interaction removes every row. A failed setup gets no teardown, so
+`no account exists` removes every row too, also the rows of a state before it in the same
+interaction: it goes first among the states of its interaction (#239). A state whose sign-in fails
+answers 400 with the status of the sign-in, such as `the sign-in of ada answered 401, not 200.`.
 
 | State                                                  | Params (default)                                                                                                       | Values                                                           | Client     |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------- |

@@ -16,14 +16,20 @@ const PASSWORD_BOUNDS = receiveBoundValuesOf(PASSWORD_LENGTH);
 // test/unit/adapters/credentials-dto.spec.ts checks that both accept the same names.
 export const USERNAME_PATTERN = `^${receiveValueOf(USERNAME_CHARACTERS)}{${USERNAME_BOUNDS.min},${USERNAME_BOUNDS.max}}$`;
 
+// The OpenAPI limits of the username rule. The request body of sign-up and
+// each leaderboard row publish them, so a client reads one rule (#237).
+export const USERNAME_LIMITS = {
+  minLength: USERNAME_BOUNDS.min,
+  maxLength: USERNAME_BOUNDS.max,
+  pattern: USERNAME_PATTERN,
+} as const;
+
 // The body of POST /v1/auth/register (API-FR-01). The limits come from the
 // domain, so OpenAPI publishes the rules that Username and Password check.
 export class CredentialsDto {
   @ApiProperty({
     example: 'ada',
-    minLength: USERNAME_BOUNDS.min,
-    maxLength: USERNAME_BOUNDS.max,
-    pattern: USERNAME_PATTERN,
+    ...USERNAME_LIMITS,
     description: 'Letters, digits, dots, hyphens or underscores.',
   })
   readonly username!: string;
