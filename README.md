@@ -502,6 +502,6 @@ At the end of each sprint, the team tags `v0.N.0` and moves the `[Unreleased]` e
 
 ## License
 
-The code is under the [MIT License](LICENSE). `LICENSE` says `Copyright (c) 2026 HexaBlock Suite contributors`.
-
-TODO: confirm the copyright holder.
+The code is under the [MIT License](LICENSE). The copyright holder is HexaBlock Suite contributors, as
+`LICENSE` says: `Copyright (c) 2026 HexaBlock Suite contributors` (decided by Oscar on 2026-11-28,
+[#26](https://github.com/Hexablock-Suite/hexablock-api/issues/26)).
