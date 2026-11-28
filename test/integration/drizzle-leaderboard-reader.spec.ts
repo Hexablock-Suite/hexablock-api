@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq, getTableColumns, sql } from 'drizzle-orm';
 import { DrizzleLeaderboardReader } from '../../src/adapters/persistence/drizzle-leaderboard-reader.js';
 import { DrizzleProgressRepository } from '../../src/adapters/persistence/drizzle-progress-repository.js';
 import {
@@ -36,8 +36,16 @@ const AT = syncInstantOf(new Date('2026-11-15T10:00:00.000Z'));
 // stores its rows.
 let shared: TestDatabase;
 
+// The text of each query that the shared database runs, in order. A test
+// empties the list before the reads that it checks.
+const sent: string[] = [];
+
 beforeAll(async () => {
-  shared = await createTestDatabase();
+  shared = await createTestDatabase({
+    logQuery(query) {
+      sent.push(query);
+    },
+  });
 });
 
 afterAll(async () => {
@@ -47,6 +55,16 @@ afterAll(async () => {
 function created<T>(result: Result<T, string>): T {
   if (!result.ok) throw new Error(result.error);
   return result.value;
+}
+
+// The columns of the users table that the select list of a query names, with
+// or without the name of the table. The select list ends at the first from,
+// so the join condition on users.id is not part of it.
+function usersColumnsSelectedBy(query: string): string[] {
+  const selectList = query.slice(0, query.indexOf(' from '));
+  return Object.values(getTableColumns(users))
+    .map(({ name }) => name)
+    .filter((name) => selectList.includes(`"${name}"`));
 }
 
 function level(levelId: string, stars: number, moves: number, elapsedMs: number): LevelResult {
@@ -161,6 +179,36 @@ describe('DrizzleLeaderboardReader', () => {
     await expect(reader.levelResults(FIT, valueOf(LevelId.of('level-01')))).rejects.toThrow(broken);
     await expect(reader.standings(FIT)).rejects.toThrow(broken);
     await expect(reader.highScores(LINES)).rejects.toThrow(broken);
+  });
+
+  // #237: the users table also holds password_hash and username_key. Each
+  // board reads only the username of an account, so each read selects no
+  // other column of users. One query serves each board.
+  it('should_select_only_the_username_of_users_when_each_board_is_read', async () => {
+    const database = await openDatabase([
+      { userId: ADA, gameId: FIT, results: [level('level-01', 3, 12, 40_000)] },
+      { userId: ADA, gameId: LINES, score: 500 },
+    ]);
+    const reader = new DrizzleLeaderboardReader(database.db);
+    const selectedBy = async (read: () => Promise<unknown>): Promise<string[][]> => {
+      sent.length = 0;
+      await read();
+      return sent.map(usersColumnsSelectedBy);
+    };
+
+    const selected = {
+      levelResults: await selectedBy(() =>
+        reader.levelResults(FIT, valueOf(LevelId.of('level-01'))),
+      ),
+      standings: await selectedBy(() => reader.standings(FIT)),
+      highScores: await selectedBy(() => reader.highScores(LINES)),
+    };
+
+    expect(selected).toEqual({
+      levelResults: [['username']],
+      standings: [['username']],
+      highScores: [['username']],
+    });
   });
 
   // #171: the keyed filters of the reader run on one index of level_results.
