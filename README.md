@@ -346,7 +346,9 @@ that endpoint (#151). Only this composition mounts the endpoint: the production 
 (#239). `http://localhost:<PORT>` still reaches it: `localhost` resolves to `127.0.0.1`, and curl,
 Node `fetch` and the Pact verifier try each address of the name. The `contract` job of hexablock-app
 checks out this repository at `main`, starts the same command with `PORT=3001`, and verifies its
-own pact against `http://localhost:3001` with the same state-change endpoint.
+own pact against `http://localhost:3001` with the same state-change endpoint. That job needs only
+`pnpm install` in that checkout and the `.env.example` of the command: the composition runs on PGlite,
+so the job needs no Postgres.
 
 ```bash
 PORT=3000 node --env-file=.env.example scripts/contract/start-provider.js &   # start the provider composition
