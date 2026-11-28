@@ -4,7 +4,7 @@ import { Score } from './score.js';
 import { SyncInstant } from './sync-instant.js';
 
 // The receiver of the parts of a PlayerProgress. PlayerProgress.deliverTo()
-// calls it once. Only the border implements it, for example a row mapper or
+// calls it once. Only the border implements it, for example a repository or
 // a DTO mapper. It gets domain values only: the key is a ProgressKey, and
 // updatedAt is a SyncInstant.
 export interface PlayerProgressReceiver {
