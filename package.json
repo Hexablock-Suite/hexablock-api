@@ -22,6 +22,7 @@
     "format:check": "vp fmt --check",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run",
+    "test:fast": "vitest run --config ./vitest.fast.config.ts",
     "test:behavior": "vitest run --config ./vitest.behavior.config.ts",
     "test:gates": "vitest run --config ./vitest.gates.config.ts",
     "arch": "depcruise src --config .dependency-cruiser.cjs",
