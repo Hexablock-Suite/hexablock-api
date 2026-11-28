@@ -17,7 +17,8 @@ import { levels } from './schema.js';
 type Queries = Pick<PersistenceDatabase, 'select'>;
 
 // Adapter of the LevelRepository port over the levels table of DS-6
-// (API-FR-04). LevelRowMapper restores each row through the strategy that
+// (API-FR-04). It implements the whole port, so one instance plays the four
+// roles LevelLister, LevelHolder, LevelFinder and LevelUpdater (#193). LevelRowMapper restores each row through the strategy that
 // LevelValidators finds for its gameId, so every level that it gives is valid.
 // A row that no strategy accepts is a broken row: list() gives it apart,
 // findFor() gives no level for it, and update() passes it to the change as

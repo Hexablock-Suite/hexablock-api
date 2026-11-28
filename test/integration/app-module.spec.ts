@@ -14,7 +14,10 @@ import {
   type GetLevelLeaderboard,
 } from '../../src/application/leaderboard/get-level-leaderboard.use-case.js';
 import { GET_LEVELS, type GetLevels } from '../../src/application/levels/get-levels.use-case.js';
-import { UPDATE_LEVELS } from '../../src/application/levels/update-levels.use-case.js';
+import {
+  UPDATE_LEVELS,
+  type UpdateLevels,
+} from '../../src/application/levels/update-levels.use-case.js';
 import { GLOBAL_BOARD_READER } from '../../src/application/ports/global-board-reader.js';
 import { LEVEL_BOARD_READER } from '../../src/application/ports/level-board-reader.js';
 import { LEVEL_REPOSITORY } from '../../src/application/ports/level-repository.js';
@@ -44,6 +47,8 @@ import { stubTestEnvironment } from '../support/http/test-app.js';
 import { InMemoryLevelRepository } from '../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../support/in-memory-progress-repository.js';
 import { levelJson, levelValidators } from '../support/level-format.js';
+import { levelResultOf } from '../support/level-results.js';
+import { incomingLevel } from '../support/level-update.js';
 import { brokenRow } from '../support/level-repository.contract.js';
 import { testUserId } from '../support/user-ids.js';
 import { valueOf } from '../support/result.js';
@@ -115,6 +120,53 @@ describe('AppModule account wiring', () => {
     expect(moduleRef.get(LEVEL_REPOSITORY)).toBeInstanceOf(DrizzleLevelRepository);
     expect(moduleRef.get(GET_LEVELS)).toBeInstanceOf(LoggingAspect);
     expect(moduleRef.get(UPDATE_LEVELS)).toBeInstanceOf(LoggingAspect);
+    await moduleRef.close();
+  });
+
+  // #193: each level use case holds one role of the LevelRepository port,
+  // and AppModule gives all four the one LEVEL_REPOSITORY instance. So one
+  // override of that token reaches list(), holds(), findFor() and update().
+  // The spies on the logger keep the lines of the aspect out of the output.
+  it('should_give_the_one_level_repository_to_the_four_level_use_cases_when_level_repository_is_overridden', async () => {
+    stubTestEnvironment();
+    const levels = new InMemoryLevelRepository(levelValidators());
+    const list = vi.spyOn(levels, 'list');
+    const holds = vi.spyOn(levels, 'holds');
+    const findFor = vi.spyOn(levels, 'findFor');
+    const update = vi.spyOn(levels, 'update');
+    const empty = () => Promise.resolve([]);
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(LEVEL_REPOSITORY)
+      .useValue(levels)
+      .overrideProvider(PROGRESS_REPOSITORY)
+      .useValue(new InMemoryProgressRepository())
+      .overrideProvider(DrizzleLeaderboardReader)
+      .useValue({ levelResults: empty, highScores: empty, standings: empty })
+      .compile();
+    vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const fit = valueOf(GameId.of('hexa-fit'));
+    const level = valueOf(LevelId.of('fit-01'));
+    const result = levelResultOf({ levelId: 'fit-01', stars: 1, moves: 9, elapsedMs: 30000 });
+
+    await moduleRef.get<GetLevels>(GET_LEVELS).execute();
+    await moduleRef
+      .get<GetLevelLeaderboard>(GET_LEVEL_LEADERBOARD)
+      .execute({ gameId: fit, levelId: level });
+    await moduleRef.get<SyncProgress>(SYNC_PROGRESS).execute({
+      userId: valueOf(UserId.from(testUserId(1))),
+      gameId: fit,
+      results: [result],
+    });
+    await moduleRef
+      .get<UpdateLevels>(UPDATE_LEVELS)
+      .execute({ levels: [incomingLevel(levelJson('hexa-sort'))] });
+
+    expect(moduleRef.get(LEVEL_REPOSITORY)).toBe(levels);
+    expect(list).toHaveBeenCalledOnce();
+    expect(holds).toHaveBeenCalledExactlyOnceWith(fit, level);
+    expect(findFor).toHaveBeenCalledExactlyOnceWith(fit, [result]);
+    expect(update).toHaveBeenCalledOnce();
     await moduleRef.close();
   });
 

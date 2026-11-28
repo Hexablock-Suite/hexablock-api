@@ -394,8 +394,11 @@
             "type": "string"
           },
           "username": {
-            "description": "The username of the account of the player, as the player typed it at sign-up (#230).",
+            "description": "The username of the account of the player, as the player typed it at sign-up.",
             "example": "ada",
+            "maxLength": 32,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9._-]{3,32}$",
             "type": "string"
           }
         },
@@ -563,8 +566,11 @@
             "type": "string"
           },
           "username": {
-            "description": "The username of the account of the player, as the player typed it at sign-up (#230).",
+            "description": "The username of the account of the player, as the player typed it at sign-up.",
             "example": "ada",
+            "maxLength": 32,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9._-]{3,32}$",
             "type": "string"
           }
         },
@@ -692,8 +698,11 @@
             "type": "string"
           },
           "username": {
-            "description": "The username of the account of the player, as the player typed it at sign-up (#230).",
+            "description": "The username of the account of the player, as the player typed it at sign-up.",
             "example": "ada",
+            "maxLength": 32,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9._-]{3,32}$",
             "type": "string"
           }
         },

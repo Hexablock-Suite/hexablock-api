@@ -50,7 +50,14 @@ import {
   LEVEL_BOARD_READER,
   type LevelBoardReader,
 } from '../application/ports/level-board-reader.js';
-import { LEVEL_REPOSITORY, type LevelRepository } from '../application/ports/level-repository.js';
+import {
+  LEVEL_REPOSITORY,
+  type LevelFinder,
+  type LevelHolder,
+  type LevelLister,
+  type LevelRepository,
+  type LevelUpdater,
+} from '../application/ports/level-repository.js';
 import { LOGGER, type Logger } from '../application/ports/logger.js';
 import { PASSWORD_HASHER, type PasswordHasher } from '../application/ports/password-hasher.js';
 import {
@@ -185,7 +192,7 @@ function levelValidators(): LevelValidators {
       inject: [PROGRESS_REPOSITORY, LEVEL_REPOSITORY, CLOCK, LOGGER],
       useFactory: (
         progress: ProgressRepository,
-        levels: LevelRepository,
+        levels: LevelFinder,
         clock: Clock,
         logger: Logger,
       ) =>
@@ -198,6 +205,9 @@ function levelValidators(): LevelValidators {
         new LoggingAspect(new GetProgressUseCase(progress), 'GetProgress', logger),
     },
     { provide: LEVEL_VALIDATORS, useFactory: (): LevelValidators => levelValidators() },
+    // One DrizzleLevelRepository plays the four roles of the LevelRepository
+    // port. Each level use case gets the one LEVEL_REPOSITORY instance, typed
+    // by the role that it holds, so no role has a token of its own (#193).
     {
       provide: LEVEL_REPOSITORY,
       inject: [DATABASE, LEVEL_VALIDATORS],
@@ -208,7 +218,7 @@ function levelValidators(): LevelValidators {
       provide: GET_LEVELS,
       inject: [LEVEL_REPOSITORY, LOGGER],
       // The aspect also writes one entry per broken level row (#219).
-      useFactory: (levels: LevelRepository, logger: Logger) =>
+      useFactory: (levels: LevelLister, logger: Logger) =>
         new LoggingAspect(
           new GetLevelsUseCase(levels),
           'GetLevels',
@@ -219,7 +229,7 @@ function levelValidators(): LevelValidators {
     {
       provide: UPDATE_LEVELS,
       inject: [LEVEL_REPOSITORY, LEVEL_VALIDATORS, LOGGER],
-      useFactory: (levels: LevelRepository, validators: LevelValidators, logger: Logger) =>
+      useFactory: (levels: LevelUpdater, validators: LevelValidators, logger: Logger) =>
         new LoggingAspect(new UpdateLevelsUseCase(levels, validators), 'UpdateLevels', logger),
     },
     // The list of level editors comes from LEVEL_EDITOR_IDS (#145).
@@ -246,7 +256,7 @@ function levelValidators(): LevelValidators {
     {
       provide: GET_LEVEL_LEADERBOARD,
       inject: [LEVEL_BOARD_READER, LEVEL_REPOSITORY, LOGGER],
-      useFactory: (boards: LevelBoardReader, levels: LevelRepository, logger: Logger) =>
+      useFactory: (boards: LevelBoardReader, levels: LevelHolder, logger: Logger) =>
         new LoggingAspect(
           new GetLevelLeaderboardUseCase(boards, levels),
           'GetLevelLeaderboard',
