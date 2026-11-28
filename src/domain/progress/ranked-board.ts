@@ -1,6 +1,6 @@
 import { Rank } from './rank.js';
-import type { UserId } from '../user/user-id.js';
-import type { Username } from '../user/username.js';
+import type { UserId } from '../shared/user-id.js';
+import type { Username } from '../shared/username.js';
 
 // The receiver of the rows of a RankedBoard. RankedBoard.deliverTo() calls it
 // once per row, in board order. Only the border implements it, for example a

@@ -1,8 +1,8 @@
 import type { PasswordAttempt } from './password-attempt.js';
 import type { PasswordHash } from './password-hash.js';
 import type { PasswordVerifier } from './password-verifier.js';
-import type { UserId } from './user-id.js';
-import type { Username } from './username.js';
+import type { UserId } from '../shared/user-id.js';
+import type { Username } from '../shared/username.js';
 
 // The receiver of the parts of a User. User.deliverTo() calls it once. Only
 // the border implements it, for example the repository or the token issuer.

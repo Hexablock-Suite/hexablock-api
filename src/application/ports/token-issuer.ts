@@ -1,5 +1,5 @@
 import type { User } from '../../domain/user/user.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import type { SessionToken } from '../auth/session-token.js';
 
 // Port. It issues a SessionToken for a user and reads the id of the user

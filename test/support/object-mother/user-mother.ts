@@ -1,8 +1,8 @@
 import { LevelEditors } from '../../../src/domain/user/level-editors.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { User } from '../../../src/domain/user/user.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { Username } from '../../../src/domain/user/username.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
+import { Username } from '../../../src/domain/shared/username.js';
 import { valueOf } from '../result.js';
 import { testUserId } from '../user-ids.js';
 

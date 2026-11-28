@@ -1,5 +1,5 @@
-import type { GameIdProblem } from '../progress/game-id.js';
-import type { LevelIdProblem } from '../progress/level-id.js';
+import type { GameIdProblem } from '../shared/game-id.js';
+import type { LevelIdProblem } from '../shared/level-id.js';
 import type { LevelProblem } from './level-problem.js';
 
 // The code of the first rule that a stored level breaks. The restore of a

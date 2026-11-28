@@ -1,4 +1,4 @@
-import type { GameId } from '../../domain/progress/game-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
 import { RankedBoard } from '../../domain/progress/ranked-board.js';
 import type { Score } from '../../domain/progress/score.js';
 import type { Standing } from '../../domain/progress/standing.js';

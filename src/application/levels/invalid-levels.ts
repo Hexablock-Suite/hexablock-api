@@ -1,6 +1,6 @@
 import type { LevelProblem } from '../../domain/level/level-problem.js';
-import type { GameId } from '../../domain/progress/game-id.js';
-import type { LevelId } from '../../domain/progress/level-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
+import type { LevelId } from '../../domain/shared/level-id.js';
 
 // One level problem of an update: the gameId and the levelId of the level,
 // and the code of the rule that it breaks. The key tells a client which

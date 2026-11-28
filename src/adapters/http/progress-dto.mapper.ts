@@ -4,7 +4,7 @@ import type { SyncProgressRequest } from '../../application/progress/sync-progre
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import { receiveLevelResultOf, receiveProgressOf, receiveValueOf } from '../received.js';
 import type { ProgressDto } from './progress.dto.js';
 import { gameIdFrom, levelResultFrom, scoreFrom } from './progress-values.js';

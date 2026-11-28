@@ -1,5 +1,5 @@
-import type { GameId } from '../../domain/progress/game-id.js';
-import type { LevelId } from '../../domain/progress/level-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
+import type { LevelId } from '../../domain/shared/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { LeaderboardEntry } from './leaderboard-entry.js';
 

@@ -1,4 +1,4 @@
-import { Moves } from '../../../src/domain/progress/moves.js';
+import { Moves } from '../../../src/domain/shared/moves.js';
 import { valueOf } from '../../support/result.js';
 
 const moves = (value: number): Moves => valueOf(Moves.of(value));

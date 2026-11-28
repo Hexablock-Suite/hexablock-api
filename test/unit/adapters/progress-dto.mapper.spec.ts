@@ -1,10 +1,10 @@
 import { ProgressDtoMapper } from '../../../src/adapters/http/progress-dto.mapper.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { ProgressKey } from '../../../src/domain/progress/progress-key.js';
 import { Score } from '../../../src/domain/progress/score.js';
-import { Stars } from '../../../src/domain/progress/stars.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
+import { Stars } from '../../../src/domain/shared/stars.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
 import { levelResultOf } from '../../support/level-results.js';
 import { syncInstantOf } from '../../support/sync-instants.js';
 import { testUserId } from '../../support/user-ids.js';

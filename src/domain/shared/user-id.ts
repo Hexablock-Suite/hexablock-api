@@ -1,5 +1,5 @@
-import { err, ok, type Result } from '../shared/result.js';
-import type { ValueReceiver } from '../shared/value-receiver.js';
+import { err, ok, type Result } from './result.js';
+import type { ValueReceiver } from './value-receiver.js';
 
 // The RFC 9562 text form: 8-4-4-4-12 hexadecimal digits with hyphens. It
 // accepts any version and letters in either case.

@@ -1,8 +1,8 @@
 import { JwtService } from '@nestjs/jwt';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
 import { User } from '../../../src/domain/user/user.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { Username } from '../../../src/domain/user/username.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
+import { Username } from '../../../src/domain/shared/username.js';
 import { createJwtService } from '../../../src/infrastructure/auth/auth-config.js';
 import { JwtTokenIssuer } from '../../../src/adapters/jwt/jwt-token-issuer.js';
 import { TEST_JWT_SECRET } from '../../support/auth/test-jwt-secret.js';

@@ -1,7 +1,7 @@
 import { PasswordHash } from '../../domain/user/password-hash.js';
 import { User } from '../../domain/user/user.js';
-import { UserId } from '../../domain/user/user-id.js';
-import { Username } from '../../domain/user/username.js';
+import { UserId } from '../../domain/shared/user-id.js';
+import { Username } from '../../domain/shared/username.js';
 import { receiveUserOf } from '../received.js';
 import type { users } from './schema.js';
 

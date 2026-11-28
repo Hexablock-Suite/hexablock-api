@@ -3,8 +3,8 @@ import type { Result } from '../../../src/domain/shared/result.js';
 import { Password } from '../../../src/domain/user/password.js';
 import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
 import { PasswordHash } from '../../../src/domain/user/password-hash.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { USERNAME_CHARACTERS, Username } from '../../../src/domain/user/username.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
+import { USERNAME_CHARACTERS, Username } from '../../../src/domain/shared/username.js';
 import { deliveredBy } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
 

@@ -12,7 +12,7 @@ import { LevelValidators } from '../../src/domain/level/level-validators.js';
 import { SortLevelValidator } from '../../src/domain/level/sort/sort-level-validator.js';
 import { Topologies } from '../../src/domain/level/topologies.js';
 import { TopologyId } from '../../src/domain/level/topology-id.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
 import type { Result } from '../../src/domain/shared/result.js';
 import {
   checkedLevel,

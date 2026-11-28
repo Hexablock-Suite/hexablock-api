@@ -1,5 +1,5 @@
-import { ElapsedTime } from '../progress/elapsed-time.js';
-import { Moves } from '../progress/moves.js';
+import { ElapsedTime } from '../shared/elapsed-time.js';
+import { Moves } from '../shared/moves.js';
 import { err, type Result } from '../shared/result.js';
 import type { LevelProblem } from './level-problem.js';
 

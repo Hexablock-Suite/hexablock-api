@@ -1,7 +1,7 @@
-import type { GameId } from '../progress/game-id.js';
-import type { LevelId } from '../progress/level-id.js';
+import type { GameId } from '../shared/game-id.js';
+import type { LevelId } from '../shared/level-id.js';
 import type { LevelResult } from '../progress/level-result.js';
-import type { Stars } from '../progress/stars.js';
+import type { Stars } from '../shared/stars.js';
 import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
 import type { LevelOrder } from './level-order.js';

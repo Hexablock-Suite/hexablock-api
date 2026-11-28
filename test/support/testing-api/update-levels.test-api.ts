@@ -11,7 +11,7 @@ import {
 import type { LevelUpdater } from '../../../src/application/ports/level-repository.js';
 import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { LevelProblem } from '../../../src/domain/level/level-problem.js';
-import { LevelId } from '../../../src/domain/progress/level-id.js';
+import { LevelId } from '../../../src/domain/shared/level-id.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import type { LevelEditors } from '../../../src/domain/user/level-editors.js';
 import { FakeStopwatch } from '../fake-stopwatch.js';

@@ -1,8 +1,8 @@
-import type { Moves } from '../../progress/moves.js';
+import type { Moves } from '../../shared/moves.js';
 import { ok, type Result } from '../../shared/result.js';
 import type { LevelProblem } from '../level-problem.js';
 import { type LevelSection, mostStarsOf } from '../level-section.js';
-import type { Stars } from '../../progress/stars.js';
+import type { Stars } from '../../shared/stars.js';
 import type { ValueReceiver } from '../../shared/value-receiver.js';
 import { readFields, readList, sameItems } from '../parts.js';
 import { maxMovesIn } from '../star-limits.js';

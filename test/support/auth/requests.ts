@@ -5,7 +5,7 @@ import type {
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
 import { Password, type PasswordProblem } from '../../../src/domain/user/password.js';
 import { PasswordAttempt } from '../../../src/domain/user/password-attempt.js';
-import { Username, type UsernameProblem } from '../../../src/domain/user/username.js';
+import { Username, type UsernameProblem } from '../../../src/domain/shared/username.js';
 import { valueOf } from '../result.js';
 
 // Builds the request of an account port from plain values, as AuthDtoMapper

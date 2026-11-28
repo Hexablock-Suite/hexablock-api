@@ -5,9 +5,9 @@ import { LevelOrder } from '../../../src/domain/level/level-order.js';
 import { LevelVersion } from '../../../src/domain/level/level-version.js';
 import { SortSection } from '../../../src/domain/level/sort/sort-section.js';
 import { TopologyId } from '../../../src/domain/level/topology-id.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelId } from '../../../src/domain/progress/level-id.js';
-import { Stars } from '../../../src/domain/progress/stars.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
+import { LevelId } from '../../../src/domain/shared/level-id.js';
+import { Stars } from '../../../src/domain/shared/stars.js';
 import { err, ok } from '../../../src/domain/shared/result.js';
 import {
   jsonBlocksOfFormat,

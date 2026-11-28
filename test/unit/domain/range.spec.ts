@@ -1,6 +1,6 @@
 import type { Ordered } from '../../../src/domain/shared/ordered.js';
 import { Range } from '../../../src/domain/shared/range.js';
-import { CharacterCount } from '../../../src/domain/user/character-count.js';
+import { CharacterCount } from '../../../src/domain/shared/character-count.js';
 import { boundsDeliveredBy, deliveredBy } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
 

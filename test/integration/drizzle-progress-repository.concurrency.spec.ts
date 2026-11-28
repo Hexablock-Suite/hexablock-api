@@ -11,10 +11,10 @@ import {
   SyncProgressUseCase,
   type SyncProgressRequest,
 } from '../../src/application/progress/sync-progress.use-case.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
 import { Score } from '../../src/domain/progress/score.js';
 import type { SyncInstant } from '../../src/domain/progress/sync-instant.js';
-import { UserId } from '../../src/domain/user/user-id.js';
+import { UserId } from '../../src/domain/shared/user-id.js';
 import { FixedClock } from '../support/fixed-clock.js';
 import { heldLevels } from '../support/held-levels.js';
 import { levelResultOf } from '../support/level-results.js';

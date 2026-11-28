@@ -13,7 +13,7 @@ import {
 } from '../../../src/application/progress/sync-progress.use-case.js';
 import type { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { Score } from '../../../src/domain/progress/score.js';
-import { Stars } from '../../../src/domain/progress/stars.js';
+import { Stars } from '../../../src/domain/shared/stars.js';
 import type { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import type { MockInstance } from 'vitest';

@@ -1,5 +1,5 @@
-import { err, ok, type Result } from '../shared/result.js';
-import type { ValueReceiver } from '../shared/value-receiver.js';
+import { err, ok, type Result } from './result.js';
+import type { ValueReceiver } from './value-receiver.js';
 
 // The code of the broken rule. The border writes the message (decision 11).
 export type ElapsedTimeProblem = 'invalid-elapsed-time';

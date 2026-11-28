@@ -2,8 +2,8 @@ import type { IncomingLevel } from '../../src/application/levels/update-levels.u
 import { LevelOrder } from '../../src/domain/level/level-order.js';
 import { LevelVersion } from '../../src/domain/level/level-version.js';
 import { TopologyId } from '../../src/domain/level/topology-id.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
-import { LevelId } from '../../src/domain/progress/level-id.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
+import { LevelId } from '../../src/domain/shared/level-id.js';
 import { levelJson, type LevelJson, valueOf } from './level-format.js';
 
 // Fixtures of the level update (#81): a level that fails A5, and the

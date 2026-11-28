@@ -1,6 +1,6 @@
 import { err, ok, type Result } from '../../domain/shared/result.js';
 import { User } from '../../domain/user/user.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import type { PasswordHasher } from '../ports/password-hasher.js';
 import type { UserIdGenerator } from '../ports/user-id-generator.js';
 import type { UserRepository } from '../ports/user-repository.js';

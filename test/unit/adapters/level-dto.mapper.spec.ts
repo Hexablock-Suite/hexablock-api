@@ -1,6 +1,6 @@
 import { LevelDtoMapper } from '../../../src/adapters/http/level-dto.mapper.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelId } from '../../../src/domain/progress/level-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
+import { LevelId } from '../../../src/domain/shared/level-id.js';
 import {
   checkedLevel,
   levelExample,
@@ -8,7 +8,7 @@ import {
   type LevelJson,
 } from '../../support/level-format.js';
 import { incomingLevel } from '../../support/level-update.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
 import { valueOf } from '../../support/result.js';
 import { testUserId } from '../../support/user-ids.js';
 

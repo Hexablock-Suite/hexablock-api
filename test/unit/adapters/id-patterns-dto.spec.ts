@@ -2,7 +2,7 @@ import { DECORATORS } from '@nestjs/swagger';
 import { LevelDto } from '../../../src/adapters/http/level.dto.js';
 import { SyncProgressDto } from '../../../src/adapters/http/progress.dto.js';
 import { TopologyId } from '../../../src/domain/level/topology-id.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';

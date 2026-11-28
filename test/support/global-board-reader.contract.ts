@@ -1,11 +1,11 @@
 import type { GlobalBoardReader } from '../../src/application/ports/global-board-reader.js';
-import { ElapsedTime } from '../../src/domain/progress/elapsed-time.js';
-import { GameId } from '../../src/domain/progress/game-id.js';
+import { ElapsedTime } from '../../src/domain/shared/elapsed-time.js';
+import { GameId } from '../../src/domain/shared/game-id.js';
 import { LevelsCompleted } from '../../src/domain/progress/levels-completed.js';
-import { Moves } from '../../src/domain/progress/moves.js';
+import { Moves } from '../../src/domain/shared/moves.js';
 import { Score } from '../../src/domain/progress/score.js';
 import { Standing } from '../../src/domain/progress/standing.js';
-import { Stars } from '../../src/domain/progress/stars.js';
+import { Stars } from '../../src/domain/shared/stars.js';
 import { levelResultOf } from './level-results.js';
 import { byPlayer, namesOf, type PlayedProgress } from './played-progress.js';
 import { testUserId } from './user-ids.js';

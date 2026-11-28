@@ -5,12 +5,12 @@ import {
   USERNAME_CHARACTERS,
   USERNAME_LENGTH,
   Username,
-} from '../../../src/domain/user/username.js';
+} from '../../../src/domain/shared/username.js';
 
 // One code point, two UTF-16 units.
 const EMOJI = '\u{1F600}';
 
-const USERNAME_MODULE = '../../../src/domain/user/username.js';
+const USERNAME_MODULE = '../../../src/domain/shared/username.js';
 
 // #149: the domain holds the allowed characters of a username once. The HTTP
 // adapter builds the OpenAPI pattern from the characters of

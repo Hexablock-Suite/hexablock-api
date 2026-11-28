@@ -9,7 +9,7 @@ import {
   AUTHENTICATE_TOKEN,
   type AuthenticateToken,
 } from '../../application/auth/authenticate-token.use-case.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 
 // RFC 7235: the scheme name is case-insensitive, so the guard compares it
 // in lower case.

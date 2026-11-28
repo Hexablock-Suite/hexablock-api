@@ -1,5 +1,5 @@
-import type { ElapsedTime } from '../../progress/elapsed-time.js';
-import type { Moves } from '../../progress/moves.js';
+import type { ElapsedTime } from '../../shared/elapsed-time.js';
+import type { Moves } from '../../shared/moves.js';
 import { ok, type Result } from '../../shared/result.js';
 import type { LevelProblem } from '../level-problem.js';
 import { readFields } from '../parts.js';

@@ -4,8 +4,8 @@ import type { LevelChange, LevelRepository } from '../../application/ports/level
 import type { LevelDefinition, StoredLevel } from '../../domain/level/level-definition.js';
 import type { LevelProblem } from '../../domain/level/level-problem.js';
 import type { LevelValidators } from '../../domain/level/level-validators.js';
-import type { GameId } from '../../domain/progress/game-id.js';
-import type { LevelId } from '../../domain/progress/level-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
+import type { LevelId } from '../../domain/shared/level-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import type { Result } from '../../domain/shared/result.js';
 import { receiveLevelResultOf, receiveValueOf } from '../received.js';

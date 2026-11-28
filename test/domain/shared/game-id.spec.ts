@@ -1,4 +1,4 @@
-import { GameId } from '../../../src/domain/progress/game-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
 import { RecordingReceiver } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
 

@@ -3,7 +3,7 @@ import { receiveUserOf } from '../received.js';
 import type { SessionToken } from '../../application/auth/session-token.js';
 import type { TokenIssuer } from '../../application/ports/token-issuer.js';
 import type { User } from '../../domain/user/user.js';
-import { UserId } from '../../domain/user/user-id.js';
+import { UserId } from '../../domain/shared/user-id.js';
 
 // Adapter of the TokenIssuer port with @nestjs/jwt. It gets a configured
 // JwtService through its constructor and reads no configuration itself.

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PASSWORD_LENGTH } from '../../domain/user/password.js';
-import { USERNAME_CHARACTERS, USERNAME_LENGTH } from '../../domain/user/username.js';
+import { USERNAME_CHARACTERS, USERNAME_LENGTH } from '../../domain/shared/username.js';
 import { receiveBoundValuesOf, receiveValueOf } from '../received.js';
 
 // The decorators need the limits when the class is defined, so the module

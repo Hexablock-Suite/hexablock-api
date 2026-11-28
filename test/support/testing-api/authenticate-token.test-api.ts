@@ -7,7 +7,7 @@ import {
 import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import type { User } from '../../../src/domain/user/user.js';
-import type { UserId } from '../../../src/domain/user/user-id.js';
+import type { UserId } from '../../../src/domain/shared/user-id.js';
 import { InMemoryUserRepository, PrefixTokenIssuer } from '../auth/fakes.js';
 import { FakeStopwatch } from '../fake-stopwatch.js';
 import { UserMother } from '../object-mother/user-mother.js';

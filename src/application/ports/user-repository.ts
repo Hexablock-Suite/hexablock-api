@@ -1,7 +1,7 @@
 import type { Result } from '../../domain/shared/result.js';
 import type { User } from '../../domain/user/user.js';
-import type { UserId } from '../../domain/user/user-id.js';
-import type { Username } from '../../domain/user/username.js';
+import type { UserId } from '../../domain/shared/user-id.js';
+import type { Username } from '../../domain/shared/username.js';
 
 // Port. The store of the User entities. No two users have names that
 // collide (Username.collidesWith(), #100), so their names never differ only

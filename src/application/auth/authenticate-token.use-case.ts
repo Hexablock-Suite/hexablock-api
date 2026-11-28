@@ -1,5 +1,5 @@
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import type { TokenIssuer } from '../ports/token-issuer.js';
 import type { UserRepository } from '../ports/user-repository.js';
 import type { UseCase } from '../use-case.js';

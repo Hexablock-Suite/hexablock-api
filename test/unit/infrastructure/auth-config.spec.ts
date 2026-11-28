@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { UserId } from '../../../src/domain/user/user-id.js';
+import { UserId } from '../../../src/domain/shared/user-id.js';
 import {
   readAuthThrottle,
   readJwtSecret,

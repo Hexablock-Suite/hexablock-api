@@ -1,5 +1,5 @@
 import type { LevelResultValues } from '../../../src/adapters/received.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
 import type { LevelResult } from '../../../src/domain/progress/level-result.js';
 import { PlayerProgress } from '../../../src/domain/progress/player-progress.js';
 import { ProgressKey } from '../../../src/domain/progress/progress-key.js';

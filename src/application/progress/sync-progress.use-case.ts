@@ -1,10 +1,10 @@
-import type { GameId } from '../../domain/progress/game-id.js';
+import type { GameId } from '../../domain/shared/game-id.js';
 import type { LevelResult } from '../../domain/progress/level-result.js';
 import { PlayerProgress } from '../../domain/progress/player-progress.js';
 import { ProgressKey } from '../../domain/progress/progress-key.js';
 import type { Score } from '../../domain/progress/score.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
-import type { UserId } from '../../domain/user/user-id.js';
+import type { UserId } from '../../domain/shared/user-id.js';
 import type { UseCase } from '../use-case.js';
 import type { Clock } from '../ports/clock.js';
 import type { LevelFinder } from '../ports/level-repository.js';

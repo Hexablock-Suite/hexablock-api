@@ -1,4 +1,4 @@
-import { Stars } from '../../../src/domain/progress/stars.js';
+import { Stars } from '../../../src/domain/shared/stars.js';
 import { valueOf } from '../../support/result.js';
 
 const stars = (value: number): Stars => valueOf(Stars.of(value));

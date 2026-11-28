@@ -5,8 +5,8 @@ import type { LevelChange, LevelRepository } from '../../src/application/ports/l
 import type { LevelDefinition } from '../../src/domain/level/level-definition.js';
 import type { LevelProblem } from '../../src/domain/level/level-problem.js';
 import type { LevelValidators } from '../../src/domain/level/level-validators.js';
-import type { GameId } from '../../src/domain/progress/game-id.js';
-import type { LevelId } from '../../src/domain/progress/level-id.js';
+import type { GameId } from '../../src/domain/shared/game-id.js';
+import type { LevelId } from '../../src/domain/shared/level-id.js';
 import type { LevelResult } from '../../src/domain/progress/level-result.js';
 import type { Result } from '../../src/domain/shared/result.js';
 

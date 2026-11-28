@@ -1,7 +1,7 @@
-import type { ElapsedTime } from './elapsed-time.js';
-import type { LevelId } from './level-id.js';
-import type { Moves } from './moves.js';
-import type { Stars } from './stars.js';
+import type { ElapsedTime } from '../shared/elapsed-time.js';
+import type { LevelId } from '../shared/level-id.js';
+import type { Moves } from '../shared/moves.js';
+import type { Stars } from '../shared/stars.js';
 
 // The receiver of the four values of a LevelResult. LevelResult.deliverTo()
 // calls it once. Only the border implements it, for example a repository.

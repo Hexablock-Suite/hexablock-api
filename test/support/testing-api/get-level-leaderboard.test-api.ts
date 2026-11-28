@@ -10,8 +10,8 @@ import {
 import type { LevelBoardReader } from '../../../src/application/ports/level-board-reader.js';
 import type { LevelHolder } from '../../../src/application/ports/level-repository.js';
 import type { UseCaseLogEntry } from '../../../src/application/ports/logger.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
-import { LevelId } from '../../../src/domain/progress/level-id.js';
+import { GameId } from '../../../src/domain/shared/game-id.js';
+import { LevelId } from '../../../src/domain/shared/level-id.js';
 import type { RankedBoard } from '../../../src/domain/progress/ranked-board.js';
 import type { Result } from '../../../src/domain/shared/result.js';
 import type { Mock } from 'vitest';

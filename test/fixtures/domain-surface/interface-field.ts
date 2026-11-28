@@ -1,5 +1,5 @@
 import type { Score } from '../../../src/domain/progress/score.js';
-import type { UserId } from '../../../src/domain/user/user-id.js';
+import type { UserId } from '../../../src/domain/shared/user-id.js';
 
 // Wrong example: an exported interface with public fields.
 export interface ScoreState {

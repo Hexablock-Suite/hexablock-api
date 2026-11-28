@@ -1,6 +1,6 @@
-import { Range } from '../shared/range.js';
-import { err, ok, type Result } from '../shared/result.js';
-import type { ValueReceiver } from '../shared/value-receiver.js';
+import { Range } from './range.js';
+import { err, ok, type Result } from './result.js';
+import type { ValueReceiver } from './value-receiver.js';
 import { CharacterCount } from './character-count.js';
 
 // 3 to 32 letters, digits, dots, hyphens or underscores. A proposal for

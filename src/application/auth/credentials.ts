@@ -1,6 +1,6 @@
 import type { Password } from '../../domain/user/password.js';
 import type { PasswordAttempt } from '../../domain/user/password-attempt.js';
-import type { Username } from '../../domain/user/username.js';
+import type { Username } from '../../domain/shared/username.js';
 
 // The inputs of the RegisterUser and Login input ports. They carry domain
 // values, not strings. AuthDtoMapper of the HTTP adapter builds them from
