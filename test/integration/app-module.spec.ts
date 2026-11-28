@@ -58,7 +58,8 @@ import { stubTestEnvironment } from '../support/http/test-app.js';
 import { InMemoryLevelRepository } from '../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../support/in-memory-progress-repository.js';
 import { levelJson, levelValidators } from '../support/level-format.js';
-import { brokenRow } from '../support/level-repository.contract.js';
+import { brokenRow, listedJson } from '../support/level-repository.contract.js';
+import { incomingLevel } from '../support/level-update.js';
 import { testUserId } from '../support/user-ids.js';
 import { valueOf } from '../support/result.js';
 
@@ -138,7 +139,7 @@ describe('AppModule account wiring', () => {
     await moduleRef
       .get<GetProgress>(GET_PROGRESS)
       .execute({ userId, gameId: valueOf(GameId.of('hexa-lines')) });
-    await moduleRef.get<UpdateLevels>(UPDATE_LEVELS).execute({ levels: [] });
+    await moduleRef.get<UpdateLevels>(UPDATE_LEVELS).execute({ userId, levels: [] });
 
     const lines = [...log.mock.calls, ...warn.mock.calls].map(([line]) => String(line));
     expect(lines.map((line) => line.split(' ')[0]).sort()).toEqual([
@@ -189,6 +190,50 @@ describe('AppModule account wiring', () => {
     expect(moduleRef.get(LEVEL_REPOSITORY)).toBeInstanceOf(DrizzleLevelRepository);
     expect(moduleRef.get(GET_LEVELS)).toBeInstanceOf(LoggingAspect);
     expect(moduleRef.get(UPDATE_LEVELS)).toBeInstanceOf(LoggingAspect);
+    await moduleRef.close();
+  });
+
+  // #180: UPDATE_LEVELS is LoggingAspect over AuthorizationAspect over
+  // UpdateLevelsUseCase. The inner layer rejects an account outside
+  // LEVEL_EDITOR_IDS before the use case saves, and the outer layer writes
+  // the line of that rejected attempt. An editor passes both layers, and the
+  // use case saves the level.
+  it('should_log_the_rejected_attempt_and_save_only_the_level_of_the_editor_when_the_update_levels_port_is_called_by_an_account_outside_the_list_and_by_an_editor', async () => {
+    stubTestEnvironment();
+    vi.stubEnv('LEVEL_EDITOR_IDS', testUserId(1));
+    const levels = new InMemoryLevelRepository(levelValidators());
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(LEVEL_REPOSITORY)
+      .useValue(levels)
+      .overrideProvider(STOPWATCH)
+      .useValue(new FakeStopwatch(25))
+      .compile();
+    const updateLevels = moduleRef.get<UpdateLevels>(UPDATE_LEVELS);
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const batch = [incomingLevel(levelJson('hexa-fit'))];
+
+    const rejected = await updateLevels.execute({
+      userId: valueOf(UserId.from(testUserId(2))),
+      levels: batch,
+    });
+    const storedAfterRejection = await listedJson(levels);
+    const accepted = await updateLevels.execute({
+      userId: valueOf(UserId.from(testUserId(1))),
+      levels: batch,
+    });
+
+    expect(updateLevels).toBeInstanceOf(LoggingAspect);
+    expect(rejected).toEqual({ ok: false, error: { kind: 'not-a-level-editor' } });
+    expect(storedAfterRejection).toEqual([]);
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=UpdateLevels outcome=failure kind=not-a-level-editor elapsedMs=25',
+    );
+    expect(accepted).toEqual({ ok: true, value: undefined });
+    expect(log).toHaveBeenCalledExactlyOnceWith(
+      'useCase=UpdateLevels outcome=success elapsedMs=25',
+    );
+    expect(await listedJson(levels)).toEqual([levelJson('hexa-fit')]);
     await moduleRef.close();
   });
 

@@ -23,6 +23,7 @@ import {
 } from '../application/auth/authenticate-token.use-case.js';
 import { LOGIN, LoginUseCase } from '../application/auth/login.use-case.js';
 import { REGISTER_USER, RegisterUseCase } from '../application/auth/register.use-case.js';
+import { AuthorizationAspect } from '../application/aspects/authorization-aspect.js';
 import { LoggingAspect } from '../application/aspects/logging-aspect.js';
 import {
   GET_GLOBAL_LEADERBOARD,
@@ -32,10 +33,6 @@ import {
   GET_LEVEL_LEADERBOARD,
   GetLevelLeaderboardUseCase,
 } from '../application/leaderboard/get-level-leaderboard.use-case.js';
-import {
-  AUTHORIZE_LEVEL_EDITOR,
-  AuthorizeLevelEditorUseCase,
-} from '../application/levels/authorize-level-editor.use-case.js';
 import { GET_LEVELS, GetLevelsUseCase } from '../application/levels/get-levels.use-case.js';
 import { unavailableLevelEntries } from '../application/levels/unavailable-level-entries.js';
 import {
@@ -150,8 +147,7 @@ function levelValidators(): LevelValidators {
       useFactory: (database: Database): UserRepository => new DrizzleUserRepository(database),
     },
     // LoggingAspect wraps each use case under the name of its input port, so
-    // the use case holds no logging code. AuthorizeLevelEditorUseCase is the
-    // one use case without it (#170).
+    // the use case holds no logging code (#170).
     {
       provide: REGISTER_USER,
       inject: [USER_REPOSITORY, PASSWORD_HASHER, USER_ID_GENERATOR, LOGGER, STOPWATCH],
@@ -245,6 +241,10 @@ function levelValidators(): LevelValidators {
           unavailableLevelEntries,
         ),
     },
+    // The aspect chain of the level update, from the outside in:
+    // LoggingAspect, AuthorizationAspect, UpdateLevelsUseCase (#180). The
+    // log is outside the authorization, so each rejected attempt leaves one
+    // entry. The list of level editors comes from LEVEL_EDITOR_IDS (#145).
     {
       provide: UPDATE_LEVELS,
       inject: [LEVEL_REPOSITORY, LEVEL_VALIDATORS, LOGGER, STOPWATCH],
@@ -255,16 +255,11 @@ function levelValidators(): LevelValidators {
         stopwatch: Stopwatch,
       ) =>
         new LoggingAspect(
-          new UpdateLevelsUseCase(levels, validators),
+          new AuthorizationAspect(new UpdateLevelsUseCase(levels, validators), readLevelEditors()),
           'UpdateLevels',
           logger,
           stopwatch,
         ),
-    },
-    // The list of level editors comes from LEVEL_EDITOR_IDS (#145).
-    {
-      provide: AUTHORIZE_LEVEL_EDITOR,
-      useFactory: () => new AuthorizeLevelEditorUseCase(readLevelEditors()),
     },
     // One DrizzleLeaderboardReader implements both board reader ports. Each
     // port token is an alias of the class token, so both give the same

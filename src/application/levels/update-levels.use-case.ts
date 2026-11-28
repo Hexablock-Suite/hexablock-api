@@ -6,9 +6,11 @@ import type { TopologyId } from '../../domain/level/topology-id.js';
 import type { GameId } from '../../domain/progress/game-id.js';
 import type { LevelId } from '../../domain/progress/level-id.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
+import type { UserId } from '../../domain/user/user-id.js';
 import type { LevelRepository } from '../ports/level-repository.js';
 import type { UseCase } from '../use-case.js';
 import type { InvalidLevels, LevelProblemReport } from './invalid-levels.js';
+import type { NotALevelEditor } from './not-a-level-editor.js';
 
 // One level of an update. The mapper of the border builds the values of
 // the common part (decision 12). The section stays as it arrives, because
@@ -22,14 +24,24 @@ export interface IncomingLevel {
   readonly section: unknown;
 }
 
-// The input of UpdateLevels: a batch of levels, in the order of the body.
+// The input of UpdateLevels: the UserId of the signed-in account and a batch
+// of levels, in the order of the body. AuthorizationAspect reads the UserId
+// (#180); the use case reads only the levels.
 export interface UpdateLevelsRequest {
+  readonly userId: UserId;
   readonly levels: readonly IncomingLevel[];
 }
 
-// Input port of the level update (API-FR-04). It binds UseCase, so one
-// aspect can wrap it (decision 7).
-export type UpdateLevels = UseCase<UpdateLevelsRequest, Result<void, InvalidLevels>>;
+// The expected failures of the level update: a level that breaks a rule,
+// and an account outside the list of level editors, which
+// AuthorizationAspect gives (#180). Each one carries a kind, so
+// LoggingAspect logs it.
+export type UpdateLevelsError = InvalidLevels | NotALevelEditor;
+
+// Input port of the level update (API-FR-04). It binds UseCase, so the
+// aspects can wrap it (decision 7). AppModule wraps it in LoggingAspect over
+// AuthorizationAspect.
+export type UpdateLevels = UseCase<UpdateLevelsRequest, Result<void, UpdateLevelsError>>;
 
 export const UPDATE_LEVELS = Symbol('UpdateLevels');
 

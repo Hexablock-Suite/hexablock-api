@@ -178,13 +178,13 @@ imports no package (rule R-application-pure).
 The aspects live in the application layer: **Q12** in [layers.md](docs/architecture/layers.md#resolved-questions).
 In the session of 2026-11-06 the professor answered that the aspects talk to the use case, so they
 belong there, built as decorators with one interface common to the use cases, without libraries.
-`UseCaseAspect` and `LoggingAspect` live in [src/application/aspects](src/application/aspects).
+`UseCaseAspect`, `LoggingAspect` and `AuthorizationAspect` live in [src/application/aspects](src/application/aspects).
 `LoggingAspect` writes a typed entry to the `Logger` port
 ([src/application/ports/logger.ts](src/application/ports/logger.ts)), and `NestLogger` in
 [src/adapters/logging](src/adapters/logging) implements it and writes the text.
 `AppModule` wraps `RegisterUseCase`, `LoginUseCase`, `AuthenticateTokenUseCase`, `SyncProgressUseCase`, `GetProgressUseCase`,
 `GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and `GetLevelLeaderboardUseCase` in `LoggingAspect`,
-each under the name of its input port, so a failed sign-in leaves a log entry (#170). `AuthorizeLevelEditorUseCase` has no aspect. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
+each under the name of its input port, so a failed sign-in leaves a log entry (#170). For `UpdateLevelsUseCase`, `AuthorizationAspect` sits inside `LoggingAspect`, so a rejected level update leaves a log entry too (#180). It logs the use case name, the outcome and, for a failure, only its `kind`, so a
 value that the client sent never reaches the log. For `GetLevels`, the aspect also writes one entry per stored level
 row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section, from `unavailableLevelEntries()`.
 No use case imports the `Logger` port (rule `only-aspects-import-logger-port`, #219). A request value that breaks its rule stops in its
@@ -232,8 +232,8 @@ export LEVEL_EDITOR_IDS=0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b,6f1c1d0e-2b7a-4c55-
 pnpm start:dev
 ```
 
-An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` gets
-403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
+An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` whose
+body passes the shape check gets 403 with the `ErrorDto` body; a malformed body gets 400 first (#180). An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
 does. The account that a deploy uses to send the levels must be in the list (see [Deploy](#deploy)).
 
 Sign-up and sign-in have a rate limit for each client

@@ -13,11 +13,17 @@ import { InMemoryLevelRepository } from '../../support/in-memory-level-repositor
 import { levelJson, levelValidators, type LevelJson } from '../../support/level-format.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
 import { brokenRow, listedJson, storeLevel } from '../../support/level-repository.contract.js';
+import { UserId } from '../../../src/domain/user/user-id.js';
 import { valueOf } from '../../support/result.js';
+import { testUserId } from '../../support/user-ids.js';
 
-// The request of a batch, built as LevelDtoMapper builds it.
+// The request of a batch, built as LevelDtoMapper builds it. The use case
+// reads no user id: AuthorizationAspect checks it before (#180).
 function batchOf(...levels: LevelJson[]): UpdateLevelsRequest {
-  return { levels: levels.map((json) => incomingLevel(json)) };
+  return {
+    userId: valueOf(UserId.from(testUserId(1))),
+    levels: levels.map((json) => incomingLevel(json)),
+  };
 }
 
 // A failed Result of UpdateLevels: the kind and one problem per broken level.
@@ -60,7 +66,7 @@ describe('UpdateLevelsUseCase (API-FR-04)', () => {
   it('should_succeed_and_save_nothing_when_the_batch_holds_no_level', async () => {
     const save = vi.spyOn(levels, 'update');
 
-    const result = await update.execute({ levels: [] });
+    const result = await update.execute(batchOf());
 
     expect(result).toEqual({ ok: true, value: undefined });
     expect(save).not.toHaveBeenCalled();
