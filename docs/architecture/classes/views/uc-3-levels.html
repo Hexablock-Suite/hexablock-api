@@ -82,12 +82,12 @@
           levelId, so a level that fails its check is never saved and no exception reaches the HTTP
           layer. GetLevelsUseCase takes no request and has no expected failure; it gives the valid
           levels and the broken rows apart, and holds no logger: LoggingAspect wraps it and logs
-          each broken row (#147, #219). AuthorizationAspect wraps UpdateLevels and holds the
-          LevelEditors value object of layer 1, the user ids of the configuration; it fails with
-          not-a-level-editor for any other user id of the request before the use case runs, so an
-          empty list lets no account update (#145, #180). A footnote names LevelDtoMapper, which
-          builds the UpdateLevelsRequest, and LevelRowMapper, which restores each stored row through
-          LevelValidators.
+          each broken row (#147, #219). AuthorizationAspect, which carries the stereotype «aspect»
+          (#182), wraps UpdateLevels and holds the LevelEditors value object of layer 1, the user
+          ids of the configuration; it fails with not-a-level-editor for any other user id of the
+          request before the use case runs, so an empty list lets no account update (#145, #180). A
+          footnote names LevelDtoMapper, which builds the UpdateLevelsRequest, and LevelRowMapper,
+          which restores each stored row through LevelValidators.
         </desc>
         <defs>
           <marker
@@ -847,7 +847,7 @@
         >
           LevelDefinition
         </text>
-        <!-- Class: AuthorizationAspect (#180; #182 adds its stereotype) -->
+        <!-- Class: AuthorizationAspect («aspect», #180, #182) -->
         <rect
           x="560"
           y="484"
@@ -858,6 +858,17 @@
           stroke="#17212a"
           stroke-width="1"
         />
+        <text
+          x="730"
+          y="502"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «aspect»
+        </text>
         <text
           x="730"
           y="520"

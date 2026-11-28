@@ -73,15 +73,16 @@
           Class diagram of layer 2 showing the generic UseCase interface, the contract that every
           input port binds, the SyncProgress input port that binds it, the use case that implements
           it, and the UseCaseAspect decorator with LoggingAspect and AuthorizationAspect, which view
-          3 details (#180). UseCaseAspect joins the UseCase that it wraps with a hollow diamond on
-          its own side, labelled decorate and 1 (class of 2026-11-23). Since Q12 the aspects live in
-          layer 2, and LoggingAspect writes to the Logger port and reads the Stopwatch port before
-          and after each call, so the one entry of the call carries its duration (#181); an optional
-          function gives it extra entries from a success, such as the broken level rows of GetLevels
-          (#219). Its TError type parameter extends { readonly kind: string }, and every problem
-          type of an input port has a kind. A footnote names LevelsController,
-          LeaderboardController, LevelDtoMapper and LeaderboardDtoMapper of layer 3, which call and
-          translate the level and leaderboard input ports.
+          3 details (#180). Each solid aspect box carries the stereotype «aspect», and UseCaseAspect
+          carries «abstract» «aspect» (#182). UseCaseAspect joins the UseCase that it wraps with a
+          hollow diamond on its own side, labelled decorate and 1 (class of 2026-11-23). Since Q12
+          the aspects live in layer 2, and LoggingAspect writes to the Logger port and reads the
+          Stopwatch port before and after each call, so the one entry of the call carries its
+          duration (#181); an optional function gives it extra entries from a success, such as the
+          broken level rows of GetLevels (#219). Its TError type parameter extends { readonly kind:
+          string }, and every problem type of an input port has a kind. A footnote names
+          LevelsController, LeaderboardController, LevelDtoMapper and LeaderboardDtoMapper of layer
+          3, which call and translate the level and leaderboard input ports.
         </desc>
         <defs>
           <marker
@@ -316,7 +317,7 @@
         >
           LAYER 2 · USE CASES · src/application/
         </text>
-        <!-- Class: LoggingAspect (no role label) -->
+        <!-- Class: LoggingAspect («aspect»; no role label) -->
         <rect
           x="64"
           y="88"
@@ -329,7 +330,18 @@
         />
         <text
           x="212"
-          y="116"
+          y="106"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «aspect»
+        </text>
+        <text
+          x="212"
+          y="124"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -362,7 +374,7 @@
           - safely(write: () =&gt; void): void
         </text>
 
-        <!-- Class: UseCaseAspect («abstract»; no role label) -->
+        <!-- Class: UseCaseAspect («abstract» «aspect»; no role label) -->
         <rect
           x="544"
           y="184"
@@ -382,7 +394,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          «abstract»
+          «abstract» «aspect»
         </text>
         <text
           x="692"
