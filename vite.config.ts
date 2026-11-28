@@ -16,6 +16,9 @@ const NO_AMBIENT_GLOBAL =
 // A use case reads all items of a request in one call of a port, so the
 // cost of a request does not grow with its count of items (#217).
 const APPLICATION_FILES = ['**/src/application/**'];
+// A use case test asserts through the then steps of its Testing API (#254,
+// API-NFR-01). The steps assert outside a test block by design.
+const TESTING_API_FILES = ['test/support/testing-api/**'];
 
 export default defineConfig({
   lint: {
@@ -32,6 +35,13 @@ export default defineConfig({
     },
     rules: {
       'typescript/no-floating-promises': 'error',
+      // A test asserts with expect, with a type assertion or with a then
+      // step of a Testing API (#254). The first three names are the default
+      // of the rule.
+      'vitest/expect-expect': [
+        'warn',
+        { assertFunctionNames: ['expect', 'expectTypeOf', 'assertType', '*.then*'] },
+      ],
       'vitest/valid-title': [
         'error',
         {
@@ -63,6 +73,12 @@ export default defineConfig({
         files: APPLICATION_FILES,
         rules: {
           'no-await-in-loop': 'error',
+        },
+      },
+      {
+        files: TESTING_API_FILES,
+        rules: {
+          'vitest/no-standalone-expect': 'off',
         },
       },
     ],
