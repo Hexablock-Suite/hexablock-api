@@ -16,7 +16,6 @@ import {
   testSection,
   valueOf,
 } from '../../support/level-format.js';
-import { levelResultOf } from '../../support/level-results.js';
 
 // A level is born valid (#77): LevelDefinition.of() builds a level only from
 // a section that its section type accepted.
@@ -268,27 +267,6 @@ describe('LevelDefinition', () => {
 describe('LevelDefinition and the stars of a play', () => {
   const fitLevel = () =>
     valueOf(levelFrom(levelExample('hexa-fit'), (raw) => FitSection.of(raw, new HexTopology())));
-  const sortLevel = () =>
-    valueOf(levelFrom(levelExample('hexa-sort'), (raw) => SortSection.of(raw)));
-  const play = (levelId: string, stars: number) =>
-    levelResultOf({ levelId, stars, moves: 12, elapsedMs: 45000 });
-
-  it.each([0, 1, 3])(
-    'should_admit_the_result_when_its_stars_are_at_most_the_count_of_star_thresholds',
-    (stars) => {
-      expect(fitLevel().admits(play('fit-01', stars))).toBe(true);
-      expect(sortLevel().admits(play('sort-01', stars))).toBe(true);
-    },
-  );
-
-  it.each([4, 9])(
-    'should_not_admit_the_result_when_its_stars_exceed_the_count_of_star_thresholds',
-    (stars) => {
-      expect(fitLevel().admits(play('fit-01', stars))).toBe(false);
-      expect(sortLevel().admits(play('sort-01', stars))).toBe(false);
-    },
-  );
-
   it('should_give_the_count_of_star_thresholds_when_asked_the_most_stars', () => {
     const one = valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok(testSection('one', 1))));
 
@@ -298,13 +276,5 @@ describe('LevelDefinition and the stars of a play', () => {
         .equals(valueOf(Stars.of(3))),
     ).toBe(true);
     expect(one.mostStars().equals(valueOf(Stars.of(1)))).toBe(true);
-  });
-
-  it('should_tell_the_level_of_a_result_when_the_game_and_the_level_id_match', () => {
-    const level = fitLevel();
-
-    expect(level.isLevelOf(FIT, play('fit-01', 3))).toBe(true);
-    expect(level.isLevelOf(FIT, play('fit-02', 3))).toBe(false);
-    expect(level.isLevelOf(valueOf(GameId.of('hexa-sort')), play('fit-01', 3))).toBe(false);
   });
 });

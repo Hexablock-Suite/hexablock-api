@@ -1,6 +1,5 @@
 import type { GameId } from '../shared/game-id.js';
 import type { LevelId } from '../shared/level-id.js';
-import type { LevelResult } from '../progress/level-result.js';
 import type { Stars } from '../shared/stars.js';
 import { err, ok, type Result } from '../shared/result.js';
 import type { ValueReceiver } from '../shared/value-receiver.js';
@@ -79,7 +78,8 @@ export class LevelDefinition<TSection extends LevelSection = LevelSection> {
   }
 
   // Tells if this level has this gameId and this levelId. LevelRepository
-  // saves a level only under the key of its update.
+  // saves a level only under the key of its update. A LevelResult pairs
+  // with its level through it too, as a PlayedLevel of the progress (#290).
   isIdentifiedBy(gameId: GameId, levelId: LevelId): boolean {
     return this.gameId.equals(gameId) && this.levelId.equals(levelId);
   }
@@ -121,22 +121,12 @@ export class LevelDefinition<TSection extends LevelSection = LevelSection> {
     return this.version.isOlderThan(version);
   }
 
-  // Tells if a result of a sync of this gameId is a play of this level: the
-  // same gameId and the same levelId (#135).
-  isLevelOf(gameId: GameId, result: LevelResult): boolean {
-    return this.gameId.equals(gameId) && result.isFor(this.levelId);
-  }
-
   // The most stars that a play of this level can carry: the count of the
   // star thresholds of its section (DS-6, decided on #134, built on #135).
+  // A LevelResult asks it through PlayedLevel, so the progress holds the
+  // rule of the stars of a play, and the level gives only its limit (#290).
   mostStars(): Stars {
     return this.section.mostStars();
-  }
-
-  // Tells if a play of this level can carry the stars of the result. The
-  // caller pairs the result with its level through isLevelOf().
-  admits(result: LevelResult): boolean {
-    return !result.hasMoreStarsThan(this.mostStars());
   }
 
   // Delivers the common part and the section to a receiver of the border, in

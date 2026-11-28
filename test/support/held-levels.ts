@@ -20,7 +20,7 @@ export type HeldGame = readonly [gameId: string, levelIds: readonly string[]];
 // double holds a level of each named gameId and levelId, with `stars` star
 // thresholds, also for a game with no strategy, such as the slug fit of the
 // concurrency suite. It holds no broken row, so findFor() gives each held
-// level that one result names, through isLevelOf(). It has no other
+// level that one result names, through LevelResult.isPlayOf(). It has no other
 // operation of the port, because a sync calls none.
 export function heldLevels(games: readonly HeldGame[], stars = 3): LevelFinder {
   const levels = games.flatMap(([gameId, levelIds]) =>
@@ -40,7 +40,7 @@ export function heldLevels(games: readonly HeldGame[], stars = 3): LevelFinder {
   return {
     findFor: (gameId: GameId, results: readonly LevelResult[]) =>
       Promise.resolve(
-        levels.filter((held) => results.some((result) => held.isLevelOf(gameId, result))),
+        levels.filter((held) => results.some((result) => result.isPlayOf(gameId, held))),
       ),
   };
 }
