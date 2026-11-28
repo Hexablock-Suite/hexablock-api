@@ -49,6 +49,24 @@ describe('architecture gate', () => {
     expect(fromVariantFixture).toEqual([]);
   });
 
+  // #290: each aggregate folder of src/domain imports only itself and
+  // src/domain/shared/, and shared/ imports only itself (class of 2026-11-13:
+  // each aggregate as if it ran on its own server).
+  it('should_report_aggregate_import_when_a_domain_folder_imports_another_domain_folder', () => {
+    expect(violationsOf(report, 'domain-aggregates-import-only-shared')).toEqual([
+      'src/domain/progress/imports-level.ts -> src/domain/level/shared-part.ts',
+      'src/domain/shared/imports-user.ts -> src/domain/user/account.ts',
+    ]);
+  });
+
+  it('should_allow_a_shared_value_when_an_aggregate_folder_imports_src_domain_shared', () => {
+    const fromSharedFixture = report.violations.filter(
+      (violation) => violation.from === 'src/domain/progress/imports-shared.ts',
+    );
+
+    expect(fromSharedFixture).toEqual([]);
+  });
+
   it('should_report_application_purity_when_application_imports_beyond_domain', () => {
     expect(violationsOf(report, 'application-imports-only-domain')).toEqual([
       'src/application/imports-adapter.ts -> src/adapters/http/imports-infrastructure.ts',
