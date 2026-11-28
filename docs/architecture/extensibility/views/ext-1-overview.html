@@ -75,15 +75,16 @@
           repositories in layer 3, aspects in layer 2 (Q12), and level validators per variant in
           layer 1. Each driver and each Drizzle adapter has its own line for each port that it
           implements, and DrizzleLeaderboardReader implements GlobalBoardReader and LevelBoardReader
-          (#218). No line starts or ends on a dashed frame. UseCase carries only the interface
-          stereotype. UpdateLevelsUseCase holds LevelRepository through a use arrow levels 1, and
-          LevelValidators holds LevelValidator through a use arrow entries 0..*. A dashed frame
-          labelled Aggregate encloses the LevelDefinition root alone. The footnote says that every
-          input port binds UseCase, that LevelDefinition keeps its fields private, that FitSection
-          and SortSection are value objects, that LeaderboardEntry is a response type of layer 2 and
-          that Standing is a value object of layer 1, that a new variant with level files adds a
-          section DTO and leaves the core unchanged, and it names the DTO mappers and the operations
-          of LevelRepository that other views draw.
+          (#218). PerformanceStopwatch implements the Stopwatch port, which LoggingAspect reads for
+          the duration of each call (#181). No line starts or ends on a dashed frame. UseCase
+          carries only the interface stereotype. UpdateLevelsUseCase holds LevelRepository through a
+          use arrow levels 1, and LevelValidators holds LevelValidator through a use arrow entries
+          0..*. A dashed frame labelled Aggregate encloses the LevelDefinition root alone. The
+          footnote says that every input port binds UseCase, that LevelDefinition keeps its fields
+          private, that FitSection and SortSection are value objects, that LeaderboardEntry is a
+          response type of layer 2 and that Standing is a value object of layer 1, that a new
+          variant with level files adds a section DTO and leaves the core unchanged, and it names
+          the DTO mappers and the operations of LevelRepository that other views draw.
         </desc>
         <defs>
           <marker
@@ -173,7 +174,7 @@
         <rect
           x="48"
           y="60"
-          width="584"
+          width="768"
           height="96"
           rx="8"
           fill="none"
@@ -335,6 +336,15 @@
         <!-- NestLogger implements Logger -->
         <path
           d="M552 136 L552 160 L384 160 L384 704 L232 704"
+          fill="none"
+          stroke-width="1"
+          stroke="#17212a"
+          stroke-dasharray="5,4"
+          marker-end="url(#ext1overview-triangle)"
+        />
+        <!-- PerformanceStopwatch implements Stopwatch (#181) -->
+        <path
+          d="M716 136 L716 172 L356 172 L356 756 L232 756"
           fill="none"
           stroke-width="1"
           stroke="#17212a"
@@ -645,11 +655,11 @@
         >
           NestLogger
         </text>
-        <!-- UseCaseAspect -->
+        <!-- PerformanceStopwatch (#181) -->
         <rect
-          x="692"
-          y="808"
-          width="96"
+          x="632"
+          y="88"
+          width="168"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -657,7 +667,29 @@
           stroke-width="1"
         />
         <text
-          x="740"
+          x="716"
+          y="116"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          PerformanceStopwatch
+        </text>
+        <!-- UseCaseAspect -->
+        <rect
+          x="692"
+          y="808"
+          width="144"
+          height="48"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="764"
           y="826"
           fill="#5b6873"
           font-size="8"
@@ -668,7 +700,7 @@
           «abstract»
         </text>
         <text
-          x="740"
+          x="764"
           y="842"
           fill="#17212a"
           font-size="11"
@@ -681,9 +713,9 @@
         </text>
         <!-- LoggingAspect -->
         <rect
-          x="796"
+          x="852"
           y="808"
-          width="96"
+          width="144"
           height="48"
           rx="6"
           fill="#ffffff"
@@ -691,7 +723,7 @@
           stroke-width="1"
         />
         <text
-          x="844"
+          x="924"
           y="836"
           fill="#17212a"
           font-size="11"
@@ -700,28 +732,6 @@
           text-anchor="middle"
         >
           LoggingAspect
-        </text>
-        <!-- TimingAspect -->
-        <rect
-          x="900"
-          y="808"
-          width="96"
-          height="48"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="948"
-          y="836"
-          fill="#17212a"
-          font-size="11"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          TimingAspect
         </text>
         <!-- HTTP controllers: every listed class holds 1 or 2 input ports -->
         <rect
@@ -1041,6 +1051,39 @@
           text-anchor="middle"
         >
           Logger
+        </text>
+        <!-- Stopwatch (#181) -->
+        <rect
+          x="64"
+          y="736"
+          width="168"
+          height="40"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="148"
+          y="751"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «interface» «port»
+        </text>
+        <text
+          x="148"
+          y="767"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          Stopwatch
         </text>
         <!-- ProgressRepository -->
         <rect
