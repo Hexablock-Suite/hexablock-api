@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Use case slice 3 of 3</p>
       <h1>Update levels: one guarded request and the validator strategies</h1>
       <svg
-        viewBox="0 0 1240 1722"
+        viewBox="0 0 1240 1738"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="flow3updatelevels-title flow3updatelevels-desc"
@@ -80,15 +80,20 @@
           LevelRepository extends LevelUpdater, the role whose update(gameId, levelId, change)
           UpdateLevelsUseCase calls, and three more roles that view 2.3 draws (#193).
           UpdateLevelsUseCase implements UpdateLevels and holds the LevelUpdater role and
-          LevelValidators. In layer 1, the LevelValidators domain service holds one LevelValidator
-          strategy per gameId in a list of entries and creates each LevelDefinition aggregate root;
-          FitLevelValidator and SortLevelValidator implement LevelValidator and pick their section
-          type. FitLevelValidator holds Topologies and gives FitSection the Topology of the level. A
-          dashed frame labelled Aggregate marks the boundary of LevelDefinition; views 2 and 5 of
-          Part 1 draw its members. The footnote says that a level that fails its check leaves the
-          stored levels unchanged, that each save asks decideReplace() of the incoming level (S3-10,
-          #174), that FitSection and SortSection are value objects of the aggregate of
-          LevelDefinition, and that LevelValidator and its validators form the Strategy pattern.
+          LevelValidators, and AuthorizationAspect, which carries the stereotype «aspect» (#182),
+          holds LevelEditors and wraps the UpdateLevels port; UseCaseAspect declares the wrapped
+          port, so view 2.1 draws that line (#180). In layer 1, the LevelValidators domain service
+          holds one LevelValidator strategy per gameId in a list of entries and creates each
+          LevelDefinition aggregate root; FitLevelValidator and SortLevelValidator implement
+          LevelValidator and pick their section type. FitLevelValidator holds Topologies and gives
+          FitSection the Topology of the level. A dashed frame labelled Aggregate marks the boundary
+          of LevelDefinition; views 2 and 5 of Part 1 draw its members. The footnote says that a
+          level that fails its check leaves the stored levels unchanged, that each save asks
+          decideReplace() of the incoming level (S3-10, #174), that FitSection and SortSection are
+          value objects of the aggregate of LevelDefinition, that LevelValidator and its validators
+          form the Strategy pattern, and that AppModule binds UpdateLevels to
+          LoggingAspect(AuthorizationAspect(UpdateLevelsUseCase)), so an account outside
+          LevelEditors gets a 403 after LevelDtoMapper has checked the body.
         </desc>
         <defs>
           <marker
@@ -180,7 +185,7 @@
         />
         <!-- LevelsController holds UpdateLevels: use -->
         <path
-          d="M560 196 L560 504"
+          d="M560 212 L560 504"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -188,7 +193,7 @@
         />
         <!-- LevelsController uses LevelDtoMapper: use -->
         <path
-          d="M820 196 L820 232"
+          d="M820 212 L820 232"
           fill="none"
           stroke="#5b6873"
           stroke-width="1"
@@ -223,7 +228,7 @@
         />
         <!-- DrizzleLevelRepository implements LevelRepository: realization -->
         <path
-          d="M492 436 L492 720 L148 720 L148 780"
+          d="M492 436 L492 752 L148 752 L148 780"
           fill="none"
           stroke="#17212a"
           stroke-width="1"
@@ -242,7 +247,7 @@
         />
         <!-- DrizzleLevelRepository holds validators: LevelValidators: use with role and multiplicity, as Part 3, view 2 draws it (decision 13) -->
         <path
-          d="M540 380 L1184 380 L1184 984"
+          d="M540 396 L1184 396 L1184 984"
           fill="none"
           stroke-width="1"
           stroke="#5b6873"
@@ -311,10 +316,10 @@
         >
           updateLevels 1
         </text>
-        <rect x="826" y="208" width="31" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="826" y="216" width="31" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="841.5"
-          y="217"
+          y="225"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -505,7 +510,7 @@
           x="516"
           y="56"
           width="340"
-          height="140"
+          height="156"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -534,8 +539,6 @@
           LevelsController
         </text>
         <text
-          textLength="320"
-          lengthAdjust="spacingAndGlyphs"
           x="686"
           y="106"
           fill="#5b6873"
@@ -544,7 +547,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-04 · update guarded by JwtAuthGuard, LevelEditorGuard
+          API-FR-04 · update guarded by JwtAuthGuard
         </text>
         <line x1="516" y1="116" x2="856" y2="116" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="532" y="132" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -558,7 +561,10 @@
           + list(): Promise&lt;LevelsDto&gt;
         </text>
         <text x="532" y="188" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + update(body: LevelsDto): Promise&lt;void&gt;
+          + update(body: LevelsDto, request: AuthenticatedRequest):
+        </text>
+        <text x="554" y="204" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;void&gt;
         </text>
         <!-- Class: DrizzleLevelRepository («repository»; no role label) -->
         <rect
@@ -638,7 +644,7 @@
           x="760"
           y="232"
           width="440"
-          height="132"
+          height="148"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -679,15 +685,18 @@
         </text>
         <line x1="760" y1="292" x2="1200" y2="292" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="776" y="308" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toRequest(body: unknown): Result&lt;UpdateLevelsRequest, string[]&gt;
+          + toRequest(body: unknown, userId: UserId):
         </text>
-        <text x="776" y="324" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toDto(level: LevelDefinition): LevelDto
+        <text x="798" y="324" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Result&lt;UpdateLevelsRequest, string[]&gt;
         </text>
         <text x="776" y="340" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + toLevelsDto(listed: ListedLevels): LevelsDto
+          + toDto(level: LevelDefinition): LevelDto
         </text>
         <text x="776" y="356" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + toLevelsDto(listed: ListedLevels): LevelsDto
+        </text>
+        <text x="776" y="372" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + toDetails(problems: readonly LevelProblemReport[]): string[]
         </text>
         <!-- Class: AuthenticateToken («interface» «input port») -->
@@ -762,7 +771,63 @@
         </text>
         <line x1="516" y1="552" x2="996" y2="552" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="532" y="568" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + execute(request: UpdateLevelsRequest): Promise&lt;Result&lt;void, InvalidLevels&gt;&gt;
+          + execute(request: UpdateLevelsRequest): Promise&lt;Result&lt;void,
+          UpdateLevelsError&gt;&gt;
+        </text>
+        <!-- Class: AuthorizationAspect («aspect», #180, #182) -->
+        <rect
+          x="48"
+          y="612"
+          width="420"
+          height="124"
+          rx="6"
+          fill="#ffffff"
+          stroke="#17212a"
+          stroke-width="1"
+        />
+        <text
+          x="258"
+          y="630"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          «aspect»
+        </text>
+        <text
+          x="258"
+          y="648"
+          fill="#17212a"
+          font-size="12"
+          font-weight="600"
+          font-family="'IBM Plex Sans', sans-serif"
+          text-anchor="middle"
+        >
+          AuthorizationAspect
+        </text>
+        <text
+          x="258"
+          y="662"
+          fill="#5b6873"
+          font-size="8"
+          font-family="'IBM Plex Mono', monospace"
+          text-anchor="middle"
+          letter-spacing="0.08em"
+        >
+          #180 · Q4 · wraps UpdateLevels
+        </text>
+        <line x1="48" y1="672" x2="468" y2="672" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="688" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          - editors: LevelEditors
+        </text>
+        <line x1="48" y1="696" x2="468" y2="696" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="64" y="712" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          + execute(request: UpdateLevelsRequest):
+        </text>
+        <text x="86" y="728" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;Result&lt;void, UpdateLevelsError&gt;&gt;
         </text>
         <!-- Class: UpdateLevelsUseCase (focal, «use case») -->
         <rect
@@ -1465,9 +1530,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelEditorGuard runs after JwtAuthGuard: an account outside LevelEditors gets a 403, and
-          the body is never read (#145, decision 18). Part 2, view 3, and Part 3, view 3, draw it;
-          this slice does not.
+          AuthorizationAspect wraps UpdateLevels: AppModule binds the port to
+          LoggingAspect(AuthorizationAspect(UpdateLevelsUseCase)) (#180, decision 18).
         </text>
         <text
           x="24"
@@ -1476,12 +1540,22 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
+          An account outside LevelEditors gets not-a-level-editor before the use case runs, and
+          LevelsController answers 403; a malformed body gets the 400 of LevelDtoMapper first.
+        </text>
+        <text
+          x="24"
+          y="1628"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
           DrizzleLevelRepository implements LevelRepository, which extends one role per use case;
           UpdateLevelsUseCase holds only LevelUpdater, and view 2.3 draws all four (decision 23,
           #193).
         </text>
-        <!-- Legend: moved down 16 for the footnote line of #193 -->
-        <g transform="translate(0,16)">
+        <!-- Legend: moved down 32 for the footnote lines of #193 and #180 -->
+        <g transform="translate(0,32)">
           <line
             x1="24"
             y1="1624"

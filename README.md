@@ -180,13 +180,13 @@ imports no package (rule R-application-pure).
 The aspects live in the application layer: **Q12** in [layers.md](docs/architecture/layers.md#resolved-questions).
 In the session of 2026-11-06 the professor answered that the aspects talk to the use case, so they
 belong there, built as decorators with one interface common to the use cases, without libraries.
-`UseCaseAspect` and `LoggingAspect` live in [src/application/aspects](src/application/aspects).
+`UseCaseAspect`, `LoggingAspect` and `AuthorizationAspect` live in [src/application/aspects](src/application/aspects).
 `LoggingAspect` writes a typed entry to the `Logger` port
 ([src/application/ports/logger.ts](src/application/ports/logger.ts)), and `NestLogger` in
 [src/adapters/logging](src/adapters/logging) implements it and writes the text.
 `AppModule` wraps `RegisterUseCase`, `LoginUseCase`, `AuthenticateTokenUseCase`, `SyncProgressUseCase`, `GetProgressUseCase`,
 `GetLevelsUseCase`, `UpdateLevelsUseCase`, `GetGlobalLeaderboardUseCase` and `GetLevelLeaderboardUseCase` in `LoggingAspect`,
-each under the name of its input port, so a failed sign-in leaves a log entry (#170). `AuthorizeLevelEditorUseCase` has no aspect. It logs the use case name, the outcome and, for a failure, only its `kind`, so a
+each under the name of its input port, so a failed sign-in leaves a log entry (#170). For `UpdateLevelsUseCase`, `AuthorizationAspect` sits inside `LoggingAspect`, so a rejected level update leaves a log entry too (#180). It logs the use case name, the outcome and, for a failure, only its `kind`, so a
 value that the client sent never reaches the log. For `GetLevels`, the aspect also writes one entry per stored level
 row that breaks a rule, with its `gameId`, `levelId` and reason code, and no section, from `unavailableLevelEntries()`.
 No use case imports the `Logger` port (rule `only-aspects-import-logger-port`, #219). A request value that breaks its rule stops in its
@@ -247,8 +247,8 @@ export LEVEL_EDITOR_IDS=0b6f6a4e-1c2d-4e5f-8a9b-0c1d2e3f4a5b,6f1c1d0e-2b7a-4c55-
 pnpm start:dev
 ```
 
-An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` gets
-403 with the `ErrorDto` body. An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
+An unset or empty `LEVEL_EDITOR_IDS` lets no account update the levels: every `PUT /v1/levels` whose
+body passes the shape check gets 403 with the `ErrorDto` body; a malformed body gets 400 first (#180). An entry that is not a UUID stops the start, as a missing `JWT_SECRET`
 does. The account that a deploy uses to send the levels must be in the list (see [Deploy](#deploy)).
 
 Sign-up and sign-in have a rate limit for each client
@@ -366,8 +366,8 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,420 tests in `pnpm test`: 1,312 behavior tests and
-108 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
+On 2026-11-28 the Vitest JSON reporter counts 1,442 tests in `pnpm test`: 1,324 behavior tests and
+118 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
 `pnpm test:fast` is the fast feedback command for the inner loop (#256). It runs the 881 tests of
@@ -396,6 +396,40 @@ builds the app with `pnpm build` and starts `dist/main.js` in a child process.
 
 Name each test `should_<expected_result>_when_<condition>`. The gate
 `test/gates/test-name.gate.spec.ts` fails on any other name.
+
+A use case test of `test/unit/application/` has three layers (API-NFR-01, #254). The test case
+reads Given / When / Then in the words of the domain and names no test double. It calls the
+Testing API of its use case in `test/support/testing-api/`, such as `LoginTestApi`: the `given…`
+steps return the Testing API, the `when…` steps are `async`, call the use case and return
+`Promise<this>`, and the `then…` steps assert. The Testing API builds the use case and holds its
+test doubles as private fields, so a new collaborator of a use case changes only its Testing API.
+Below it, the Object Mothers of `test/support/object-mother/`, such as `UserMother`, build
+domain data with the public factories and know no double. Each `then…` step fails when no
+`when…` step ran. `pnpm lint` fails on a test that asserts neither with `expect` nor through a
+`then…` step (`vitest/expect-expect`), and on a `when…` step without `await`
+(`typescript/no-floating-promises`). Every test file of `test/unit/application/` has this shape, the
+tests of `LoggingAspect` and `AuthorizationAspect` included, and so has the test of the domain
+service `LevelValidators` in `test/domain/level/`: its `when…` steps are `async` too, although
+`check()` is synchronous.
+
+The review demo (#257) shows that the tests hold the behavior, not the shape of the code. Run it on a
+scratch branch and never push that branch: a push starts CI and leaves a branch that nobody merges.
+First count the two suites with `pnpm test:behavior` and `pnpm test:gates`: the 1,334 behavior
+tests and the 118 gate tests above. Then make two changes, one at a time, undo each one before the
+next, and run `pnpm test` after each:
+
+1. A refactor that keeps the behavior. Add the `Clock` port to the constructor of `LoginUseCase`,
+   inject `CLOCK` in the `LOGIN` factory of `AppModule`, and give `LoginTestApi` a `FixedClock`.
+   `pnpm test` stays green, and `git diff --stat` names `src/application/auth/login.use-case.ts`,
+   `src/infrastructure/app.module.ts` and `test/support/testing-api/login.test-api.ts` only. No test
+   case changes, because only the Testing API builds the use case.
+2. A change of behavior. In `Standing.isBetterThan()` (`src/domain/progress/standing.ts`), compare
+   the time before the moves. `pnpm test` fails on two named tests:
+   `should_rank_fewer_total_moves_first_when_stars_and_levels_completed_are_equal` of
+   `test/domain/progress/standing.spec.ts` and
+   `should_rank_the_board_by_the_standing_comparison_when_the_entries_come_in_no_order` of
+   `test/domain/progress/ranked-board.spec.ts`. Each failure shows the expected and the received
+   value.
 
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.

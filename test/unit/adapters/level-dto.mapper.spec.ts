@@ -8,8 +8,11 @@ import {
   type LevelJson,
 } from '../../support/level-format.js';
 import { incomingLevel } from '../../support/level-update.js';
+import { UserId } from '../../../src/domain/user/user-id.js';
 import { valueOf } from '../../support/result.js';
+import { testUserId } from '../../support/user-ids.js';
 
+const ADA = valueOf(UserId.from(testUserId(1)));
 const SHAPE_PROBLEM = 'levels must be an array of objects';
 const FIELDS_PROBLEM =
   'a level holds exactly the fields gameId, levelId, order, version, topology and section';
@@ -36,11 +39,11 @@ describe('LevelDtoMapper', () => {
     const fit = levelJson('hexa-fit');
     const sort = levelJson('hexa-sort', 'sort-02', 3);
 
-    const request = LevelDtoMapper.toRequest({ levels: [fit, sort] });
+    const request = LevelDtoMapper.toRequest({ levels: [fit, sort] }, ADA);
 
     expect(request).toEqual({
       ok: true,
-      value: { levels: [incomingLevel(fit), incomingLevel(sort)] },
+      value: { userId: ADA, levels: [incomingLevel(fit), incomingLevel(sort)] },
     });
   });
 
@@ -58,7 +61,7 @@ describe('LevelDtoMapper', () => {
     [{ levels: [[levelJson('hexa-fit')]] }],
     [{ levels: ['fit-01'] }],
   ])('should_report_the_shape_problem_when_the_body_holds_no_array_of_level_objects', (body) => {
-    expect(LevelDtoMapper.toRequest(body)).toEqual({ ok: false, error: [SHAPE_PROBLEM] });
+    expect(LevelDtoMapper.toRequest(body, ADA)).toEqual({ ok: false, error: [SHAPE_PROBLEM] });
   });
 
   // Each problem names its level by its gameId and levelId, so a client can
@@ -76,7 +79,7 @@ describe('LevelDtoMapper', () => {
       ],
     };
 
-    const request = LevelDtoMapper.toRequest(body);
+    const request = LevelDtoMapper.toRequest(body, ADA);
 
     expect(request).toEqual({
       ok: false,
@@ -101,7 +104,7 @@ describe('LevelDtoMapper', () => {
       ],
     };
 
-    const request = LevelDtoMapper.toRequest(body);
+    const request = LevelDtoMapper.toRequest(body, ADA);
 
     expect(request).toEqual({
       ok: false,
