@@ -12,9 +12,10 @@ const GAME_ID_PATTERN = /^[a-z][a-z0-9-]*$/;
 export class GameId {
   private constructor(private readonly value: string) {}
 
-  // Builds a gameId that the API already holds: a stored row or a name of
-  // the composition root. A stored row keeps what it holds, so this factory
-  // has no length bound.
+  // Builds a gameId that the API already holds: a stored gameId or a name of
+  // the composition root. A stored value keeps what it holds, so this factory
+  // has no length bound. The bound of a gameId that a client sends lives at
+  // the border (#135, #179).
   static of(value: string): Result<GameId, GameIdProblem> {
     return typeof value === 'string' && GAME_ID_PATTERN.test(value)
       ? ok(new GameId(value))

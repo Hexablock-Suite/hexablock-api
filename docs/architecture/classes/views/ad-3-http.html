@@ -76,10 +76,11 @@
           answer, among them the RegisterUserRequest and the LoginRequest, the LeaderboardDtoMapper
           that LeaderboardController uses to build each board request and each answer, the
           JwtAuthGuard that the controller decorators apply to progress, leaderboard reads and level
-          updates and that holds the AuthenticateToken input port, the LevelEditorGuard that runs
-          after it on level updates and holds the AuthorizeLevelEditor input port (#145), the
-          LevelsDto that list() returns and update() takes, whose LevelDto rows each carry the
-          section for the validator of its gameId, and the HttpErrorFilter for unexpected errors.
+          updates and that holds the AuthenticateToken input port, the LevelsController whose
+          update() reads the AuthenticatedRequest and puts its UserId in the request of
+          UpdateLevels, which AuthorizationAspect checks (#180), the LevelsDto that list() returns
+          and update() takes, whose LevelDto rows each carry the section for the validator of its
+          gameId, and the HttpErrorFilter for unexpected errors.
         </desc>
         <defs>
           <marker
@@ -168,9 +169,9 @@
         <!-- LevelsController takes LevelsDto as the parameter of update() and returns it from list(): use -->
         <line
           x1="868"
-          y1="228"
+          y1="260"
           x2="868"
-          y2="252"
+          y2="284"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad3http-open)"
@@ -178,9 +179,9 @@
         <!-- LevelsDto holds levels: LevelDto[]: use with role and multiplicity -->
         <line
           x1="868"
-          y1="340"
+          y1="372"
           x2="868"
-          y2="400"
+          y2="432"
           stroke="#5b6873"
           stroke-width="1"
           marker-end="url(#ad3http-open)"
@@ -210,10 +211,10 @@
         >
           USES
         </text>
-        <rect x="874" y="234" width="40" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="874" y="266" width="40" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="894"
-          y="243"
+          y="275"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -222,10 +223,10 @@
         >
           TAKES
         </text>
-        <rect x="874" y="364" width="64" height="12" rx="2" fill="#e2ebf8" />
+        <rect x="874" y="396" width="64" height="12" rx="2" fill="#e2ebf8" />
         <text
           x="906"
-          y="373"
+          y="405"
           fill="#7d8a94"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -423,7 +424,7 @@
           x="736"
           y="88"
           width="264"
-          height="140"
+          height="172"
           rx="6"
           fill="#ffffff"
           stroke="#17212a"
@@ -452,8 +453,6 @@
           LevelsController
         </text>
         <text
-          textLength="248"
-          lengthAdjust="spacingAndGlyphs"
           x="868"
           y="138"
           fill="#5b6873"
@@ -462,7 +461,7 @@
           text-anchor="middle"
           letter-spacing="0.08em"
         >
-          API-FR-04 · update guarded by JwtAuthGuard, LevelEditorGuard
+          API-FR-04 · update guarded by JwtAuthGuard
         </text>
         <line x1="736" y1="148" x2="1000" y2="148" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text x="752" y="164" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
@@ -476,7 +475,13 @@
           + list(): Promise&lt;LevelsDto&gt;
         </text>
         <text x="752" y="220" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + update(body: LevelsDto): Promise&lt;void&gt;
+          + update(body: LevelsDto,
+        </text>
+        <text x="774" y="236" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          request: AuthenticatedRequest):
+        </text>
+        <text x="774" y="252" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+          Promise&lt;void&gt;
         </text>
         <!-- Class: LeaderboardController («controller») -->
         <rect
@@ -632,62 +637,6 @@
           Promise&lt;boolean&gt;
         </text>
 
-        <!-- Class: LevelEditorGuard («guard», #145) -->
-        <rect
-          x="736"
-          y="596"
-          width="264"
-          height="124"
-          rx="6"
-          fill="#ffffff"
-          stroke="#17212a"
-          stroke-width="1"
-        />
-        <text
-          x="868"
-          y="614"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          «guard»
-        </text>
-        <text
-          x="868"
-          y="632"
-          fill="#17212a"
-          font-size="12"
-          font-weight="600"
-          font-family="'IBM Plex Sans', sans-serif"
-          text-anchor="middle"
-        >
-          LevelEditorGuard
-        </text>
-        <text
-          x="868"
-          y="646"
-          fill="#5b6873"
-          font-size="8"
-          font-family="'IBM Plex Mono', monospace"
-          text-anchor="middle"
-          letter-spacing="0.08em"
-        >
-          #145 · after JwtAuthGuard
-        </text>
-        <line x1="736" y1="656" x2="1000" y2="656" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="752" y="672" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          - authorize: AuthorizeLevelEditor
-        </text>
-        <line x1="736" y1="680" x2="1000" y2="680" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="752" y="696" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          + canActivate(context: ExecutionContext):
-        </text>
-        <text x="774" y="712" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          Promise&lt;boolean&gt;
-        </text>
-
         <!-- Class: HttpErrorFilter («filter») -->
         <rect
           x="400"
@@ -758,7 +707,7 @@
         <!-- Class: LevelsDto («DTO») -->
         <rect
           x="736"
-          y="252"
+          y="284"
           width="264"
           height="88"
           rx="6"
@@ -768,7 +717,7 @@
         />
         <text
           x="868"
-          y="270"
+          y="302"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -779,7 +728,7 @@
         </text>
         <text
           x="868"
-          y="288"
+          y="320"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -788,17 +737,17 @@
         >
           LevelsDto
         </text>
-        <line x1="736" y1="300" x2="1000" y2="300" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="752" y="316" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="736" y1="332" x2="1000" y2="332" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="348" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + levels: LevelDto[]
         </text>
-        <text x="752" y="332" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="752" y="364" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + unavailable?: UnavailableLevelDto[]
         </text>
         <!-- Class: LevelDto («DTO») -->
         <rect
           x="736"
-          y="400"
+          y="432"
           width="264"
           height="172"
           rx="6"
@@ -808,7 +757,7 @@
         />
         <text
           x="868"
-          y="418"
+          y="450"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -819,7 +768,7 @@
         </text>
         <text
           x="868"
-          y="436"
+          y="468"
           fill="#17212a"
           font-size="12"
           font-weight="600"
@@ -830,7 +779,7 @@
         </text>
         <text
           x="868"
-          y="450"
+          y="482"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -839,28 +788,28 @@
         >
           DS-6
         </text>
-        <line x1="736" y1="460" x2="1000" y2="460" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
-        <text x="752" y="476" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <line x1="736" y1="492" x2="1000" y2="492" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <text x="752" y="508" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + gameId: string
         </text>
-        <text x="752" y="492" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="752" y="524" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + levelId: string
         </text>
-        <text x="752" y="508" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="752" y="540" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + order: number
         </text>
-        <text x="752" y="524" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="752" y="556" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + version: number
         </text>
-        <text x="752" y="540" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="752" y="572" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           + topology: string
         </text>
-        <line x1="736" y1="548" x2="1000" y2="548" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
+        <line x1="736" y1="580" x2="1000" y2="580" stroke="rgba(23,33,42,0.22)" stroke-width="1" />
         <text
           textLength="230"
           lengthAdjust="spacingAndGlyphs"
           x="752"
-          y="564"
+          y="596"
           fill="#17212a"
           font-size="9"
           font-family="'IBM Plex Mono', monospace"
@@ -944,9 +893,9 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LevelEditorGuard runs after JwtAuthGuard on the level update. It holds the
-          AuthorizeLevelEditor input port and answers 403 for an account outside LevelEditors
-          (#145).
+          LevelsController puts the UserId of the AuthenticatedRequest in the UpdateLevelsRequest.
+          AuthorizationAspect checks it inside UpdateLevels, and not-a-level-editor becomes a 403
+          (#180).
         </text>
         <!-- Legend -->
         <line x1="24" y1="900" x2="1016" y2="900" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />

@@ -11,16 +11,18 @@ import type { LevelVersion } from './level-version.js';
 import type { StoredLevelProblem } from './stored-level.js';
 import type { TopologyId } from './topology-id.js';
 
-// What the store holds for one gameId and levelId, read under the lock of
-// update() (#147). It lives in this file because the valid state holds a
-// level and decideReplace() takes it, so two files would import each other
-// (#221). The three states are closed, so a change handles each:
-// - absent: no row.
-// - valid: a row that the strategy of its gameId restores into a level.
-// - broken: a row that breaks a rule. It has no level. It gives the code of
-//   its first broken rule and its stored version, or null when the version
-//   column itself breaks the rule of LevelVersion. So a broken row never
-//   passes as no row.
+// The stored state of one gameId and levelId, as LevelUpdater.update() gives
+// it to its change. Two updates of one level run one after the other, so
+// each change reads what the previous one saved (#147). It lives in this
+// file because the valid state holds a level and decideReplace() takes it,
+// so two files would import each other (#221). The three states are closed,
+// so a change handles each:
+// - absent: no level is stored for the key.
+// - valid: a stored level that the strategy of its gameId restores.
+// - broken: a stored level that breaks a rule. It has no level. It gives the
+//   code of its first broken rule and its stored version, or null when the
+//   stored version itself breaks the rule of LevelVersion. So a broken level
+//   never passes as an absent level.
 export type StoredLevel =
   | { readonly state: 'absent' }
   | { readonly state: 'valid'; readonly level: LevelDefinition }
@@ -77,7 +79,7 @@ export class LevelDefinition<TSection extends LevelSection = LevelSection> {
   }
 
   // Tells if this level has this gameId and this levelId. LevelRepository
-  // saves a level only under the key that it locks.
+  // saves a level only under the key of its update.
   isIdentifiedBy(gameId: GameId, levelId: LevelId): boolean {
     return this.gameId.equals(gameId) && this.levelId.equals(levelId);
   }
@@ -95,9 +97,10 @@ export class LevelDefinition<TSection extends LevelSection = LevelSection> {
   }
 
   // The version rule of S3-10 over the stored state of the level (#174).
-  // This level is the incoming copy: an absent store takes it, a valid
-  // stored level decides through accepts(), and a broken row compares only
-  // its version, when the row holds one. The use case only coordinates.
+  // This level is the incoming copy: an absent level takes it, a valid
+  // stored level decides through accepts(), and a broken stored level
+  // compares only its version, when it holds a valid one. The use case only
+  // coordinates.
   decideReplace(stored: StoredLevel): Result<LevelDefinition, LevelProblem> {
     switch (stored.state) {
       case 'absent':
@@ -111,9 +114,9 @@ export class LevelDefinition<TSection extends LevelSection = LevelSection> {
     }
   }
 
-  // Tells if this copy is older than a stored version (S3-10). A stored row
+  // Tells if this copy is older than a stored version (S3-10). A stored level
   // that breaks a rule gives only its version, so the version rule over that
-  // row compares with the version alone (#147). An equal version is not older.
+  // level compares with the version alone (#147). An equal version is not older.
   isOlderThan(version: LevelVersion): boolean {
     return this.version.isOlderThan(version);
   }

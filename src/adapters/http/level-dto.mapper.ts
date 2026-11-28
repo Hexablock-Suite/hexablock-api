@@ -9,6 +9,7 @@ import { LevelOrder } from '../../domain/level/level-order.js';
 import { LevelVersion } from '../../domain/level/level-version.js';
 import { TopologyId } from '../../domain/level/topology-id.js';
 import { err, ok, type Result } from '../../domain/shared/result.js';
+import type { UserId } from '../../domain/user/user-id.js';
 import { receiveJsonOf, receiveValueOf } from '../received.js';
 import type { LevelDto, LevelsDto } from './level.dto.js';
 import { gameIdFrom, levelIdFrom } from './progress-values.js';
@@ -29,8 +30,10 @@ const FIELDS_PROBLEM =
 export const LevelDtoMapper = {
   // The app has no validation pipe, so the mapper checks the body shape.
   // The domain checks the rule of each value. A level that breaks a rule
-  // gives one problem, and the mapper checks every level of the body.
-  toRequest(body: unknown): Result<UpdateLevelsRequest, string[]> {
+  // gives one problem, and the mapper checks every level of the body. The
+  // request carries the UserId of the signed-in account, which
+  // AuthorizationAspect checks (#180).
+  toRequest(body: unknown, userId: UserId): Result<UpdateLevelsRequest, string[]> {
     const levels = isObject(body) ? body.levels : undefined;
     if (!Array.isArray(levels) || !levels.every(isObject)) {
       return err([SHAPE_PROBLEM]);
@@ -45,7 +48,7 @@ export const LevelDtoMapper = {
         problems.push(incoming.error);
       }
     });
-    return problems.length === 0 ? ok({ levels: built }) : err(problems);
+    return problems.length === 0 ? ok({ userId, levels: built }) : err(problems);
   },
 
   // The level delivers its parts in the fields of the shared level format.

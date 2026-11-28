@@ -9,9 +9,11 @@ export type StarsProblem = 'invalid-stars';
 export class Stars {
   private constructor(private readonly value: number) {}
 
-  // Builds the stars of a value that the API already holds: a stored row, or
-  // a total that sums the stored rows. A total can exceed one column, and a
-  // stored row keeps what it holds, so this factory has no upper bound.
+  // Builds the stars of a value that the API already holds: a stored result,
+  // or a total that sums the stored results. A total can exceed the bound of
+  // one play, and a stored value keeps what it holds, so this factory has no
+  // upper bound. The bound of the stars that a client sends lives at the
+  // border (#135, #179).
   static of(value: number): Result<Stars, StarsProblem> {
     return Number.isSafeInteger(value) && value >= 0 ? ok(new Stars(value)) : err('invalid-stars');
   }

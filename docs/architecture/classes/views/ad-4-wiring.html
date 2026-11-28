@@ -63,7 +63,7 @@
       <p class="eyebrow">Class diagram · Part 3 · View 4 of 5</p>
       <h1>Wiring: the composition root binds each port to one adapter</h1>
       <svg
-        viewBox="0 0 1040 938"
+        viewBox="0 0 1040 954"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby="ad4wiring-title ad4wiring-desc"
@@ -78,10 +78,11 @@
           one DrizzleLeaderboardReader (#218), and the input ports and the filter on the right.
           LoggingAspect wraps RegisterUser, Login, AuthenticateToken, SyncProgress, GetProgress,
           GetLevels, UpdateLevels, GetGlobalLeaderboard and GetLevelLeaderboard (#170); for
-          GetLevels it also logs each broken level row (#219). The AuthorizeLevelEditor input port
-          binds to AuthorizeLevelEditorUseCase with the LevelEditors of LEVEL_EDITOR_IDS (#145); the
-          Nest container creates each adapter once. STOPWATCH binds to PerformanceStopwatch, which
-          each LoggingAspect reads for the duration of a call (#181).
+          GetLevels it also logs each broken level row (#219). On UpdateLevels, AuthorizationAspect
+          sits inside LoggingAspect and holds the LevelEditors of LEVEL_EDITOR_IDS, so the log sees
+          each rejected attempt (#145, #180); the Nest container creates each adapter once.
+          STOPWATCH binds to PerformanceStopwatch, which each LoggingAspect reads for the duration
+          of a call (#181).
         </desc>
         <defs>
           <marker
@@ -363,18 +364,15 @@
           GET_LEVELS → LoggingAspect(GetLevelsUseCase)
         </text>
         <text x="536" y="244" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          UPDATE_LEVELS → LoggingAspect(UpdateLevelsUseCase)
+          UPDATE_LEVELS → LoggingAspect(AuthorizationAspect(UpdateLevelsUseCase))
         </text>
         <text x="536" y="260" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
-          AUTHORIZE_LEVEL_EDITOR → AuthorizeLevelEditorUseCase
-        </text>
-        <text x="536" y="276" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           GET_GLOBAL_LEADERBOARD → LoggingAspect(GetGlobalLeaderboardUseCase)
         </text>
-        <text x="536" y="292" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="536" y="276" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           GET_LEVEL_LEADERBOARD → LoggingAspect(GetLevelLeaderboardUseCase)
         </text>
-        <text x="536" y="308" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
+        <text x="536" y="292" fill="#17212a" font-size="9" font-family="'IBM Plex Mono', monospace">
           APP_FILTER → HttpErrorFilter
         </text>
 
@@ -665,9 +663,8 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          LoggingAspect wraps every use case except AuthorizeLevelEditor (#170, #218, #219). Each
-          chain reads from the outside in. Both board reader tokens alias one
-          DrizzleLeaderboardReader.
+          LoggingAspect wraps every use case (#170, #218, #219). Each chain reads from the outside
+          in. Both board reader tokens alias one DrizzleLeaderboardReader.
         </text>
         <text
           x="24"
@@ -686,15 +683,24 @@
           font-size="11"
           font-family="'IBM Plex Sans', sans-serif"
         >
-          readLevelEditors() reads LEVEL_EDITOR_IDS next to readJwtSecret(), and AppModule builds
-          AuthorizeLevelEditorUseCase with that LevelEditors; an empty list lets no one update
-          (#145).
+          readLevelEditors() reads LEVEL_EDITOR_IDS next to readJwtSecret(), and AppModule gives
+          that LevelEditors to AuthorizationAspect; an empty list lets no one update (#145).
         </text>
-        <!-- Legend -->
-        <line x1="24" y1="856" x2="1016" y2="856" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
         <text
           x="24"
-          y="874"
+          y="848"
+          fill="#5b6873"
+          font-size="11"
+          font-family="'IBM Plex Sans', sans-serif"
+        >
+          AuthorizationAspect sits inside LoggingAspect on UPDATE_LEVELS, so the log sees each
+          rejected attempt to update the levels (#180).
+        </text>
+        <!-- Legend -->
+        <line x1="24" y1="872" x2="1016" y2="872" stroke="rgba(23,33,42,0.10)" stroke-width="0.8" />
+        <text
+          x="24"
+          y="890"
           fill="#5b6873"
           font-size="8"
           font-family="'IBM Plex Mono', monospace"
@@ -704,9 +710,9 @@
         </text>
         <line
           x1="24"
-          y1="892"
+          y1="908"
           x2="52"
-          y2="892"
+          y2="908"
           stroke="#17212a"
           stroke-width="1"
           stroke-dasharray="5,4"
@@ -714,7 +720,7 @@
         />
         <text
           x="60"
-          y="896"
+          y="912"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -723,7 +729,7 @@
         </text>
         <rect
           x="24"
-          y="912"
+          y="928"
           width="20"
           height="12"
           rx="2"
@@ -733,7 +739,7 @@
         />
         <rect
           x="48"
-          y="912"
+          y="928"
           width="20"
           height="12"
           rx="2"
@@ -743,7 +749,7 @@
         />
         <rect
           x="72"
-          y="912"
+          y="928"
           width="20"
           height="12"
           rx="2"
@@ -753,7 +759,7 @@
         />
         <text
           x="104"
-          y="921"
+          y="937"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -762,7 +768,7 @@
         </text>
         <rect
           x="264"
-          y="912"
+          y="928"
           width="28"
           height="12"
           rx="2"
@@ -773,7 +779,7 @@
         />
         <text
           x="300"
-          y="921"
+          y="937"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -782,7 +788,7 @@
         </text>
         <rect
           x="470"
-          y="912"
+          y="928"
           width="28"
           height="12"
           rx="2"
@@ -792,7 +798,7 @@
         />
         <text
           x="506"
-          y="921"
+          y="937"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
@@ -801,7 +807,7 @@
         </text>
         <rect
           x="616"
-          y="912"
+          y="928"
           width="28"
           height="12"
           rx="2"
@@ -812,7 +818,7 @@
         />
         <text
           x="652"
-          y="921"
+          y="937"
           fill="#5b6873"
           font-size="8.5"
           font-family="'IBM Plex Sans', sans-serif"
