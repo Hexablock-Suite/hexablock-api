@@ -16,7 +16,7 @@ A variant with level files adds two domain classes (its section and its validato
 - **Add:** a class that implements [`LevelValidator<TSection>`](../src/domain/level/level-validator.ts), as [`SortLevelValidator`](../src/domain/level/sort/sort-level-validator.ts). It only picks the section type of its game and holds no rule.
 - **Register:** one `[GameId, validator]` entry in `levelValidators()` of [`app.module.ts`](../src/infrastructure/app.module.ts). [`LevelValidators.of()`](../src/domain/level/level-validators.ts) throws a `RangeError` when two entries name one `gameId`.
 - **Document the HTTP schema:** `LevelDto.section` in [`level.dto.ts`](../src/adapters/http/level.dto.ts) is a `oneOf` of `FitSectionDto` and `SortSectionDto`. Add a section DTO there and add it to that `oneOf` and to `@ApiExtraModels`, so that the OpenAPI schema describes the new section, then run `pnpm openapi:export`. `LevelDtoMapper` keeps each section as it arrives, so it does not change.
-- **Test:** as [`sort-section.spec.ts`](../test/domain/level/sort-section.spec.ts), [`sort-level-validator.spec.ts`](../test/domain/level/sort-level-validator.spec.ts) and [`level-validators.spec.ts`](../test/domain/level/level-validators.spec.ts) do.
+- **Test:** as [`level-validators-check.spec.ts`](../test/domain/level/level-validators-check.spec.ts) and [`level-validators.spec.ts`](../test/domain/level/level-validators.spec.ts) do: the rules of the section enter through `LevelValidators.check()`, with the strategies that `levelValidators()` of `test/support/level-format.ts` registers as the composition root does (#255).
 
 ## A variant with no level files
 
@@ -26,7 +26,7 @@ A variant with no level files, as Lines and Merge, adds nothing. `GameId` is an 
 
 - **Add:** a class that implements [`Topology`](../src/domain/level/topology.ts), as [`HexTopology`](../src/domain/level/hex-topology.ts), [`SquareTopology`](../src/domain/level/square-topology.ts) and [`TriangleTopology`](../src/domain/level/triangle-topology.ts) do. It says which coordinates are its cells (`holds()`), how a rotation turns a cell (`turn()`) and how the offset of a placement moves a cell (`move()`).
 - **Register:** one `[TopologyId, topology]` entry in the `Topologies.of()` list inside `levelValidators()` of [`app.module.ts`](../src/infrastructure/app.module.ts). [`Topologies.of()`](../src/domain/level/topologies.ts) throws a `RangeError` when two entries name one topology. A level whose `topology` has no entry gives `unknown-topology`.
-- **Test:** as [`topology.spec.ts`](../test/domain/level/topology.spec.ts) does for `HexTopology`, `SquareTopology` and `TriangleTopology`.
+- **Test:** through `LevelValidators.check()`, as [`level-validators-check.spec.ts`](../test/domain/level/level-validators-check.spec.ts) does for `HexTopology`, `SquareTopology` and `TriangleTopology`: a Fit level of one piece of one cell passes A5 only when the topology takes the cell to the cell of the figure (#255).
 
 ## A database engine
 

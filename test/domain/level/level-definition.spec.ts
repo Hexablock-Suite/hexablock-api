@@ -2,7 +2,6 @@ import { FitSection } from '../../../src/domain/level/fit/fit-section.js';
 import { HexTopology } from '../../../src/domain/level/hex-topology.js';
 import { LevelDefinition, type StoredLevel } from '../../../src/domain/level/level-definition.js';
 import { LevelOrder } from '../../../src/domain/level/level-order.js';
-import type { LevelSection } from '../../../src/domain/level/level-section.js';
 import { LevelVersion } from '../../../src/domain/level/level-version.js';
 import { SortSection } from '../../../src/domain/level/sort/sort-section.js';
 import { TopologyId } from '../../../src/domain/level/topology-id.js';
@@ -261,24 +260,6 @@ describe('LevelDefinition', () => {
 
     expect(level.equals(otherLevel)).toBe(false);
     expect(level.equals(otherGame)).toBe(false);
-  });
-
-  // Decision 4, option D of #222: the class bounds TSection by LevelSection,
-  // and LevelSection is the default. These checks run in the type check.
-  describe('the bound of its section type', () => {
-    it('should_reject_the_type_argument_when_it_is_not_a_level_section', () => {
-      // @ts-expect-error -- #222 bounds TSection by LevelSection on the class.
-      const notALevel: LevelDefinition<string> | undefined = undefined;
-
-      expect(notALevel).toBeUndefined();
-    });
-
-    it('should_hold_any_level_section_when_no_type_argument_is_named', () => {
-      expectTypeOf<LevelDefinition>().toEqualTypeOf<LevelDefinition<LevelSection>>();
-      expectTypeOf(
-        valueOf(LevelDefinition.of(FIT, FIT_01, FIRST, V1, HEX, ok(testSection('section')))),
-      ).toExtend<LevelDefinition>();
-    });
   });
 });
 

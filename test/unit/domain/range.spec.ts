@@ -1,11 +1,7 @@
 import type { Ordered } from '../../../src/domain/shared/ordered.js';
 import { Range } from '../../../src/domain/shared/range.js';
 import { CharacterCount } from '../../../src/domain/user/character-count.js';
-import {
-  boundsDeliveredBy,
-  deliveredBy,
-  RecordingBoundsReceiver,
-} from '../../support/recording-receiver.js';
+import { boundsDeliveredBy, deliveredBy } from '../../support/recording-receiver.js';
 import { valueOf } from '../../support/result.js';
 
 const count = (value: number): CharacterCount => valueOf(CharacterCount.of(value));
@@ -29,74 +25,27 @@ class Day implements Ordered<Day> {
   }
 }
 
-// The values of the two bounds that a range of counts delivers.
-const boundValuesOf = (range: Range<CharacterCount>): number[] =>
-  boundsDeliveredBy(range).flatMap(([min, max]) => [...deliveredBy(min), ...deliveredBy(max)]);
-
 // #99: the value orders itself, so the range asks it with booleans and no
 // number order crosses the range.
+//
+// #255: RegisterUseCase holds contains() at each limit of a credential, and
+// LoginUseCase holds isExceededBy() at the maximum of a password. The cases
+// below stay, because no root and no use case reaches their rule: the code
+// builds each range from fixed bounds, every range of src/ is a range of
+// counts, only the border receives the bounds, and no code of src/ calls
+// equals().
 describe('Range', () => {
-  it('should_contain_value_when_it_lies_between_the_bounds_inclusive', () => {
-    const range = counts(3, 32);
-
-    expect([3, 4, 31, 32].map((value) => range.contains(count(value)))).toEqual([
-      true,
-      true,
-      true,
-      true,
-    ]);
-  });
-
-  it.each([0, 2, 33, Number.MAX_SAFE_INTEGER])(
-    'should_not_contain_value_when_it_lies_outside_the_bounds',
-    (value) => {
-      expect(counts(3, 32).contains(count(value))).toBe(false);
-    },
-  );
-
-  it('should_contain_only_the_bound_when_min_equals_max', () => {
-    const range = counts(5, 5);
-
-    expect([4, 5, 6].map((value) => range.contains(count(value)))).toEqual([false, true, false]);
-  });
-
-  // PasswordAttempt.isLongerThanAnyPassword() asks this, so it reads no
-  // bound. A row gives the value and the answer.
-  it.each([
-    [129, true],
-    [Number.MAX_SAFE_INTEGER, true],
-    [128, false],
-    [8, false],
-    [7, false],
-    [0, false],
-  ])('should_be_exceeded_only_when_value_is_above_the_upper_bound', (value, exceeded) => {
-    expect(counts(8, 128).isExceededBy(count(value))).toBe(exceeded);
-  });
-
   it('should_throw_range_error_when_min_comes_after_max', () => {
     expect(() => counts(5, 4)).toThrow(new RangeError('A Range needs min <= max.'));
   });
 
-  // #90: the bounds leave only through a delivery to a receiver.
+  // #90: the bounds leave only through a delivery to a receiver. The OpenAPI
+  // limits and the messages of the border receive them.
   it('should_deliver_both_bounds_to_the_receiver_when_range_is_created', () => {
-    const range = counts(8, 128);
-    const delivered = boundsDeliveredBy(range);
+    const delivered = boundsDeliveredBy(counts(8, 128));
 
     expect(delivered).toHaveLength(1);
-    expect(delivered[0][0].equals(count(8))).toBe(true);
-    expect(delivered[0][1].equals(count(128))).toBe(true);
-    expect(boundValuesOf(range)).toEqual([8, 128]);
-  });
-
-  it('should_have_no_public_bound_field_when_the_bounds_leave_through_a_delivery', () => {
-    const range = counts(8, 128);
-
-    // @ts-expect-error -- #90 makes the lower bound private.
-    void range.min;
-    // @ts-expect-error -- #90 makes the upper bound private.
-    void range.max;
-    // The delivery returns nothing: the receiver holds the bounds.
-    expect(range.deliverBoundsTo(new RecordingBoundsReceiver<CharacterCount>())).toBeUndefined();
+    expect(delivered[0].flatMap((bound) => deliveredBy(bound))).toEqual([8, 128]);
   });
 
   // The order lives in the value, so a range of any value that orders itself works.
@@ -107,16 +56,6 @@ describe('Range', () => {
     expect(range.contains(Day.of(31))).toBe(false);
     expect(range.isExceededBy(Day.of(31))).toBe(true);
     expect(() => Range.of(Day.of(30), Day.of(1))).toThrow(RangeError);
-  });
-
-  // #99: no number order crosses the factory. A range takes only its two bounds.
-  it('should_take_only_the_two_bounds_when_the_factory_builds_a_range', () => {
-    // @ts-expect-error -- #99: the factory takes no order function. The order lives in T.
-    const range = Range.of(count(1), count(2), () => 0);
-
-    expect(range.contains(count(2))).toBe(true);
-    expect(range.contains(count(3))).toBe(false);
-    expect('ofNumbers' in Range).toBe(false);
   });
 });
 
