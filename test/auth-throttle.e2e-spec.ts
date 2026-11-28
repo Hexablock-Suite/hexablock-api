@@ -124,39 +124,72 @@ describe('rate limit of sign-up and sign-in (API-FR-01)', () => {
 
     expect(statuses).toEqual(Array<number>(12).fill(401));
   });
+});
 
-  it('should_describe_the_rate_limit_headers_and_the_429_answer_of_sign_up_and_sign_in_when_the_openapi_document_is_built', async () => {
+// The OpenAPI document describes the rate limit headers and the 429 answer of
+// sign-up and sign-in. One app builds the document for every case of this
+// block, and each case checks one header or one answer (#184).
+describe('OpenAPI document of the rate limit of sign-up and sign-in (API-FR-01)', () => {
+  let testApp: TestApp;
+  let document: ReturnType<typeof buildOpenApiDocument>;
+
+  beforeAll(async () => {
     testApp = await createTestApp();
+    document = buildOpenApiDocument(testApp.app);
+  });
 
-    const document = buildOpenApiDocument(testApp.app);
+  afterAll(async () => {
+    await testApp.close();
+  });
 
-    const ref = (name: string) => ({ $ref: `#/components/headers/${name}` });
-    const counters = {
-      'X-RateLimit-Limit': ref('X-RateLimit-Limit'),
-      'X-RateLimit-Remaining': ref('X-RateLimit-Remaining'),
-      'X-RateLimit-Reset': ref('X-RateLimit-Reset'),
-    };
-    const definitions = document.components?.headers ?? {};
-    for (const name of [...Object.keys(counters), 'Retry-After']) {
+  const ref = (name: string) => ({ $ref: `#/components/headers/${name}` });
+  const counters = {
+    'X-RateLimit-Limit': ref('X-RateLimit-Limit'),
+    'X-RateLimit-Remaining': ref('X-RateLimit-Remaining'),
+    'X-RateLimit-Reset': ref('X-RateLimit-Reset'),
+  };
+  const responsesOf = (path: string) => document.paths[path]?.post?.responses ?? {};
+
+  it.each([...Object.keys(counters), 'Retry-After'])(
+    'should_define_the_header_as_an_integer_with_a_description_when_the_openapi_document_is_built',
+    (name) => {
+      const definitions = document.components?.headers ?? {};
+
       expect(definitions[name]).toMatchObject({ schema: { type: 'integer' } });
       expect((definitions[name] as { description?: string }).description).toBeTruthy();
-    }
-    const answers = { [REGISTER]: ['201', '400', '409'], [LOGIN]: ['200', '400', '401'] };
-    for (const [path, statuses] of Object.entries(answers)) {
-      const responses = document.paths[path]?.post?.responses ?? {};
-      for (const status of statuses) {
-        expect((responses[status] as { headers?: unknown }).headers).toEqual(counters);
-      }
-      const answer = responses['429'] as {
+    },
+  );
+
+  it.each([
+    { path: REGISTER, status: '201' },
+    { path: REGISTER, status: '400' },
+    { path: REGISTER, status: '409' },
+    { path: LOGIN, status: '200' },
+    { path: LOGIN, status: '400' },
+    { path: LOGIN, status: '401' },
+  ])(
+    'should_list_the_rate_limit_counters_in_the_answer_when_the_openapi_document_is_built',
+    ({ path, status }) => {
+      const answer = responsesOf(path)[status] as { headers?: unknown };
+
+      expect(answer.headers).toEqual(counters);
+    },
+  );
+
+  it.each([REGISTER, LOGIN])(
+    'should_describe_the_429_answer_with_retry_after_and_the_error_body_when_the_openapi_document_is_built',
+    (path) => {
+      const answer = responsesOf(path)['429'] as {
         description?: string;
         headers?: Record<string, unknown>;
         content?: Record<string, { schema?: { $ref?: string } }>;
       };
+
       expect(answer.description).toContain('Retry-After');
       expect(answer.headers).toEqual({ 'Retry-After': ref('Retry-After') });
       expect(answer.content?.['application/json']?.schema?.$ref).toBe(
         '#/components/schemas/ErrorDto',
       );
-    }
-  });
+    },
+  );
 });

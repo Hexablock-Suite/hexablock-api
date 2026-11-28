@@ -93,7 +93,6 @@
         "GetProgress",
         "GetLevels",
         "UpdateLevels",
-        "AuthorizeLevelEditor",
         "GetGlobalLeaderboard",
         "GetLevelLeaderboard"
       ],
@@ -151,6 +150,7 @@
         "Result",
         "User",
         "LoggingAspect",
+        "AuthorizationAspect",
         "LoginUseCase",
         "GetGlobalLeaderboardUseCase",
         "GetLevelLeaderboardUseCase",
@@ -175,7 +175,6 @@
         "GetProgress",
         "GetLevels",
         "UpdateLevels",
-        "AuthorizeLevelEditor",
         "GetGlobalLeaderboard",
         "GetLevelLeaderboard",
         "Logger"
@@ -225,10 +224,6 @@
         {
           "file": "src/adapters/http/level.dto.ts",
           "change": "describe the OpenAPI schema without @nestjs/swagger"
-        },
-        {
-          "file": "src/adapters/http/level-editor.guard.ts",
-          "change": "check the request as a guard of the new framework"
         },
         {
           "file": "src/adapters/http/levels.controller.ts",
@@ -299,6 +294,7 @@
         "Result",
         "User",
         "LoggingAspect",
+        "AuthorizationAspect",
         "LoginUseCase",
         "GetGlobalLeaderboardUseCase",
         "GetLevelLeaderboardUseCase",

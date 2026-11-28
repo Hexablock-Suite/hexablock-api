@@ -93,8 +93,9 @@ describe('RankedBoard', () => {
     ]);
   });
 
-  // DS-4: more stars wins, then fewer moves, then less time. The LevelResult
-  // spec pins each step, so these entries differ only in stars.
+  // DS-4: more stars wins, then fewer moves, then less time. The
+  // PlayerProgress spec pins each step through the root, so these entries
+  // differ only in stars.
   it('should_rank_the_board_by_the_level_result_comparison_when_the_entries_come_in_no_order', () => {
     const threeStars = levelResult(3, 10, 40_000);
     const twoStars = levelResult(2, 10, 40_000);
