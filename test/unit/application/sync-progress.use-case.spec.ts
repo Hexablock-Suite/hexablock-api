@@ -1,137 +1,52 @@
-import type { LevelResultValues } from '../../../src/adapters/received.js';
-import type { ProgressRepository } from '../../../src/application/ports/progress-repository.js';
-import {
-  type SyncProgressRequest,
-  SyncProgressUseCase,
-} from '../../../src/application/progress/sync-progress.use-case.js';
-import { GameId } from '../../../src/domain/progress/game-id.js';
-import { ProgressKey } from '../../../src/domain/progress/progress-key.js';
-import { Score } from '../../../src/domain/progress/score.js';
-import { Stars } from '../../../src/domain/progress/stars.js';
-import type { SyncInstant } from '../../../src/domain/progress/sync-instant.js';
-import { UserId } from '../../../src/domain/user/user-id.js';
-import { FixedClock } from '../../support/fixed-clock.js';
-import { heldLevels } from '../../support/held-levels.js';
-import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
-import { levelValidators } from '../../support/level-format.js';
-import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
-import { levelResultOf } from '../../support/level-results.js';
-import { progressPartsOf } from '../../support/recording-receiver.js';
-import { syncInstantOf } from '../../support/sync-instants.js';
-import { testUserId } from '../../support/user-ids.js';
-import { valueOf } from '../../support/result.js';
+import { ProgressMother } from '../../support/object-mother/progress-mother.js';
+import { SyncProgressTestApi } from '../../support/testing-api/sync-progress.test-api.js';
 
-const ADA = valueOf(UserId.from(testUserId(1)));
-const AT_TIME = new Date('2026-11-06T10:00:00.000Z');
-const FIVE_MINUTES_MS = 5 * 60 * 1000;
-const AT = syncInstantOf(AT_TIME);
-const LATER = syncInstantOf(new Date(AT_TIME.getTime() + FIVE_MINUTES_MS));
-// The levels that the tests sync: each one has 3 star thresholds (DS-6).
-const LEVELS = heldLevels([['hexa-fit', ['fit-01', 'fit-02']]]);
-
-// The key of the progress of ADA in one game (#107).
-function keyOf(gameId: string): ProgressKey {
-  return ProgressKey.of(ADA, valueOf(GameId.of(gameId)));
-}
-
-// Builds the request as the mapper of the border does: the use case gets
-// domain values. A call with no score key sends a score of 120.
-function syncRequest(
-  values: { gameId?: string; score?: number; results?: LevelResultValues[] } = {},
-): SyncProgressRequest {
-  const { gameId = 'hexa-lines', results = [] } = values;
-  const score = 'score' in values ? values.score : 120;
-  return {
-    userId: ADA,
-    gameId: valueOf(GameId.of(gameId)),
-    score: score === undefined ? undefined : valueOf(Score.of(score)),
-    results: results.map((result) => levelResultOf(result)),
-  };
-}
-
-// Wraps a repository. Each call of a method first awaits `before`, which
-// gets the method name. A test uses it to record the calls or to hold them.
-function intercepted(
-  repository: ProgressRepository,
-  before: (method: string) => Promise<void>,
-): ProgressRepository {
-  return new Proxy(repository, {
-    get(target, property, receiver) {
-      const member: unknown = Reflect.get(target, property, receiver);
-      if (typeof member !== 'function') {
-        return member;
-      }
-      return async (...args: unknown[]) => {
-        await before(String(property));
-        return Reflect.apply(member, target, args) as unknown;
-      };
-    },
-  });
-}
+const { START, FIVE_MINUTES_LATER } = ProgressMother;
 
 describe('SyncProgressUseCase (API-FR-02)', () => {
-  let progress: InMemoryProgressRepository;
-  let clock: FixedClock;
-  let sync: SyncProgressUseCase;
+  let sync: SyncProgressTestApi;
 
   beforeEach(() => {
-    progress = new InMemoryProgressRepository();
-    clock = new FixedClock(AT);
-    sync = new SyncProgressUseCase(progress, LEVELS, clock);
+    sync = new SyncProgressTestApi();
   });
 
   it('should_save_new_progress_with_score_at_clock_instant_when_user_has_no_progress_for_game', async () => {
-    const result = await sync.execute(syncRequest());
+    await sync.whenSyncing({ score: 120 });
 
-    expect(result.ok).toBe(true);
-    const stored = await progress.find(keyOf('hexa-lines'));
-    expect(stored).not.toBeNull();
-    expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(120)))).toBe(true);
-    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
-    expect(progressPartsOf(stored)?.results).toEqual([]);
-    expect(result.ok && result.value).toEqual(stored);
+    sync.thenTheSyncSucceeds();
+    sync.thenTheStoredProgressIs('hexa-lines', { highScore: 120, updatedAt: START, results: [] });
+    sync.thenTheSyncGivesTheStoredProgressOf('hexa-lines');
   });
 
   it('should_keep_one_progress_with_highest_score_when_same_game_syncs_twice', async () => {
-    await sync.execute(syncRequest({ score: 120 }));
-    clock.advanceBy(FIVE_MINUTES_MS);
+    sync.givenASync({ score: 120 }).givenFiveMinutesPass();
 
-    const result = await sync.execute(syncRequest({ score: 80 }));
+    await sync.whenSyncing({ score: 80 });
 
-    const stored = await progress.find(keyOf('hexa-lines'));
-    expect(result.ok && result.value).toEqual(stored);
-    expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(120)))).toBe(true);
-    expect(progressPartsOf(stored)?.updatedAt).toEqual(LATER);
+    sync.thenTheSyncGivesTheStoredProgressOf('hexa-lines');
+    sync.thenTheStoredProgressIs('hexa-lines', { highScore: 120, updatedAt: FIVE_MINUTES_LATER });
   });
 
   it('should_keep_separate_progress_when_user_syncs_two_games', async () => {
-    await sync.execute(syncRequest({ gameId: 'hexa-lines', score: 120 }));
-    await sync.execute(syncRequest({ gameId: 'hexa-merge', score: 300 }));
+    sync.givenASync({ gameId: 'hexa-lines', score: 120 });
 
-    expect(
-      progressPartsOf(await progress.find(keyOf('hexa-lines')))?.highScore?.equals(
-        valueOf(Score.of(120)),
-      ),
-    ).toBe(true);
-    expect(
-      progressPartsOf(await progress.find(keyOf('hexa-merge')))?.highScore?.equals(
-        valueOf(Score.of(300)),
-      ),
-    ).toBe(true);
+    await sync.whenSyncing({ gameId: 'hexa-merge', score: 300 });
+
+    sync.thenTheStoredProgressIs('hexa-lines', { highScore: 120 });
+    sync.thenTheStoredProgressIs('hexa-merge', { highScore: 300 });
   });
 
   it('should_record_level_results_without_score_when_request_has_only_results', async () => {
     const level = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-fit', score: undefined, results: [level] }),
-    );
+    await sync.whenSyncing({ gameId: 'hexa-fit', score: undefined, results: [level] });
 
-    expect(result.ok).toBe(true);
-    const stored = await progress.find(keyOf('hexa-fit'));
-    expect(progressPartsOf(stored)?.highScore).toBeNull();
-    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
-    expect(progressPartsOf(stored)?.results).toEqual([levelResultOf(level)]);
+    sync.thenTheSyncSucceeds();
+    sync.thenTheStoredProgressIs('hexa-fit', {
+      highScore: null,
+      updatedAt: START,
+      results: [level],
+    });
   });
 
   // A better result for a stored levelId takes its place (DS-4, DS-12).
@@ -139,16 +54,12 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
     const first = { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 };
     const retry = { levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 30000 };
     const next = { levelId: 'fit-02', stars: 2, moves: 12, elapsedMs: 45000 };
-    await sync.execute(syncRequest({ gameId: 'hexa-fit', score: undefined, results: [first] }));
+    sync.givenASync({ gameId: 'hexa-fit', score: undefined, results: [first] });
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-fit', score: undefined, results: [retry, next] }),
-    );
+    await sync.whenSyncing({ gameId: 'hexa-fit', score: undefined, results: [retry, next] });
 
-    const stored = await progress.find(keyOf('hexa-fit'));
-    expect(result.ok && result.value).toEqual(stored);
-    expect(progressPartsOf(stored)?.highScore).toBeNull();
-    expect(progressPartsOf(stored)?.results).toEqual([levelResultOf(retry), levelResultOf(next)]);
+    sync.thenTheSyncGivesTheStoredProgressOf('hexa-fit');
+    sync.thenTheStoredProgressIs('hexa-fit', { highScore: null, results: [retry, next] });
   });
 
   // DS-12 check: a better result and then a worse one for the same level
@@ -164,20 +75,15 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
   ])(
     'should_store_better_level_result_in_either_order_when_a_worse_result_of_same_level_syncs',
     async (first, second) => {
-      await sync.execute(syncRequest({ gameId: 'hexa-fit', score: undefined, results: [first] }));
+      sync.givenASync({ gameId: 'hexa-fit', score: undefined, results: [first] });
 
-      const result = await sync.execute(
-        syncRequest({ gameId: 'hexa-fit', score: undefined, results: [second] }),
-      );
+      await sync.whenSyncing({ gameId: 'hexa-fit', score: undefined, results: [second] });
 
-      const found = await progress.find(keyOf('hexa-fit'));
-      expect(progressPartsOf(found)).toEqual({
-        key: keyOf('hexa-fit'),
-        highScore: null,
-        updatedAt: AT,
-        results: [levelResultOf(betterResult)],
+      sync.thenTheStoredProgressIsExactly('hexa-fit', {
+        updatedAt: START,
+        results: [betterResult],
       });
-      expect(result.ok && result.value).toEqual(found);
+      sync.thenTheSyncGivesTheStoredProgressOf('hexa-fit');
     },
   );
 
@@ -190,14 +96,11 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
   ])(
     'should_store_highest_score_in_either_order_when_two_syncs_of_same_game_overlap',
     async (firstScore, secondScore) => {
-      const results = await Promise.all(
-        [firstScore, secondScore].map((score) => sync.execute(syncRequest({ score }))),
-      );
+      await sync.whenTwoSyncsOverlap({ score: firstScore }, { score: secondScore });
 
-      const stored = await progress.find(keyOf('hexa-lines'));
-      expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(500)))).toBe(true);
-      expect(results.map((result) => result.ok)).toEqual([true, true]);
-      expect(results[1]?.ok && results[1].value).toEqual(stored);
+      sync.thenTheStoredProgressIs('hexa-lines', { highScore: 500 });
+      sync.thenBothSyncsSucceed();
+      sync.thenTheSyncGivesTheStoredProgressOf('hexa-lines');
     },
   );
 
@@ -211,21 +114,15 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
   ])(
     'should_store_both_levels_in_either_order_when_two_syncs_add_different_levels',
     async (first, second) => {
-      const results = await Promise.all(
-        [first, second].map((level) =>
-          sync.execute(syncRequest({ gameId: 'hexa-fit', score: undefined, results: [level] })),
-        ),
+      await sync.whenTwoSyncsOverlap(
+        { gameId: 'hexa-fit', score: undefined, results: [first] },
+        { gameId: 'hexa-fit', score: undefined, results: [second] },
       );
 
-      const stored = await progress.find(keyOf('hexa-fit'));
       // The port gives the results by levelId, whatever the sync order.
-      expect(progressPartsOf(stored)?.results).toEqual([
-        levelResultOf(firstLevel),
-        levelResultOf(secondLevel),
-      ]);
+      sync.thenTheStoredProgressIs('hexa-fit', { results: [firstLevel, secondLevel] });
       // The answer of the last sync keeps the stored result first, then the new one.
-      const last = results[1]?.ok ? results[1].value : null;
-      expect(progressPartsOf(last)?.results).toEqual([levelResultOf(first), levelResultOf(second)]);
+      sync.thenTheLastSyncGivesTheResults([first, second]);
     },
   );
 
@@ -233,26 +130,13 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
   // other sync saved. It reads the Clock under the lock, so updatedAt does
   // not move back (DEF-02).
   it('should_keep_latest_updated_at_when_a_stale_sync_saves_last', async () => {
-    let openGate = (): void => {};
-    const gate = new Promise<void>((resolve) => {
-      openGate = resolve;
+    await sync.whenAStaleSyncSavesLast({ score: 500 }, { score: 100 });
+
+    sync.thenTheStoredProgressIs('hexa-lines', {
+      highScore: 500,
+      updatedAt: FIVE_MINUTES_LATER,
     });
-    const held = new SyncProgressUseCase(
-      intercepted(progress, () => gate),
-      LEVELS,
-      clock,
-    );
-
-    const stale = held.execute(syncRequest({ score: 500 }));
-    clock.advanceBy(FIVE_MINUTES_MS);
-    await sync.execute(syncRequest({ score: 100 }));
-    openGate();
-    const result = await stale;
-
-    const stored = await progress.find(keyOf('hexa-lines'));
-    expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(500)))).toBe(true);
-    expect(progressPartsOf(stored)?.updatedAt).toEqual(LATER);
-    expect(result.ok && result.value).toEqual(stored);
+    sync.thenTheSyncGivesTheStoredProgressOf('hexa-lines');
   });
 
   // #97: the use case checks no instant. The Clock gives a SyncInstant, which
@@ -261,35 +145,29 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
   // (decision 11). The guard of the aggregate throws, so the client gets a
   // 500, not a 400.
   it('should_reject_and_save_nothing_when_clock_gives_no_sync_instant', async () => {
-    const broken = new SyncProgressUseCase(progress, LEVELS, {
-      now: () => new Date(Number.NaN) as unknown as SyncInstant,
-    });
     const level = { levelId: 'fit-01', stars: 3, moves: 12, elapsedMs: 45000 };
-    await sync.execute(syncRequest({ gameId: 'hexa-fit', score: 120 }));
+    sync.givenASync({ gameId: 'hexa-fit', score: 120 }).givenTheClockGivesNoSyncInstant();
 
-    await expect(broken.execute(syncRequest())).rejects.toThrow(
-      new TypeError('The instant must be a SyncInstant.'),
-    );
-    await expect(
-      broken.execute(syncRequest({ gameId: 'hexa-fit', score: 900, results: [level] })),
-    ).rejects.toThrow(new TypeError('The instant must be a SyncInstant.'));
-    expect(await progress.find(keyOf('hexa-lines'))).toBeNull();
-    const stored = await progress.find(keyOf('hexa-fit'));
-    expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(120)))).toBe(true);
-    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
-    expect(progressPartsOf(stored)?.results).toEqual([]);
+    await sync.whenSyncing();
+
+    sync.thenTheSyncRejectsWith(new TypeError('The instant must be a SyncInstant.'));
+
+    await sync.whenSyncing({ gameId: 'hexa-fit', score: 900, results: [level] });
+
+    sync.thenTheSyncRejectsWith(new TypeError('The instant must be a SyncInstant.'));
+    sync.thenNoProgressIsStoredFor('hexa-lines');
+    sync.thenTheStoredProgressIs('hexa-fit', { highScore: 120, updatedAt: START, results: [] });
   });
 
   // The repository fails with unknown-user when no user has the id of the
   // key (#137). The use case returns it as a ProgressProblem.
   it('should_fail_with_unknown_user_and_store_nothing_when_the_repository_knows_no_such_user', async () => {
-    const strangers = new InMemoryProgressRepository([]);
-    const stranger = new SyncProgressUseCase(strangers, LEVELS, clock);
+    sync.givenTheProgressStoreKnowsNoUser();
 
-    const result = await stranger.execute(syncRequest({ score: 120 }));
+    await sync.whenSyncing({ score: 120 });
 
-    expect(result).toEqual({ ok: false, error: { kind: 'unknown-user' } });
-    expect(await strangers.find(keyOf('hexa-lines'))).toBeNull();
+    sync.thenTheSyncFailsWith({ kind: 'unknown-user' });
+    sync.thenNoProgressIsStoredFor('hexa-lines');
   });
 
   // The request types forbid this value. The mapper of the border builds
@@ -297,18 +175,12 @@ describe('SyncProgressUseCase (API-FR-02)', () => {
   // The guard of the aggregate throws, and the use case saves nothing
   // (decision 11).
   it('should_throw_the_guard_and_keep_stored_progress_when_aggregate_rejects_a_request_value', async () => {
-    await sync.execute(syncRequest({ score: 120 }));
-    clock.advanceBy(FIVE_MINUTES_MS);
+    sync.givenASync({ score: 120 }).givenFiveMinutesPass();
 
-    await expect(
-      sync.execute({
-        ...syncRequest(),
-        score: 500 as unknown as Score,
-      }),
-    ).rejects.toThrow(new TypeError('A high score must be a Score.'));
-    const stored = await progress.find(keyOf('hexa-lines'));
-    expect(progressPartsOf(stored)?.highScore?.equals(valueOf(Score.of(120)))).toBe(true);
-    expect(progressPartsOf(stored)?.updatedAt).toEqual(AT);
+    await sync.whenSyncingAScoreThatIsNotAScore(500);
+
+    sync.thenTheSyncRejectsWith(new TypeError('A high score must be a Score.'));
+    sync.thenTheStoredProgressIs('hexa-lines', { highScore: 120, updatedAt: START });
   });
 });
 
@@ -322,156 +194,90 @@ describe('SyncProgressUseCase and the stars of a level (DS-6)', () => {
     moves: 12,
     elapsedMs: 45000,
   });
+  let sync: SyncProgressTestApi;
+
+  beforeEach(() => {
+    sync = new SyncProgressTestApi();
+  });
 
   it('should_fail_with_unknown_level_and_save_nothing_when_the_api_holds_no_level_of_a_result', async () => {
-    const progress = new InMemoryProgressRepository();
-    const sync = new SyncProgressUseCase(progress, LEVELS, new FixedClock(AT));
     const unknown = play('fit-99', 1);
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-fit', results: [play('fit-01', 3), unknown] }),
-    );
+    await sync.whenSyncing({ gameId: 'hexa-fit', results: [play('fit-01', 3), unknown] });
 
-    expect(result).toEqual({
-      ok: false,
-      error: { kind: 'unknown-level', result: levelResultOf(unknown) },
-    });
-    expect(await progress.find(keyOf('hexa-fit'))).toBeNull();
+    sync.thenTheSyncFailsWith({ kind: 'unknown-level', result: unknown });
+    sync.thenNoProgressIsStoredFor('hexa-fit');
   });
 
   it('should_fail_with_unknown_level_when_the_level_is_of_another_game', async () => {
-    const sync = new SyncProgressUseCase(
-      new InMemoryProgressRepository(),
-      LEVELS,
-      new FixedClock(AT),
-    );
+    await sync.whenSyncing({ gameId: 'hexa-sort', results: [play('fit-01', 1)] });
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-sort', results: [play('fit-01', 1)] }),
-    );
-
-    expect(result.ok || result.error.kind).toBe('unknown-level');
+    sync.thenTheSyncFailsWithTheKind('unknown-level');
   });
 
   // A stored row that breaks a rule has no star thresholds (#147), so it
   // holds no level for a result.
   it('should_fail_with_unknown_level_when_the_stored_row_of_the_level_is_broken', async () => {
-    const levels = new InMemoryLevelRepository(levelValidators());
-    levels.storeRow({
-      gameId: 'hexa-fit',
-      levelId: 'fit-01',
-      order: 1,
-      version: 1,
-      topology: 'hex',
-      section: { broken: true },
-    });
-    const sync = new SyncProgressUseCase(
-      new InMemoryProgressRepository(),
-      levels,
-      new FixedClock(AT),
-    );
+    sync.givenTheStoredRowOfTheLevelIsBroken('hexa-fit', 'fit-01');
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-fit', results: [play('fit-01', 1)] }),
-    );
+    await sync.whenSyncing({ gameId: 'hexa-fit', results: [play('fit-01', 1)] });
 
-    expect(result.ok || result.error.kind).toBe('unknown-level');
+    sync.thenTheSyncFailsWithTheKind('unknown-level');
   });
 
   it('should_fail_with_too_many_stars_and_save_nothing_when_the_stars_exceed_the_star_thresholds', async () => {
-    const progress = new InMemoryProgressRepository();
-    const sync = new SyncProgressUseCase(progress, LEVELS, new FixedClock(AT));
     const over = play('fit-02', 4);
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-fit', results: [play('fit-01', 3), over] }),
-    );
+    await sync.whenSyncing({ gameId: 'hexa-fit', results: [play('fit-01', 3), over] });
 
-    expect(result).toEqual({
-      ok: false,
-      error: { kind: 'too-many-stars', result: levelResultOf(over), most: valueOf(Stars.of(3)) },
-    });
-    expect(await progress.find(keyOf('hexa-fit'))).toBeNull();
+    sync.thenTheSyncFailsWith({ kind: 'too-many-stars', result: over, most: 3 });
+    sync.thenNoProgressIsStoredFor('hexa-fit');
   });
 
   it('should_save_the_result_when_its_stars_equal_the_count_of_star_thresholds', async () => {
-    const progress = new InMemoryProgressRepository();
-    const sync = new SyncProgressUseCase(progress, LEVELS, new FixedClock(AT));
+    await sync.whenSyncing({ gameId: 'hexa-fit', results: [play('fit-01', 3)] });
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-fit', results: [play('fit-01', 3)] }),
-    );
-
-    expect(result.ok).toBe(true);
-    expect(progressPartsOf(await progress.find(keyOf('hexa-fit')))?.results).toEqual([
-      levelResultOf(play('fit-01', 3)),
-    ]);
+    sync.thenTheSyncSucceeds();
+    sync.thenTheStoredProgressIs('hexa-fit', { results: [play('fit-01', 3)] });
   });
 
   // A sync with no result reads no level, so Lines and Merge need no level (#171).
   it('should_read_no_level_when_the_sync_has_no_result', async () => {
-    const levels = heldLevels([]);
-    const findFor = vi.spyOn(levels, 'findFor');
-    const sync = new SyncProgressUseCase(
-      new InMemoryProgressRepository(),
-      levels,
-      new FixedClock(AT),
-    );
+    sync.givenTheLevelStoreHolds([]);
 
-    const result = await sync.execute(syncRequest({ gameId: 'hexa-lines', score: 120 }));
+    await sync.whenSyncing({ gameId: 'hexa-lines', score: 120 });
 
-    expect(result.ok).toBe(true);
-    expect(findFor).not.toHaveBeenCalled();
+    sync.thenTheSyncSucceeds();
+    sync.thenNoLevelWasRead();
   });
 
   // One read per sync (#217): the sync asks findFor() once, with the gameId
   // and every result in the order of the request, and never lists every
   // stored level (#171).
   it('should_read_the_levels_with_one_call_when_the_sync_has_two_results', async () => {
-    const levels = heldLevels([['hexa-fit', ['fit-01', 'fit-02']]]);
-    const findFor = vi.spyOn(levels, 'findFor');
-    const sync = new SyncProgressUseCase(
-      new InMemoryProgressRepository(),
-      levels,
-      new FixedClock(AT),
-    );
     const first = { levelId: 'fit-02', stars: 1, moves: 20, elapsedMs: 60000 };
     const second = { levelId: 'fit-01', stars: 3, moves: 9, elapsedMs: 30000 };
+    sync.givenTheLevelStoreHolds([['hexa-fit', ['fit-01', 'fit-02']]]);
 
-    const result = await sync.execute(
-      syncRequest({ gameId: 'hexa-fit', results: [first, second] }),
-    );
+    await sync.whenSyncing({ gameId: 'hexa-fit', results: [first, second] });
 
-    expect(result.ok).toBe(true);
-    expect(findFor).toHaveBeenCalledTimes(1);
-    expect(findFor).toHaveBeenCalledWith(valueOf(GameId.of('hexa-fit')), [
-      levelResultOf(first),
-      levelResultOf(second),
-    ]);
+    sync.thenTheSyncSucceeds();
+    sync.thenTheLevelsWereReadOnceFor('hexa-fit', [first, second]);
   });
 
   it('should_read_the_levels_with_one_call_when_the_sync_has_three_results', async () => {
-    const levels = heldLevels([['hexa-fit', ['fit-01', 'fit-02', 'fit-03']]]);
-    const findFor = vi.spyOn(levels, 'findFor');
-    const progress = new InMemoryProgressRepository();
-    const sync = new SyncProgressUseCase(progress, levels, new FixedClock(AT));
     const results = [
       { levelId: 'fit-01', stars: 1, moves: 20, elapsedMs: 60000 },
       { levelId: 'fit-02', stars: 2, moves: 15, elapsedMs: 50000 },
       { levelId: 'fit-03', stars: 3, moves: 9, elapsedMs: 30000 },
     ];
+    sync.givenTheLevelStoreHolds([['hexa-fit', ['fit-01', 'fit-02', 'fit-03']]]);
 
-    const result = await sync.execute(syncRequest({ gameId: 'hexa-fit', results }));
+    await sync.whenSyncing({ gameId: 'hexa-fit', results });
 
-    expect(result.ok).toBe(true);
-    expect(findFor).toHaveBeenCalledTimes(1);
-    expect(findFor).toHaveBeenCalledWith(
-      valueOf(GameId.of('hexa-fit')),
-      results.map((values) => levelResultOf(values)),
-    );
-    expect(progressPartsOf(await progress.find(keyOf('hexa-fit')))?.results).toEqual(
-      results.map((values) => levelResultOf(values)),
-    );
+    sync.thenTheSyncSucceeds();
+    sync.thenTheLevelsWereReadOnceFor('hexa-fit', results);
+    sync.thenTheStoredProgressIs('hexa-fit', { results });
   });
 
   // The order of the request decides the first failure, not the order in
@@ -480,21 +286,15 @@ describe('SyncProgressUseCase and the stars of a level (DS-6)', () => {
   const overStars = play('fit-02', 4);
   const unknownLevel = play('fit-99', 1);
   it.each([
-    [
-      [overStars, unknownLevel],
-      { kind: 'too-many-stars', result: levelResultOf(overStars), most: valueOf(Stars.of(3)) },
-    ],
-    [[unknownLevel, overStars], { kind: 'unknown-level', result: levelResultOf(unknownLevel) }],
+    [[overStars, unknownLevel], { kind: 'too-many-stars', result: overStars, most: 3 } as const],
+    [[unknownLevel, overStars], { kind: 'unknown-level', result: unknownLevel } as const],
   ])(
     'should_fail_with_the_first_broken_result_of_the_request_when_two_results_break_a_rule',
-    async (results, error) => {
-      const progress = new InMemoryProgressRepository();
-      const sync = new SyncProgressUseCase(progress, LEVELS, new FixedClock(AT));
+    async (results, failure) => {
+      await sync.whenSyncing({ gameId: 'hexa-fit', results });
 
-      const result = await sync.execute(syncRequest({ gameId: 'hexa-fit', results }));
-
-      expect(result).toEqual({ ok: false, error });
-      expect(await progress.find(keyOf('hexa-fit'))).toBeNull();
+      sync.thenTheSyncFailsWith(failure);
+      sync.thenNoProgressIsStoredFor('hexa-fit');
     },
   );
 });
