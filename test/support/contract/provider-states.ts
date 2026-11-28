@@ -1,7 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
-import { levels as levelRows } from '../../../src/adapters/persistence/schema.js';
+import {
+  levelResults,
+  levels as levelRows,
+  progress,
+  users,
+} from '../../../src/adapters/persistence/schema.js';
 import type { LevelRepository } from '../../../src/application/ports/level-repository.js';
 import { signIn, TEST_PASSWORD } from '../http/sign-in.js';
 import { levelJson } from '../level-format.js';
@@ -50,10 +55,16 @@ const SCORE_PLAYERS = [
 // One handler per state name that the client pact uses (app #45 to #48,
 // #480 and #485).
 // Each setup adds rows; the teardown of the endpoint removes them. So two
-// states of one interaction add up.
+// states of one interaction add up. Only no account exists removes rows: it
+// removes every row, also the rows of a state before it in the same
+// interaction, so it goes first (#239).
 export const PROVIDER_STATES: Readonly<Record<string, StateSetup>> = {
-  // App #45: a sign-up with a free username.
-  'no account exists': () => Promise.resolve({}),
+  // App #45: a sign-up with a free username. A failed setup gets no
+  // teardown, so the state removes the rows that it left (#239).
+  'no account exists': async ({ database }) => {
+    await removeEveryRow(database);
+    return {};
+  },
   // App #45: a sign-in, and a sign-up with a taken username.
   'an account exists': async ({ server }, params) => {
     const username = textParam(params, 'username', DEFAULT_USERNAME);
@@ -132,11 +143,27 @@ interface StoredLevel {
   readonly levelId: string;
 }
 
+// Removes every row of the database. The level results go first, because
+// each one belongs to a progress row, and each progress row belongs to a
+// user. The teardown of the endpoint and no account exists use it.
+export async function removeEveryRow(database: TestDatabase): Promise<void> {
+  const { db } = database;
+  await db.delete(levelResults);
+  await db.delete(progress);
+  await db.delete(users);
+  await db.delete(levelRows);
+}
+
+// A failed sign-in answers 400 with its cause, not 500 (#239).
 async function signedIn(server: App, params: StateParams): Promise<SignedIn> {
   const username = textParam(params, 'username', DEFAULT_USERNAME);
   const password = textParam(params, 'password', TEST_PASSWORD);
-  const { token, userId } = await signIn(server, username, password);
-  return { accessToken: token, userId, username };
+  try {
+    const { token, userId } = await signIn(server, username, password);
+    return { accessToken: token, userId, username };
+  } catch (error) {
+    throw new BadRequestException(error instanceof Error ? error.message : String(error));
+  }
 }
 
 // The gameId and the levelId of a level of the format.
