@@ -364,7 +364,7 @@ selects every other test of `pnpm test`. `pnpm test` runs both suites, so `pnpm 
 of `pnpm test` is in no suite. Each suite reports the tests of `test/health.e2e-spec.ts` that belong
 to the other suite as skipped.
 
-On 2026-11-28 the Vitest JSON reporter counts 1,373 tests in `pnpm test`: 1,271 behavior tests and
+On 2026-11-28 the Vitest JSON reporter counts 1,398 tests in `pnpm test`: 1,296 behavior tests and
 102 gate tests. The 16 tests of the two advisory-lock suites are behavior tests, and they skip
 unless `HB_TEST_PG_URL` is set (rule R-database-harness).
 
