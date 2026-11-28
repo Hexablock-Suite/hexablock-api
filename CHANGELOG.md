@@ -8,6 +8,7 @@ Each sprint of the plan in [`hexablock-app/docs/ROADMAP.md`](https://github.com/
 
 ### Changed
 
+- `docs/architecture/classes.drawio` is generated again from `4c064ef` with the dependencies installed: the field `logger` of `HttpErrorFilter` shows its type `Logger` again, in place of the `any` that the generation of [#288](https://github.com/Hexablock-Suite/hexablock-api/pull/288) wrote.
 - `AI_USAGE.md` «Critical Evaluation» lists where AI output was wrong or weak, how it was caught, what changed and what the team learned, each case with its evidence (refs [#26](https://github.com/Hexablock-Suite/hexablock-api/issues/26)).
 - `docs/architecture/classes.drawio` is generated again from `89cd3e9` ([#224](https://github.com/Hexablock-Suite/hexablock-api/issues/224), [#182](https://github.com/Hexablock-Suite/hexablock-api/issues/182), [#196](https://github.com/Hexablock-Suite/hexablock-api/issues/196)): no line stays planned, 11 receiver lines are built, and the reference boxes of `AuthorizationAspect` and `LoggingAspect` carry «aspect». `classes.md` states the receiver rule of the generator.
 - README «License» names the copyright holder that `LICENSE` names, HexaBlock Suite contributors, and drops its TODO (refs [#26](https://github.com/Hexablock-Suite/hexablock-api/issues/26)).
