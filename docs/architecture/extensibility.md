@@ -2,7 +2,7 @@
 
 Status: draft for review with the team, 2026-10-31.
 
-Statement §4 asks for an extensibility diagram with the engine in the center and the variants as extensions. Decision D6 and API-NFR-10 ask the API for the same standards and its own diagrams. The API has no game engine, so the application core sits in the center: `UseCase<TRequest, TResponse>` and the eight use cases. The extension points around it use the names of the [class diagram](classes.md). IDs such as D5, DS-6 and API-FR-04 refer to [`docs/REQUIREMENTS.md`](../REQUIREMENTS.md). The variation register (§8) and the decisions D4 and D5 are in the app repo's canonical `docs/REQUIREMENTS.md` (rule R-requirements). The file-by-file steps live in [`docs/EXTENSIBILITY.md`](../EXTENSIBILITY.md); this page draws the axes and does not repeat those steps.
+Statement §4 asks for an extensibility diagram with the engine in the center and the variants as extensions. Decision D6 and API-NFR-10 ask the API for the same standards and its own diagrams. The API has no game engine, so the application core sits in the center: `UseCase<TRequest, TResponse>` and the nine use cases. The extension points around it use the names of the [class diagram](classes.md). IDs such as D5, DS-6 and API-FR-04 refer to [`docs/REQUIREMENTS.md`](../REQUIREMENTS.md). The variation register (§8) and the decisions D4 and D5 are in the app repo's canonical `docs/REQUIREMENTS.md` (rule R-requirements). The file-by-file steps live in [`docs/EXTENSIBILITY.md`](../EXTENSIBILITY.md); this page draws the axes and does not repeat those steps.
 
 ## How to read it
 

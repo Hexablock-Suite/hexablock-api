@@ -3,6 +3,7 @@ import {
   type ExtraLogEntry,
   LoggingAspect,
 } from '../../../src/application/aspects/logging-aspect.js';
+import { AuthorizationAspect } from '../../../src/application/aspects/authorization-aspect.js';
 import { UseCaseAspect } from '../../../src/application/aspects/use-case-aspect.js';
 import {
   type AuthenticateToken,
@@ -25,6 +26,7 @@ import { SyncProgressUseCase } from '../../../src/application/progress/sync-prog
 import { GameId } from '../../../src/domain/progress/game-id.js';
 import { Score } from '../../../src/domain/progress/score.js';
 import { err, ok, type Result } from '../../../src/domain/shared/result.js';
+import { LevelEditors } from '../../../src/domain/user/level-editors.js';
 import { UserId } from '../../../src/domain/user/user-id.js';
 import { NestLogger } from '../../../src/adapters/logging/nest-logger.js';
 import {
@@ -39,7 +41,8 @@ import { FixedClock } from '../../support/fixed-clock.js';
 import { heldLevels } from '../../support/held-levels.js';
 import { InMemoryLevelRepository } from '../../support/in-memory-level-repository.js';
 import { InMemoryProgressRepository } from '../../support/in-memory-progress-repository.js';
-import { levelValidators } from '../../support/level-format.js';
+import { levelJson, levelValidators } from '../../support/level-format.js';
+import { listedJson } from '../../support/level-repository.contract.js';
 import { syncInstantOf } from '../../support/sync-instants.js';
 import { a5FailingFitJson, incomingLevel } from '../../support/level-update.js';
 import { testUserId } from '../../support/user-ids.js';
@@ -680,6 +683,7 @@ describe('LoggingAspect', () => {
     );
 
     const result = await aspect.execute({
+      userId: valueOf(UserId.from(testUserId(1))),
       levels: [incomingLevel(a5FailingFitJson('fit-secret-07'))],
     });
 
@@ -691,6 +695,40 @@ describe('LoggingAspect', () => {
       elapsedMs: 0,
     });
     expect(JSON.stringify(logger.log.mock.calls)).not.toContain('fit-secret-07');
+  });
+
+  // #180: AppModule puts LoggingAspect outside AuthorizationAspect, so the
+  // log sees each rejected attempt to update the levels. The entry holds
+  // the kind and no user id, and the API saves nothing.
+  it('should_log_one_failure_entry_with_kind_not_a_level_editor_and_save_nothing_when_logging_aspect_wraps_authorization_aspect_and_the_account_is_not_a_level_editor', async () => {
+    const logger = recordingLogger();
+    const levels = new InMemoryLevelRepository(levelValidators());
+    const editor = valueOf(UserId.from(testUserId(1)));
+    const other = valueOf(UserId.from(testUserId(2)));
+    const aspect = new LoggingAspect(
+      new AuthorizationAspect(
+        new UpdateLevelsUseCase(levels, levelValidators()),
+        LevelEditors.of([editor]),
+      ),
+      'UpdateLevels',
+      logger,
+      new FakeStopwatch(),
+    );
+
+    const result = await aspect.execute({
+      userId: other,
+      levels: [incomingLevel(levelJson('hexa-fit'))],
+    });
+
+    expect(result).toEqual({ ok: false, error: { kind: 'not-a-level-editor' } });
+    expect(logger.log).toHaveBeenCalledExactlyOnceWith({
+      useCase: 'UpdateLevels',
+      outcome: 'failure',
+      kind: 'not-a-level-editor',
+      elapsedMs: 0,
+    });
+    expect(JSON.stringify(logger.log.mock.calls)).not.toContain(testUserId(2));
+    expect(await listedJson(levels)).toEqual([]);
   });
 
   // GetLevels has no expected failure: its error type is never, which meets

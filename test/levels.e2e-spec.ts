@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
 import { levels } from '../src/adapters/persistence/schema.js';
@@ -10,8 +11,9 @@ import { a5FailingFitJson } from './support/level-update.js';
 import { testUserId } from './support/user-ids.js';
 
 // API-FR-04: read and update the level definitions of Fit and Sort. The read
-// has no guard. The update is behind JwtAuthGuard and LevelEditorGuard (Q4,
-// #145): an idempotent batch that answers 204. API-FR-06: every error has the
+// has no guard. The update is behind JwtAuthGuard, and AuthorizationAspect
+// lets only a level editor reach UpdateLevels (Q4, #145, #180): an idempotent
+// batch that answers 204. API-FR-06: every error has the
 // shared ErrorDto body.
 const LEVELS_PATH = '/v1/levels';
 
@@ -52,6 +54,7 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await testApp.close();
   });
 
@@ -94,8 +97,9 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     });
   });
 
-  // The guard runs before the controller reads the body, so an account
-  // outside the list learns nothing about the rules of a level.
+  // The rules of a level run inside UpdateLevels, behind AuthorizationAspect
+  // (#180), so an account outside the list learns nothing about the rules
+  // of a level.
   it('should_answer_forbidden_with_no_level_problem_when_the_account_is_not_a_level_editor_and_the_body_is_wrong', async () => {
     await tokenOf('ada');
     const other = await tokenOf('eve');
@@ -105,6 +109,48 @@ describe('level endpoints (API-FR-04, API-FR-06)', () => {
     expect(rejected.status).toBe(403);
     expect(rejected.body).toEqual(FORBIDDEN);
     expect((await list()).body).toEqual({ levels: [] });
+  });
+
+  // #180, option A of 2026-11-28: LevelDtoMapper checks the shape and the
+  // bounds of the body before AuthorizationAspect runs. So an account outside
+  // the list that sends a malformed body gets the 400 of the mapper. The
+  // format and its bounds are public in docs/level-format.md and OpenAPI.
+  it.each([
+    [{ levels: 'fit-01' }, 'levels must be an array of objects'],
+    [
+      { levels: [{ ...levelJson('hexa-fit'), levelId: 'x'.repeat(65) }] },
+      'levels[0]: levelId must be a non-blank string of 1 to 64 characters with no control character.',
+    ],
+  ])(
+    'should_answer_bad_request_with_the_problem_of_the_mapper_and_save_nothing_when_the_account_is_not_a_level_editor_and_the_body_is_malformed',
+    async (body, problem) => {
+      await tokenOf('ada');
+      const other = await tokenOf('eve');
+
+      const rejected = await update(other, body);
+
+      expect(rejected.status).toBe(400);
+      expect(rejected.body).toEqual(badRequest(problem));
+      expect((await list()).body).toEqual({ levels: [] });
+    },
+  );
+
+  // #180: LoggingAspect wraps AuthorizationAspect, so a rejected attempt
+  // leaves one entry under the name UpdateLevels. The entry holds the kind
+  // and no user id. The spy starts after the sign-ups, so it sees only the
+  // entries of the update.
+  it('should_log_one_failure_entry_with_kind_not_a_level_editor_when_an_account_outside_the_list_tries_to_update', async () => {
+    await tokenOf('ada');
+    const other = await tokenOf('eve');
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+
+    const rejected = await update(other, { levels: [levelJson('hexa-fit')] });
+
+    expect(rejected.status).toBe(403);
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      'useCase=UpdateLevels outcome=failure kind=not-a-level-editor elapsedMs=0',
+    );
+    expect(warn.mock.contexts[0]).toMatchObject({ context: 'LoggingAspect' });
   });
 
   // The check of #20: the read gives the levels of each gameId.
