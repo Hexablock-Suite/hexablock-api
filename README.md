@@ -412,6 +412,25 @@ tests of `LoggingAspect` and `AuthorizationAspect` included, and so has the test
 service `LevelValidators` in `test/domain/level/`: its `when…` steps are `async` too, although
 `check()` is synchronous.
 
+The review demo (#257) shows that the tests hold the behavior, not the shape of the code. Run it on a
+scratch branch and never push that branch: a push starts CI and leaves a branch that nobody merges.
+First count the two suites with `pnpm test:behavior` and `pnpm test:gates`: the 1,334 behavior
+tests and the 118 gate tests above. Then make two changes, one at a time, undo each one before the
+next, and run `pnpm test` after each:
+
+1. A refactor that keeps the behavior. Add the `Clock` port to the constructor of `LoginUseCase`,
+   inject `CLOCK` in the `LOGIN` factory of `AppModule`, and give `LoginTestApi` a `FixedClock`.
+   `pnpm test` stays green, and `git diff --stat` names `src/application/auth/login.use-case.ts`,
+   `src/infrastructure/app.module.ts` and `test/support/testing-api/login.test-api.ts` only. No test
+   case changes, because only the Testing API builds the use case.
+2. A change of behavior. In `Standing.isBetterThan()` (`src/domain/progress/standing.ts`), compare
+   the time before the moves. `pnpm test` fails on two named tests:
+   `should_rank_fewer_total_moves_first_when_stars_and_levels_completed_are_equal` of
+   `test/domain/progress/standing.spec.ts` and
+   `should_rank_the_board_by_the_standing_comparison_when_the_entries_come_in_no_order` of
+   `test/domain/progress/ranked-board.spec.ts`. Each failure shows the expected and the received
+   value.
+
 Integration tests in `test/integration` run on Postgres in memory (PGlite) through
 `test/support/test-database.ts`, which applies the `drizzle/` migrations. They need no Docker.
 Never test on a shared Postgres.
