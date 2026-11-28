@@ -351,19 +351,21 @@ PACT_FILE=test/fixtures/contract/provider-states.json pnpm contract:verify
 
 `BACKEND_URL` defaults to `http://localhost:3000`. A missing pact fails the run.
 
-The provider states of the client interactions (app #45 to #48). Each param is optional. A
+The provider states of the client interactions (app #45 to #48, #480 and #485). Each param is optional. A
 request takes a value of the setup through a provider-state expression, such as
 `fromProviderState('Bearer ${accessToken}', …)`. The states of one interaction add up, and the
 teardown after each interaction removes every row.
 
-| State                                                  | Params (default)                                                         | Values                                                   | Client     |
-| ------------------------------------------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------- | ---------- |
-| `no account exists`                                    | none                                                                     | none                                                     | #45        |
-| `an account exists`                                    | `username` (`ada`), `password` (`correct horse battery`)                 | `username`                                               | #45        |
-| `a signed-in account exists`                           | `username`, `password`                                                   | `accessToken`, `userId`, `username`                      | #45 to #47 |
-| `a level is stored`                                    | `gameId` (`hexa-fit` or `hexa-sort`; `hexa-fit`), `levelId` (`fit-01`)   | `gameId`, `levelId`                                      | #46, #48   |
-| `the signed-in account has progress on a stored level` | the params of the two states above; the result has 3 stars and 12 moves  | `accessToken`, `userId`, `username`, `gameId`, `levelId` | #46        |
-| `several accounts have results on a stored level`      | `gameId`, `levelId`; `ada`, `grace` and `linus` sync 10, 12 and 14 moves | `accessToken` of `ada`, `gameId`, `levelId`              | #47        |
+| State                                                  | Params (default)                                                                                                       | Values                                                           | Client     |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------- |
+| `no account exists`                                    | none                                                                                                                   | none                                                             | #45        |
+| `an account exists`                                    | `username` (`ada`), `password` (`correct horse battery`)                                                               | `username`                                                       | #45        |
+| `a signed-in account exists`                           | `username`, `password`                                                                                                 | `accessToken`, `userId`, `username`                              | #45 to #47 |
+| `a level is stored`                                    | `gameId` (`hexa-fit` or `hexa-sort`; `hexa-fit`), `levelId` (`fit-01`)                                                 | `gameId`, `levelId`                                              | #46, #48   |
+| `the signed-in account has progress on a stored level` | the params of the two states above; the result has 3 stars and 12 moves                                                | `accessToken`, `userId`, `username`, `gameId`, `levelId`         | #46        |
+| `several accounts have results on a stored level`      | `gameId`, `levelId`; `ada`, `grace` and `linus` sync 10, 12 and 14 moves                                               | `accessToken` of `ada`, `gameId`, `levelId`                      | #47        |
+| `several accounts have high scores in a game`          | `gameId` (`hexa-lines`); `ada`, `grace` and `linus` sync the scores 300, 200 and 100 and no level result               | `accessToken` of `ada`, `gameId`                                 | #480       |
+| `a broken level is stored`                             | `gameId` (`hexa-fit` or `hexa-sort`; `hexa-fit`), `levelId` (`fit-01`); the row has a Fit section that breaks its rule | `gameId`, `levelId`, `reason` (`invalid-figure` for a Fit level) | #485       |
 
 ## AI Usage Documentation
 
