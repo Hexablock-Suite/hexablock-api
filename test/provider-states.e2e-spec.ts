@@ -44,23 +44,32 @@ describe('pact provider states (#151)', () => {
   // #170: the provider composition turns the rate limit of sign-up and
   // sign-in off, whatever AUTH_RATE_LIMIT holds, because the contract job
   // signs in for each provider state. The app CI starts it too.
-  it('should_answer_no_429_when_the_provider_composition_signs_in_more_times_than_auth_rate_limit', async () => {
-    stubTestEnvironment();
-    vi.stubEnv('AUTH_RATE_LIMIT', '1');
-    const composition = await createProviderApp();
+  // Three sign-ins hash a password three times, so the test gets more than
+  // the default 5 s. The finally block closes the app and restores the
+  // environment even when an assertion fails, so the next test starts clean.
+  it(
+    'should_answer_no_429_when_the_provider_composition_signs_in_more_times_than_auth_rate_limit',
+    { timeout: 20_000 },
+    async () => {
+      stubTestEnvironment();
+      vi.stubEnv('AUTH_RATE_LIMIT', '1');
+      const composition = await createProviderApp();
+      try {
+        const statuses: number[] = [];
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          const response = await request(composition.app.getHttpServer())
+            .post('/v1/auth/login')
+            .send({ username: 'ada', password: TEST_PASSWORD });
+          statuses.push(response.status);
+        }
 
-    const statuses: number[] = [];
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      const response = await request(composition.app.getHttpServer())
-        .post('/v1/auth/login')
-        .send({ username: 'ada', password: TEST_PASSWORD });
-      statuses.push(response.status);
-    }
-
-    expect(statuses).toEqual([401, 401, 401]);
-    await composition.close();
-    vi.unstubAllEnvs();
-  });
+        expect(statuses).toEqual([401, 401, 401]);
+      } finally {
+        await composition.close();
+        vi.unstubAllEnvs();
+      }
+    },
+  );
 
   describe('the test composition', () => {
     let provider: ProviderApp;
